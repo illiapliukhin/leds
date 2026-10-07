@@ -819,6 +819,7 @@ def route_full_matrix(
             top_right = column_number >= variant.matrix_size - 1
             upper_dogleg_color = "B" if top_right else "R"
             lower_dogleg_color = "R" if top_right else "B"
+            lower_inner_color = "B" if top_right else "R"
             edge_column = (
                 column_number <= 2
                 or column_number >= variant.matrix_size - 1
@@ -842,6 +843,13 @@ def route_full_matrix(
                     (
                         lower_regular_positions[color_name][0],
                         transition_center_y_mm + 1.0,
+                    ),
+                )
+            elif edge_column and color_name == lower_inner_color:
+                lower_waypoints = (
+                    (
+                        lower_regular_positions[color_name][0],
+                        transition_center_y_mm + 0.7,
                     ),
                 )
             add_rgb_connection(
