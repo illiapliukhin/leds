@@ -422,7 +422,15 @@ KiCad 10 рабочие PCB:
 - Все LED на лицевой стороне.
 - Вся остальная электроника и test pads сзади.
 - USB-C по центру боковой грани.
-- Battery расположен в component-free keepout.
+- Исходное требование component-free battery keepout для 20×20 пока
+  невыполнимо: 172 non-LED footprint envelopes занимают около 1673 мм², а
+  вне provisional проекции батареи 32×40 мм доступно только около 1150 мм².
+  `hardware/tools/check_backside_placement_feasibility.py` проверяет этот
+  конфликт напрямую по root netlist и footprint libraries. До production
+  placement нужно либо изменить battery/PCB/stack envelope, либо письменно
+  разрешить конкретные низкопрофильные компоненты под батареей с изоляцией и
+  подтверждённым зазором; текущая проекция остаётся provisional guide, а не
+  доказанным keepout.
 - Нельзя размещать DC/DC и LED drivers под аккумулятором.
 - IMU в жёсткой зоне, вдали от дросселя и края с USB.
 - Microphone вдали от DC/DC и с прямым акустическим каналом.

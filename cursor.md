@@ -71,4 +71,10 @@
 - `pcbnew.SaveBoard` can create or rewrite a sibling `.kicad_pro`. Generated
   analysis boards must be saved in a temporary directory and copied back as
   `.kicad_pcb` only, so verification cannot mutate project metadata.
+- Do not begin dense backside placement from a nominal battery rectangle
+  without an area-feasibility check. Sum the actual non-text footprint
+  envelopes from the root netlist and compare them with the available board
+  area; the 20×20 design has approximately 1673 mm² of non-LED envelopes but
+  only approximately 1150 mm² outside its provisional 32×40 mm battery
+  projection, so a component-free projection cannot be claimed.
 
