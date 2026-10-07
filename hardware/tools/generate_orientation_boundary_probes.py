@@ -5,12 +5,18 @@ import pcbnew
 
 from generate_edge_routing_probe import (
     INNER_ROW_WIDTH_MM,
+    MATRIX_RGB_VIA_DIAMETER_MM,
     OUTER_ROW_WIDTH_MM,
     PROBE_VARIANTS,
+    TRANSITION_ROW_WIDTH_MM,
+    TRANSITION_SIDE_VIA_X_OFFSET_MM,
+    TRANSITION_SIDE_VIA_Y_OFFSET_MM,
     ProbeVariant,
     add_track,
+    add_through_via,
     get_led,
     get_pad,
+    millimeters,
     route_anode,
     route_rgb_to_back,
     route_rotated_anode,
@@ -260,19 +266,185 @@ def generate_column_boundary_probe(
     return output_path
 
 
-def get_trunk_offset(
-    profile: OrientationRoutingProfile,
-    color_name: str,
-) -> tuple[float, float]:
-    for profile_color_name, x_offset_mm, y_offset_mm in (
-        profile.trunk_offsets
-    ):
-        if profile_color_name == color_name:
-            return x_offset_mm, y_offset_mm
+def route_edge_row_transition_rgb(
+    board: pcbnew.BOARD,
+    upper_footprint: pcbnew.FOOTPRINT,
+    lower_footprint: pcbnew.FOOTPRINT,
+    top_right: bool,
+) -> None:
+    upper_center_x_mm, upper_center_y_mm = millimeters(
+        upper_footprint.GetPosition()
+    )
+    lower_center_x_mm, lower_center_y_mm = millimeters(
+        lower_footprint.GetPosition()
+    )
+    if abs(upper_center_x_mm - lower_center_x_mm) > 0.001:
+        raise ValueError("Transition LEDs must be in the same column")
 
-    raise ValueError(
-        f"Unable to find {color_name} in orientation profile "
-        f"{profile.orientation_degrees}"
+    transition_center_y_mm = (
+        upper_center_y_mm + lower_center_y_mm
+    ) / 2
+    upper_via_y_mm = (
+        transition_center_y_mm - TRANSITION_SIDE_VIA_Y_OFFSET_MM
+    )
+    lower_via_y_mm = (
+        transition_center_y_mm + TRANSITION_SIDE_VIA_Y_OFFSET_MM
+    )
+    horizontal_offset_mm = TRANSITION_SIDE_VIA_X_OFFSET_MM
+    central_via_x_offset_mm = horizontal_offset_mm / 2
+    central_via_y_offset_mm = TRANSITION_SIDE_VIA_Y_OFFSET_MM / 2
+
+    upper_blue_pad = get_pad(upper_footprint, "4")
+    upper_red_pad = get_pad(upper_footprint, "2")
+    upper_green_pad = get_pad(upper_footprint, "3")
+    lower_blue_pad = get_pad(lower_footprint, "4")
+    lower_red_pad = get_pad(lower_footprint, "2")
+    lower_green_pad = get_pad(lower_footprint, "3")
+
+    if top_right:
+        shared_green_via_x_mm = upper_center_x_mm + 0.4
+        transition_vias = (
+            (
+                upper_blue_pad,
+                upper_center_x_mm - horizontal_offset_mm,
+                upper_via_y_mm,
+                False,
+            ),
+            (
+                upper_red_pad,
+                upper_center_x_mm - central_via_x_offset_mm,
+                transition_center_y_mm - central_via_y_offset_mm,
+                True,
+            ),
+            (
+                lower_blue_pad,
+                upper_center_x_mm + central_via_x_offset_mm,
+                transition_center_y_mm + central_via_y_offset_mm,
+                True,
+            ),
+            (
+                lower_red_pad,
+                upper_center_x_mm - horizontal_offset_mm,
+                lower_via_y_mm,
+                False,
+            ),
+        )
+    else:
+        shared_green_via_x_mm = upper_center_x_mm - 0.4
+        transition_vias = (
+            (
+                upper_blue_pad,
+                upper_center_x_mm + central_via_x_offset_mm,
+                transition_center_y_mm - central_via_y_offset_mm,
+                True,
+            ),
+            (
+                upper_red_pad,
+                upper_center_x_mm + horizontal_offset_mm,
+                upper_via_y_mm,
+                False,
+            ),
+            (
+                lower_blue_pad,
+                upper_center_x_mm + horizontal_offset_mm,
+                lower_via_y_mm,
+                False,
+            ),
+            (
+                lower_red_pad,
+                upper_center_x_mm - central_via_x_offset_mm,
+                transition_center_y_mm + central_via_y_offset_mm,
+                True,
+            ),
+        )
+
+    via_positions_by_pad_number: dict[int, tuple[float, float]] = {}
+    for pad, via_x_mm, via_y_mm, route_through_center in transition_vias:
+        pad_x_mm, pad_y_mm = millimeters(pad.GetPosition())
+        if route_through_center:
+            footprint = pad.GetParent()
+            footprint_x_mm, footprint_y_mm = millimeters(
+                footprint.GetPosition()
+            )
+            add_track(
+                board,
+                pad.GetNet(),
+                pcbnew.F_Cu,
+                pad_x_mm,
+                pad_y_mm,
+                footprint_x_mm,
+                footprint_y_mm,
+            )
+            pad_x_mm = footprint_x_mm
+            pad_y_mm = footprint_y_mm
+        add_track(
+            board,
+            pad.GetNet(),
+            pcbnew.F_Cu,
+            pad_x_mm,
+            pad_y_mm,
+            via_x_mm,
+            via_y_mm,
+        )
+        add_through_via(
+            board,
+            pad.GetNet(),
+            via_x_mm,
+            via_y_mm,
+            MATRIX_RGB_VIA_DIAMETER_MM,
+        )
+        via_positions_by_pad_number[id(pad)] = (via_x_mm, via_y_mm)
+
+    shared_green_via_y_mm = transition_center_y_mm
+    for green_pad in (upper_green_pad, lower_green_pad):
+        pad_x_mm, pad_y_mm = millimeters(green_pad.GetPosition())
+        add_track(
+            board,
+            green_pad.GetNet(),
+            pcbnew.F_Cu,
+            pad_x_mm,
+            pad_y_mm,
+            shared_green_via_x_mm,
+            shared_green_via_y_mm,
+        )
+    add_through_via(
+        board,
+        upper_green_pad.GetNet(),
+        shared_green_via_x_mm,
+        shared_green_via_y_mm,
+        MATRIX_RGB_VIA_DIAMETER_MM,
+    )
+    add_track(
+        board,
+        upper_green_pad.GetNet(),
+        pcbnew.B_Cu,
+        shared_green_via_x_mm,
+        shared_green_via_y_mm,
+        shared_green_via_x_mm,
+        shared_green_via_y_mm + 0.2,
+    )
+
+    upper_blue_via = via_positions_by_pad_number[id(upper_blue_pad)]
+    lower_blue_via = via_positions_by_pad_number[id(lower_blue_pad)]
+    upper_red_via = via_positions_by_pad_number[id(upper_red_pad)]
+    lower_red_via = via_positions_by_pad_number[id(lower_red_pad)]
+    add_track(
+        board,
+        upper_blue_pad.GetNet(),
+        pcbnew.In2_Cu,
+        upper_blue_via[0],
+        upper_blue_via[1],
+        lower_blue_via[0],
+        lower_blue_via[1],
+    )
+    add_track(
+        board,
+        upper_red_pad.GetNet(),
+        pcbnew.B_Cu,
+        upper_red_via[0],
+        upper_red_via[1],
+        lower_red_via[0],
+        lower_red_via[1],
     )
 
 
@@ -293,10 +465,12 @@ def generate_row_boundary_probe(
     )
     board = pcbnew.LoadBoard(str(get_board_path(repository_root, variant)))
 
+    upper_row_number = variant.matrix_size // 2
+    lower_row_number = upper_row_number + 1
     if top_right:
         row_profiles = (
-            (2, TOP_RIGHT_PROFILE),
-            (3, NORMAL_PROFILE),
+            (upper_row_number, TOP_RIGHT_PROFILE),
+            (lower_row_number, ROTATED_PROFILE),
         )
         column_numbers = (
             variant.matrix_size - 1,
@@ -304,30 +478,74 @@ def generate_row_boundary_probe(
         )
     else:
         row_profiles = (
-            (variant.matrix_size - 2, ROTATED_PROFILE),
-            (variant.matrix_size - 1, BOTTOM_LEFT_PROFILE),
+            (upper_row_number, NORMAL_PROFILE),
+            (lower_row_number, BOTTOM_LEFT_PROFILE),
         )
         column_numbers = (1, 2)
 
     row_via_extents: dict[int, list[float]] = {}
-    for row_number, profile in row_profiles:
-        row_center_y_mm = (
-            0.9 + (row_number - 1) * variant.led_pitch_mm
+    for column_number in column_numbers:
+        upper_footprint = get_led(
+            board,
+            get_led_reference(
+                variant,
+                upper_row_number,
+                column_number,
+            ),
         )
-        for column_number in column_numbers:
-            footprint = get_led(
-                board,
-                get_led_reference(variant, row_number, column_number),
+        lower_footprint = get_led(
+            board,
+            get_led_reference(
+                variant,
+                lower_row_number,
+                column_number,
+            ),
+        )
+        upper_footprint.SetOrientationDegrees(
+            row_profiles[0][1].orientation_degrees
+        )
+        lower_footprint.SetOrientationDegrees(
+            row_profiles[1][1].orientation_degrees
+        )
+        route_edge_row_transition_rgb(
+            board,
+            upper_footprint,
+            lower_footprint,
+            top_right,
+        )
+
+        for row_number, profile, footprint in (
+            (
+                upper_row_number,
+                row_profiles[0][1],
+                upper_footprint,
+            ),
+            (
+                lower_row_number,
+                row_profiles[1][1],
+                lower_footprint,
+            ),
+        ):
+            row_center_y_mm = (
+                0.9 + (row_number - 1) * variant.led_pitch_mm
             )
-            via_x_mm = route_profiled_led(
-                board,
-                footprint,
-                profile,
-                row_center_y_mm,
-                row_center_y_mm,
-                INNER_ROW_WIDTH_MM,
-                variant.board_size_mm - 0.525,
-            )
+            if profile.vertical_direction > 0:
+                via_x_mm = route_anode(
+                    board,
+                    footprint,
+                    row_center_y_mm,
+                    TRANSITION_ROW_WIDTH_MM,
+                    profile.anode_via_x_offset_mm,
+                )
+            else:
+                via_x_mm = route_rotated_anode(
+                    board,
+                    footprint,
+                    row_center_y_mm,
+                    TRANSITION_ROW_WIDTH_MM,
+                    variant.board_size_mm - 0.525,
+                    profile.anode_via_x_offset_mm,
+                )
             row_via_extents.setdefault(row_number, []).append(via_x_mm)
 
     for row_number, _ in row_profiles:
@@ -354,39 +572,8 @@ def generate_row_boundary_probe(
             row_center_y_mm,
             max(row_via_x_values),
             row_center_y_mm,
-            INNER_ROW_WIDTH_MM,
+            TRANSITION_ROW_WIDTH_MM,
         )
-
-    upper_row_number, upper_profile = row_profiles[0]
-    lower_row_number, lower_profile = row_profiles[1]
-    upper_row_center_y_mm = (
-        0.9 + (upper_row_number - 1) * variant.led_pitch_mm
-    )
-    lower_row_center_y_mm = (
-        0.9 + (lower_row_number - 1) * variant.led_pitch_mm
-    )
-    for column_number in column_numbers:
-        column_center_x_mm = (
-            0.9 + (column_number - 1) * variant.led_pitch_mm
-        )
-        for color_name in ("R", "G", "B"):
-            upper_x_offset_mm, upper_y_offset_mm = get_trunk_offset(
-                upper_profile,
-                color_name,
-            )
-            lower_x_offset_mm, lower_y_offset_mm = get_trunk_offset(
-                lower_profile,
-                color_name,
-            )
-            add_track(
-                board,
-                board.FindNet(f"COL_{color_name}_{column_number:02d}"),
-                pcbnew.B_Cu,
-                column_center_x_mm + upper_x_offset_mm,
-                upper_row_center_y_mm + upper_y_offset_mm,
-                column_center_x_mm + lower_x_offset_mm,
-                lower_row_center_y_mm + lower_y_offset_mm,
-            )
 
     pcbnew.SaveBoard(str(output_path), board)
     return output_path
