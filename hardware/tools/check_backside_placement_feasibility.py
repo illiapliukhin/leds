@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ElementTree
 import pcbnew
 
 
-BOARD_SIZE_MM = 49.3
+BOARD_SIZE_MM = 57.0
 BATTERY_WIDTH_MM = 32.0
 BATTERY_HEIGHT_MM = 40.0
 EXPECTED_LED_COUNT = 400

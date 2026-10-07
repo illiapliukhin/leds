@@ -8,7 +8,7 @@ listed evidence is received.
 
 | Input | 20×20 | 28×28 | Status |
 |---|---:|---:|---|
-| PCB outline | 49.3 × 49.3 mm | 61.2 × 61.2 mm | ROUTING-PROVEN, NOT FROZEN |
+| PCB outline | 57.0 × 57.0 mm | 61.2 × 61.2 mm | 20×20 STUDY BASELINE; NOT FROZEN |
 | PCB thickness | 1.0 mm | 1.0 mm | EVT BASELINE |
 | LED pitch | 2.50 mm | 2.20 mm | ROUTING-PROVEN |
 | Battery plan envelope | 32 × 40 mm | 40 × 50 mm | PROVISIONAL |
@@ -47,8 +47,9 @@ USB, branding, reference text, or routing reserves.
 
 For the current component set and battery projection, the square-outline floor
 is approximately 54.3 mm at impossible 100% packing and approximately 57.0 mm
-at an 85% rectangular-envelope packing baseline. Treat 57 mm as the next
-single-board mechanical study size, not a frozen production dimension. HDI and
+at an 85% rectangular-envelope packing baseline. The generated 20×20 matrix
+now uses 57.0 mm as its single-board mechanical study size, not a frozen
+production dimension. HDI and
 blind vias may remove backside via conflicts but do not close this area deficit.
 If the 49.3 mm product envelope is mandatory, the alternatives are a
 supplier-qualified component-under-battery stack or a separate logic PCB; both

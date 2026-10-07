@@ -23,7 +23,7 @@ BOARD_VARIANTS = (
     BoardVariant(
         name="wearable_20x20",
         matrix_size=20,
-        board_size_mm=49.3,
+        board_size_mm=57.0,
         led_pitch_mm=2.5,
         battery_width_mm=32.0,
         battery_height_mm=40.0,

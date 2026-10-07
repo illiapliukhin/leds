@@ -18,7 +18,9 @@ from generate_edge_routing_probe import (
     add_track,
     add_through_via,
     get_led,
+    get_outer_row_bus_y,
     get_pad,
+    get_row_center,
     millimeters,
     route_anode,
     route_rgb_to_back,
@@ -57,17 +59,15 @@ def get_row_bus_spec(
     variant: ProbeVariant,
     row_number: int,
 ) -> tuple[float, float]:
-    row_center_y_mm = (
-        0.9 + (row_number - 1) * variant.led_pitch_mm
-    )
+    row_center_y_mm = get_row_center(variant, row_number)
     transition_rows = (
         variant.matrix_size // 2,
         variant.matrix_size // 2 + 1,
     )
     if row_number == 1:
-        return 0.525, OUTER_ROW_WIDTH_MM
+        return get_outer_row_bus_y(variant, top=True), OUTER_ROW_WIDTH_MM
     if row_number == variant.matrix_size:
-        return variant.board_size_mm - 0.525, OUTER_ROW_WIDTH_MM
+        return get_outer_row_bus_y(variant, top=False), OUTER_ROW_WIDTH_MM
     if row_number == transition_rows[0]:
         return row_center_y_mm - 0.385, TRANSITION_ROW_WIDTH_MM
     if row_number == transition_rows[1]:
@@ -620,9 +620,7 @@ def route_full_matrix(
     row_via_positions: dict[int, list[float]] = {}
 
     for row_number in range(1, variant.matrix_size + 1):
-        row_center_y_mm = (
-            0.9 + (row_number - 1) * variant.led_pitch_mm
-        )
+        row_center_y_mm = get_row_center(variant, row_number)
         if row_number in (upper_transition_row, lower_transition_row):
             continue
         for column_number in range(1, variant.matrix_size + 1):
@@ -723,7 +721,7 @@ def route_full_matrix(
                 )
             )
 
-    maximum_via_y_mm = variant.board_size_mm - 0.525
+    maximum_via_y_mm = get_outer_row_bus_y(variant, top=False)
     for row_number in range(1, variant.matrix_size + 1):
         row_bus_y_mm, row_bus_width_mm = get_row_bus_spec(
             variant,

@@ -81,4 +81,8 @@
   per component. The resulting side-rail zoning understated 20×20 placement
   demand by more than 2×. Also do not present HDI as an area fix: blind vias
   can remove backside via conflicts, but they do not create component area.
+- Do not change a generated board outline while routing generators still use
+  hard-coded LED margins or edge-bus coordinates. Derive LED centers and outer
+  row buses from board size, matrix size, and pitch, then rerun every topology
+  and DRC gate before promoting the resized board.
 

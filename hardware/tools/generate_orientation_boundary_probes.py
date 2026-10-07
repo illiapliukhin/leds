@@ -19,8 +19,11 @@ from generate_edge_routing_probe import (
     ProbeVariant,
     add_track,
     add_through_via,
+    get_column_center,
     get_led,
+    get_outer_row_bus_y,
     get_pad,
+    get_row_center,
     millimeters,
     route_anode,
     route_rgb_to_back,
@@ -175,8 +178,8 @@ def generate_column_boundary_probe(
             (variant.matrix_size - 1, TOP_RIGHT_PROFILE),
         )
         row_bus_specs = (
-            (0.525, OUTER_ROW_WIDTH_MM),
-            (0.9 + variant.led_pitch_mm, INNER_ROW_WIDTH_MM),
+            (get_outer_row_bus_y(variant, top=True), OUTER_ROW_WIDTH_MM),
+            (get_row_center(variant, 2), INNER_ROW_WIDTH_MM),
         )
     else:
         row_numbers = (variant.matrix_size - 1, variant.matrix_size)
@@ -184,16 +187,17 @@ def generate_column_boundary_probe(
             (1, BOTTOM_LEFT_PROFILE),
             (2, ROTATED_PROFILE),
         )
-        second_last_row_center_y_mm = (
-            0.9 + (row_numbers[0] - 1) * variant.led_pitch_mm
+        second_last_row_center_y_mm = get_row_center(
+            variant,
+            row_numbers[0],
         )
         row_bus_specs = (
             (second_last_row_center_y_mm, INNER_ROW_WIDTH_MM),
-            (variant.board_size_mm - 0.525, OUTER_ROW_WIDTH_MM),
+            (get_outer_row_bus_y(variant, top=False), OUTER_ROW_WIDTH_MM),
         )
 
     row_center_y_values = tuple(
-        0.9 + (row_number - 1) * variant.led_pitch_mm
+        get_row_center(variant, row_number)
         for row_number in row_numbers
     )
     row_via_extents: dict[int, list[float]] = {}
@@ -216,7 +220,7 @@ def generate_column_boundary_probe(
                 row_center_y_mm,
                 row_bus_y_mm,
                 row_bus_width_mm,
-                variant.board_size_mm - 0.525,
+                get_outer_row_bus_y(variant, top=False),
             )
             row_via_extents.setdefault(row_number, []).append(via_x_mm)
 
@@ -251,9 +255,7 @@ def generate_column_boundary_probe(
         )
 
     for column_number, profile in column_profiles:
-        column_center_x_mm = (
-            0.9 + (column_number - 1) * variant.led_pitch_mm
-        )
+        column_center_x_mm = get_column_center(variant, column_number)
         for color_name, x_offset_mm, y_offset_mm in profile.trunk_offsets:
             trunk_x_mm = column_center_x_mm + x_offset_mm
             add_track(
@@ -638,9 +640,7 @@ def generate_row_boundary_probe(
                 lower_footprint,
             ),
         ):
-            row_center_y_mm = (
-                0.9 + (row_number - 1) * variant.led_pitch_mm
-            )
+            row_center_y_mm = get_row_center(variant, row_number)
             if profile.vertical_direction > 0:
                 via_x_mm = route_anode(
                     board,
@@ -655,15 +655,13 @@ def generate_row_boundary_probe(
                     footprint,
                     row_center_y_mm,
                     TRANSITION_ROW_WIDTH_MM,
-                    variant.board_size_mm - 0.525,
+                    get_outer_row_bus_y(variant, top=False),
                     profile.anode_via_x_offset_mm,
                 )
             row_via_extents.setdefault(row_number, []).append(via_x_mm)
 
     for row_number, _ in row_profiles:
-        row_center_y_mm = (
-            0.9 + (row_number - 1) * variant.led_pitch_mm
-        )
+        row_center_y_mm = get_row_center(variant, row_number)
         row_net = get_pad(
             get_led(
                 board,

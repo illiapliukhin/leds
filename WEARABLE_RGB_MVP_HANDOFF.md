@@ -15,7 +15,7 @@ production-ready.
 
 | Версия | Матрица | Пиксели | Ориентировочная PCB | Шаг LED |
 |---|---:|---:|---:|---:|
-| Compact | 20×20 | 400 | 49,3×49,3 мм | 2,50 мм |
+| Compact | 20×20 | 400 | 57,0×57,0 мм study baseline | 2,50 мм |
 | High-resolution | 28×28 | 784 | 61,2×61,2 мм | 2,20 мм |
 
 Функции:
@@ -415,7 +415,16 @@ KiCad 10 рабочие PCB:
 - `B.SilkS`: `PCB CREATED BY ILLIA PLIUKHIN` и маленькая пятиконечная звезда;
 - LED references находятся на `F.Fab`; все остальные компоненты должны иметь физические reference designators не меньше 1,0/0,15 мм без перекрытий.
 
-Текущие outline 49,3 × 49,3 мм и 61,2 × 61,2 мм ещё не заморожены для производства, но увеличивать их сейчас не требуется. Все 18 локальных corner/orientation probes прошли KiCad 10.0.6 DRC без геометрических нарушений для шага 2,50 и 2,20 мм. Проверенная карта 0°/90°/180°/270° размножена на полные массивы: обе сгенерированные платы имеют `0 DRC violations` и `0 unconnected items`. Семантическая проверка подтверждает 400/784 LED, 1 564/3 084 стандартных through vias, правильные ориентации, все row nets на физическом L3 (`In2.Cu`) и 0 tracks на L2 (`In1.Cu`). Midpoint cells используют L1/L3/L4 crossover-коридоры и локальные row buses 0,40 мм. Отдельный 20×20 L2 probe после antipads сохраняет один сплошной fill outline и 81,0% nominal zone area, но остаётся электрически изолированным до появления backside GND pads и поэтому не перенесён в working PCB. Генераторы, платы, DRC reports и расчёты находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. До freeze необходимо добавить production L2 GND zone после placement, проверить локальные return paths/neck widths и провести row/RGB exits к драйверам без нарушения доказанных коридоров.
+Outline 20×20 увеличивается с 49,3 до 57,0 мм как single-board study
+baseline после доказанного дефицита backside-площади; 28×28 остаётся 61,2 мм.
+Генераторы вычисляют LED centers и крайние row buses из outline, matrix size и
+pitch вместо жёсткого margin 0,9 мм. Ранее доказанная карта
+0°/90°/180°/270°, 1 564/3 084 via и L1/L3/L4 topology должна пройти повторную
+детерминированную генерацию, semantic checks и DRC перед promotion нового
+20×20 outline. Размер 57,0 мм остаётся mechanical study baseline, а не
+production freeze. До freeze также необходимо добавить production L2 GND
+после placement, проверить return paths/neck widths и провести row/RGB exits
+к драйверам без нарушения доказанных коридоров.
 
 ### Placement
 
@@ -431,8 +440,8 @@ KiCad 10 рабочие PCB:
   разрешить конкретные низкопрофильные компоненты под батареей с изоляцией и
   подтверждённым зазором; текущая проекция остаётся provisional guide, а не
   доказанным keepout. Теоретический минимум квадратной платы составляет
-  около 54,3 мм даже при невозможной 100% упаковке; следующий одноплатный
-  mechanical study baseline — около 57 мм при 85% упаковке. HDI/blind vias
+  около 54,3 мм даже при невозможной 100% упаковке; текущий одноплатный
+  mechanical study baseline установлен в 57,0 мм при 85% упаковке. HDI/blind vias
   могут убрать выходы matrix vias на backside, но сами по себе не устраняют
   дефицит площади. Если 49,3 мм обязательны, требуется отдельная logic PCB
   либо квалифицированный component-under-battery stack с новым thermal и
