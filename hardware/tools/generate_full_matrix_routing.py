@@ -4,7 +4,6 @@ import pcbnew
 
 from generate_edge_routing_probe import (
     INNER_ROW_WIDTH_MM,
-    MATRIX_RGB_VIA_DIAMETER_MM,
     OUTER_ROW_WIDTH_MM,
     PROBE_VARIANTS,
     TRANSITION_ROW_WIDTH_MM,
@@ -12,11 +11,11 @@ from generate_edge_routing_probe import (
     TRANSITION_SIDE_VIA_Y_OFFSET_MM,
     ProbeVariant,
     add_track,
-    add_through_via,
     get_led,
     get_pad,
     millimeters,
     route_anode,
+    route_orientation_transition_rgb,
     route_rgb_to_back,
     route_rotated_anode,
 )
@@ -65,10 +64,8 @@ def get_row_bus_spec(
         return 0.525, OUTER_ROW_WIDTH_MM
     if row_number == variant.matrix_size:
         return variant.board_size_mm - 0.525, OUTER_ROW_WIDTH_MM
-    if row_number == transition_rows[0]:
-        return row_center_y_mm - 0.4, TRANSITION_ROW_WIDTH_MM
-    if row_number == transition_rows[1]:
-        return row_center_y_mm + 0.4, TRANSITION_ROW_WIDTH_MM
+    if row_number in transition_rows:
+        return row_center_y_mm, TRANSITION_ROW_WIDTH_MM
     return row_center_y_mm, INNER_ROW_WIDTH_MM
 
 
@@ -96,20 +93,14 @@ def route_profiled_anode(
     row_bus_y_mm: float,
     row_bus_width_mm: float,
     maximum_via_y_mm: float,
-    via_x_offset_mm: float | None = None,
 ) -> float:
-    selected_via_x_offset_mm = (
-        profile.anode_via_x_offset_mm
-        if via_x_offset_mm is None
-        else via_x_offset_mm
-    )
     if profile.vertical_direction > 0:
         return route_anode(
             board,
             footprint,
             row_bus_y_mm,
             row_bus_width_mm,
-            selected_via_x_offset_mm,
+            profile.anode_via_x_offset_mm,
         )
     return route_rotated_anode(
         board,
@@ -117,7 +108,7 @@ def route_profiled_anode(
         row_bus_y_mm,
         row_bus_width_mm,
         maximum_via_y_mm,
-        selected_via_x_offset_mm,
+        profile.anode_via_x_offset_mm,
     )
 
 
@@ -154,10 +145,6 @@ def get_standard_transition_positions(
         transition_center_y_mm + TRANSITION_SIDE_VIA_Y_OFFSET_MM
     )
     shared_blue_position = (center_x_mm, transition_center_y_mm)
-    lower_blue_position = (
-        center_x_mm + 1.2,
-        transition_center_y_mm + 0.95,
-    )
     return (
         {
             "G": (
@@ -179,188 +166,9 @@ def get_standard_transition_positions(
                 center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
                 lower_via_y_mm,
             ),
-            "B": lower_blue_position,
+            "B": shared_blue_position,
         },
     )
-
-
-def route_full_standard_transition_rgb(
-    board: pcbnew.BOARD,
-    upper_footprint: pcbnew.FOOTPRINT,
-    lower_footprint: pcbnew.FOOTPRINT,
-) -> None:
-    center_x_mm, upper_center_y_mm = millimeters(
-        upper_footprint.GetPosition()
-    )
-    _, lower_center_y_mm = millimeters(lower_footprint.GetPosition())
-    transition_center_y_mm = (
-        upper_center_y_mm + lower_center_y_mm
-    ) / 2
-    upper_via_y_mm = (
-        transition_center_y_mm - TRANSITION_SIDE_VIA_Y_OFFSET_MM
-    )
-    lower_via_y_mm = (
-        transition_center_y_mm + TRANSITION_SIDE_VIA_Y_OFFSET_MM
-    )
-
-    upper_green_pad = get_pad(upper_footprint, "3")
-    upper_red_pad = get_pad(upper_footprint, "2")
-    upper_blue_pad = get_pad(upper_footprint, "4")
-    lower_green_pad = get_pad(lower_footprint, "3")
-    lower_red_pad = get_pad(lower_footprint, "2")
-    lower_blue_pad = get_pad(lower_footprint, "4")
-
-    transition_vias = (
-        (
-            upper_green_pad,
-            center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            upper_via_y_mm,
-        ),
-        (
-            upper_red_pad,
-            center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            upper_via_y_mm,
-        ),
-        (
-            lower_green_pad,
-            center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            lower_via_y_mm,
-        ),
-        (
-            lower_red_pad,
-            center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            lower_via_y_mm,
-        ),
-    )
-    for pad, via_x_mm, via_y_mm in transition_vias:
-        pad_x_mm, pad_y_mm = millimeters(pad.GetPosition())
-        add_track(
-            board,
-            pad.GetNet(),
-            pcbnew.F_Cu,
-            pad_x_mm,
-            pad_y_mm,
-            via_x_mm,
-            via_y_mm,
-        )
-        add_through_via(
-            board,
-            pad.GetNet(),
-            via_x_mm,
-            via_y_mm,
-            MATRIX_RGB_VIA_DIAMETER_MM,
-        )
-
-    shared_blue_position = (center_x_mm, transition_center_y_mm)
-    for footprint, blue_pad in (
-        (upper_footprint, upper_blue_pad),
-        (lower_footprint, lower_blue_pad),
-    ):
-        pad_x_mm, pad_y_mm = millimeters(blue_pad.GetPosition())
-        footprint_x_mm, footprint_y_mm = millimeters(
-            footprint.GetPosition()
-        )
-        add_track(
-            board,
-            blue_pad.GetNet(),
-            pcbnew.F_Cu,
-            pad_x_mm,
-            pad_y_mm,
-            footprint_x_mm,
-            footprint_y_mm,
-        )
-        add_track(
-            board,
-            blue_pad.GetNet(),
-            pcbnew.F_Cu,
-            footprint_x_mm,
-            footprint_y_mm,
-            shared_blue_position[0],
-            shared_blue_position[1],
-        )
-    add_through_via(
-        board,
-        upper_blue_pad.GetNet(),
-        shared_blue_position[0],
-        shared_blue_position[1],
-        MATRIX_RGB_VIA_DIAMETER_MM,
-    )
-
-    lower_blue_position = (
-        center_x_mm + 1.2,
-        transition_center_y_mm + 0.95,
-    )
-    add_through_via(
-        board,
-        upper_blue_pad.GetNet(),
-        lower_blue_position[0],
-        lower_blue_position[1],
-        MATRIX_RGB_VIA_DIAMETER_MM,
-    )
-    blue_route_points = (
-        shared_blue_position,
-        (center_x_mm, transition_center_y_mm + 0.65),
-        (lower_blue_position[0], transition_center_y_mm + 0.65),
-        lower_blue_position,
-    )
-    for start_position, end_position in zip(
-        blue_route_points,
-        blue_route_points[1:],
-    ):
-        add_track(
-            board,
-            upper_blue_pad.GetNet(),
-            pcbnew.In2_Cu,
-            start_position[0],
-            start_position[1],
-            end_position[0],
-            end_position[1],
-        )
-
-    green_route_points = (
-        (
-            center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            upper_via_y_mm,
-        ),
-        (center_x_mm - 1.0, upper_via_y_mm),
-        (center_x_mm - 1.0, transition_center_y_mm - 0.75),
-        (center_x_mm + 1.0, transition_center_y_mm - 0.75),
-        (center_x_mm + 1.0, lower_via_y_mm),
-        (
-            center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            lower_via_y_mm,
-        ),
-    )
-    red_route_points = (
-        (
-            center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            upper_via_y_mm,
-        ),
-        (center_x_mm + 0.9, upper_via_y_mm),
-        (center_x_mm + 0.9, transition_center_y_mm + 0.75),
-        (center_x_mm - 0.5, transition_center_y_mm + 0.75),
-        (
-            center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
-            lower_via_y_mm,
-        ),
-    )
-    for net, layer, route_points in (
-        (upper_green_pad.GetNet(), pcbnew.In2_Cu, green_route_points),
-        (upper_red_pad.GetNet(), pcbnew.B_Cu, red_route_points),
-    ):
-        for start_position, end_position in zip(
-            route_points,
-            route_points[1:],
-        ):
-            add_track(
-                board,
-                net,
-                layer,
-                start_position[0],
-                start_position[1],
-                end_position[0],
-                end_position[1],
-            )
 
 
 def get_edge_transition_positions(
@@ -545,7 +353,7 @@ def route_full_matrix(
                 )
             )
         else:
-            route_full_standard_transition_rgb(
+            route_orientation_transition_rgb(
                 board,
                 upper_footprint,
                 lower_footprint,
@@ -573,14 +381,6 @@ def route_full_matrix(
                 row_number,
                 column_number,
             )
-            transition_anode_offset_mm = None
-            if row_number in (
-                upper_transition_row,
-                lower_transition_row,
-            ):
-                transition_anode_offset_mm = (
-                    0.2 if profile.anode_via_x_offset_mm > 0 else -0.2
-                )
             via_x_mm = route_profiled_anode(
                 board,
                 footprint,
@@ -588,7 +388,6 @@ def route_full_matrix(
                 row_bus_y_mm,
                 row_bus_width_mm,
                 maximum_via_y_mm,
-                transition_anode_offset_mm,
             )
             row_via_positions.setdefault(row_number, []).append(via_x_mm)
 
