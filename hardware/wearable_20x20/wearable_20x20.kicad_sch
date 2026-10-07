@@ -386,10 +386,6 @@
 		(uuid "e11888df-aafa-517f-86f5-4bbb287f4065")
 	)
 	(no_connect
-		(at 180.34 541.02)
-		(uuid "e196c16f-da88-528b-bd7d-e10a150520b2")
-	)
-	(no_connect
 		(at 820.42 111.76)
 		(uuid "e912dbe0-911f-5538-af6d-2ef96da05864")
 	)
@@ -480,6 +476,16 @@
 			(type default)
 		)
 		(uuid "12aae566-0047-5c24-8944-065faf947761")
+	)
+	(wire
+		(pts
+			(xy 180.34 541.02) (xy 340.36 541.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "18a49917-30c2-5208-b510-795dade3e0b6")
 	)
 	(wire
 		(pts
@@ -2594,6 +2600,16 @@
 		(pin "BMI_ASDX_UNUSED" passive
 			(at 340.36 543.56 180)
 			(uuid "c61a5ea6-b2d1-5af2-a2bd-da1f4ffcf313")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "BUTTON_WAKE_N" passive
+			(at 340.36 541.02 180)
+			(uuid "320ea586-bb6b-5fcc-be65-d32171842c8a")
 			(effects
 				(font
 					(size 1.27 1.27)

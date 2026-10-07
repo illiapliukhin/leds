@@ -500,6 +500,155 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "PartSignal_Platform:NA-FFA381-A10-1"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -7.62 11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "NA-FFA381-A10-1"
+				(at 7.62 11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Footprint" "PartSignal_Packages:Gettop_NA-FFA381-A10-1_TopPort_Microphone"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://en.gettopacoustic.com/Public/Uploads/uploadfile/files/20250817/NAFFA381A101.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Pin map checked against primary manufacturer datasheet"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "NA-FFA381-A10-1_0_1"
+				(rectangle
+					(start -7.62 10.16)
+					(end 7.62 -10.16)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "NA-FFA381-A10-1_1_1"
+				(pin power_in line
+					(at -10.16 7.62 0)
+					(length 2.54)
+					(name "VDD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -10.16 5.08 0)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 10.16 7.62 180)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 10.16 5.08 180)
+					(length 2.54)
+					(name "OUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 	)
 	(label "GND"
 		(at 43.18 41.91 270)
@@ -631,6 +780,16 @@
 		)
 		(uuid "72045237-f0f9-550f-a245-1cdb779b2e7e")
 	)
+	(label "GND"
+		(at 20.32 55.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "7456adfe-951e-5ce2-b249-5aa448bfcd73")
+	)
 	(label "MIC_BIAS"
 		(at 115.57 50.8 180)
 		(effects
@@ -670,6 +829,16 @@
 			(justify right bottom)
 		)
 		(uuid "9173b721-a9a5-5ffc-9787-74edca37410b")
+	)
+	(label "GND"
+		(at 40.64 53.34 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "9439d840-4dd7-5743-8056-d77aaab155eb")
 	)
 	(label "MIC_AFE_OUT"
 		(at 161.29 60.96 0)
@@ -720,6 +889,26 @@
 			(justify right bottom)
 		)
 		(uuid "ac633027-b0a3-5053-b158-bbe6bef6d3f3")
+	)
+	(label "MIC_VDD"
+		(at 20.32 53.34 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "af32a7f3-5224-59ce-a47e-e47969e2db8d")
+	)
+	(label "MIC_RAW"
+		(at 40.64 55.88 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "b53165b8-0b76-5875-bbed-c6adb155d06a")
 	)
 	(label "MIC_AFE_FB"
 		(at 101.6 60.96 180)
@@ -910,6 +1099,17 @@
 	)
 	(hierarchical_label "GND"
 		(shape input)
+		(at 20.32 55.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "49b6ae45-c09f-533c-b7c7-4e7f36923b26")
+	)
+	(hierarchical_label "GND"
+		(shape input)
 		(at 172.72 80.01 0)
 		(effects
 			(font
@@ -940,6 +1140,28 @@
 			(justify left)
 		)
 		(uuid "705f2afc-4c57-5839-a600-38e64b2f2303")
+	)
+	(hierarchical_label "GND"
+		(shape input)
+		(at 40.64 53.34 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "726f6adf-d83a-5f0d-b3df-377be998be40")
+	)
+	(hierarchical_label "MIC_RAW"
+		(shape input)
+		(at 40.64 55.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "81c9148f-e8af-57d5-b5b7-f3ac9d070c84")
 	)
 	(hierarchical_label "GND"
 		(shape input)
@@ -1127,6 +1349,17 @@
 			(justify left)
 		)
 		(uuid "da605cf5-bbf2-5231-b561-6be8cec2abf4")
+	)
+	(hierarchical_label "MIC_VDD"
+		(shape input)
+		(at 20.32 53.34 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "db321bd4-ba90-508c-a0a5-f27a42f23787")
 	)
 	(hierarchical_label "MIC_AFE_FB"
 		(shape input)
@@ -1683,6 +1916,113 @@
 			(project ""
 				(path "/cee8a5eb-ba57-5bb9-9b24-255b95f07e0c"
 					(reference "C41")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "PartSignal_Platform:NA-FFA381-A10-1")
+		(at 30.48 60.96 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "89321946-927e-523a-94a2-ba27874490a8")
+		(property "Reference" "MIC1"
+			(at 22.86 72.39 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "NA-FFA381-A10-1"
+			(at 38.1 72.39 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "PartSignal_Packages:Gettop_NA-FFA381-A10-1_TopPort_Microphone"
+			(at 30.48 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 30.48 60.96 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 30.48 60.96 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Function" "TOP_PORT_ANALOG_MICROPHONE"
+			(at 33.02 66.0399 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "FootprintStatus" "RELEASED_GETTOP_V8"
+			(at 33.02 66.0399 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "5d476e70-5fca-56f3-80f6-f38dcf20cd7b")
+		)
+		(pin "2"
+			(uuid "c23af89e-3bc5-5430-9e57-cab823f5b9d0")
+		)
+		(pin "3"
+			(uuid "397b1d0d-b4f9-5962-895b-b09f112f2fdb")
+		)
+		(pin "4"
+			(uuid "177448e3-0f16-554d-ba3b-5bcc8356910d")
+		)
+		(instances
+			(project ""
+				(path "/cee8a5eb-ba57-5bb9-9b24-255b95f07e0c"
+					(reference "MIC1")
 					(unit 1)
 				)
 			)

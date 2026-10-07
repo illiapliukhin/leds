@@ -164,7 +164,7 @@ KiCad 10 row-selection sheets:
 - геометрия DLA0010A, DFE201612E, SMD3225-4P, EVPBL и Gettop microphone
   проверяется
   `hardware/tools/verify_critical_footprints.py`;
-- XML-аудит загружает все 18 уникальных footprint types для 569/977
+- XML-аудит загружает все 21 уникальный footprint type для 572/980
   компонентов и подтверждает, что каждый connected symbol pin имеет
   одноимённый physical pad; пустых назначений в root netlists нет;
 - единый реестр механических входных данных и внешних блокеров находится в

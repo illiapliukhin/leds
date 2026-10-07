@@ -308,6 +308,279 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:Thermistor_NTC"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "TH"
+				(at -4.445 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Thermistor_NTC"
+				(at 3.175 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Temperature dependent resistor, negative temperature coefficient"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "thermistor NTC resistor sensor RTD"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "R_* RV_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Thermistor_NTC_0_1"
+				(arc
+					(start -3.175 2.413)
+					(mid -3.0506 2.3165)
+					(end -3.048 2.159)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -3.048 2.794)
+					(mid -2.9736 2.9736)
+					(end -2.794 3.048)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.794 3.048)
+					(mid -2.6144 2.9736)
+					(end -2.54 2.794)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.794 2.54)
+					(mid -2.9736 2.6144)
+					(end -3.048 2.794)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.794 1.905)
+					(mid -2.9736 1.9794)
+					(end -3.048 2.159)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.54 2.159)
+					(mid -2.6144 1.9794)
+					(end -2.794 1.905)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -2.159 2.794)
+					(mid -2.434 2.5608)
+					(end -2.794 2.54)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 2.159) (xy -2.54 2.794)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 -3.683) (xy -2.54 -1.397) (xy -2.794 -2.159) (xy -2.286 -2.159) (xy -2.54 -1.397) (xy -2.54 -1.651)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 2.54) (xy -1.778 1.524) (xy 1.778 -1.524) (xy 1.778 -2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 -1.397) (xy -1.778 -3.683) (xy -2.032 -2.921) (xy -1.524 -2.921) (xy -1.778 -3.683)
+						(xy -1.778 -3.429)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start -1.016 2.54)
+					(end 1.016 -2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Thermistor_NTC_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "PartSignal_Platform:BMI270"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -876,6 +1149,170 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Switch:SW_Push"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "SW"
+				(at 1.27 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "SW_Push"
+				(at 0 -1.524 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Push button switch, generic, two pins"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "switch normally-open pushbutton push-button"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SW_Push_0_1"
+				(circle
+					(center -2.032 0)
+					(radius 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 1.27) (xy 0 3.048)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.032 0)
+					(radius 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 1.27) (xy -2.54 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 	)
 	(no_connect
 		(at 66.04 55.88)
@@ -900,6 +1337,16 @@
 			(justify left bottom)
 		)
 		(uuid "07e53fea-f841-5df1-91ec-fba59b23cbc8")
+	)
+	(label "AON_3V3"
+		(at 194.31 76.2 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "0f74f7c6-37d0-5307-a34e-18a163b554d5")
 	)
 	(label "GND"
 		(at 45.72 48.26 0)
@@ -930,6 +1377,16 @@
 			(justify right bottom)
 		)
 		(uuid "2db4a943-a98e-50cb-9a20-23e5e9b5555d")
+	)
+	(label "BUTTON_WAKE_N"
+		(at 186.69 76.2 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "2ea6c141-43a4-5464-b4ec-ae9415bd9299")
 	)
 	(label "GND"
 		(at 111.76 48.26 0)
@@ -970,16 +1427,6 @@
 			(justify right bottom)
 		)
 		(uuid "38dfd84f-6e6c-50ac-a051-c127085cef64")
-	)
-	(label "PCB_NTC_ADC"
-		(at 153.67 76.2 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "3995f303-876d-5fab-92ae-6f918586239f")
 	)
 	(label "GND"
 		(at 45.72 63.5 0)
@@ -1061,6 +1508,16 @@
 		)
 		(uuid "5e7cd920-ea2b-5245-9100-07841eb2d829")
 	)
+	(label "PCB_NTC_ADC"
+		(at 149.86 72.39 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "5f33507b-56b0-583e-b1f3-c3bba8d9c1f1")
+	)
 	(label "I2C_SDA"
 		(at 153.67 45.72 0)
 		(effects
@@ -1082,14 +1539,14 @@
 		(uuid "6937585e-9f80-589d-86f0-85bf5120534e")
 	)
 	(label "GND"
-		(at 146.05 76.2 180)
+		(at 149.86 80.01 270)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "74f444a4-ddb7-526f-8d30-721fc838aa81")
+		(uuid "6ac580f7-74dc-5137-8dac-e5f4a1a7052d")
 	)
 	(label "AON_3V3"
 		(at 66.04 58.42 180)
@@ -1241,6 +1698,26 @@
 		)
 		(uuid "c79b70e5-8578-506f-908a-ac4e0199a8ca")
 	)
+	(label "BUTTON_WAKE_N"
+		(at 185.42 55.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "cda958b1-ea5b-554c-86b0-b02f08a30393")
+	)
+	(label "GND"
+		(at 195.58 55.88 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "d914865c-dd3f-5986-93db-e16f3174866c")
+	)
 	(label "BAT_RAW"
 		(at 111.76 53.34 0)
 		(effects
@@ -1313,17 +1790,6 @@
 			(justify left)
 		)
 		(uuid "07e627ba-6c00-57e0-8a3a-9a05b96398ad")
-	)
-	(hierarchical_label "GND"
-		(shape input)
-		(at 146.05 76.2 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "0d7eeb6a-6ddf-5863-9e7d-13c1cc12d7b3")
 	)
 	(hierarchical_label "GND"
 		(shape input)
@@ -1468,6 +1934,17 @@
 		)
 		(uuid "6ebe244d-b5fc-5787-88a7-bf330b6ddea0")
 	)
+	(hierarchical_label "BUTTON_WAKE_N"
+		(shape input)
+		(at 185.42 55.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7002d698-e4ce-53a8-a33e-b918195803b2")
+	)
 	(hierarchical_label "BMI_ASDX_UNUSED"
 		(shape input)
 		(at 45.72 50.8 0)
@@ -1478,17 +1955,6 @@
 			(justify left)
 		)
 		(uuid "725f24cf-bba3-5b7c-9371-0919ad9c6074")
-	)
-	(hierarchical_label "PCB_NTC_ADC"
-		(shape input)
-		(at 153.67 76.2 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "788009c6-2d51-5d71-9485-efd8b85375b3")
 	)
 	(hierarchical_label "I2C_SCL"
 		(shape input)
@@ -1511,6 +1977,17 @@
 			(justify left)
 		)
 		(uuid "8169b257-556a-553f-a528-45b1a5161be1")
+	)
+	(hierarchical_label "PCB_NTC_ADC"
+		(shape input)
+		(at 149.86 72.39 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "81e7e8ed-8521-5f57-a1ec-449f1786bb25")
 	)
 	(hierarchical_label "GND"
 		(shape input)
@@ -1644,6 +2121,28 @@
 		)
 		(uuid "b311ade3-06a2-5c43-a200-87953c6203cc")
 	)
+	(hierarchical_label "BUTTON_WAKE_N"
+		(shape input)
+		(at 186.69 76.2 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "cd097bd2-b695-5f0e-919c-dcc15b412297")
+	)
+	(hierarchical_label "GND"
+		(shape input)
+		(at 149.86 80.01 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d85092c7-927d-5fba-b949-e362166e724f")
+	)
 	(hierarchical_label "GND"
 		(shape input)
 		(at 132.08 55.88 0)
@@ -1709,6 +2208,28 @@
 			(justify left)
 		)
 		(uuid "fa2f6b7c-6c8e-502e-bf27-a50605139d35")
+	)
+	(hierarchical_label "GND"
+		(shape input)
+		(at 195.58 55.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "fa7488dc-acfb-5776-94fd-aa8edce980ea")
+	)
+	(hierarchical_label "AON_3V3"
+		(shape input)
+		(at 194.31 76.2 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "fb54f578-4518-50f8-b223-3c826eb6a2d1")
 	)
 	(hierarchical_label "I2C_SDA"
 		(shape input)
@@ -2032,6 +2553,107 @@
 			(project ""
 				(path "/2a939f96-5075-51d1-b26c-cfac0de00eb6"
 					(reference "R31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Switch:SW_Push")
+		(at 190.5 55.88 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "84b07d2e-494e-5cae-a2c5-4580cc30cc33")
+		(property "Reference" "SW1"
+			(at 191.77 58.42 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "EVPBL2A1F000"
+			(at 190.5 54.356 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "PartSignal_Packages:Panasonic_EVPBL2A1F000_Switch"
+			(at 190.5 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 190.5 55.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 190.5 55.88 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Function" "REAR_WAKE_BUTTON"
+			(at 193.04 60.9599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "FootprintStatus" "RELEASED_PANASONIC_EVPBL"
+			(at 193.04 60.9599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "727a3c01-284f-5bfa-b1b9-aee08c14de3a")
+		)
+		(pin "2"
+			(uuid "954b8916-8324-5cb3-8226-6c732c3bba83")
+		)
+		(instances
+			(project ""
+				(path "/2a939f96-5075-51d1-b26c-cfac0de00eb6"
+					(reference "SW1")
 					(unit 1)
 				)
 			)
@@ -2455,6 +3077,107 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:Thermistor_NTC")
+		(at 149.86 76.2 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "a5222ffc-f7a1-5cb7-82c3-be1d9f4f40d7")
+		(property "Reference" "TH1"
+			(at 145.415 76.2 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TE 20021086-05 10k 1% B3435"
+			(at 153.035 76.2 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 149.86 77.47 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 149.86 76.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 149.86 76.2 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Function" "PCB_TEMPERATURE_SENSOR"
+			(at 152.4 81.2799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "FootprintStatus" "RELEASED_STANDARD_0402"
+			(at 152.4 81.2799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "a3910d7c-e61f-50d4-921a-5e71327f27cc")
+		)
+		(pin "2"
+			(uuid "9e54d55a-3202-5ef8-a55e-b083d0219e9a")
+		)
+		(instances
+			(project ""
+				(path "/2a939f96-5075-51d1-b26c-cfac0de00eb6"
+					(reference "TH1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 68.58 78.74 90)
 		(unit 1)
@@ -2535,7 +3258,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 149.86 76.2 90)
+		(at 190.5 76.2 90)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -2545,7 +3268,7 @@
 		(dnp no)
 		(uuid "ecfa78f1-6232-59af-8cf6-427d219c473b")
 		(property "Reference" "R32"
-			(at 149.86 78.232 180)
+			(at 190.5 78.232 180)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2555,8 +3278,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "10k NTC TBD"
-			(at 149.86 76.2 180)
+		(property "Value" "100k"
+			(at 190.5 76.2 180)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2567,7 +3290,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 148.082 76.2 90)
+			(at 188.722 76.2 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2578,7 +3301,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 149.86 76.2 0)
+			(at 190.5 76.2 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2588,7 +3311,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 149.86 76.2 0)
+			(at 190.5 76.2 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
