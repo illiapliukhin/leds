@@ -12,6 +12,7 @@ KICAD_SYMBOL_DIRECTORY = Path(
     os.environ.get("KICAD10_SYMBOL_DIR", "/usr/share/kicad/symbols")
 )
 STANDARD_DRIVER_LIBRARY = KICAD_SYMBOL_DIRECTORY / "Driver_LED.kicad_sym"
+STANDARD_DEVICE_LIBRARY = KICAD_SYMBOL_DIRECTORY / "Device.kicad_sym"
 CUSTOM_LIBRARY_NAME = "PartSignal_Wearable"
 CUSTOM_LIBRARY_PATH = (
     Path(__file__).resolve().parents[1]
@@ -19,7 +20,9 @@ CUSTOM_LIBRARY_PATH = (
     / f"{CUSTOM_LIBRARY_NAME}.kicad_sym"
 )
 MBI5124_LIBRARY_ID = f"{CUSTOM_LIBRARY_NAME}:MBI5124GP-B"
+MHPA1010_LIBRARY_ID = f"{CUSTOM_LIBRARY_NAME}:MHPA1010RGBDT"
 MBI5124_FOOTPRINT = "Package_SO:SSOP-24_3.9x8.7mm_P0.635mm"
+MHPA1010_FOOTPRINT = "PartSignal_LEDs:MHPA1010RGBDT"
 BUFFER_LIBRARY_ID = "74xGxx:SN74LVC1G125DBV"
 BUFFER_FOOTPRINT = "Package_TO_SOT_SMD:SOT-23-5"
 RESISTOR_FOOTPRINT = "Resistor_SMD:R_0603_1608Metric"
@@ -213,7 +216,7 @@ def generate_harness_symbol(matrix_size: int) -> str:
 
 def generate_custom_symbol_library() -> None:
     source_library_text = STANDARD_DRIVER_LIBRARY.read_text(encoding="utf-8")
-    symbol_text = extract_symbol_expression(source_library_text, "MBI5252GP")
+    mbi_symbol_text = extract_symbol_expression(source_library_text, "MBI5252GP")
 
     replacements = (
         (
@@ -233,9 +236,31 @@ def generate_custom_symbol_library() -> None:
     )
 
     for old_value, new_value in replacements:
-        if old_value not in symbol_text:
+        if old_value not in mbi_symbol_text:
             raise ValueError(f"Expected source symbol value is missing: {old_value}")
-        symbol_text = symbol_text.replace(old_value, new_value)
+        mbi_symbol_text = mbi_symbol_text.replace(old_value, new_value)
+
+    device_library_text = STANDARD_DEVICE_LIBRARY.read_text(encoding="utf-8")
+    led_symbol_text = extract_symbol_expression(device_library_text, "LED_ARGB")
+    led_replacements = (
+        (
+            '(property "Footprint" ""',
+            f'(property "Footprint" "{MHPA1010_FOOTPRINT}"',
+        ),
+        (
+            '(property "Datasheet" ""',
+            '(property "Datasheet" "https://www.lcsc.com/datasheet/C404280.pdf"',
+        ),
+        (
+            'RGB LED, anode/red/green/blue',
+            "MEIHUA MHPA1010RGBDT common-anode RGB LED, 1.0x1.0 mm",
+        ),
+        ("LED_ARGB", "MHPA1010RGBDT"),
+    )
+    for old_value, new_value in led_replacements:
+        if old_value not in led_symbol_text:
+            raise ValueError(f"Expected source LED symbol value is missing: {old_value}")
+        led_symbol_text = led_symbol_text.replace(old_value, new_value)
 
     library_text = "\n".join(
         (
@@ -243,7 +268,8 @@ def generate_custom_symbol_library() -> None:
             "\t(version 20251024)",
             '\t(generator "kicad_symbol_editor")',
             '\t(generator_version "10.0")',
-            symbol_text,
+            mbi_symbol_text,
+            led_symbol_text,
             generate_harness_symbol(20),
             generate_harness_symbol(28),
             ")",
@@ -282,6 +308,23 @@ def configure_symbol_cache() -> None:
                 f"MBI5124 pin {pin_number}: expected {expected_pin_name}, "
                 f"found {actual_pin_names.get(pin_number)}"
             )
+
+    led_symbol = symbol_cache.get_symbol(MHPA1010_LIBRARY_ID)
+    if led_symbol is None:
+        raise RuntimeError("Generated MHPA1010RGBDT symbol is not readable")
+
+    expected_led_pin_names = {
+        "1": "A",
+        "2": "RK",
+        "3": "GK",
+        "4": "BK",
+    }
+    actual_led_pin_names = {pin.number: pin.name for pin in led_symbol.pins}
+    if actual_led_pin_names != expected_led_pin_names:
+        raise ValueError(
+            "MHPA1010RGBDT pin map mismatch: "
+            f"expected {expected_led_pin_names}, found {actual_led_pin_names}"
+        )
 
 
 def add_component(
@@ -584,7 +627,10 @@ def add_erc_harness(
         )
 
 
-def write_project_library_tables(output_directory: Path) -> None:
+def write_project_library_tables(
+    output_directory: Path,
+    project_name: str = "led_drivers",
+) -> None:
     symbol_table = """(sym_lib_table
   (lib (name "PartSignal_Wearable")(type "KiCad")(uri "${KIPRJMOD}/../libraries/PartSignal_Wearable.kicad_sym")(options "")(descr "Part Signal wearable custom symbols"))
   (lib (name "74xGxx")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/74xGxx.kicad_sym")(options "")(descr ""))
@@ -596,12 +642,16 @@ def write_project_library_tables(output_directory: Path) -> None:
   (lib (name "Capacitor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Capacitor_SMD.pretty")(options "")(descr ""))
   (lib (name "Package_SO")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_SO.pretty")(options "")(descr ""))
   (lib (name "Package_TO_SOT_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_TO_SOT_SMD.pretty")(options "")(descr ""))
+  (lib (name "PartSignal_LEDs")(type "KiCad")(uri "${KIPRJMOD}/../libraries/leds.pretty")(options "")(descr "Part Signal LED footprints"))
   (lib (name "Resistor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Resistor_SMD.pretty")(options "")(descr ""))
 )
 """
     (output_directory / "sym-lib-table").write_text(symbol_table, encoding="utf-8")
     (output_directory / "fp-lib-table").write_text(footprint_table, encoding="utf-8")
-    (output_directory / "led_drivers.kicad_pro").write_text("{}\n", encoding="utf-8")
+    (output_directory / f"{project_name}.kicad_pro").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
 
 
 def generate_variant_schematic(repository_root: Path, variant: MatrixVariant) -> Path:
