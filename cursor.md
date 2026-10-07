@@ -47,4 +47,7 @@
   generators with `python3` after checking the setup status.
 - In KiCad 10 Python checks, `CONNECTIVITY_DATA.GetUnconnectedCount` requires
   the `visibleOnly` boolean argument; pass `False` for a complete board check.
+- Model multifunction strap pins by their use in the selected interface.
+  BMI270 `SDO` is an SPI output but an I²C address strap in this design; marking
+  it output caused a false output-to-power-output ERC error when tied to GND.
 

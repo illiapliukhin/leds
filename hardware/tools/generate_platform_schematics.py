@@ -66,7 +66,7 @@ CUSTOM_SYMBOLS = {
         "downloads/datasheets/bst-bmi270-ds000.pdf",
         "",
         (
-            ("output", "SDO", "1"),
+            ("passive", "SDO", "1"),
             ("bidirectional", "ASDx", "2"),
             ("bidirectional", "ASCx", "3"),
             ("bidirectional", "INT1", "4"),
