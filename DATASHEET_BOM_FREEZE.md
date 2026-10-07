@@ -21,6 +21,11 @@
 - Nexperia 74HC154/HCT154 datasheet: https://assets.nexperia.com/documents/data-sheet/74HC_HCT154.pdf
 - AO3403 datasheet: https://www.aosmd.com/res/datasheets/AO3403.pdf
 - TPS22917 datasheet Rev. B: https://www.ti.com/lit/ds/symlink/tps22917.pdf
+- Molex Pico-Lock `504050-0391`, `504051-0301`, and `504052-0098` product
+  drawings and specification `PS-504051-001-001`.
+- Panasonic `EVPBL2A1F000` product page and current `EVPBL` series drawing.
+- TE Connectivity surface-mount NTC datasheet `CAT-NTC0003`.
+- Gettop `NA-FFA381-A10-1` manufacturer datasheet and product page.
 
 ## Подтверждённые решения
 
@@ -116,6 +121,30 @@
   заменяют low-power/wake,
   fuel-gauge runtime, TS/NTC, charger thermal и power-ramp EVT.
 
+### Внешние EVT-компоненты — CONDITIONAL
+
+- Для трёхпроводного интерфейса аккумулятора выбран комплект Molex Pico-Lock
+  1.50 мм: SMT header `504050-0391`, housing `504051-0301` и terminals
+  `504052-0098`. Header рассчитан максимум на 3,5 А/contact, terminal — на
+  3,0 А/contact; диапазон провода 24–28 AWG, mated height 2,0 мм, ресурс
+  30 mating cycles, температура −40…+105 °C. До заморозки требуются
+  подтверждение жгута батареи, pin order, polarity, derating и wire exit.
+- Для задней кнопки выбран Panasonic `EVPBL2A1F000`: top-push SMD
+  2,8×1,9×0,53 мм, 1,6 Н, travel 0,15 мм, ресурс 300 000 циклов,
+  −40…+85 °C. IP67 относится только к отдельному компоненту; plunger stack,
+  preload и защита собранного корпуса остаются механическими проверками.
+- PCB temperature sensor выбран как TE Connectivity `20021086-05`: NTC 0402,
+  10 кОм ±1% при 25 °C, B25/85 = 3435 К, −40…+150 °C. Battery NTC остаётся
+  частью квалифицированного battery pack и не заменяется этим компонентом.
+- Для `MA-HFA381-H13-1AF` добавлен pin/acoustic-compatible EVT alternate
+  Gettop `NA-FFA381-A10-1`, LCSC `C50275774`: top-port analog MEMS,
+  2,75×1,85×1,0 мм, 1,6…3,6 В, 120 мкА typical, sensitivity −38 dBV ±1 dB,
+  SNR 64 dBA, AOP 127 dB SPL. Pins: 1 VDD, 2/3 GND, 4 OUT. Alternate нельзя
+  подставлять в footprint исходного микрофона: сначала выпустить точный
+  four-land pattern и проверить AFE bias/gain, acoustic seal и noise.
+- Bottom-port `MA-HRA381-H23-3` отклонён как акустически несовместимый.
+  Panasonic `ERTJ0EG103FA` отклонён для нового дизайна из-за статуса `NRFND`.
+
 ### Расчётная модель — CONDITIONAL
 
 - `hardware/tools/model_power_scan.py` воспроизводимо генерирует `hardware/analysis/POWER_SCAN_MODEL.md` и CSV.
@@ -129,8 +158,11 @@
 1. Выбрать точный USB-C и завершить механический cross-section.
 2. Завершить reset-glitch/ESP-IDF audit ESP32-S3FN8; физические QFN56 pins и
    GPIO назначения проверены в `hardware/common/MCU_PIN_AUDIT.md`.
-3. Проверить оставшиеся критические компоненты: BMI270, MAX17048, TPS7A2033, microphone, TLV9001 и USB ESD.
-4. Получить актуальные stock/lifecycle данные и compatible alternate минимум для LED, драйвера, microphone и DC/DC.
+3. Выпустить точные footprints для Molex header, Panasonic switch, TE NTC и
+   Gettop microphone; проверить TLV9001, TPS7A2033 и USB ESD layout.
+4. Получить актуальные stock/lifecycle данные и compatible alternate минимум
+   для LED, драйвера и DC/DC; Gettop microphone alternate уже выбран
+   условно, но требует supplier quote и footprint/AFE review.
 
 ## Gate для начала KiCad
 
@@ -148,6 +180,8 @@ decoder-output/gate/row и явные NC. Точный TI RHL-24 footprint trans
 `hardware/libraries/packages.pretty`.
 Обе harness-free top-level hierarchy содержат power, MCU/USB, IMU/gauge/input,
 audio, LED drivers, row selection и полную matrix; standalone harness sheets
-сохранены только для автономного ERC. USB connector, battery/NTC/button,
-microphone и несколько package land patterns остаются намеренно заблокированы,
-поэтому hierarchy не является разрешением на PCBA-заказ.
+сохранены только для автономного ERC. USB connector, battery pack и battery
+NTC остаются заблокированы. Battery connector, rear button, PCB NTC и
+alternate microphone имеют условные MPN, но их exact land patterns и
+механические/акустические проверки ещё не выпущены, поэтому hierarchy не
+является разрешением на PCBA-заказ.

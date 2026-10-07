@@ -47,8 +47,23 @@ and retention-tab access. `C52711232` remains unverified and is not an approved
 alternate.
 
 The battery interface remains a three-contact `BAT+ / NTC / GND` requirement.
-The connector pitch, mating height, polarity key, wire exit, and footprint are
-blocked on the selected battery supplier.
+The EVT connector candidate is the active Molex Pico-Lock 1.50 mm set:
+
+- PCB header `504050-0391`, right-angle SMT, positive lock, 3 circuits,
+  3.5 A/contact maximum;
+- cable housing `504051-0301`;
+- three crimp terminals `504052-0098`, 24–28 AWG, 3.0 A/contact maximum;
+- 2.0 mm mated height, 30 mating cycles, and −40…+105 °C operating range.
+
+This selection is conditional. Freeze the footprint and wire exit only after
+the battery supplier confirms the mating harness, conductor gauge, pin order,
+polarity, current derating, and cable bend envelope.
+
+The rear-button EVT candidate is Panasonic `EVPBL2A1F000`: top-push SMD,
+2.8 × 1.9 × 0.53 mm, 1.6 N force, 0.15 mm travel, and 300,000-cycle rated
+life. Its component-level IP67 rating does not establish enclosure ingress
+protection. Placement remains conditional on the rear-cover plunger tolerance
+stack and allowable preload.
 
 ## Placement constraints
 
@@ -82,7 +97,7 @@ assembled EVT matrix.
 1. Battery manufacturer drawing, STEP, PCM/NTC specification, UN38.3 evidence,
    maximum pulse current, and mating connector.
 2. USB-C supplier drawing and enclosure cross-section with insertion clearance.
-3. Button drawing and plunger tolerance stack.
+3. `EVPBL2A1F000` drawing and rear-cover plunger tolerance stack.
 4. PCB, enclosure, battery, grid, front panel, mesh, and fasteners in one STEP
    assembly with interference checks.
 5. Supplier-approved panel rails, routed tabs, fiducials, and depanelization
@@ -96,3 +111,5 @@ assembled EVT matrix.
 - `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`
 - `manufacturing/JLCPCB_STANDARD_PCBA_RULES.md`
 - HH `16P TYPE-C (Y385)` supplier listing and datasheet, LCSC `C52209107`
+- Molex drawings for `504050-0391`, `504051-0301`, and `504052-0098`
+- Panasonic `EVPBL2A1F000` product page and `EVPBL` series drawing

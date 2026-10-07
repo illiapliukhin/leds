@@ -169,6 +169,12 @@ KiCad 10 row-selection sheets:
   `mechanical/MECHANICAL_INPUTS.md`;
 - построчный статус freeze находится в
   `manufacturing/BOM_FREEZE_STATUS.csv`;
+- для EVT выбраны Molex Pico-Lock `504050-0391` / `504051-0301` /
+  `504052-0098` как battery connector set, Panasonic `EVPBL2A1F000` как
+  rear button и TE Connectivity `20021086-05` как PCB NTC;
+- top-port microphone Gettop `NA-FFA381-A10-1`, LCSC `C50275774`, выбран
+  условным alternate для дефицитного `MA-HFA381-H13-1AF`; его отдельный
+  four-land footprint и AFE/acoustic validation обязательны;
 - USB-C `C52209107` подтверждён только как EVT-кандидат; footprint и положение
   остаются заблокированы до утверждения разреза корпуса.
 - `hardware/tools/export_manufacturing_package.py` формирует immutable
@@ -245,6 +251,8 @@ Power sequencing:
 - MAX17048G+T10, предварительный LCSC C2682616.
 - I²C общий с BMI270.
 - Battery NTC: 10 кОм B3435.
+- PCB NTC: TE Connectivity `20021086-05`, 0402, 10 кОм ±1%,
+  B25/85 = 3435 К; размещение и thermal correlation проверить на EVT.
 - Hardware charge window ориентировочно 0…60 °C.
 - MCU разрешает заряд ориентировочно только 0…45 °C.
 - Отдельный PCB NTC, divider включается GPIO только во время измерения.
@@ -276,9 +284,13 @@ IMU не заменяет микрофон: accelerometer улавливает �
 
 ## 5. Микрофон
 
-- Кандидат: MA-HFA381-H13-1AF, top-port analog MEMS.
-- Предварительный LCSC C50275762.
-- Запас компонента ранее был ограничен; для серии нужен approved alternate.
+- Основной кандидат: `MA-HFA381-H13-1AF`, top-port analog MEMS,
+  LCSC `C50275762`.
+- Условный alternate: Gettop `NA-FFA381-A10-1`, LCSC `C50275774`, top-port
+  analog MEMS, 2,75×1,85×1,0 мм, 1,6…3,6 В, 120 мкА typical,
+  −38 dBV ±1 dB, 64 dBA SNR.
+- У alternate pins 1/2/3/4 — VDD/GND/GND/OUT. Нельзя использовать footprint
+  основного кандидата без отдельного manufacturer-land-pattern audit.
 - Устанавливается сзади напротив акустического отверстия.
 - Нужны мягкая герметизирующая прокладка и acoustic mesh.
 
@@ -422,7 +434,8 @@ KiCad 10 рабочие PCB:
 Требования:
 
 - protected Li-Po с PCM и NTC;
-- трёхконтактный низкопрофильный разъём BAT+, NTC, GND;
+- трёхконтактный разъём BAT+, NTC, GND; EVT-кандидат Molex Pico-Lock
+  `504050-0391` с housing `504051-0301` и terminals `504052-0098`;
 - батарея полностью внутри PCB outline;
 - точные размеры и положение фиксировать только по чертежу конкретного поставщика.
 
@@ -522,7 +535,8 @@ Lanyard loop выполняется корпусом, не PCB. IP-рейтин�
 8. MSC compatibility с iPhone.
 9. Реальная яркость через выбранный diffuser.
 10. DFM двухстороннего PCBA и подтверждение reflow-профиля.
-11. Lifecycle, stock и approved alternates критических компонентов.
+11. Lifecycle, stock и approved alternates LED, драйвера и DC/DC; supplier
+    quote и footprint/AFE review microphone alternate.
 12. ERC, финальный DRC, SI/PI и независимое schematic/layout review.
 
 ## 14. Рекомендуемая структура репозитория
