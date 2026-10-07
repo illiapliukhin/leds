@@ -53,9 +53,10 @@ pre-charge settings without an undocumented mixed-color compromise:
 - green: `0b1111000101101011` (`0xF16B`);
 - blue: `0b1110110101101011` (`0xED6B`).
 
-Populate one 1.91 kΩ, 0.1% `R-EXT` resistor per driver. The nominal channel
-current is approximately 9.66 mA; the 3% specified IC-to-IC error still keeps
-the nominal worst case below the 10 mA upper limit specified at 3.3 V.
+Populate one 1.96 kΩ, 0.1% `R-EXT` resistor per driver. The nominal channel
+current is approximately 9.41 mA. Conservatively combining the maximum +3%
+IC-to-IC error, +2.5% channel-to-channel error, and resistor tolerance gives
+approximately 9.95 mA, below the 10 mA upper limit specified at 3.3 V.
 Populate 100 nF directly between each driver's VDD and GND pins and local
 bulk capacitance at the driver group.
 
@@ -95,7 +96,7 @@ At 4.1 V, interpolating the 74HC requirement gives approximately `VIH ≥ 2.87 V
 - PMOS source connects to `LED_4V1`; drain connects to the selected LED common-anode row.
 - Only rows 1…20 are populated on the compact variant; rows 21…28 exist only on the high-resolution variant.
 
-At approximately 0.81 A and the conservative 200 mΩ bound, instantaneous drop is approximately 162 mV. Because each PMOS is active for only one row period, thermal dissipation is modest, but the voltage drop and brightness impact must be measured.
+At approximately 0.79 A and the conservative 200 mΩ bound, instantaneous drop is approximately 158 mV. Because each PMOS is active for only one row period, thermal dissipation is modest, but the voltage drop and brightness impact must be measured.
 
 ## MBI5124 signal isolation
 
@@ -131,6 +132,9 @@ Add 22 Ω source-series footprints after the buffer on `LED_CLK`, `LED_SDI`, and
 6. Drive valid row controls, then set `ROW_XLAT_OE_N = 0`.
 7. Shift data while blanked, latch, enable one decoder bank, and finally deassert `LED_OE_N`.
 
+If any configuration readback fails, keep `LED_OE_N` high, both decoder banks
+disabled, `ROW_XLAT_OE_N` high, and `LED_EN` low.
+
 ### Row transition
 
 1. Shift the next 96 bits while the current row is displayed and keep `LED_LE` low.
@@ -141,6 +145,9 @@ Add 22 Ω source-series footprints after the buffer on `LED_CLK`, `LED_SDI`, and
 6. Pulse `LED_LE` to latch the already shifted column data.
 7. Enable exactly one decoder bank.
 8. Deassert `LED_OE_N`.
+
+At 3.3 V, enforce the MBI5124 timing minima: `LED_LE` high pulse at least
+20 ns, LE setup at least 5 ns, and LE hold at least 30 ns.
 
 ### Shutdown
 

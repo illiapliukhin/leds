@@ -37,5 +37,5 @@
 - A full-matrix edge transition needs separate lower L4 corridors for the outer dogleg and the inner color trunk. Route the outer path orthogonally at the transition boundary and move the inner trunk to its regular X coordinate before they converge.
 - In KiCad 10 Python checks, call `PCB_VIA.GetWidth(layer)` with an explicit copper layer. Calling `GetWidth()` without a layer emits one assertion per via and obscures otherwise valid semantic-test output.
 - Do not infer that an LED-driver configuration register is per-channel from a color table. The MBI5124 has one 16-bit pre-charge configuration per IC, so color-specific settings require color-homogeneous driver assignments unless Macroblock documents a mixed-color mode.
-- Do not select a nominal current at or above a datasheet operating-range boundary. Include resistor tolerance and the specified IC-to-IC current error; 1.91 kΩ ±0.1% keeps the MBI5124 nominal worst case below 10 mA at 3.3 V.
+- Do not select a nominal current at or above a datasheet operating-range boundary. Combine resistor tolerance with both IC-to-IC and channel-to-channel maximum errors; omitting the MBI5124 ±2.5% channel error made 1.91 kΩ appear safe when its combined worst case exceeded 10 mA.
 
