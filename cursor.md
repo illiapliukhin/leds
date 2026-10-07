@@ -57,4 +57,8 @@
 - When counting KiCad DRC categories in a text report, match category headers
   at the start of a line. Counting `[` characters also counts bracketed net
   names such as `[GND]` in violation details and produces false failures.
+- Do not derive a footprint from search-result synthesis or extracted dimension
+  tables alone; packaging dimensions can be mistaken for land-pattern
+  dimensions. Inspect the primary drawing and its graphical dimension arrows
+  before encoding pad geometry.
 

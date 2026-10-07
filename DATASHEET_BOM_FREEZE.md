@@ -133,15 +133,18 @@
   2,8×1,9×0,53 мм, 1,6 Н, travel 0,15 мм, ресурс 300 000 циклов,
   −40…+85 °C. IP67 относится только к отдельному компоненту; plunger stack,
   preload и защита собранного корпуса остаются механическими проверками.
+  Локальный footprint воспроизводит четыре lands 0,63×0,60 мм и
+  manufacturer no-solder region.
 - PCB temperature sensor выбран как TE Connectivity `20021086-05`: NTC 0402,
   10 кОм ±1% при 25 °C, B25/85 = 3435 К, −40…+150 °C. Battery NTC остаётся
   частью квалифицированного battery pack и не заменяется этим компонентом.
+  В схеме назначен стандартный KiCad 0402 reflow footprint.
 - Для `MA-HFA381-H13-1AF` добавлен pin/acoustic-compatible EVT alternate
   Gettop `NA-FFA381-A10-1`, LCSC `C50275774`: top-port analog MEMS,
   2,75×1,85×1,0 мм, 1,6…3,6 В, 120 мкА typical, sensitivity −38 dBV ±1 dB,
-  SNR 64 dBA, AOP 127 dB SPL. Pins: 1 VDD, 2/3 GND, 4 OUT. Alternate нельзя
-  подставлять в footprint исходного микрофона: сначала выпустить точный
-  four-land pattern и проверить AFE bias/gain, acoustic seal и noise.
+  SNR 64 dBA, AOP 127 dB SPL. Pins: 1 VDD, 2/3 GND, 4 OUT. Выпущены
+  отдельные symbol и manufacturer footprint с четырьмя lands 0,60×0,54 мм;
+  AFE bias/gain, acoustic seal и noise ещё требуют проверки.
 - Bottom-port `MA-HRA381-H23-3` отклонён как акустически несовместимый.
   Panasonic `ERTJ0EG103FA` отклонён для нового дизайна из-за статуса `NRFND`.
 
@@ -158,8 +161,8 @@
 1. Выбрать точный USB-C и завершить механический cross-section.
 2. Завершить reset-glitch/ESP-IDF audit ESP32-S3FN8; физические QFN56 pins и
    GPIO назначения проверены в `hardware/common/MCU_PIN_AUDIT.md`.
-3. Выпустить точные footprints для Molex header, Panasonic switch, TE NTC и
-   Gettop microphone; проверить TLV9001, TPS7A2033 и USB ESD layout.
+3. Получить полный Molex sales drawing и выпустить точный 3-pin header
+   footprint; проверить TLV9001, TPS7A2033 и USB ESD layout.
 4. Получить актуальные stock/lifecycle данные и compatible alternate минимум
    для LED, драйвера и DC/DC; Gettop microphone alternate уже выбран
    условно, но требует supplier quote и footprint/AFE review.
@@ -181,7 +184,7 @@ decoder-output/gate/row и явные NC. Точный TI RHL-24 footprint trans
 Обе harness-free top-level hierarchy содержат power, MCU/USB, IMU/gauge/input,
 audio, LED drivers, row selection и полную matrix; standalone harness sheets
 сохранены только для автономного ERC. USB connector, battery pack и battery
-NTC остаются заблокированы. Battery connector, rear button, PCB NTC и
-alternate microphone имеют условные MPN, но их exact land patterns и
-механические/акустические проверки ещё не выпущены, поэтому hierarchy не
+NTC остаются заблокированы. Rear button, PCB NTC и alternate microphone
+добавлены в hierarchy с проверенными pad mappings; battery connector footprint,
+механические и акустические проверки ещё не выпущены, поэтому hierarchy не
 является разрешением на PCBA-заказ.

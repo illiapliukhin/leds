@@ -113,6 +113,18 @@ CUSTOM_SYMBOLS = {
             ("power_in", "GND", "4"),
         ),
     ),
+    "NA-FFA381-A10-1": (
+        "https://en.gettopacoustic.com/Public/Uploads/uploadfile/"
+        "files/20250817/NAFFA381A101.pdf",
+        "PartSignal_Packages:"
+        "Gettop_NA-FFA381-A10-1_TopPort_Microphone",
+        (
+            ("power_in", "VDD", "1"),
+            ("power_in", "GND", "2"),
+            ("power_in", "GND", "3"),
+            ("output", "OUT", "4"),
+        ),
+    ),
 }
 
 
@@ -257,6 +269,7 @@ def write_library_tables(output_directory: Path) -> None:
         "Power_Management",
         "Power_Protection",
         "Regulator_Linear",
+        "Switch",
         "Transistor_FET",
         "power",
     )
@@ -828,15 +841,21 @@ def generate_imu_gauge_sheet(variant: MatrixVariant) -> Schematic:
     add_resistor(
         schematic, key, "R31", "4.7k", (162.56, 45.72), "I2C_SCL", "AON_3V3"
     )
-    add_resistor(
+    add_component(
         schematic,
-        key,
-        "R32",
-        "10k NTC TBD",
-        (149.86, 76.2),
-        "PCB_NTC_ADC",
-        "GND",
+        generation_key=key,
+        library_id="Device:Thermistor_NTC",
+        reference="TH1",
+        value="TE 20021086-05 10k 1% B3435",
+        position=(149.86, 76.2),
+        footprint="Resistor_SMD:R_0402_1005Metric",
+        properties={
+            "Function": "PCB_TEMPERATURE_SENSOR",
+            "FootprintStatus": "RELEASED_STANDARD_0402",
+        },
     )
+    add_pin_label(schematic, key, "TH1", "1", "PCB_NTC_ADC")
+    add_pin_label(schematic, key, "TH1", "2", "GND")
     add_resistor(
         schematic,
         key,
@@ -846,11 +865,55 @@ def generate_imu_gauge_sheet(variant: MatrixVariant) -> Schematic:
         "PCB_NTC_EXCITE",
         "PCB_NTC_ADC",
     )
+    add_component(
+        schematic,
+        generation_key=key,
+        library_id="Switch:SW_Push",
+        reference="SW1",
+        value="EVPBL2A1F000",
+        position=(190.5, 55.88),
+        footprint=(
+            "PartSignal_Packages:"
+            "Panasonic_EVPBL2A1F000_Switch"
+        ),
+        properties={
+            "Function": "REAR_WAKE_BUTTON",
+            "FootprintStatus": "RELEASED_PANASONIC_EVPBL",
+        },
+    )
+    add_pin_label(schematic, key, "SW1", "1", "BUTTON_WAKE_N")
+    add_pin_label(schematic, key, "SW1", "2", "GND")
+    add_resistor(
+        schematic,
+        key,
+        "R32",
+        "100k",
+        (190.5, 76.2),
+        "AON_3V3",
+        "BUTTON_WAKE_N",
+    )
     return schematic
 
 
 def generate_audio_sheet(variant: MatrixVariant) -> Schematic:
     schematic, key = create_sheet(variant, SHEET_DEFINITIONS[3])
+    add_component(
+        schematic,
+        generation_key=key,
+        library_id=f"{PLATFORM_LIBRARY_NAME}:NA-FFA381-A10-1",
+        reference="MIC1",
+        value="NA-FFA381-A10-1",
+        position=(30.48, 60.96),
+        footprint=CUSTOM_SYMBOLS["NA-FFA381-A10-1"][1],
+        properties={
+            "Function": "TOP_PORT_ANALOG_MICROPHONE",
+            "FootprintStatus": "RELEASED_GETTOP_V8",
+        },
+    )
+    add_pin_label(schematic, key, "MIC1", "1", "MIC_VDD")
+    add_pin_label(schematic, key, "MIC1", "2", "GND")
+    add_pin_label(schematic, key, "MIC1", "3", "GND")
+    add_pin_label(schematic, key, "MIC1", "4", "MIC_RAW")
     add_component(
         schematic,
         generation_key=key,

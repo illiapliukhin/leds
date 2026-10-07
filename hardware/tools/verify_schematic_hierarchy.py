@@ -42,6 +42,15 @@ EXPECTED_CRITICAL_FOOTPRINTS = {
         "PartSignal_Packages:"
         "Lucki_L327S400H11L_Crystal_3225-4Pin"
     ),
+    "MIC1": (
+        "PartSignal_Packages:"
+        "Gettop_NA-FFA381-A10-1_TopPort_Microphone"
+    ),
+    "SW1": (
+        "PartSignal_Packages:"
+        "Panasonic_EVPBL2A1F000_Switch"
+    ),
+    "TH1": "Resistor_SMD:R_0402_1005Metric",
 }
 LOCAL_FOOTPRINT_DIRECTORIES = {
     "PartSignal_LEDs": Path(__file__).resolve().parents[1]
@@ -223,6 +232,14 @@ def verify_variant(netlist_path: Path, variant: Variant) -> None:
         ("U30", "1"): "MIC_AFE_OUT",
         ("U30", "3"): "MIC_AFE_IN",
         ("U30", "4"): "MIC_AFE_FB",
+        ("MIC1", "1"): "MIC_VDD",
+        ("MIC1", "2"): "GND",
+        ("MIC1", "3"): "GND",
+        ("MIC1", "4"): "MIC_RAW",
+        ("SW1", "1"): "BUTTON_WAKE_N",
+        ("SW1", "2"): "GND",
+        ("TH1", "1"): "PCB_NTC_ADC",
+        ("TH1", "2"): "GND",
         ("U100", "2"): "MCU_LED_CLK",
         ("U100", "5"): "MCU_LED_SDI",
         ("U100", "9"): "MCU_LED_LE",

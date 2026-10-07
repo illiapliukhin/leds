@@ -44,6 +44,20 @@ L327S400H11L_PADS = (
     PadGeometry("3", 1.1, -0.85, 1.4, 1.2),
     PadGeometry("4", -1.1, -0.85, 1.4, 1.2),
 )
+EVPBL2A1F000_NAME = "Panasonic_EVPBL2A1F000_Switch"
+EVPBL2A1F000_PADS = (
+    PadGeometry("1", -1.385, -0.65, 0.63, 0.60),
+    PadGeometry("1", 1.385, -0.65, 0.63, 0.60),
+    PadGeometry("2", -1.385, 0.65, 0.63, 0.60),
+    PadGeometry("2", 1.385, 0.65, 0.63, 0.60),
+)
+NA_FFA381_A10_1_NAME = "Gettop_NA-FFA381-A10-1_TopPort_Microphone"
+NA_FFA381_A10_1_PADS = (
+    PadGeometry("1", -0.525, -0.965, 0.60, 0.54),
+    PadGeometry("2", -0.525, 0.965, 0.60, 0.54),
+    PadGeometry("3", 0.525, 0.965, 0.60, 0.54),
+    PadGeometry("4", 0.525, -0.965, 0.60, 0.54),
+)
 
 
 def millimeters(internal_units: int) -> float:
@@ -165,6 +179,18 @@ def main() -> None:
         L327S400H11L_PADS,
     )
     print(f"{L327S400H11L_NAME}: manufacturer 4-pad pattern verified")
+    verify_footprint(
+        packages_directory,
+        EVPBL2A1F000_NAME,
+        EVPBL2A1F000_PADS,
+    )
+    print(f"{EVPBL2A1F000_NAME}: manufacturer 4-pad pattern verified")
+    verify_footprint(
+        packages_directory,
+        NA_FFA381_A10_1_NAME,
+        NA_FFA381_A10_1_PADS,
+    )
+    print(f"{NA_FFA381_A10_1_NAME}: manufacturer 4-pad pattern verified")
 
 
 if __name__ == "__main__":

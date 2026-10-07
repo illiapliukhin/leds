@@ -158,9 +158,11 @@ KiCad 10 row-selection sheets:
   `TPS63802` (TI DLA0010A HotRod), `BMI270` (Bosch LGA-14) и
   `MAX17048G+T10` (Maxim 21-0168/90-0065);
 - manufacturer-pattern footprints также выпущены для Murata
-  `DFE201612E-R47M=P2` и Lucki `L327S400H11L`; у кварца pins 2/4 корпуса
+  `DFE201612E-R47M=P2`, Lucki `L327S400H11L`, Panasonic
+  `EVPBL2A1F000` и Gettop `NA-FFA381-A10-1`; у кварца pins 2/4 корпуса
   явно подключены к GND отдельным 4-pin symbol;
-- геометрия DLA0010A, DFE201612E и SMD3225-4P проверяется
+- геометрия DLA0010A, DFE201612E, SMD3225-4P, EVPBL и Gettop microphone
+  проверяется
   `hardware/tools/verify_critical_footprints.py`;
 - XML-аудит загружает все 18 уникальных footprint types для 569/977
   компонентов и подтверждает, что каждый connected symbol pin имеет
@@ -173,8 +175,8 @@ KiCad 10 row-selection sheets:
   `504052-0098` как battery connector set, Panasonic `EVPBL2A1F000` как
   rear button и TE Connectivity `20021086-05` как PCB NTC;
 - top-port microphone Gettop `NA-FFA381-A10-1`, LCSC `C50275774`, выбран
-  условным alternate для дефицитного `MA-HFA381-H13-1AF`; его отдельный
-  four-land footprint и AFE/acoustic validation обязательны;
+  условным alternate для дефицитного `MA-HFA381-H13-1AF`; его отдельные
+  symbol и four-land footprint выпущены, AFE/acoustic validation обязательна;
 - USB-C `C52209107` подтверждён только как EVT-кандидат; footprint и положение
   остаются заблокированы до утверждения разреза корпуса.
 - `hardware/tools/export_manufacturing_package.py` формирует immutable
@@ -289,8 +291,8 @@ IMU не заменяет микрофон: accelerometer улавливает �
 - Условный alternate: Gettop `NA-FFA381-A10-1`, LCSC `C50275774`, top-port
   analog MEMS, 2,75×1,85×1,0 мм, 1,6…3,6 В, 120 мкА typical,
   −38 dBV ±1 dB, 64 dBA SNR.
-- У alternate pins 1/2/3/4 — VDD/GND/GND/OUT. Нельзя использовать footprint
-  основного кандидата без отдельного manufacturer-land-pattern audit.
+- У alternate pins 1/2/3/4 — VDD/GND/GND/OUT. Используется отдельный
+  manufacturer footprint с lands 0,60×0,54 мм.
 - Устанавливается сзади напротив акустического отверстия.
 - Нужны мягкая герметизирующая прокладка и acoustic mesh.
 
