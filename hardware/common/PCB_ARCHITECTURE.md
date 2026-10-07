@@ -1,9 +1,9 @@
 # Common PCB architecture
 
-Status: partial KiCad 10 schematic implementation. Generated LED-driver projects
-exist for both variants; row selection, matrix, power, MCU, and top-level
-hierarchy remain incomplete. Values marked `EVT` require measurement before
-production release.
+Status: partial KiCad 10 schematic implementation. Generated LED-driver and
+complete LED-matrix projects exist for both variants; row selection, power, MCU,
+and top-level hierarchy remain incomplete. Values marked `EVT` require
+measurement before production release.
 
 ## Power domains
 

@@ -2,9 +2,9 @@
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
 Важно: KiCad 10 PCB-каркасы созданы и проходят DRC. Сгенерированные LED-driver
-проекты обеих версий проходят автономный ERC без нарушений, но общая иерархия,
-matrix/row/power/MCU sheets, footprints остальных компонентов, полный
-placement/routing и физические измерения ещё не выполнены. Все значения,
+и полные LED-matrix проекты обеих версий проходят автономный ERC без нарушений,
+но общая иерархия, row/power/MCU sheets, footprints остальных компонентов,
+полный placement/routing и физические измерения ещё не выполнены. Все значения,
 помеченные как требующие проверки, нельзя считать production-ready.
 
 ## 1. Цель
@@ -118,6 +118,17 @@ KiCad 10 driver sheets:
 - явный non-BOM ERC harness моделирует внешние MCU/power/matrix connections до
   появления top-level hierarchy;
 - обе версии проходят KiCad 10 ERC с `0 violations`.
+
+KiCad 10 matrix sheets:
+
+- `hardware/wearable_20x20/led_matrix.kicad_sch` содержит 400 LED;
+- `hardware/wearable_28x28/led_matrix.kicad_sch` содержит 784 LED;
+- воспроизводятся `hardware/tools/generate_led_matrix_schematics.py`;
+- references `D1…D400/784` совпадают с PCB и назначаются row-major;
+- pin 1 каждого LED подключён к `ROW_nn_ANODE`, pins 2/3/4 — к
+  `COL_R/G/B_nn`;
+- оба листа проходят KiCad 10 ERC с `0 violations`; XML netlist подтверждает
+  80/112 уникальных row и color-column nets.
 
 ### Расчёт обновления
 
@@ -481,4 +492,7 @@ test/
 docs/
 ```
 
-Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, а схемная архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап: общая схема, два matrix sheets, ERC, механика и только затем placement/routing.
+Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, а схемная
+архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап:
+row-selection, power и MCU sheets, общая иерархия, механика и только затем
+production placement/routing.
