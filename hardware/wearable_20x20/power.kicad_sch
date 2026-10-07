@@ -513,7 +513,7 @@
 					(justify right)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "Package_DFN_QFN:Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -651,7 +651,7 @@
 					)
 				)
 				(pin bidirectional line
-					(at 10.16 7.62 180)
+					(at -10.16 -5.08 0)
 					(length 2.54)
 					(name "TS/MR"
 						(effects
@@ -669,7 +669,7 @@
 					)
 				)
 				(pin passive line
-					(at 10.16 5.08 180)
+					(at 10.16 7.62 180)
 					(length 2.54)
 					(name "ILIM/VSET"
 						(effects
@@ -687,7 +687,7 @@
 					)
 				)
 				(pin passive line
-					(at 10.16 2.54 180)
+					(at 10.16 5.08 180)
 					(length 2.54)
 					(name "ISET"
 						(effects
@@ -705,7 +705,7 @@
 					)
 				)
 				(pin open_collector line
-					(at 10.16 0 180)
+					(at 10.16 2.54 180)
 					(length 2.54)
 					(name "STAT1"
 						(effects
@@ -723,7 +723,7 @@
 					)
 				)
 				(pin power_in line
-					(at 10.16 -2.54 180)
+					(at 10.16 0 180)
 					(length 2.54)
 					(name "IN"
 						(effects
@@ -733,6 +733,24 @@
 						)
 					)
 					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 10.16 -2.54 180)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1804,7 +1822,7 @@
 		(uuid "587b72a7-b3bf-5965-a549-742ec3cf1fd9")
 	)
 	(label "CHG_ILIM_SET"
-		(at 55.88 50.8 180)
+		(at 55.88 48.26 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1914,7 +1932,7 @@
 		(uuid "80fb65dd-1cf4-5ea0-98d2-7c45098f0d54")
 	)
 	(label "CHG_ISET"
-		(at 55.88 53.34 180)
+		(at 55.88 50.8 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1962,6 +1980,16 @@
 			(justify right bottom)
 		)
 		(uuid "88bb3862-7dd9-5940-aa41-c0937b407f53")
+	)
+	(label "GND"
+		(at 55.88 58.42 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "8acdcde9-e4f3-5b95-9a59-b1c3314cae88")
 	)
 	(label "GND"
 		(at 64.77 132.08 180)
@@ -2044,12 +2072,12 @@
 		(uuid "aa769189-3e52-5a52-9c63-8f4054e38def")
 	)
 	(label "BAT_NTC"
-		(at 55.88 48.26 180)
+		(at 35.56 60.96 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify left bottom)
 		)
 		(uuid "abfb8d4a-3522-5a12-8539-28c8067e623d")
 	)
@@ -2224,7 +2252,7 @@
 		(uuid "d4b81dce-43cc-5af8-9c8a-da9fa94ed73a")
 	)
 	(label "CHG_STAT1_N"
-		(at 55.88 55.88 180)
+		(at 55.88 53.34 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2254,7 +2282,7 @@
 		(uuid "e03e05e3-6d16-5068-8845-deb51900ec02")
 	)
 	(label "VBUS_USB"
-		(at 55.88 58.42 180)
+		(at 55.88 55.88 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2431,6 +2459,17 @@
 		)
 		(uuid "137185b4-f8ad-5c69-ba2b-5133eb04bcc0")
 	)
+	(hierarchical_label "GND"
+		(shape input)
+		(at 55.88 58.42 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "1520ee7e-1587-5b79-956f-a3a5e3cd6ec3")
+	)
 	(hierarchical_label "LED_SW1"
 		(shape input)
 		(at 157.48 77.47 0)
@@ -2455,7 +2494,7 @@
 	)
 	(hierarchical_label "CHG_ISET"
 		(shape input)
-		(at 55.88 53.34 0)
+		(at 55.88 50.8 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2840,7 +2879,7 @@
 	)
 	(hierarchical_label "CHG_STAT1_N"
 		(shape input)
-		(at 55.88 55.88 0)
+		(at 55.88 53.34 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2884,7 +2923,7 @@
 	)
 	(hierarchical_label "VBUS_USB"
 		(shape input)
-		(at 55.88 58.42 0)
+		(at 55.88 55.88 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2895,7 +2934,7 @@
 	)
 	(hierarchical_label "BAT_NTC"
 		(shape input)
-		(at 55.88 48.26 0)
+		(at 35.56 60.96 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3214,7 +3253,7 @@
 	)
 	(hierarchical_label "CHG_ILIM_SET"
 		(shape input)
-		(at 55.88 50.8 0)
+		(at 55.88 48.26 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4468,7 +4507,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DFN_QFN:Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm"
 			(at 45.72 55.88 0)
 			(hide yes)
 			(show_name no)
@@ -4510,7 +4549,7 @@
 				(justify left)
 			)
 		)
-		(property "FootprintStatus" "BLOCKED_PACKAGE_LAND_PATTERN_RELEASE"
+		(property "FootprintStatus" "RELEASED_TI_DLH0010A"
 			(at 48.26 60.9599 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4550,6 +4589,9 @@
 		)
 		(pin "10"
 			(uuid "57d3633f-e936-5f4b-b929-a1b19fb6a642")
+		)
+		(pin "11"
+			(uuid "66b9a061-d0b6-5389-8443-756b5e279291")
 		)
 		(instances
 			(project ""

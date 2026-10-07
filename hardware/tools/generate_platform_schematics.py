@@ -31,7 +31,8 @@ PLATFORM_LIBRARY_PATH = (
 CUSTOM_SYMBOLS = {
     "BQ25185": (
         "https://www.ti.com/lit/ds/symlink/bq25185.pdf",
-        "",
+        "Package_DFN_QFN:"
+        "Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm",
         (
             ("power_out", "SYS", "1"),
             ("power_in", "BAT", "2"),
@@ -43,6 +44,7 @@ CUSTOM_SYMBOLS = {
             ("passive", "ISET", "8"),
             ("open_collector", "STAT1", "9"),
             ("power_in", "IN", "10"),
+            ("power_in", "GND", "11"),
         ),
     ),
     "TPS63802DLAR": (
@@ -64,7 +66,7 @@ CUSTOM_SYMBOLS = {
     "BMI270": (
         "https://www.bosch-sensortec.com/media/boschsensortec/"
         "downloads/datasheets/bst-bmi270-ds000.pdf",
-        "",
+        "Package_LGA:Bosch_LGA-14_3x2.5mm_P0.5mm",
         (
             ("passive", "SDO", "1"),
             ("bidirectional", "ASDx", "2"),
@@ -85,7 +87,7 @@ CUSTOM_SYMBOLS = {
     "MAX17048G+T10": (
         "https://www.analog.com/media/en/technical-documentation/"
         "data-sheets/max17048-max17049.pdf",
-        "",
+        "Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm",
         (
             ("passive", "CTG", "1"),
             ("power_in", "CELL", "2"),
@@ -95,6 +97,7 @@ CUSTOM_SYMBOLS = {
             ("input", "QSTRT", "6"),
             ("input", "SCL", "7"),
             ("bidirectional", "SDA", "8"),
+            ("power_in", "GND", "9"),
         ),
     ),
 }
@@ -382,7 +385,7 @@ def generate_power_sheet(variant: MatrixVariant) -> Schematic:
         footprint=CUSTOM_SYMBOLS["BQ25185"][1],
         properties={
             "Function": "CHARGER_POWER_PATH",
-            "FootprintStatus": "BLOCKED_PACKAGE_LAND_PATTERN_RELEASE",
+            "FootprintStatus": "RELEASED_TI_DLH0010A",
         },
     )
     charger_nets = {
@@ -396,6 +399,7 @@ def generate_power_sheet(variant: MatrixVariant) -> Schematic:
         "8": "CHG_ISET",
         "9": "CHG_STAT1_N",
         "10": "VBUS_USB",
+        "11": "GND",
     }
     for pin_number, net_name in charger_nets.items():
         add_pin_label(schematic, key, "U1", pin_number, net_name)
@@ -733,7 +737,7 @@ def generate_imu_gauge_sheet(variant: MatrixVariant) -> Schematic:
         footprint=CUSTOM_SYMBOLS["BMI270"][1],
         properties={
             "Function": "IMU",
-            "FootprintStatus": "BLOCKED_PACKAGE_LAND_PATTERN_RELEASE",
+            "FootprintStatus": "RELEASED_BOSCH_LGA14",
         },
     )
     for pin_number, net_name in {
@@ -784,7 +788,7 @@ def generate_imu_gauge_sheet(variant: MatrixVariant) -> Schematic:
         footprint=CUSTOM_SYMBOLS["MAX17048G+T10"][1],
         properties={
             "Function": "FUEL_GAUGE",
-            "FootprintStatus": "BLOCKED_PACKAGE_LAND_PATTERN_RELEASE",
+            "FootprintStatus": "RELEASED_MAXIM_21_0168_90_0065",
         },
     )
     for pin_number, net_name in {
@@ -796,6 +800,7 @@ def generate_imu_gauge_sheet(variant: MatrixVariant) -> Schematic:
         "6": "GND",
         "7": "I2C_SCL",
         "8": "I2C_SDA",
+        "9": "GND",
     }.items():
         add_pin_label(schematic, key, "U21", pin_number, net_name)
     add_capacitor(schematic, key, "C32", "100nF", (101.6, 78.74), "BAT_RAW")

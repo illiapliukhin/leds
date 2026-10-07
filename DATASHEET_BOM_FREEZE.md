@@ -88,6 +88,23 @@
 - Для обоих отключаемых 3,3-вольтовых доменов выбран `TPS22917DBVR`; нужны внешние enable pull-down и configurable QOD.
 - Полная topology, pulls и sequencing зафиксированы в `hardware/common/PCB_ARCHITECTURE.md`.
 
+### BMI270, MAX17048 и package release — CONDITIONAL
+
+- `BMI270` назначен на KiCad
+  `Package_LGA:Bosch_LGA-14_3x2.5mm_P0.5mm`, соответствующий Bosch
+  14-pin LGA 3,0×2,5 мм и datasheet landing pattern.
+- `MAX17048G+T10` назначен на
+  `Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm`,
+  соответствующий Maxim package outline 21-0168 и land pattern 90-0065.
+  Exposed pad добавлен в symbol как GND pin 9.
+- `BQ25185DLHR` назначен на
+  `Package_DFN_QFN:Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm`.
+  Exposed pad добавлен в symbol как GND pin 11.
+- Эти package releases закрывают геометрию, но не заменяют low-power/wake,
+  fuel-gauge runtime, TS/NTC, charger thermal и power-ramp EVT.
+- `TPS63802DLAR` остаётся без footprint: TI `DLA0010A` — нестандартный
+  VSON-HR/HotRod land pattern, который нельзя заменять generic DFN.
+
 ### Расчётная модель — CONDITIONAL
 
 - `hardware/tools/model_power_scan.py` воспроизводимо генерирует `hardware/analysis/POWER_SCAN_MODEL.md` и CSV.

@@ -335,7 +335,7 @@
 					(justify right)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "Package_LGA:Bosch_LGA-14_3x2.5mm_P0.5mm"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -664,7 +664,7 @@
 					(justify right)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -784,7 +784,7 @@
 					)
 				)
 				(pin open_collector line
-					(at 10.16 7.62 180)
+					(at -10.16 -2.54 0)
 					(length 2.54)
 					(name "~{ALERT}"
 						(effects
@@ -802,7 +802,7 @@
 					)
 				)
 				(pin input line
-					(at 10.16 5.08 180)
+					(at 10.16 7.62 180)
 					(length 2.54)
 					(name "QSTRT"
 						(effects
@@ -820,7 +820,7 @@
 					)
 				)
 				(pin input line
-					(at 10.16 2.54 180)
+					(at 10.16 5.08 180)
 					(length 2.54)
 					(name "SCL"
 						(effects
@@ -838,7 +838,7 @@
 					)
 				)
 				(pin bidirectional line
-					(at 10.16 0 180)
+					(at 10.16 2.54 180)
 					(length 2.54)
 					(name "SDA"
 						(effects
@@ -848,6 +848,24 @@
 						)
 					)
 					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 10.16 0 180)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -924,12 +942,12 @@
 		(uuid "2e837802-3735-5743-920b-5f96564dd8c0")
 	)
 	(label "GAUGE_ALERT_N"
-		(at 132.08 48.26 180)
+		(at 111.76 58.42 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right bottom)
+			(justify left bottom)
 		)
 		(uuid "44c3f573-a6ef-5b39-9271-34dbd3f47aa2")
 	)
@@ -984,7 +1002,7 @@
 		(uuid "6a14f3c0-fd6d-5643-9c9e-30a9747353bd")
 	)
 	(label "I2C_SCL"
-		(at 132.08 53.34 180)
+		(at 132.08 50.8 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1064,7 +1082,7 @@
 		(uuid "9cf771b7-9bb3-5805-b14e-66e8fea42f68")
 	)
 	(label "GND"
-		(at 132.08 50.8 180)
+		(at 132.08 48.26 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1193,6 +1211,16 @@
 		)
 		(uuid "d5a3a163-f5ec-5380-8edd-21506a7cdf8e")
 	)
+	(label "GND"
+		(at 132.08 55.88 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "dde984e5-a405-5ca3-92b5-236c9eb584c8")
+	)
 	(label "AON_3V3"
 		(at 66.04 58.42 180)
 		(effects
@@ -1214,7 +1242,7 @@
 		(uuid "ef1c9b34-85f8-572d-af71-d2d3dd01e26a")
 	)
 	(label "I2C_SDA"
-		(at 132.08 55.88 180)
+		(at 132.08 53.34 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1396,6 +1424,17 @@
 		)
 		(uuid "4609c663-8c47-5653-8e09-1e3e0e98d10b")
 	)
+	(hierarchical_label "GND"
+		(shape input)
+		(at 132.08 55.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4b9a2761-5204-5b0b-8922-7e467e0518e9")
+	)
 	(hierarchical_label "AON_3V3"
 		(shape input)
 		(at 158.75 45.72 0)
@@ -1475,7 +1514,7 @@
 	)
 	(hierarchical_label "I2C_SCL"
 		(shape input)
-		(at 132.08 53.34 0)
+		(at 132.08 50.8 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1530,7 +1569,7 @@
 	)
 	(hierarchical_label "I2C_SDA"
 		(shape input)
-		(at 132.08 55.88 0)
+		(at 132.08 53.34 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1618,7 +1657,7 @@
 	)
 	(hierarchical_label "GND"
 		(shape input)
-		(at 132.08 50.8 0)
+		(at 132.08 48.26 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1673,7 +1712,7 @@
 	)
 	(hierarchical_label "GAUGE_ALERT_N"
 		(shape input)
-		(at 132.08 48.26 0)
+		(at 111.76 58.42 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1794,7 +1833,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_LGA:Bosch_LGA-14_3x2.5mm_P0.5mm"
 			(at 55.88 55.88 0)
 			(hide yes)
 			(show_name no)
@@ -1836,7 +1875,7 @@
 				(justify left)
 			)
 		)
-		(property "FootprintStatus" "BLOCKED_PACKAGE_LAND_PATTERN_RELEASE"
+		(property "FootprintStatus" "RELEASED_BOSCH_LGA14"
 			(at 58.42 60.9599 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2089,7 +2128,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm"
 			(at 121.92 55.88 0)
 			(hide yes)
 			(show_name no)
@@ -2131,7 +2170,7 @@
 				(justify left)
 			)
 		)
-		(property "FootprintStatus" "BLOCKED_PACKAGE_LAND_PATTERN_RELEASE"
+		(property "FootprintStatus" "RELEASED_MAXIM_21_0168_90_0065"
 			(at 124.46 60.9599 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2165,6 +2204,9 @@
 		)
 		(pin "8"
 			(uuid "11386837-5ae6-59e9-bb13-55a2b1fdd941")
+		)
+		(pin "9"
+			(uuid "4fe2c4ab-e12d-55ec-acba-7402c5564e88")
 		)
 		(instances
 			(project ""
