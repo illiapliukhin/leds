@@ -162,6 +162,9 @@ KiCad 10 row-selection sheets:
   явно подключены к GND отдельным 4-pin symbol;
 - геометрия DLA0010A, DFE201612E и SMD3225-4P проверяется
   `hardware/tools/verify_critical_footprints.py`;
+- XML-аудит загружает все 18 уникальных footprint types для 569/977
+  компонентов и подтверждает, что каждый connected symbol pin имеет
+  одноимённый physical pad; пустых назначений в root netlists нет;
 - единый реестр механических входных данных и внешних блокеров находится в
   `mechanical/MECHANICAL_INPUTS.md`;
 - построчный статус freeze находится в
