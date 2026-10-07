@@ -582,18 +582,14 @@ def route_full_matrix(
         lower_regular_positions = regular_positions[
             (lower_transition_row + 1, column_number)
         ]
+        transition_colors = (
+            ("R", pcbnew.B_Cu),
+            ("G", pcbnew.B_Cu),
+        )
         if column_number <= 2 or column_number >= variant.matrix_size - 1:
-            transition_colors = (
-                ("R", pcbnew.F_Cu),
-                ("G", pcbnew.B_Cu),
-                ("B", pcbnew.F_Cu),
-            )
+            transition_colors += (("B", pcbnew.B_Cu),)
         else:
-            transition_colors = (
-                ("R", pcbnew.B_Cu),
-                ("G", pcbnew.B_Cu),
-                ("B", pcbnew.F_Cu),
-            )
+            transition_colors += (("B", pcbnew.F_Cu),)
 
         for color_name, layer in transition_colors:
             add_rgb_connection(
