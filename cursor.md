@@ -33,4 +33,7 @@
 - Derive the edge-orientation map from physical pad and outline constraints before routing its boundaries. A nominally symmetric orientation pair can place the anode escape outside the board; the proven edge row pairs are 90°→180° on the right and 0°→270° on the left.
 - Do not route dense transition fan-out or crossovers as unchecked direct diagonals. Use explicit orthogonal corridors and run DRC at the tightest production pitch; tracks can clear their endpoint pads while still crossing an intermediate pad or through via.
 - Normalize KiCad orientation values modulo 360 in semantic checks. `pcbnew` may report a 270-degree footprint as -90 degrees even though the saved orientation is correct.
+- Do not move long transition-to-trunk continuations onto `F.Cu` as a layer-only fix. On the complete matrix they can cross LED fan-out and anode escapes even when the isolated transition is clean; redesign the transition and its neighboring corridors together.
+- A full-matrix edge transition needs separate lower L4 corridors for the outer dogleg and the inner color trunk. Route the outer path orthogonally at the transition boundary and move the inner trunk to its regular X coordinate before they converge.
+- In KiCad 10 Python checks, call `PCB_VIA.GetWidth(layer)` with an explicit copper layer. Calling `GetWidth()` without a layer emits one assertion per via and obscures otherwise valid semantic-test output.
 
