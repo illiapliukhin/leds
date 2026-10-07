@@ -91,6 +91,126 @@ def extract_symbol_expression(library_text: str, symbol_name: str) -> str:
     raise ValueError(f"Unterminated symbol expression: {symbol_name}")
 
 
+def format_harness_pin(
+    pin_type: str,
+    pin_name: str,
+    pin_number: int,
+    x_position: float,
+    y_position: float,
+    rotation: int,
+) -> str:
+    return f"""\
+\t\t\t(pin {pin_type} line
+\t\t\t\t(at {x_position:.2f} {y_position:.2f} {rotation})
+\t\t\t\t(length 2.54)
+\t\t\t\t(name "{pin_name}"
+\t\t\t\t\t(effects
+\t\t\t\t\t\t(font
+\t\t\t\t\t\t\t(size 1.27 1.27)
+\t\t\t\t\t\t)
+\t\t\t\t\t)
+\t\t\t\t)
+\t\t\t\t(number "{pin_number}"
+\t\t\t\t\t(effects
+\t\t\t\t\t\t(font
+\t\t\t\t\t\t\t(size 1.27 1.27)
+\t\t\t\t\t\t)
+\t\t\t\t\t)
+\t\t\t\t)
+\t\t\t)"""
+
+
+def generate_harness_symbol(matrix_size: int) -> str:
+    symbol_name = f"LED_DRIVER_ERC_HARNESS_{matrix_size}"
+    source_pins = (
+        ("output", "LED_SDI"),
+        ("output", "LED_CLK"),
+        ("output", "LED_LE"),
+        ("output", "LED_OE_N"),
+        ("power_out", "LED_LOGIC_3V3"),
+        ("power_out", "GND"),
+    )
+    sink_pins = [("input", "LED_SDO_RETURN")]
+    sink_pins.extend(
+        ("passive", f"COL_{color_name}_{column_number:02d}")
+        for color_name in ("R", "G", "B")
+        for column_number in range(1, matrix_size + 1)
+    )
+    maximum_pin_count = max(len(source_pins), len(sink_pins))
+    top_y = (maximum_pin_count - 1) * 1.27
+    bottom_y = -top_y
+    pin_expressions = []
+
+    for pin_index, (pin_type, pin_name) in enumerate(source_pins, start=1):
+        pin_expressions.append(
+            format_harness_pin(
+                pin_type,
+                pin_name,
+                pin_index,
+                -10.16,
+                top_y - (pin_index - 1) * 2.54,
+                0,
+            )
+        )
+
+    for sink_index, (pin_type, pin_name) in enumerate(sink_pins, start=1):
+        pin_number = len(source_pins) + sink_index
+        pin_expressions.append(
+            format_harness_pin(
+                pin_type,
+                pin_name,
+                pin_number,
+                10.16,
+                top_y - (sink_index - 1) * 2.54,
+                180,
+            )
+        )
+
+    joined_pins = "\n".join(pin_expressions)
+    return f"""\
+\t(symbol "{symbol_name}"
+\t\t(exclude_from_sim yes)
+\t\t(in_bom no)
+\t\t(on_board no)
+\t\t(in_pos_files no)
+\t\t(duplicate_pin_numbers_are_jumpers no)
+\t\t(property "Reference" "H"
+\t\t\t(at -7.62 {top_y + 3.81:.2f} 0)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(property "Value" "{symbol_name}"
+\t\t\t(at 7.62 {top_y + 3.81:.2f} 0)
+\t\t\t(effects (font (size 1.27 1.27)) (justify right))
+\t\t)
+\t\t(property "Footprint" ""
+\t\t\t(at 0 0 0)
+\t\t\t(hide yes)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(property "Datasheet" ""
+\t\t\t(at 0 0 0)
+\t\t\t(hide yes)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(property "Description" "Non-BOM external harness for standalone LED driver ERC"
+\t\t\t(at 0 0 0)
+\t\t\t(hide yes)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(symbol "{symbol_name}_0_1"
+\t\t\t(rectangle
+\t\t\t\t(start -7.62 {top_y + 1.27:.2f})
+\t\t\t\t(end 7.62 {bottom_y - 1.27:.2f})
+\t\t\t\t(stroke (width 0.254) (type default))
+\t\t\t\t(fill (type background))
+\t\t\t)
+\t\t)
+\t\t(symbol "{symbol_name}_1_1"
+{joined_pins}
+\t\t)
+\t)"""
+
+
 def generate_custom_symbol_library() -> None:
     source_library_text = STANDARD_DRIVER_LIBRARY.read_text(encoding="utf-8")
     symbol_text = extract_symbol_expression(source_library_text, "MBI5252GP")
@@ -124,6 +244,8 @@ def generate_custom_symbol_library() -> None:
             '\t(generator "kicad_symbol_editor")',
             '\t(generator_version "10.0")',
             symbol_text,
+            generate_harness_symbol(20),
+            generate_harness_symbol(28),
             ")",
             "",
         )
@@ -415,26 +537,51 @@ def add_sdo_return_buffer(schematic: Schematic, generation_key: str) -> None:
     add_pin_label(schematic, generation_key, "C107", "2", "GND")
 
 
-def add_power_flags(schematic: Schematic, generation_key: str) -> None:
-    for flag_index, (net_name, position) in enumerate(
-        (
-            ("LED_LOGIC_3V3", (228.6, 38.1)),
-            ("GND", (254.0, 38.1)),
-        ),
-        start=1,
-    ):
-        reference = f"#FLG{flag_index:02d}"
-        add_component(
+def add_erc_harness(
+    schematic: Schematic,
+    generation_key: str,
+    matrix_size: int,
+) -> None:
+    harness_reference = "H1"
+    harness_library_id = (
+        f"{CUSTOM_LIBRARY_NAME}:LED_DRIVER_ERC_HARNESS_{matrix_size}"
+    )
+    harness = add_component(
+        schematic,
+        generation_key=generation_key,
+        library_id=harness_library_id,
+        reference=harness_reference,
+        value=f"LED_DRIVER_ERC_HARNESS_{matrix_size}",
+        position=(330.2, 139.7),
+        footprint="",
+        properties={"Function": "NON_BOM_ERC_HARNESS"},
+    )
+    harness._data.in_bom = False
+    harness._data.on_board = False
+
+    net_names = [
+        "LED_SDI",
+        "LED_CLK",
+        "LED_LE",
+        "LED_OE_N",
+        "LED_LOGIC_3V3",
+        "GND",
+        "LED_SDO_RETURN",
+    ]
+    net_names.extend(
+        f"COL_{color_name}_{column_number:02d}"
+        for color_name in ("R", "G", "B")
+        for column_number in range(1, matrix_size + 1)
+    )
+
+    for pin_number, net_name in enumerate(net_names, start=1):
+        add_pin_label(
             schematic,
-            generation_key=generation_key,
-            library_id="power:PWR_FLAG",
-            reference=reference,
-            value="PWR_FLAG",
-            position=position,
-            footprint="",
-            properties={"Function": f"{net_name}_ERC_SOURCE"},
+            generation_key,
+            harness_reference,
+            str(pin_number),
+            net_name,
         )
-        add_pin_label(schematic, generation_key, reference, "1", net_name)
 
 
 def write_project_library_tables(output_directory: Path) -> None:
@@ -485,7 +632,7 @@ def generate_variant_schematic(repository_root: Path, variant: MatrixVariant) ->
         variant.matrix_size,
     )
     add_sdo_return_buffer(schematic, generation_key)
-    add_power_flags(schematic, generation_key)
+    add_erc_harness(schematic, generation_key, variant.matrix_size)
     schematic.save(output_path)
 
     subprocess.run(
