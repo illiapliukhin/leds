@@ -836,6 +836,10 @@ def route_full_matrix(
             if edge_column and color_name == lower_dogleg_color:
                 lower_waypoints = (
                     (
+                        lower_transition_positions[color_name][0],
+                        transition_center_y_mm + 1.0,
+                    ),
+                    (
                         lower_regular_positions[color_name][0],
                         transition_center_y_mm + 1.0,
                     ),
