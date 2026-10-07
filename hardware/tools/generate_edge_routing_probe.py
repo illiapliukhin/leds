@@ -23,6 +23,8 @@ INNER_ROW_WIDTH_MM = 1.2
 STANDARD_VIA_DIAMETER_MM = 0.45
 MATRIX_RGB_VIA_DIAMETER_MM = 0.4
 VIA_DRILL_MM = 0.2
+TRANSITION_SIDE_VIA_X_OFFSET_MM = 0.45
+TRANSITION_SIDE_VIA_Y_OFFSET_MM = 0.3
 
 
 def add_track(
@@ -246,6 +248,133 @@ def route_rotated_rgb_to_back(
     )
 
 
+def route_orientation_transition_rgb(
+    board: pcbnew.BOARD,
+    normal_footprint: pcbnew.FOOTPRINT,
+    rotated_footprint: pcbnew.FOOTPRINT,
+) -> None:
+    normal_center_x_mm, normal_center_y_mm = millimeters(
+        normal_footprint.GetPosition()
+    )
+    rotated_center_x_mm, rotated_center_y_mm = millimeters(
+        rotated_footprint.GetPosition()
+    )
+    if abs(normal_center_x_mm - rotated_center_x_mm) > 0.001:
+        raise ValueError("Transition LEDs must be in the same column")
+
+    transition_center_y_mm = (
+        normal_center_y_mm + rotated_center_y_mm
+    ) / 2
+    normal_via_y_mm = (
+        transition_center_y_mm - TRANSITION_SIDE_VIA_Y_OFFSET_MM
+    )
+    rotated_via_y_mm = (
+        transition_center_y_mm + TRANSITION_SIDE_VIA_Y_OFFSET_MM
+    )
+
+    normal_green_pad = get_pad(normal_footprint, "3")
+    normal_red_pad = get_pad(normal_footprint, "2")
+    normal_blue_pad = get_pad(normal_footprint, "4")
+    rotated_green_pad = get_pad(rotated_footprint, "3")
+    rotated_red_pad = get_pad(rotated_footprint, "2")
+    rotated_blue_pad = get_pad(rotated_footprint, "4")
+
+    transition_vias = (
+        (
+            normal_green_pad,
+            normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
+            normal_via_y_mm,
+        ),
+        (
+            normal_red_pad,
+            normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
+            normal_via_y_mm,
+        ),
+        (
+            rotated_green_pad,
+            normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
+            rotated_via_y_mm,
+        ),
+        (
+            rotated_red_pad,
+            normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
+            rotated_via_y_mm,
+        ),
+    )
+    for pad, via_x_mm, via_y_mm in transition_vias:
+        pad_x_mm, pad_y_mm = millimeters(pad.GetPosition())
+        add_track(
+            board,
+            pad.GetNet(),
+            pcbnew.F_Cu,
+            pad_x_mm,
+            pad_y_mm,
+            via_x_mm,
+            via_y_mm,
+        )
+        add_through_via(
+            board,
+            pad.GetNet(),
+            via_x_mm,
+            via_y_mm,
+            MATRIX_RGB_VIA_DIAMETER_MM,
+        )
+
+    shared_blue_via_x_mm = normal_center_x_mm
+    shared_blue_via_y_mm = transition_center_y_mm
+    for footprint, blue_pad in (
+        (normal_footprint, normal_blue_pad),
+        (rotated_footprint, rotated_blue_pad),
+    ):
+        pad_x_mm, pad_y_mm = millimeters(blue_pad.GetPosition())
+        footprint_x_mm, footprint_y_mm = millimeters(footprint.GetPosition())
+        add_track(
+            board,
+            blue_pad.GetNet(),
+            pcbnew.F_Cu,
+            pad_x_mm,
+            pad_y_mm,
+            footprint_x_mm,
+            footprint_y_mm,
+        )
+        add_track(
+            board,
+            blue_pad.GetNet(),
+            pcbnew.F_Cu,
+            footprint_x_mm,
+            footprint_y_mm,
+            shared_blue_via_x_mm,
+            shared_blue_via_y_mm,
+        )
+
+    add_through_via(
+        board,
+        normal_blue_pad.GetNet(),
+        shared_blue_via_x_mm,
+        shared_blue_via_y_mm,
+        MATRIX_RGB_VIA_DIAMETER_MM,
+    )
+
+    add_track(
+        board,
+        normal_green_pad.GetNet(),
+        pcbnew.In2_Cu,
+        normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
+        normal_via_y_mm,
+        normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
+        rotated_via_y_mm,
+    )
+    add_track(
+        board,
+        normal_red_pad.GetNet(),
+        pcbnew.B_Cu,
+        normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
+        normal_via_y_mm,
+        normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
+        rotated_via_y_mm,
+    )
+
+
 def route_anode(
     board: pcbnew.BOARD,
     footprint: pcbnew.FOOTPRINT,
@@ -271,7 +400,7 @@ def route_anode(
         add_track(
             board,
             anode_pad.GetNet(),
-            pcbnew.In1_Cu,
+            pcbnew.In2_Cu,
             via_x_mm,
             via_y_mm,
             via_x_mm,
@@ -308,7 +437,7 @@ def route_rotated_anode(
         add_track(
             board,
             anode_pad.GetNet(),
-            pcbnew.In1_Cu,
+            pcbnew.In2_Cu,
             via_x_mm,
             via_y_mm,
             via_x_mm,
@@ -387,7 +516,7 @@ def generate_probe(
         add_track(
             board,
             row_net,
-            pcbnew.In1_Cu,
+            pcbnew.In2_Cu,
             min(row_via_x_values),
             row_bus_y_mm,
             max(row_via_x_values),
@@ -528,7 +657,7 @@ def generate_bottom_right_probe(
         add_track(
             board,
             row_net,
-            pcbnew.In1_Cu,
+            pcbnew.In2_Cu,
             min(row_via_x_values),
             row_bus_y_mm,
             max(row_via_x_values),
@@ -562,6 +691,107 @@ def generate_bottom_right_probe(
     return output_path
 
 
+def generate_orientation_transition_probe(
+    repository_root: Path,
+    variant: ProbeVariant,
+) -> Path:
+    source_path = (
+        repository_root
+        / "hardware"
+        / variant.board_name
+        / f"{variant.board_name}.kicad_pcb"
+    )
+    output_path = (
+        repository_root
+        / "hardware"
+        / "analysis"
+        / (
+            f"{variant.board_name}"
+            "_orientation_transition_routing_probe.kicad_pcb"
+        )
+    )
+    board = pcbnew.LoadBoard(str(source_path))
+
+    normal_row_number = variant.matrix_size // 2
+    rotated_row_number = normal_row_number + 1
+    column_numbers = (2, 3)
+    normal_row_center_y_mm = (
+        0.9 + (normal_row_number - 1) * variant.led_pitch_mm
+    )
+    rotated_row_center_y_mm = (
+        0.9 + (rotated_row_number - 1) * variant.led_pitch_mm
+    )
+    normal_row_via_x_values: list[float] = []
+    rotated_row_via_x_values: list[float] = []
+
+    for column_number in column_numbers:
+        normal_reference_number = (
+            (normal_row_number - 1) * variant.matrix_size + column_number
+        )
+        rotated_reference_number = (
+            (rotated_row_number - 1) * variant.matrix_size + column_number
+        )
+        normal_footprint = get_led(board, f"D{normal_reference_number}")
+        rotated_footprint = get_led(board, f"D{rotated_reference_number}")
+        rotated_footprint.SetOrientationDegrees(180)
+
+        route_orientation_transition_rgb(
+            board,
+            normal_footprint,
+            rotated_footprint,
+        )
+        normal_row_via_x_values.append(
+            route_anode(
+                board,
+                normal_footprint,
+                normal_row_center_y_mm,
+                INNER_ROW_WIDTH_MM,
+            )
+        )
+        rotated_row_via_x_values.append(
+            route_rotated_anode(
+                board,
+                rotated_footprint,
+                rotated_row_center_y_mm,
+                INNER_ROW_WIDTH_MM,
+                variant.board_size_mm - 0.525,
+            )
+        )
+
+    for row_number, row_center_y_mm, row_via_x_values in (
+        (
+            normal_row_number,
+            normal_row_center_y_mm,
+            normal_row_via_x_values,
+        ),
+        (
+            rotated_row_number,
+            rotated_row_center_y_mm,
+            rotated_row_via_x_values,
+        ),
+    ):
+        first_reference_number = (
+            (row_number - 1) * variant.matrix_size + column_numbers[0]
+        )
+        row_net = get_pad(
+            get_led(board, f"D{first_reference_number}"),
+            "1",
+        ).GetNet()
+        add_track(
+            board,
+            row_net,
+            pcbnew.In2_Cu,
+            min(row_via_x_values),
+            row_center_y_mm,
+            max(row_via_x_values),
+            row_center_y_mm,
+            INNER_ROW_WIDTH_MM,
+        )
+
+    pcbnew.SaveBoard(str(output_path), board)
+    return output_path
+
+
 if __name__ == "__main__":
     root_path = Path(__file__).resolve().parents[2]
     for probe_variant in PROBE_VARIANTS:
@@ -572,3 +802,8 @@ if __name__ == "__main__":
             probe_variant,
         )
         print(f"Generated {generated_bottom_right_path}")
+        generated_transition_path = generate_orientation_transition_probe(
+            root_path,
+            probe_variant,
+        )
+        print(f"Generated {generated_transition_path}")
