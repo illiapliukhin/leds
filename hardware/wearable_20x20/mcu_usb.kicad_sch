@@ -168,195 +168,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Device:Crystal"
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 1.016)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "Y"
-				(at 0 3.81 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "Crystal"
-				(at 0 -3.81 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Two pin crystal"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "quartz ceramic resonator oscillator"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "Crystal*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "Crystal_0_1"
-				(polyline
-					(pts
-						(xy -2.54 0) (xy -1.905 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.905 -1.27) (xy -1.905 1.27)
-					)
-					(stroke
-						(width 0.508)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start -1.143 2.54)
-					(end 1.143 -2.54)
-					(stroke
-						(width 0.3048)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.905 -1.27) (xy 1.905 1.27)
-					)
-					(stroke
-						(width 0.508)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 0) (xy 1.905 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "Crystal_1_1"
-				(pin passive line
-					(at -3.81 0 0)
-					(length 1.27)
-					(name "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 3.81 0 180)
-					(length 1.27)
-					(name "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Device:R"
 			(pin_numbers
 				(hide yes)
@@ -1625,6 +1436,155 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "PartSignal_Platform:L327S400H11L"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -7.62 11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "L327S400H11L"
+				(at 7.62 11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Footprint" "PartSignal_Packages:Lucki_L327S400H11L_Crystal_3225-4Pin"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2212021030_Lucki-L327S400H11L_C5261245.pdf"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Pin map checked against primary manufacturer datasheet"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "L327S400H11L_0_1"
+				(rectangle
+					(start -7.62 10.16)
+					(end 7.62 -10.16)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "L327S400H11L_1_1"
+				(pin passive line
+					(at -10.16 7.62 0)
+					(length 2.54)
+					(name "XTAL_IN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -10.16 5.08 0)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 10.16 7.62 180)
+					(length 2.54)
+					(name "XTAL_OUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 10.16 5.08 180)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Power_Protection:USBLC6-2SC6"
 			(pin_names
 				(hide yes)
@@ -2180,7 +2140,7 @@
 		(uuid "0fbc898d-9c05-59eb-862d-5f24cffed5a2")
 	)
 	(label "XTAL_P"
-		(at 143.51 40.64 0)
+		(at 137.16 33.02 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -2329,6 +2289,16 @@
 		)
 		(uuid "4cc911ec-8b05-5c83-af91-e7df26b7f5b6")
 	)
+	(label "GND"
+		(at 137.16 35.56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "4ce565ee-bae4-5a81-bf20-947374bd9db4")
+	)
 	(label "ROW_A3"
 		(at 114.3 83.82 180)
 		(effects
@@ -2358,16 +2328,6 @@
 			(justify right bottom)
 		)
 		(uuid "6a56b0da-41f2-5cd1-a98a-60a711c9c28b")
-	)
-	(label "XTAL_N"
-		(at 151.13 40.64 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "6a9166c1-c2e0-51df-bb0d-bf28ab42fb85")
 	)
 	(label "SERVICE_UART_RX"
 		(at 114.3 111.76 180)
@@ -2609,6 +2569,16 @@
 		)
 		(uuid "ce402285-153d-554b-993f-21ed760aae29")
 	)
+	(label "XTAL_N"
+		(at 157.48 33.02 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "cfba1751-46d9-52c4-91a9-5a71d41b2089")
+	)
 	(label "AON_3V3"
 		(at 44.45 35.56 180)
 		(effects
@@ -2648,6 +2618,16 @@
 			(justify left bottom)
 		)
 		(uuid "db224dc6-62e8-570e-ac81-f1297735bdc9")
+	)
+	(label "GND"
+		(at 157.48 35.56 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "dc04d03c-57ca-54ea-ad1e-659ab317276a")
 	)
 	(label "BUTTON_WAKE_N"
 		(at 68.58 88.9 0)
@@ -2947,7 +2927,7 @@
 	)
 	(hierarchical_label "XTAL_P"
 		(shape input)
-		(at 143.51 40.64 0)
+		(at 137.16 33.02 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3021,17 +3001,6 @@
 			(justify left)
 		)
 		(uuid "56efbbc6-862c-5e0c-afc6-e50ca50bf6fe")
-	)
-	(hierarchical_label "XTAL_N"
-		(shape input)
-		(at 151.13 40.64 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "5be33f86-d1fa-5697-ac2b-4cb625adacbe")
 	)
 	(hierarchical_label "DEC_B_EN_N"
 		(shape input)
@@ -3131,6 +3100,17 @@
 			(justify left)
 		)
 		(uuid "79993d35-4400-51cf-9cfb-b85a84461697")
+	)
+	(hierarchical_label "XTAL_N"
+		(shape input)
+		(at 157.48 33.02 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7a2c05be-c348-544f-bf29-3daba2cc55a3")
 	)
 	(hierarchical_label "SERVICE_UART_RX"
 		(shape input)
@@ -3233,6 +3213,17 @@
 	)
 	(hierarchical_label "GND"
 		(shape input)
+		(at 137.16 35.56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "b0481c06-2dbf-5996-9aee-e2da8a9b7ded")
+	)
+	(hierarchical_label "GND"
+		(shape input)
 		(at 224.79 101.6 0)
 		(effects
 			(font
@@ -3296,6 +3287,17 @@
 			(justify left)
 		)
 		(uuid "cc15a9bd-a76a-5ade-be8c-dda0b485be9a")
+	)
+	(hierarchical_label "GND"
+		(shape input)
+		(at 157.48 35.56 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d1d2266b-6879-5c97-83dd-9492c0776a80")
 	)
 	(hierarchical_label "DEC_A_EN_N"
 		(shape input)
@@ -3955,7 +3957,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:Crystal")
+		(lib_id "PartSignal_Platform:L327S400H11L")
 		(at 147.32 40.64 0)
 		(unit 1)
 		(body_style 1)
@@ -3966,7 +3968,7 @@
 		(dnp no)
 		(uuid "7a472e33-c684-516b-9a4f-7a2a768ff41d")
 		(property "Reference" "Y1"
-			(at 147.32 44.45 0)
+			(at 139.7 52.07 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3977,7 +3979,7 @@
 			)
 		)
 		(property "Value" "L327S400H11L 40MHz 10pF"
-			(at 147.32 36.83 0)
+			(at 154.94 52.07 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -3987,7 +3989,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "PartSignal_Packages:Lucki_L327S400H11L_Crystal_3225-4Pin"
 			(at 147.32 40.64 0)
 			(hide yes)
 			(show_name no)
@@ -4029,7 +4031,7 @@
 				(justify left)
 			)
 		)
-		(property "FootprintStatus" "CONDITIONAL_PACKAGE_AUDIT_REQUIRED"
+		(property "FootprintStatus" "RELEASED_LUCKI_SMD3225_4P"
 			(at 149.86 45.7199 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4045,6 +4047,12 @@
 		)
 		(pin "2"
 			(uuid "8d131cd3-4895-5f5e-9682-2e31e6c27851")
+		)
+		(pin "3"
+			(uuid "6cd1952d-c83f-5dc2-82fa-102e5e77aef9")
+		)
+		(pin "4"
+			(uuid "022518d1-de22-543b-9de2-b36b42690360")
 		)
 		(instances
 			(project ""

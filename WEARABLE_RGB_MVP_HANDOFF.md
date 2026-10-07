@@ -157,7 +157,10 @@ KiCad 10 row-selection sheets:
 - primary-drawing footprints выпущены для `BQ25185` (TI DLH0010A),
   `TPS63802` (TI DLA0010A HotRod), `BMI270` (Bosch LGA-14) и
   `MAX17048G+T10` (Maxim 21-0168/90-0065);
-- геометрия DLA0010A и 83,8% paste coverage pad 8 проверяются
+- manufacturer-pattern footprints также выпущены для Murata
+  `DFE201612E-R47M=P2` и Lucki `L327S400H11L`; у кварца pins 2/4 корпуса
+  явно подключены к GND отдельным 4-pin symbol;
+- геометрия DLA0010A, DFE201612E и SMD3225-4P проверяется
   `hardware/tools/verify_critical_footprints.py`;
 - единый реестр механических входных данных и внешних блокеров находится в
   `mechanical/MECHANICAL_INPUTS.md`;

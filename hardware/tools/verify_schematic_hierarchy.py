@@ -18,6 +18,10 @@ VARIANTS = (
 )
 
 EXPECTED_CRITICAL_FOOTPRINTS = {
+    "L1": (
+        "PartSignal_Packages:"
+        "Murata_DFE201612E_2.0x1.6mm"
+    ),
     "U1": (
         "Package_DFN_QFN:"
         "Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm"
@@ -30,6 +34,10 @@ EXPECTED_CRITICAL_FOOTPRINTS = {
     "U21": (
         "Package_DFN_QFN:"
         "TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm"
+    ),
+    "Y1": (
+        "PartSignal_Packages:"
+        "Lucki_L327S400H11L_Crystal_3225-4Pin"
     ),
 }
 
@@ -139,6 +147,10 @@ def verify_variant(netlist_path: Path, variant: Variant) -> None:
         ("U100", "5"): "MCU_LED_SDI",
         ("U100", "9"): "MCU_LED_LE",
         ("U100", "12"): "MCU_LED_OE_N",
+        ("Y1", "1"): "XTAL_P",
+        ("Y1", "2"): "GND",
+        ("Y1", "3"): "XTAL_N",
+        ("Y1", "4"): "GND",
     }
     for (reference, pin_number), net_suffix in critical_pin_nets.items():
         assert_net_suffix(pin_net_map, reference, pin_number, net_suffix)

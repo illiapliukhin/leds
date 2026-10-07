@@ -32,6 +32,18 @@ DLA0010A_PADS = (
     PadGeometry("9", 0.75, -0.5, 0.9, 0.25),
     PadGeometry("10", 0.75, -1.0, 0.9, 0.25),
 )
+DFE201612E_NAME = "Murata_DFE201612E_2.0x1.6mm"
+DFE201612E_PADS = (
+    PadGeometry("1", -0.725, 0.0, 0.55, 1.6),
+    PadGeometry("2", 0.725, 0.0, 0.55, 1.6),
+)
+L327S400H11L_NAME = "Lucki_L327S400H11L_Crystal_3225-4Pin"
+L327S400H11L_PADS = (
+    PadGeometry("1", -1.1, 0.85, 1.4, 1.2),
+    PadGeometry("2", 1.1, 0.85, 1.4, 1.2),
+    PadGeometry("3", 1.1, -0.85, 1.4, 1.2),
+    PadGeometry("4", -1.1, -0.85, 1.4, 1.2),
+)
 
 
 def millimeters(internal_units: int) -> float:
@@ -87,23 +99,31 @@ def verify_pad(pad: pcbnew.PAD, expected: PadGeometry, index: int) -> None:
             )
 
 
-def verify_dla0010a(packages_directory: Path) -> None:
-    footprint = pcbnew.FootprintLoad(str(packages_directory), DLA0010A_NAME)
+def verify_footprint(
+    packages_directory: Path,
+    footprint_name: str,
+    expected_pads: tuple[PadGeometry, ...],
+) -> None:
+    footprint = pcbnew.FootprintLoad(str(packages_directory), footprint_name)
     if footprint is None:
-        raise FileNotFoundError(f"Unable to load {DLA0010A_NAME}")
+        raise FileNotFoundError(f"Unable to load {footprint_name}")
 
     pads = list(footprint.Pads())
-    if len(pads) != len(DLA0010A_PADS):
+    if len(pads) != len(expected_pads):
         raise ValueError(
-            f"{DLA0010A_NAME}: expected {len(DLA0010A_PADS)} pad objects, "
+            f"{footprint_name}: expected {len(expected_pads)} pad objects, "
             f"found {len(pads)}"
         )
 
     for index, (pad, expected) in enumerate(
-        zip(pads, DLA0010A_PADS, strict=True),
+        zip(pads, expected_pads, strict=True),
         start=1,
     ):
         verify_pad(pad, expected, index)
+
+
+def verify_dla0010a(packages_directory: Path) -> None:
+    verify_footprint(packages_directory, DLA0010A_NAME, DLA0010A_PADS)
 
     paste_area_mm2 = sum(
         rounded_rectangle_area(
@@ -133,6 +153,18 @@ def main() -> None:
         Path(__file__).resolve().parents[1] / "libraries" / "packages.pretty"
     )
     verify_dla0010a(packages_directory)
+    verify_footprint(
+        packages_directory,
+        DFE201612E_NAME,
+        DFE201612E_PADS,
+    )
+    print(f"{DFE201612E_NAME}: manufacturer 2-pad pattern verified")
+    verify_footprint(
+        packages_directory,
+        L327S400H11L_NAME,
+        L327S400H11L_PADS,
+    )
+    print(f"{L327S400H11L_NAME}: manufacturer 4-pad pattern verified")
 
 
 if __name__ == "__main__":

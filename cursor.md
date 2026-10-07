@@ -50,4 +50,8 @@
 - Model multifunction strap pins by their use in the selected interface.
   BMI270 `SDO` is an SPI output but an I²C address strap in this design; marking
   it output caused a false output-to-power-output ERC error when tied to GND.
+- Do not assign a multi-pad crystal footprint to a generic two-pin symbol.
+  Verify the manufacturer terminal table and model signal pins plus grounded
+  case pads explicitly; `L327S400H11L` requires signals on pins 1/3 and GND on
+  pins 2/4.
 

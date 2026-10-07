@@ -101,6 +101,18 @@ CUSTOM_SYMBOLS = {
             ("power_in", "GND", "9"),
         ),
     ),
+    "L327S400H11L": (
+        "https://www.lcsc.com/datasheet/"
+        "lcsc_datasheet_2212021030_Lucki-L327S400H11L_C5261245.pdf",
+        "PartSignal_Packages:"
+        "Lucki_L327S400H11L_Crystal_3225-4Pin",
+        (
+            ("passive", "XTAL_IN", "1"),
+            ("power_in", "GND", "2"),
+            ("passive", "XTAL_OUT", "3"),
+            ("power_in", "GND", "4"),
+        ),
+    ),
 }
 
 
@@ -474,10 +486,13 @@ def generate_power_sheet(variant: MatrixVariant) -> Schematic:
         reference="L1",
         value="DFE201612E-R47M=P2 0.47uH",
         position=(157.48, 81.28),
-        footprint="",
+        footprint=(
+            "PartSignal_Packages:"
+            "Murata_DFE201612E_2.0x1.6mm"
+        ),
         properties={
             "Function": "LED_BUCK_BOOST_INDUCTOR",
-            "FootprintStatus": "BLOCKED_MURATA_LAND_PATTERN_RELEASE",
+            "FootprintStatus": "RELEASED_MURATA_DFE201612E",
         },
     )
     add_pin_label(schematic, key, "L1", "1", "LED_SW1")
@@ -668,18 +683,20 @@ def generate_mcu_usb_sheet(variant: MatrixVariant) -> Schematic:
     add_component(
         schematic,
         generation_key=key,
-        library_id="Device:Crystal",
+        library_id=f"{PLATFORM_LIBRARY_NAME}:L327S400H11L",
         reference="Y1",
         value="L327S400H11L 40MHz 10pF",
         position=(147.32, 40.64),
-        footprint="",
+        footprint=CUSTOM_SYMBOLS["L327S400H11L"][1],
         properties={
             "Function": "MCU_XTAL_40MHZ",
-            "FootprintStatus": "CONDITIONAL_PACKAGE_AUDIT_REQUIRED",
+            "FootprintStatus": "RELEASED_LUCKI_SMD3225_4P",
         },
     )
     add_pin_label(schematic, key, "Y1", "1", "XTAL_P")
-    add_pin_label(schematic, key, "Y1", "2", "XTAL_N")
+    add_pin_label(schematic, key, "Y1", "2", "GND")
+    add_pin_label(schematic, key, "Y1", "3", "XTAL_N")
+    add_pin_label(schematic, key, "Y1", "4", "GND")
     add_component(
         schematic,
         generation_key=key,
