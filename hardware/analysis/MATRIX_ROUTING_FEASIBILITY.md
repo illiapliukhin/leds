@@ -48,7 +48,7 @@ Status: all local orientation probes and the complete repeated 20×20 and 28×28
 - Boundary generator: `hardware/tools/generate_orientation_boundary_probes.py`
 - Full-matrix generator: `hardware/tools/generate_full_matrix_routing.py`
 
-All 18 local-probe DRC reports contain zero geometric violations. They still report 499 unconnected groups because only four LEDs are routed in each probe. Both full-matrix reports contain `Found 0 DRC violations` and `Found 0 unconnected items`.
+All 18 local-probe DRC reports contain zero geometric violations. They still report 499 unconnected groups because only four LEDs are routed in each probe. Both full-matrix reports contain `Found 0 DRC violations` and `Found 0 unconnected pads`.
 
 ## DRC-proven local pattern
 
