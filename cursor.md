@@ -77,4 +77,8 @@
   area; the 20×20 design has approximately 1673 mm² of non-LED envelopes but
   only approximately 1150 mm² outside its provisional 32×40 mm battery
   projection, so a component-free projection cannot be claimed.
+- Do not replace measured footprint-envelope area with a guessed average area
+  per component. The resulting side-rail zoning understated 20×20 placement
+  demand by more than 2×. Also do not present HDI as an area fix: blind vias
+  can remove backside via conflicts, but they do not create component area.
 

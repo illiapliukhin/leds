@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -14,6 +15,7 @@ BATTERY_HEIGHT_MM = 40.0
 EXPECTED_LED_COUNT = 400
 EXPECTED_NON_LED_COUNT = 172
 LED_VALUE = "MHPA1010RGBDT"
+PRACTICAL_PACKING_EFFICIENCY = 0.85
 LOCAL_FOOTPRINT_DIRECTORIES = {
     "PartSignal_LEDs": Path(__file__).resolve().parents[1]
     / "libraries"
@@ -152,6 +154,14 @@ def main() -> None:
     utilization_percent = (
         component_envelope_area_mm2 / area_outside_battery_mm2 * 100.0
     )
+    theoretical_minimum_side_mm = math.sqrt(
+        component_envelope_area_mm2
+        + BATTERY_WIDTH_MM * BATTERY_HEIGHT_MM
+    )
+    practical_minimum_side_mm = math.sqrt(
+        component_envelope_area_mm2 / PRACTICAL_PACKING_EFFICIENCY
+        + BATTERY_WIDTH_MM * BATTERY_HEIGHT_MM
+    )
 
     print(
         f"20x20: {led_count} LEDs and "
@@ -166,14 +176,27 @@ def main() -> None:
         f"{area_outside_battery_mm2:.1f} mm^2"
     )
     print(f"Minimum rectangular-envelope utilization: {utilization_percent:.1f}%")
+    print(
+        "Theoretical square-side floor at 100% packing: "
+        f"{theoretical_minimum_side_mm:.1f} mm"
+    )
+    print(
+        "Square-side baseline at "
+        f"{PRACTICAL_PACKING_EFFICIENCY:.0%} packing: "
+        f"{practical_minimum_side_mm:.1f} mm"
+    )
 
     if component_envelope_area_mm2 > area_outside_battery_mm2:
         raise ValueError(
             "component-free 32x40 mm battery projection is infeasible: "
             "component envelopes exceed all area outside the projection. "
-            "Freeze a revised mechanical stack or permit explicitly selected "
-            "low-profile components beneath the battery before production "
-            "placement."
+            f"the outline must be at least "
+            f"{theoretical_minimum_side_mm:.1f} mm square even at impossible "
+            "100% packing, and approximately "
+            f"{practical_minimum_side_mm:.1f} mm at the declared packing "
+            "baseline. Freeze a larger outline, split the electronics onto "
+            "another PCB, or qualify a revised battery/component stack before "
+            "production placement."
         )
 
 

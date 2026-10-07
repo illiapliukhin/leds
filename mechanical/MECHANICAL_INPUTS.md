@@ -36,6 +36,24 @@ Neither candidate is frozen. Require a finished-pack drawing that includes PCM,
 insulation, wire exit, connector, bend radius, swelling allowance, NTC table,
 and compliance document identifiers before changing the keepouts.
 
+## 20×20 placement feasibility
+
+The current 49.3 mm square outline cannot preserve a component-free 32 × 40 mm
+battery projection. The 172 non-LED assembly envelopes measured from the root
+netlist and assigned footprint libraries total approximately 1673.2 mm², while
+the board area outside the battery projection is only approximately 1150.5 mm².
+This is a necessary-condition utilization of 145.4% before courtyard spacing,
+USB, branding, reference text, or routing reserves.
+
+For the current component set and battery projection, the square-outline floor
+is approximately 54.3 mm at impossible 100% packing and approximately 57.0 mm
+at an 85% rectangular-envelope packing baseline. Treat 57 mm as the next
+single-board mechanical study size, not a frozen production dimension. HDI and
+blind vias may remove backside via conflicts but do not close this area deficit.
+If the 49.3 mm product envelope is mandatory, the alternatives are a
+supplier-qualified component-under-battery stack or a separate logic PCB; both
+require a new thickness, thermal, interconnect, and assembly budget.
+
 ## Stack budget
 
 | Element | Baseline | Validation |
