@@ -16,6 +16,49 @@ Status: pre-schematic architecture for KiCad 10. Values marked `EVT` require mea
 
 Both TPS22917 enable inputs require external 100 kΩ pull-downs to guarantee default-off independently of MCU state. Populate a configurable QOD resistor footprint on each switched rail. Start EVT with 1 kΩ on `LED_LOGIC_3V3` and DNP on `AUDIO_3V3`.
 
+## RGB matrix connections
+
+Each `MHPA1010RGBDT` is common-anode:
+
+- pin 1 connects to its `ROW_nn_ANODE` net;
+- pin 2 connects to the column's `COL_R_nn` net;
+- pin 3 connects to the column's `COL_G_nn` net;
+- pin 4 connects to the column's `COL_B_nn` net.
+
+Only one row is powered at a time. The selected row PMOS sources
+`LED_4V1` into the common anodes, and the MBI5124 outputs sink the selected
+R/G/B column currents. Do not add per-LED series resistors because the
+MBI5124 outputs regulate current.
+
+Use six color-homogeneous `MBI5124GP-B` devices on both board variants:
+
+| Device | Outputs | 20×20 connection | 28×28 connection |
+|---|---|---|---|
+| `U_LED_R_A` | OUT0…OUT15 | `COL_R_01…16` | `COL_R_01…16` |
+| `U_LED_R_B` | OUT0… | `COL_R_17…20` | `COL_R_17…28` |
+| `U_LED_G_A` | OUT0…OUT15 | `COL_G_01…16` | `COL_G_01…16` |
+| `U_LED_G_B` | OUT0… | `COL_G_17…20` | `COL_G_17…28` |
+| `U_LED_B_A` | OUT0…OUT15 | `COL_B_01…16` | `COL_B_01…16` |
+| `U_LED_B_B` | OUT0… | `COL_B_17…20` | `COL_B_17…28` |
+
+Unused outputs remain unconnected and their serialized bits remain zero.
+Chain `SDO` to the next device's `SDI` in table order. Every row transfer is
+96 bits on both variants.
+
+The MBI5124 has one configuration register per IC, not one setting per
+output. Color-homogeneous devices are required to use the datasheet
+pre-charge settings without an undocumented mixed-color compromise:
+
+- red: `0b0111110101101011` (`0x7D6B`);
+- green: `0b1111000101101011` (`0xF16B`);
+- blue: `0b1110110101101011` (`0xED6B`).
+
+Populate one 1.91 kΩ, 0.1% `R-EXT` resistor per driver. The nominal channel
+current is approximately 9.66 mA; the 3% specified IC-to-IC error still keeps
+the nominal worst case below the 10 mA upper limit specified at 3.3 V.
+Populate 100 nF directly between each driver's VDD and GND pins and local
+bulk capacitance at the driver group.
+
 ## Row selection
 
 ### Components
@@ -52,7 +95,7 @@ At 4.1 V, interpolating the 74HC requirement gives approximately `VIH ≥ 2.87 V
 - PMOS source connects to `LED_4V1`; drain connects to the selected LED common-anode row.
 - Only rows 1…20 are populated on the compact variant; rows 21…28 exist only on the high-resolution variant.
 
-At 0.84 A and the conservative 200 mΩ bound, instantaneous drop is 168 mV. Because each PMOS is active for only one row period, thermal dissipation is modest, but the voltage drop and brightness impact must be measured.
+At approximately 0.81 A and the conservative 200 mΩ bound, instantaneous drop is approximately 162 mV. Because each PMOS is active for only one row period, thermal dissipation is modest, but the voltage drop and brightness impact must be measured.
 
 ## MBI5124 signal isolation
 
@@ -83,19 +126,21 @@ Add 22 Ω source-series footprints after the buffer on `LED_CLK`, `LED_SDI`, and
 1. Keep `LED_EN = 0`, `LED_LOGIC_EN = 0`, and `ROW_XLAT_OE_N = 1`.
 2. Configure row address low, both decoder enables high, `LED_OE_N` high, clock/data/latch low.
 3. Set `LED_LOGIC_EN = 1` and wait for the switched 3.3 V rail to settle.
-4. Set `LED_EN = 1` and wait for `LED_4V1` power-good or a validated delay.
-5. Drive valid row controls, then set `ROW_XLAT_OE_N = 0`.
-6. Shift data while blanked, latch, enable one decoder bank, and finally deassert `LED_OE_N`.
+4. Program and read back the color-specific configuration register of all six MBI5124 devices.
+5. Set `LED_EN = 1` and wait for `LED_4V1` power-good or a validated delay.
+6. Drive valid row controls, then set `ROW_XLAT_OE_N = 0`.
+7. Shift data while blanked, latch, enable one decoder bank, and finally deassert `LED_OE_N`.
 
 ### Row transition
 
-1. Assert `LED_OE_N`.
-2. Set both decoder enables high.
-3. Wait the EVT-derived PMOS turn-off dead time.
-4. Change row address.
-5. Shift/latch column data.
-6. Enable exactly one decoder bank.
-7. Deassert `LED_OE_N`.
+1. Shift the next 96 bits while the current row is displayed and keep `LED_LE` low.
+2. Assert `LED_OE_N`.
+3. Set both decoder enables high.
+4. Wait the EVT-derived PMOS turn-off dead time.
+5. Change row address.
+6. Pulse `LED_LE` to latch the already shifted column data.
+7. Enable exactly one decoder bank.
+8. Deassert `LED_OE_N`.
 
 ### Shutdown
 
