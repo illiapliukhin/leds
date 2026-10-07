@@ -2,10 +2,11 @@
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
 Важно: KiCad 10 PCB-каркасы созданы и проходят DRC. Сгенерированные LED-driver
-и полные LED-matrix проекты обеих версий проходят автономный ERC без нарушений,
-но общая иерархия, row/power/MCU sheets, footprints остальных компонентов,
-полный placement/routing и физические измерения ещё не выполнены. Все значения,
-помеченные как требующие проверки, нельзя считать production-ready.
+полные LED-matrix и row-selection проекты обеих версий проходят автономный ERC
+без нарушений, но общая иерархия, power/MCU sheets, footprints остальных
+компонентов, полный placement/routing и физические измерения ещё не выполнены.
+Все значения, помеченные как требующие проверки, нельзя считать
+production-ready.
 
 ## 1. Цель
 
@@ -129,6 +130,20 @@ KiCad 10 matrix sheets:
   `COL_R/G/B_nn`;
 - оба листа проходят KiCad 10 ERC с `0 violations`; XML netlist подтверждает
   80/112 уникальных row и color-column nets.
+
+KiCad 10 row-selection sheets:
+
+- `hardware/wearable_20x20/row_selection.kicad_sch`;
+- `hardware/wearable_28x28/row_selection.kicad_sch`;
+- воспроизводятся `hardware/tools/generate_row_selection_schematics.py`;
+- содержат `SN74LVC8T245RHLR`, два `74HC154PW,118`, 20/28 `AO3403`,
+  gate-series 33 Ом, gate pull-up 47 кОм, B-side defaults и decoupling;
+- неиспользуемые translator inputs заземлены через 0 Ом, соответствующие
+  outputs и неиспользуемые decoder outputs явно отмечены NC;
+- оба листа проходят ERC с `0 violations`; XML netlist подтверждает точное
+  соответствие decoder outputs строкам и 14/6 NC pins;
+- footprint `SN74LVC8T245RHLR` намеренно оставлен открытым до проверки точного
+  TI RHL-24 land pattern.
 
 ### Расчёт обновления
 
@@ -493,6 +508,6 @@ docs/
 ```
 
 Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, а схемная
-архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап:
-row-selection, power и MCU sheets, общая иерархия, механика и только затем
-production placement/routing.
+архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап: power и
+MCU sheets, общая иерархия, механика и только затем production
+placement/routing.

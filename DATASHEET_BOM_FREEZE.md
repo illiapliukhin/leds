@@ -105,5 +105,9 @@ outputs и изолированный SDO return; оба проходят KiCad 
 Полные matrix projects содержат 400/784 LED с тем же проверенным pin map и
 footprint; оба также проходят ERC без нарушений, а XML netlist подтверждает все
 row и RGB-column connections.
+Row-selection projects содержат translator, два decoder banks и 20/28 PMOS;
+оба проходят ERC без нарушений, а XML netlist подтверждает каждую цепь
+decoder-output/gate/row и явные NC. Точный TI RHL-24 footprint translator
+остаётся открытым и не назначен.
 Non-BOM ERC harness необходимо заменить реальными top-level MCU, power и matrix
 sheets при сборке полной иерархии. USB placement нельзя фиксировать до пункта 1.
