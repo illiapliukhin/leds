@@ -3,6 +3,13 @@ from pathlib import Path
 
 import pcbnew
 
+from generate_board_skeletons import (
+    assign_deterministic_board_uuids,
+    create_board,
+    get_board_variant,
+    save_board_without_project_side_effects,
+)
+
 
 @dataclass(frozen=True)
 class ProbeVariant:
@@ -59,6 +66,22 @@ def get_outer_row_bus_y(
     )
     direction = -1.0 if top else 1.0
     return edge_row_center_mm + direction * 0.375
+
+
+def create_probe_board(
+    repository_root: Path,
+    variant: ProbeVariant,
+) -> pcbnew.BOARD:
+    board_variant = get_board_variant(variant.board_name)
+    return create_board(repository_root, board_variant)
+
+
+def save_probe_board(output_path: Path, board: pcbnew.BOARD) -> None:
+    assign_deterministic_board_uuids(
+        board,
+        f"edge-probe:{output_path.stem}",
+    )
+    save_board_without_project_side_effects(output_path, board)
 
 
 def add_track(
@@ -454,19 +477,13 @@ def generate_probe(
     repository_root: Path,
     variant: ProbeVariant,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     output_path = (
         repository_root
         / "hardware"
         / "analysis"
         / f"{variant.board_name}_edge_routing_probe.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
     first_row_center_y_mm = get_row_center(variant, 1)
     second_row_center_y_mm = get_row_center(variant, 2)
@@ -555,7 +572,7 @@ def generate_probe(
                 end_y_mm,
             )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 
@@ -563,19 +580,13 @@ def generate_bottom_right_probe(
     repository_root: Path,
     variant: ProbeVariant,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     output_path = (
         repository_root
         / "hardware"
         / "analysis"
         / f"{variant.board_name}_bottom_right_routing_probe.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
     second_last_row_number = variant.matrix_size - 1
     last_row_number = variant.matrix_size
@@ -698,7 +709,7 @@ def generate_bottom_right_probe(
                 end_y_mm,
             )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 
@@ -707,12 +718,6 @@ def generate_mirrored_corner_probe(
     variant: ProbeVariant,
     top_right: bool,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     corner_name = "top_right" if top_right else "bottom_left"
     output_path = (
         repository_root
@@ -720,7 +725,7 @@ def generate_mirrored_corner_probe(
         / "analysis"
         / f"{variant.board_name}_{corner_name}_routing_probe.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
     if top_right:
         row_numbers = (1, 2)
@@ -846,7 +851,7 @@ def generate_mirrored_corner_probe(
                 row_center_y_values[1] + y_offset_mm,
             )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 
@@ -854,12 +859,6 @@ def generate_orientation_transition_probe(
     repository_root: Path,
     variant: ProbeVariant,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     output_path = (
         repository_root
         / "hardware"
@@ -869,7 +868,7 @@ def generate_orientation_transition_probe(
             "_orientation_transition_routing_probe.kicad_pcb"
         )
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
     normal_row_number = variant.matrix_size // 2
     rotated_row_number = normal_row_number + 1
@@ -943,7 +942,7 @@ def generate_orientation_transition_probe(
             TRANSITION_ROW_WIDTH_MM,
         )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 

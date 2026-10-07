@@ -63,7 +63,9 @@
   before encoding pad geometry.
 - Do not let an analysis generator use the mutable production PCB as its input.
   Build probes and repeated routing from a clean skeleton so reruns cannot
-  duplicate copper or erase later backside placement.
+  duplicate copper or erase later backside placement. This applies to every
+  probe generator, not only the full-matrix generator; the legacy edge probe
+  path duplicated vias after production promotion until it was converted too.
 - KiCad assigns fresh internal UUIDs to newly created board items unless the
   generator sets them explicitly. Do not use whole-file hashes as a
   reproducibility gate until board, footprint, pad, graphic, track, via, and

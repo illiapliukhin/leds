@@ -401,8 +401,8 @@ KiCad 10 рабочие PCB:
 - `hardware/wearable_28x28/wearable_28x28.kicad_pcb`;
 - чистые matrix skeletons воспроизводятся
   `hardware/tools/generate_board_skeletons.py` только как analysis-артефакты;
-  full-matrix и boundary generators всегда начинают с нового skeleton в
-  памяти и не читают production PCB, а доказанная трассировка переносится
+  full-matrix, edge и boundary generators всегда начинают с нового skeleton
+  в памяти и не читают production PCB, а доказанная трассировка переносится
   `hardware/tools/promote_matrix_routing.py` после проверки topology;
 - `hardware/tools/verify_matrix_generation.py` дважды строит skeleton/full
   artifacts, требует одинаковые SHA-256 при deterministic KiCad UUIDs и
