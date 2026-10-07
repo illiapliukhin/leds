@@ -9,7 +9,6 @@ from generate_edge_routing_probe import (
     OUTER_ROW_WIDTH_MM,
     PROBE_VARIANTS,
     TRANSITION_ROW_WIDTH_MM,
-    TRANSITION_SIDE_VIA_X_OFFSET_MM,
     TRANSITION_SIDE_VIA_Y_OFFSET_MM,
     ProbeVariant,
     add_track,

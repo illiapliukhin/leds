@@ -30,4 +30,7 @@
 - Do not assume a 180-degree LED orientation transition can reuse one three-via RGB set. Rotation reverses the lateral G/R pad order, so prove the required crossover and local row-bus neck with DRC at every production pitch.
 - Do not mirror a dense corner escape by changing only the anode-via direction. Verify the transformed pad map through `pcbnew`; the opposite corners require 90/270-degree footprints and a different central RGB escape.
 - A DRC-clean corner-specific orientation does not prove that it tiles into the full matrix. Test each boundary between 0/90/180/270-degree regions before production expansion.
+- Derive the edge-orientation map from physical pad and outline constraints before routing its boundaries. A nominally symmetric orientation pair can place the anode escape outside the board; the proven edge row pairs are 90°→180° on the right and 0°→270° on the left.
+- Do not route dense transition fan-out or crossovers as unchecked direct diagonals. Use explicit orthogonal corridors and run DRC at the tightest production pitch; tracks can clear their endpoint pads while still crossing an intermediate pad or through via.
+- Normalize KiCad orientation values modulo 360 in semantic checks. `pcbnew` may report a 270-degree footprint as -90 degrees even though the saved orientation is correct.
 
