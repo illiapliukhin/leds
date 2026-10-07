@@ -214,6 +214,101 @@ def generate_harness_symbol(matrix_size: int) -> str:
 \t)"""
 
 
+def generate_row_selector_harness_symbol(matrix_size: int) -> str:
+    symbol_name = f"ROW_SELECTOR_ERC_HARNESS_{matrix_size}"
+    source_pins = [
+        ("output", f"ROW_A{address_index}")
+        for address_index in range(4)
+    ]
+    source_pins.extend(
+        (
+            ("output", "DEC_A_EN_N"),
+            ("output", "DEC_B_EN_N"),
+            ("output", "ROW_XLAT_OE_N"),
+            ("power_out", "AON_3V3"),
+            ("power_out", "LED_4V1"),
+            ("power_out", "GND"),
+        )
+    )
+    sink_pins = [
+        ("passive", f"ROW_{row_number:02d}_ANODE")
+        for row_number in range(1, matrix_size + 1)
+    ]
+    maximum_pin_count = max(len(source_pins), len(sink_pins))
+    top_y = (maximum_pin_count - 1) * 1.27
+    bottom_y = -top_y
+    pin_expressions = []
+
+    for pin_index, (pin_type, pin_name) in enumerate(source_pins, start=1):
+        pin_expressions.append(
+            format_harness_pin(
+                pin_type,
+                pin_name,
+                pin_index,
+                -10.16,
+                top_y - (pin_index - 1) * 2.54,
+                0,
+            )
+        )
+
+    for sink_index, (pin_type, pin_name) in enumerate(sink_pins, start=1):
+        pin_number = len(source_pins) + sink_index
+        pin_expressions.append(
+            format_harness_pin(
+                pin_type,
+                pin_name,
+                pin_number,
+                10.16,
+                top_y - (sink_index - 1) * 2.54,
+                180,
+            )
+        )
+
+    joined_pins = "\n".join(pin_expressions)
+    return f"""\
+\t(symbol "{symbol_name}"
+\t\t(exclude_from_sim yes)
+\t\t(in_bom no)
+\t\t(on_board no)
+\t\t(in_pos_files no)
+\t\t(duplicate_pin_numbers_are_jumpers no)
+\t\t(property "Reference" "H"
+\t\t\t(at -7.62 {top_y + 3.81:.2f} 0)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(property "Value" "{symbol_name}"
+\t\t\t(at 7.62 {top_y + 3.81:.2f} 0)
+\t\t\t(effects (font (size 1.27 1.27)) (justify right))
+\t\t)
+\t\t(property "Footprint" ""
+\t\t\t(at 0 0 0)
+\t\t\t(hide yes)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(property "Datasheet" ""
+\t\t\t(at 0 0 0)
+\t\t\t(hide yes)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(property "Description" "Non-BOM external harness for standalone row-selector ERC"
+\t\t\t(at 0 0 0)
+\t\t\t(hide yes)
+\t\t\t(effects (font (size 1.27 1.27)))
+\t\t)
+\t\t(symbol "{symbol_name}_0_1"
+\t\t\t(rectangle
+\t\t\t\t(start -7.62 {top_y + 1.27:.2f})
+\t\t\t\t(end 7.62 {bottom_y - 1.27:.2f})
+\t\t\t\t(stroke (width 0.254) (type default))
+\t\t\t\t(fill (type background))
+\t\t\t)
+\t\t)
+\t\t(symbol "{symbol_name}_1_1"
+{joined_pins}
+\t\t)
+\t)"""
+
+
 def generate_custom_symbol_library() -> None:
     source_library_text = STANDARD_DRIVER_LIBRARY.read_text(encoding="utf-8")
     mbi_symbol_text = extract_symbol_expression(source_library_text, "MBI5252GP")
@@ -272,6 +367,8 @@ def generate_custom_symbol_library() -> None:
             led_symbol_text,
             generate_harness_symbol(20),
             generate_harness_symbol(28),
+            generate_row_selector_harness_symbol(20),
+            generate_row_selector_harness_symbol(28),
             ")",
             "",
         )
@@ -634,7 +731,10 @@ def write_project_library_tables(
     symbol_table = """(sym_lib_table
   (lib (name "PartSignal_Wearable")(type "KiCad")(uri "${KIPRJMOD}/../libraries/PartSignal_Wearable.kicad_sym")(options "")(descr "Part Signal wearable custom symbols"))
   (lib (name "74xGxx")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/74xGxx.kicad_sym")(options "")(descr ""))
+  (lib (name "74xx")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/74xx.kicad_sym")(options "")(descr ""))
   (lib (name "Device")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")(options "")(descr ""))
+  (lib (name "Logic_LevelTranslator")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Logic_LevelTranslator.kicad_sym")(options "")(descr ""))
+  (lib (name "Transistor_FET")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Transistor_FET.kicad_sym")(options "")(descr ""))
   (lib (name "power")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/power.kicad_sym")(options "")(descr ""))
 )
 """

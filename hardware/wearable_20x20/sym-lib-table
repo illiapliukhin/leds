@@ -1,6 +1,9 @@
 (sym_lib_table
   (lib (name "PartSignal_Wearable")(type "KiCad")(uri "${KIPRJMOD}/../libraries/PartSignal_Wearable.kicad_sym")(options "")(descr "Part Signal wearable custom symbols"))
   (lib (name "74xGxx")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/74xGxx.kicad_sym")(options "")(descr ""))
+  (lib (name "74xx")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/74xx.kicad_sym")(options "")(descr ""))
   (lib (name "Device")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")(options "")(descr ""))
+  (lib (name "Logic_LevelTranslator")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Logic_LevelTranslator.kicad_sym")(options "")(descr ""))
+  (lib (name "Transistor_FET")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/Transistor_FET.kicad_sym")(options "")(descr ""))
   (lib (name "power")(type "KiCad")(uri "${KICAD10_SYMBOL_DIR}/power.kicad_sym")(options "")(descr ""))
 )
