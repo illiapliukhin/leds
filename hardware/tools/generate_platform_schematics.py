@@ -49,7 +49,8 @@ CUSTOM_SYMBOLS = {
     ),
     "TPS63802DLAR": (
         "https://www.ti.com/lit/ds/symlink/tps63802.pdf",
-        "",
+        "PartSignal_Packages:"
+        "TI_DLA0010A_VSON-HR-10_2x3mm_P0.5mm",
         (
             ("input", "EN", "1"),
             ("input", "MODE", "2"),
@@ -450,7 +451,7 @@ def generate_power_sheet(variant: MatrixVariant) -> Schematic:
         footprint=CUSTOM_SYMBOLS["TPS63802DLAR"][1],
         properties={
             "Function": "LED_4V1_BUCK_BOOST",
-            "FootprintStatus": "BLOCKED_PACKAGE_LAND_PATTERN_RELEASE",
+            "FootprintStatus": "RELEASED_TI_DLA0010A_4223750_REV_D",
         },
     )
     for pin_number, net_name in {

@@ -9,7 +9,7 @@ LED signal buffer,U_LED_BUF,SN74LV125APWR,"Quad buffer with Ioff for switched MB
 LED SDO return buffer,U_LED_SDO_BUF,SN74LVC1G125DBVR,"Single buffer with Ioff for MBI5124 configuration readback",- ,1,1,"CONDITIONAL: SDO return to GPIO48 with always-enabled output and MCU-side 100k pull-down; verify stock and power-up behavior"
 IMU,U_IMU,BMI270,"6-axis accelerometer and gyroscope",C2836813,1,1,"CONDITIONAL: Bosch LGA-14 3x2.5mm footprint released; verify interrupt and low-power configuration"
 Charger,U_CHG,BQ25185,"1-cell linear charger with power path and ship mode",C19725033,1,1,"CONDITIONAL: TI DLH0010A footprint and 24k/18k ILIM plus 1k/750R ISET confirmed; design CE resampling TS network and thermal policy"
-LED DC/DC,U_LED_PWR,TPS63802DLAR,"Synchronous buck-boost converter; VSON-HR-10",C2845237,1,1,"CONDITIONAL: use 655k/91k feedback 10uF input 2x22uF output; verify thermal/load margin"
+LED DC/DC,U_LED_PWR,TPS63802DLAR,"Synchronous buck-boost converter; VSON-HR-10",C2845237,1,1,"CONDITIONAL: TI DLA0010A HotRod footprint released from drawing 4223750 Rev D; use 655k/91k feedback 10uF input 2x22uF output; verify thermal/load margin"
 AON LDO,U_LDO,TPS7A2033,"Low-Iq 3.3 V LDO",C2862740,1,1,"Verify peak current and output capacitor"
 Fuel gauge,U_GAUGE,MAX17048G+T10,"1-cell ModelGauge fuel gauge",C2682616,1,1,"CONDITIONAL: Maxim 21-0168 / 90-0065 TDFN footprint released; configure alert and hibernate"
 Microphone,MIC1,MA-HFA381-H13-1AF,"Top-port analog MEMS microphone",C50275762,1,1,"Low stock risk; approved alternate required"

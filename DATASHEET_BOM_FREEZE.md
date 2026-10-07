@@ -70,6 +70,11 @@
 - `VFB` nominal равен 0,5 В, нижний резистор divider не должен превышать 100 кОм.
 - Для 4,1 В выбран divider 655/91 кОм, 0,1%, nominal около 4,099 В.
 - Предварительно выбран Murata `DFE201612E-R47M=P2`: 0,47 мкГн, Isat 5,5 А, thermal current 4,5 А, DCR до 26 мОм, высота 1,2 мм.
+- `TPS63802DLAR` назначен на локальный
+  `PartSignal_Packages:TI_DLA0010A_VSON-HR-10_2x3mm_P0.5mm`, созданный
+  по TI 4223750 Rev. D. Footprint сохраняет асимметричную HotRod-геометрию:
+  пять lands 0,60×0,25 мм, четыре lands 0,90×0,25 мм и pad 8
+  1,30×0,25 мм с двумя stencil apertures и покрытием paste около 83,8%.
 - Остаются открытыми проверка точного ordering code/stock, output-current margin при минимальном BAT, enclosure thermal test и load-transient measurement.
 
 ### Row selection и domain isolation — CONDITIONAL
@@ -100,10 +105,9 @@
 - `BQ25185DLHR` назначен на
   `Package_DFN_QFN:Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm`.
   Exposed pad добавлен в symbol как GND pin 11.
-- Эти package releases закрывают геометрию, но не заменяют low-power/wake,
+- Эти package releases, включая `TPS63802DLAR`, закрывают геометрию, но не
+  заменяют low-power/wake,
   fuel-gauge runtime, TS/NTC, charger thermal и power-ramp EVT.
-- `TPS63802DLAR` остаётся без footprint: TI `DLA0010A` — нестандартный
-  VSON-HR/HotRod land pattern, который нельзя заменять generic DFN.
 
 ### Расчётная модель — CONDITIONAL
 

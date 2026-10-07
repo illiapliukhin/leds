@@ -17,6 +17,22 @@ VARIANTS = (
     Variant("wearable_28x28", 784, 28),
 )
 
+EXPECTED_CRITICAL_FOOTPRINTS = {
+    "U1": (
+        "Package_DFN_QFN:"
+        "Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm"
+    ),
+    "U3": (
+        "PartSignal_Packages:"
+        "TI_DLA0010A_VSON-HR-10_2x3mm_P0.5mm"
+    ),
+    "U20": "Package_LGA:Bosch_LGA-14_3x2.5mm_P0.5mm",
+    "U21": (
+        "Package_DFN_QFN:"
+        "TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm"
+    ),
+}
+
 
 def export_netlist(repository_root: Path, variant: Variant, output_path: Path) -> None:
     schematic_path = (
@@ -86,6 +102,21 @@ def verify_variant(netlist_path: Path, variant: Variant) -> None:
         raise ValueError(
             f"{variant.name}: expected {variant.led_count} LEDs, found {led_count}"
         )
+
+    components_by_reference = {
+        component.get("ref", ""): component
+        for component in components
+    }
+    for reference, expected_footprint in EXPECTED_CRITICAL_FOOTPRINTS.items():
+        component = components_by_reference.get(reference)
+        if component is None:
+            raise ValueError(f"{variant.name}: missing {reference}")
+        actual_footprint = component.findtext("footprint", default="")
+        if actual_footprint != expected_footprint:
+            raise ValueError(
+                f"{variant.name}: {reference} expected footprint "
+                f"{expected_footprint}, found {actual_footprint}"
+            )
 
     pin_net_map = build_pin_net_map(root)
     critical_pin_nets = {

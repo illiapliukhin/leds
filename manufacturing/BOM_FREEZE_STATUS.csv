@@ -9,7 +9,7 @@ LED signal buffer,SN74LV125APWR,CONDITIONAL,"Power-up behavior not measured","St
 LED SDO return buffer,SN74LVC1G125DBVR,CONDITIONAL,"Power-up behavior not measured","Stock review; configuration readback test"
 IMU,BMI270,CONDITIONAL,"Bosch LGA-14 footprint released; interrupt and low-power configuration open","Wake and false-wake EVT"
 Charger,BQ25185,CONDITIONAL,"TI DLH0010A footprint released; TS network and thermal policy open","Charge/load/NTC thermal EVT"
-LED DC/DC,TPS63802DLAR,CONDITIONAL,"Load-transient and enclosure thermal margin open","Complete layout; transient and thermal EVT"
+LED DC/DC,TPS63802DLAR,CONDITIONAL,"TI DLA0010A footprint released; load-transient and enclosure thermal margin open","Complete power layout; transient and thermal EVT"
 AON LDO,TPS7A2033,CONDITIONAL,"Peak load and capacitor margin open","Load budget; transient measurement"
 Fuel gauge,MAX17048G+T10,CONDITIONAL,"Maxim 21-0168 / 90-0065 footprint released; alert and hibernate configuration open","SOC/runtime characterization"
 Microphone,MA-HFA381-H13-1AF,BLOCKED_EXTERNAL,"Low stock and no approved alternate","Supplier quote; pin/acoustic compatible alternate"

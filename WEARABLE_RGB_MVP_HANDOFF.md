@@ -154,8 +154,11 @@ KiCad 10 row-selection sheets:
 - точный footprint `SN74LVC8T245RHLR` выпущен в
   `hardware/libraries/packages.pretty` по TI `RHL0024A`, drawing 4225250
   Rev. C; generic QFN не используется;
-- primary-drawing footprints выпущены для `BQ25185` (TI DLH0010A), `BMI270`
-  (Bosch LGA-14) и `MAX17048G+T10` (Maxim 21-0168/90-0065);
+- primary-drawing footprints выпущены для `BQ25185` (TI DLH0010A),
+  `TPS63802` (TI DLA0010A HotRod), `BMI270` (Bosch LGA-14) и
+  `MAX17048G+T10` (Maxim 21-0168/90-0065);
+- геометрия DLA0010A и 83,8% paste coverage pad 8 проверяются
+  `hardware/tools/verify_critical_footprints.py`;
 - единый реестр механических входных данных и внешних блокеров находится в
   `mechanical/MECHANICAL_INPUTS.md`;
 - построчный статус freeze находится в
@@ -534,6 +537,7 @@ docs/
 Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, схемная
 архитектура — в `hardware/common/PCB_ARCHITECTURE.md`, расчётные ограничения —
 в `hardware/analysis/DESIGN_BUDGETS.md`, а release gates — в
-`manufacturing/RELEASE_CHECKLIST.md`. Следующий этап: закрыть заблокированные
-component land patterns и внешние MPN, затем выполнить backside
-placement/routing и L2 GND.
+`manufacturing/RELEASE_CHECKLIST.md`. Следующий этап: выбрать заблокированные
+внешние MPN и выполнить backside placement/routing и L2 GND; критический
+HotRod-footprint `TPS63802` уже выпущен, но его силовой layout и тепловые
+измерения остаются обязательными.
