@@ -98,4 +98,9 @@
 
 ## Gate для начала KiCad
 
-KiCad PCB и общую схему можно продолжать. Электрические LED footprints проверены по первичному datasheet; USB placement нельзя фиксировать до пункта 1.
+KiCad PCB и общую схему можно продолжать. Электрические LED footprints
+проверены по первичному datasheet. Сгенерированные driver projects для обеих
+матриц используют проверенный pinout MBI5124, явные NC на неиспользуемых
+outputs и изолированный SDO return; оба проходят KiCad 10 ERC без нарушений.
+Non-BOM ERC harness необходимо заменить реальными top-level MCU, power и matrix
+sheets при сборке полной иерархии. USB placement нельзя фиксировать до пункта 1.

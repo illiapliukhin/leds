@@ -1,7 +1,11 @@
 # Wearable RGB MVP — передача проекта
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
-Важно: KiCad 10 PCB-каркасы созданы и проходят DRC, но схемы, footprints компонентов кроме LED, полные placement/routing, ERC и физические измерения ещё не выполнены. Все значения, помеченные как требующие проверки, нельзя считать production-ready.
+Важно: KiCad 10 PCB-каркасы созданы и проходят DRC. Сгенерированные LED-driver
+проекты обеих версий проходят автономный ERC без нарушений, но общая иерархия,
+matrix/row/power/MCU sheets, footprints остальных компонентов, полный
+placement/routing и физические измерения ещё не выполнены. Все значения,
+помеченные как требующие проверки, нельзя считать production-ready.
 
 ## 1. Цель
 
@@ -102,6 +106,18 @@
 8. `MBI_OE = 0`.
 
 Точные connections, default pulls и power sequencing зафиксированы в `hardware/common/PCB_ARCHITECTURE.md`; поведение на медленных фронтах питания проверить на EVT.
+
+KiCad 10 driver sheets:
+
+- `hardware/wearable_20x20/led_drivers.kicad_sch`;
+- `hardware/wearable_28x28/led_drivers.kicad_sch`;
+- воспроизводятся `hardware/tools/generate_led_driver_schematics.py`;
+- используют pin-verified `PartSignal_Wearable:MBI5124GP-B`;
+- содержат шесть драйверов, `R-EXT`, decoupling, полный SDO-chain и
+  `SN74LVC1G125DBVR`;
+- явный non-BOM ERC harness моделирует внешние MCU/power/matrix connections до
+  появления top-level hierarchy;
+- обе версии проходят KiCad 10 ERC с `0 violations`.
 
 ### Расчёт обновления
 
