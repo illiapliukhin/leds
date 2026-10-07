@@ -42,7 +42,7 @@ def get_orientation_profile(
     upper_half = row_number <= variant.matrix_size // 2
     if upper_half and column_number >= variant.matrix_size - 1:
         return TOP_RIGHT_PROFILE
-    if not upper_half and column_number == 1:
+    if not upper_half and column_number <= 2:
         return BOTTOM_LEFT_PROFILE
     if upper_half:
         return NORMAL_PROFILE
@@ -238,6 +238,25 @@ def add_rgb_connection(
     )
 
 
+def add_rgb_route(
+    board: pcbnew.BOARD,
+    column_number: int,
+    color_name: str,
+    route_points: tuple[tuple[float, float], ...],
+) -> None:
+    for start_position, end_position in zip(
+        route_points,
+        route_points[1:],
+    ):
+        add_rgb_connection(
+            board,
+            column_number,
+            color_name,
+            start_position,
+            end_position,
+        )
+
+
 def route_full_matrix(
     repository_root: Path,
     variant: ProbeVariant,
@@ -324,7 +343,7 @@ def route_full_matrix(
         lower_footprint.SetOrientationDegrees(
             lower_profile.orientation_degrees
         )
-        if column_number == 1:
+        if column_number <= 2:
             route_edge_row_transition_rgb(
                 board,
                 upper_footprint,
@@ -452,6 +471,149 @@ def route_full_matrix(
         lower_regular_positions = regular_positions[
             (lower_transition_row + 1, column_number)
         ]
+        if column_number <= 2:
+            upper_red_lane_x_mm = (
+                upper_transition_positions["R"][0] + 0.3
+            )
+            add_rgb_route(
+                board,
+                column_number,
+                "R",
+                (
+                    upper_regular_positions["R"],
+                    (
+                        upper_red_lane_x_mm,
+                        upper_regular_positions["R"][1],
+                    ),
+                    (
+                        upper_red_lane_x_mm,
+                        upper_transition_positions["R"][1],
+                    ),
+                    upper_transition_positions["R"],
+                ),
+            )
+            for color_name in ("G", "B"):
+                add_rgb_connection(
+                    board,
+                    column_number,
+                    color_name,
+                    upper_regular_positions[color_name],
+                    upper_transition_positions[color_name],
+                )
+
+            lower_blue_lane_x_mm = (
+                upper_transition_positions["B"][0] + 1.7
+            )
+            lower_blue_upper_y_mm = (
+                upper_transition_positions["B"][1] - 0.5
+            )
+            add_rgb_route(
+                board,
+                column_number,
+                "B",
+                (
+                    upper_transition_positions["B"],
+                    (
+                        upper_transition_positions["B"][0],
+                        lower_blue_upper_y_mm,
+                    ),
+                    (lower_blue_lane_x_mm, lower_blue_upper_y_mm),
+                    (
+                        lower_blue_lane_x_mm,
+                        lower_regular_positions["B"][1],
+                    ),
+                    lower_regular_positions["B"],
+                ),
+            )
+            for color_name in ("R", "G"):
+                add_rgb_connection(
+                    board,
+                    column_number,
+                    color_name,
+                    lower_transition_positions[color_name],
+                    lower_regular_positions[color_name],
+                )
+            continue
+
+        if column_number >= variant.matrix_size - 1:
+            upper_blue_lane_x_mm = (
+                upper_transition_positions["B"][0] - 0.3
+            )
+            add_rgb_route(
+                board,
+                column_number,
+                "B",
+                (
+                    upper_regular_positions["B"],
+                    (
+                        upper_blue_lane_x_mm,
+                        upper_regular_positions["B"][1],
+                    ),
+                    (
+                        upper_blue_lane_x_mm,
+                        upper_transition_positions["B"][1],
+                    ),
+                    upper_transition_positions["B"],
+                ),
+            )
+            for color_name in ("R", "G"):
+                add_rgb_connection(
+                    board,
+                    column_number,
+                    color_name,
+                    upper_regular_positions[color_name],
+                    upper_transition_positions[color_name],
+                )
+
+            lower_blue_lane_x_mm = (
+                upper_transition_positions["B"][0] - 0.75
+            )
+            add_rgb_route(
+                board,
+                column_number,
+                "B",
+                (
+                    upper_transition_positions["B"],
+                    (
+                        lower_blue_lane_x_mm,
+                        upper_transition_positions["B"][1],
+                    ),
+                    (
+                        lower_blue_lane_x_mm,
+                        lower_regular_positions["B"][1],
+                    ),
+                    lower_regular_positions["B"],
+                ),
+            )
+            lower_red_lane_x_mm = (
+                lower_transition_positions["R"][0] - 0.3
+            )
+            add_rgb_route(
+                board,
+                column_number,
+                "R",
+                (
+                    lower_transition_positions["R"],
+                    (
+                        lower_red_lane_x_mm,
+                        lower_transition_positions["R"][1],
+                    ),
+                    (
+                        lower_red_lane_x_mm,
+                        lower_regular_positions["R"][1],
+                    ),
+                    lower_regular_positions["R"],
+                ),
+            )
+            add_rgb_connection(
+                board,
+                column_number,
+                "G",
+                lower_transition_positions["G"],
+                lower_regular_positions["G"],
+            )
+            continue
+
         for color_name in ("R", "G", "B"):
             add_rgb_connection(
                 board,
@@ -460,13 +622,54 @@ def route_full_matrix(
                 upper_regular_positions[color_name],
                 upper_transition_positions[color_name],
             )
-            add_rgb_connection(
-                board,
-                column_number,
-                color_name,
-                lower_transition_positions[color_name],
-                lower_regular_positions[color_name],
-            )
+
+        add_rgb_connection(
+            board,
+            column_number,
+            "R",
+            lower_transition_positions["R"],
+            lower_regular_positions["R"],
+        )
+        lower_green_lane_x_mm = (
+            lower_transition_positions["G"][0] + 0.6
+        )
+        add_rgb_route(
+            board,
+            column_number,
+            "G",
+            (
+                lower_transition_positions["G"],
+                (
+                    lower_green_lane_x_mm,
+                    lower_transition_positions["G"][1],
+                ),
+                (
+                    lower_green_lane_x_mm,
+                    lower_regular_positions["G"][1],
+                ),
+                lower_regular_positions["G"],
+            ),
+        )
+        lower_blue_lane_x_mm = (
+            lower_transition_positions["B"][0] - 0.8
+        )
+        add_rgb_route(
+            board,
+            column_number,
+            "B",
+            (
+                lower_transition_positions["B"],
+                (
+                    lower_blue_lane_x_mm,
+                    lower_transition_positions["B"][1],
+                ),
+                (
+                    lower_blue_lane_x_mm,
+                    lower_regular_positions["B"][1],
+                ),
+                lower_regular_positions["B"],
+            ),
+        )
 
     pcbnew.SaveBoard(str(output_path), board)
     return output_path
