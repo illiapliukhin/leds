@@ -15,6 +15,7 @@
 - MHPA1010RGBDT datasheet Rev. 2: https://www.lcsc.com/datasheet/C404280.pdf
 - SN74LVC8T245 datasheet Rev. D: https://www.ti.com/lit/ds/symlink/sn74lvc8t245.pdf
 - SN74LV125A datasheet Rev. O: https://www.ti.com/lit/ds/symlink/sn74lv125a.pdf
+- SN74LVC1G125 datasheet Rev. V: https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf
 - Nexperia 74HC154/HCT154 datasheet: https://assets.nexperia.com/documents/data-sheet/74HC_HCT154.pdf
 - AO3403 datasheet: https://www.aosmd.com/res/datasheets/AO3403.pdf
 - TPS22917 datasheet Rev. B: https://www.ti.com/lit/ds/symlink/tps22917.pdf
@@ -43,7 +44,9 @@
 ### MBI5124GP-B — CONDITIONAL
 
 - При 3,3 В допустимый диапазон заданного тока — 1…10 мА на канал.
-- Формула: `IOUT = 1.23 V / Rext × 15`. Для 1,82 кОм datasheet приводит около 10,05 мА; для номинальных 10 мА расчёт даёт 1,845 кОм. Стартовый номинал для EVT — 1,82 кОм с обязательным измерением.
+- Формула: `IOUT = 1.23 V / Rext × 15`. Стартовый `Rext` — 1,96 кОм ±0,1%, что задаёт около 9,41 мА. Совместный worst case с ошибками +3% между IC и +2,5% между каналами составляет около 9,95 мА.
+- Один 16-битный configuration register управляет pre-charge всего IC. Datasheet задаёт разные полные слова для красного (`0x7D6B`), зелёного (`0xF16B`) и синего (`0xED6B`), поэтому подтверждённая архитектура использует шесть цвето-однородных драйверов в обеих версиях.
+- Ordering table подтверждает `MBI5124GP-B` как SSOP24L-150-0.64; LCSC `C256866` использует тот же ordering code.
 - Максимальная частота CLK — 25 МГц. Рабочие 24 МГц оставляют только 4% запаса, поэтому baseline снижен до 20 МГц; 24 МГц разрешены только после SI/timing-проверки на EVT.
 - При VDD = 3,3 В минимальный `VIH` равен 0,7×VDD, а минимальный CLK high/low pulse — 20 нс.
 - Постоянный режим тока характеризуется при `VDS = 1,0 В`; datasheet рекомендует держать `VDS` примерно 0,4…0,8 В с учётом рассеиваемой мощности. Необходимо проверить worst-case `LED_4V1 − VF` отдельно для R/G/B и температуру корпуса.
@@ -74,6 +77,7 @@
 - Выбраны два Nexperia `74HC154PW,118` в TSSOP-24 и `AO3403` для каждой строки.
 - `AO3403` имеет Qg около 2,8 нКл typical и RDS(on) до 200 мОм при VGS = −2,5 В. Voltage drop и switching dead time остаются EVT-параметрами.
 - Для изоляции MBI5124 выбран `SN74LV125APWR`, который явно специфицирует `Ioff`; похожий `SN74LVC125A` отклонён из-за отсутствия явной partial-power-down гарантии.
+- Для обязательного configuration readback выбран отдельный `SN74LVC1G125DBVR`: вход от SDO последнего MBI5124, выход `LED_SDO_RETURN` на `GPIO48`, `/OE` на GND и 100 кОм pull-down на стороне MCU. Его `Ioff` гарантирует изоляцию при выключенном `LED_LOGIC_3V3`.
 - Для обоих отключаемых 3,3-вольтовых доменов выбран `TPS22917DBVR`; нужны внешние enable pull-down и configurable QOD.
 - Полная topology, pulls и sequencing зафиксированы в `hardware/common/PCB_ARCHITECTURE.md`.
 
@@ -94,4 +98,16 @@
 
 ## Gate для начала KiCad
 
-KiCad PCB и общую схему можно продолжать. Электрические LED footprints проверены по первичному datasheet; USB placement нельзя фиксировать до пункта 1.
+KiCad PCB и общую схему можно продолжать. Электрические LED footprints
+проверены по первичному datasheet. Сгенерированные driver projects для обеих
+матриц используют проверенный pinout MBI5124, явные NC на неиспользуемых
+outputs и изолированный SDO return; оба проходят KiCad 10 ERC без нарушений.
+Полные matrix projects содержат 400/784 LED с тем же проверенным pin map и
+footprint; оба также проходят ERC без нарушений, а XML netlist подтверждает все
+row и RGB-column connections.
+Row-selection projects содержат translator, два decoder banks и 20/28 PMOS;
+оба проходят ERC без нарушений, а XML netlist подтверждает каждую цепь
+decoder-output/gate/row и явные NC. Точный TI RHL-24 footprint translator
+остаётся открытым и не назначен.
+Non-BOM ERC harness необходимо заменить реальными top-level MCU, power и matrix
+sheets при сборке полной иерархии. USB placement нельзя фиксировать до пункта 1.

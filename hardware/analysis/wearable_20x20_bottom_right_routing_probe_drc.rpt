@@ -1,5 +1,5 @@
 ** Drc report for wearable_20x20_bottom_right_routing_probe.kicad_pcb **
-** Created on 2026-10-07T18:55:44 **
+** Created on 2026-10-07T16:12:34 **
 ** Report includes: Errors, Warnings **
 
 ** Found 0 DRC violations **
@@ -680,11 +680,11 @@
 [unconnected_items]: Missing connection between items
     Local override; error
     @(43.7850 mm, 45.5150 mm): Pad 1 [ROW_19_ANODE] of D378 on F.Cu
-    @(44.9750 mm, 45.9000 mm): Track [ROW_19_ANODE] on In1.Cu, length 2.5000 mm
+    @(41.2850 mm, 45.5150 mm): Pad 1 [ROW_19_ANODE] of D377 on F.Cu
 [unconnected_items]: Missing connection between items
     Local override; error
+    @(44.9750 mm, 46.2850 mm): Track [ROW_19_ANODE] on In2.Cu, length 0.3850 mm
     @(43.7850 mm, 45.5150 mm): Pad 1 [ROW_19_ANODE] of D378 on F.Cu
-    @(41.2850 mm, 45.5150 mm): Pad 1 [ROW_19_ANODE] of D377 on F.Cu
 [unconnected_items]: Missing connection between items
     Local override; error
     @(11.2850 mm, 1.2850 mm): Pad 2 [COL_R_05] of D5 on F.Cu

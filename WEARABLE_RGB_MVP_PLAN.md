@@ -26,9 +26,10 @@
 
 ## 4. Создать две схемы матриц
 
-- 20×20: 400 common-anode RGB LED, 4× MBI5124, 20 PMOS-строк, 2× 74HC154.
+- 20×20: 400 common-anode RGB LED, 6× MBI5124, 20 PMOS-строк, 2× 74HC154.
 - 28×28: 784 RGB LED, 6× MBI5124, 28 PMOS-строк, 2× 74HC154.
-- Зафиксировать цепочку SDI/SDO, распределение RGB-каналов, отдельные enable двух банков и безопасную последовательность blank/address/latch/enable.
+- Использовать по два цвето-однородных MBI5124 для R/G/B, чтобы каждый IC получил корректное color-specific pre-charge word; передавать 96 бит на строку в обеих версиях.
+- Зафиксировать цепочку SDI/SDO, распределение RGB-каналов, отдельные enable двух банков и безопасную последовательность shift/blank/address/latch/enable.
 - Выполнить ERC и независимое ревью netlist до placement.
 
 ## 5. Спроектировать механику и оптику до разводки
@@ -61,7 +62,7 @@
 - Соблюсти USB differential pair, crystal keepout, непрерывные возвратные пути, локальную развязку и Kelvin feedback DC/DC.
 - Выполнить DRC, проверку токовых путей, падений напряжения, тепловых зон и экспорт 3D-модели.
 
-Статус: LED footprints и row/RGB-column nets добавлены. Pre-route DRC проходит с 0 violations; 499 unrouted groups ожидаются до драйверов и трассировки. Отдельные top-left и 180°-rotated bottom-right 2×2 routing probes проходят с 0 geometric violations для обоих pitches; детали в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. Copper zones, переход между ориентациями, bottom-left corner, полный повтор pattern и driver exits ещё не проверены, поэтому этот DRC не является финальным.
+Статус: LED footprints и row/RGB-column nets добавлены. Все 18 локальных routing probes проходят с 0 geometric violations для обоих pitches. Полный повтор pattern также сгенерирован: платы 20×20 и 28×28 имеют `0 DRC violations` и `0 unconnected items`. Семантическая проверка подтверждает 1 564/3 084 стандартных through vias, правильную карту 0°/90°/180°/270°, все row nets на физическом L3 (`In2.Cu`) и отсутствие tracks на L2 (`In1.Cu`). Midpoint transitions распределяют crossover по L1/L3/L4, а edge cells используют раздельные L4-коридоры вокруг row vias. Детали и воспроизводимые артефакты находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. Copper zones, L2 return-path continuity, driver exits и backside placement ещё не проверены, поэтому результат доказывает только полную LED-матрицу, а не production-ready PCB.
 
 ## 8. Подготовить прошивочную платформу
 

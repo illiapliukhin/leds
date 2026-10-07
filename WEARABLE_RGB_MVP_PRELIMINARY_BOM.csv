@@ -1,11 +1,12 @@
 Category,Reference,Manufacturer Part,Description,LCSC Candidate,Qty 20x20,Qty 28x28,Status / required validation
 MCU,U1,ESP32-S3FN8,"Dual-core MCU, 8 MB Flash, native USB, QFN56",C2913196,1,1,"CONDITIONAL: quad-flash and USB confirmed; complete pin/glitch/ADC audit and lifecycle check"
 RGB LED,D1-D400 / D1-D784,MHPA1010RGBDT,"1.0x1.0 mm common-anode RGB LED",C404280,400,784,"CONDITIONAL: pin map land pattern and maximum two reflows verified; confirm bin stock and alternate"
-LED driver,U_LED1-U_LED4/6,MBI5124GP-B,"16-channel constant-current sink driver",C256866,4,6,"CONDITIONAL: 1.82k gives about 10.05mA; use 20MHz baseline; verify VDS thermal stock and alternate"
+LED driver,U_LED_R_A/B U_LED_G_A/B U_LED_B_A/B,MBI5124GP-B,"16-channel constant-current sink driver",C256866,6,6,"CONDITIONAL: color-homogeneous drivers use R/G/B pre-charge words; 1.96k 0.1% gives about 9.41mA and 9.95mA combined worst case; verify VDS thermal stock and alternate"
 Row translator,U_ROW_XLAT,SN74LVC8T245RHLR,"8-bit dual-supply translator with Ioff and VCC isolation",- ,1,1,"CONDITIONAL: selected for 3.3V to 4.1V row controls; verify package availability and power ramps"
 Row decoder,U_DEC1-U_DEC2,"74HC154PW,118","4-to-16 active-low decoder; TSSOP-24",- ,2,2,"CONDITIONAL: selected behind translator; verify stock and measured gate timing"
 Row PMOS,Q_ROW1-Q_ROW20/28,AO3403,"-30V low-Qg P-channel MOSFET; SOT-23",- ,20,28,"CONDITIONAL: full production; 2.8nC typical Qg and 200mR max at -2.5V; measure drop and switching"
 LED signal buffer,U_LED_BUF,SN74LV125APWR,"Quad buffer with Ioff for switched MBI5124 domain",- ,1,1,"CONDITIONAL: selected for GPIO back-power isolation; verify stock and power-up behavior"
+LED SDO return buffer,U_LED_SDO_BUF,SN74LVC1G125DBVR,"Single buffer with Ioff for MBI5124 configuration readback",- ,1,1,"CONDITIONAL: SDO return to GPIO48 with always-enabled output and MCU-side 100k pull-down; verify stock and power-up behavior"
 IMU,U_IMU,BMI270,"6-axis accelerometer and gyroscope",C2836813,1,1,"Selected; verify interrupt and low-power configuration"
 Charger,U_CHG,BQ25185,"1-cell linear charger with power path and ship mode",C19725033,1,1,"CONDITIONAL: 24k/18k ILIM and 1k/750R ISET confirmed; design CE resampling TS network and thermal policy"
 LED DC/DC,U_LED_PWR,TPS63802DLAR,"Synchronous buck-boost converter; VSON-HR-10",C2845237,1,1,"CONDITIONAL: use 655k/91k feedback 10uF input 2x22uF output; verify thermal/load margin"

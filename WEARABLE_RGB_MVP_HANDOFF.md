@@ -1,7 +1,12 @@
 # Wearable RGB MVP — передача проекта
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
-Важно: KiCad 10 PCB-каркасы созданы и проходят DRC, но схемы, footprints, placement/routing, ERC и физические измерения ещё не выполнены. Все значения, помеченные как требующие проверки, нельзя считать production-ready.
+Важно: KiCad 10 PCB-каркасы созданы и проходят DRC. Сгенерированные LED-driver
+полные LED-matrix и row-selection проекты обеих версий проходят автономный ERC
+без нарушений, но общая иерархия, power/MCU sheets, footprints остальных
+компонентов, полный placement/routing и физические измерения ещё не выполнены.
+Все значения, помеченные как требующие проверки, нельзя считать
+production-ready.
 
 ## 1. Цель
 
@@ -60,6 +65,7 @@
 | 38…42 | charger control/status/ship |
 | 43/44 | service UART |
 | 47 | ROW_XLAT_OE_N |
+| 48 | LED_SDO_RETURN |
 
 Проверить полный pin map, reset glitches, ADC-конфликты и ограничения выбранного ESP-IDF peripheral routing.
 
@@ -70,9 +76,11 @@
 - Проверенный pin map: 1 — common anode, 2 — red cathode, 3 — green cathode, 4 — blue cathode.
 - Локальный KiCad footprint: `hardware/libraries/leds.pretty/MHPA1010RGBDT.kicad_mod`, pads 0,43×0,43 мм по datasheet Rev.2 page 2.
 - Драйверы: MBI5124GP-B, 16 constant-current sink channels.
-- 20×20: 4 драйвера, 64 передаваемых бита на строку.
+- 20×20: 6 драйверов, 96 передаваемых бит на строку.
 - 28×28: 6 драйверов, 96 передаваемых бит на строку.
-- Rext: 1,82 кОм даёт по datasheet около 10,05 мА/канал при VDD 3,3 В.
+- По два драйвера выделены каждому цвету; смешивать R/G/B на одном IC нельзя без неподтверждённого компромисса, поскольку один configuration register задаёт pre-charge для всех 16 выходов.
+- Configuration words: red `0x7D6B`, green `0xF16B`, blue `0xED6B`.
+- Rext: 1,96 кОм ±0,1% задаёт около 9,41 мА/канал при VDD 3,3 В; совместный worst case ошибок между IC/каналами составляет около 9,95 мА.
 - Rext, реальный ток и цветовой баланс обязательно измерить на EVT.
 - Драйверы питаются от отключаемой LED_LOGIC_3V3.
 
@@ -84,18 +92,58 @@
 - `SN74LVC8T245RHLR` переводит A0…A3 и два bank-enable с 3,3 В на LED_4V1;
 - translator имеет `Ioff`, VCC isolation и аппаратный `/OE` pull-up;
 - `SN74LV125APWR` изолирует LED clock/data/latch/OE от выключенного LED_LOGIC_3V3;
+- `SN74LVC1G125DBVR` возвращает SDO последнего MBI5124 на `GPIO48`, имеет `Ioff`, постоянно разрешён и дополнен 100 кОм pull-down на стороне MCU;
 - отдельные DEC_A_EN_N и DEC_B_EN_N исключают включение двух банков.
 
 Безопасная последовательность строки:
 
-1. MBI_OE = 1.
-2. DEC_A_EN_N = 1 и DEC_B_EN_N = 1.
-3. Изменить адрес.
-4. Передать данные и выполнить latch.
-5. Включить только нужный дешифратор.
-6. MBI_OE = 0.
+1. Передать следующие 96 бит при текущей активной строке и `MBI_LE = 0`.
+2. `MBI_OE = 1`.
+3. `DEC_A_EN_N = 1` и `DEC_B_EN_N = 1`.
+4. Выдержать измеренный break-before-make dead time.
+5. Изменить адрес.
+6. Выполнить latch уже переданных данных.
+7. Включить только нужный дешифратор.
+8. `MBI_OE = 0`.
 
 Точные connections, default pulls и power sequencing зафиксированы в `hardware/common/PCB_ARCHITECTURE.md`; поведение на медленных фронтах питания проверить на EVT.
+
+KiCad 10 driver sheets:
+
+- `hardware/wearable_20x20/led_drivers.kicad_sch`;
+- `hardware/wearable_28x28/led_drivers.kicad_sch`;
+- воспроизводятся `hardware/tools/generate_led_driver_schematics.py`;
+- используют pin-verified `PartSignal_Wearable:MBI5124GP-B`;
+- содержат шесть драйверов, `R-EXT`, decoupling, полный SDO-chain и
+  `SN74LVC1G125DBVR`;
+- явный non-BOM ERC harness моделирует внешние MCU/power/matrix connections до
+  появления top-level hierarchy;
+- обе версии проходят KiCad 10 ERC с `0 violations`.
+
+KiCad 10 matrix sheets:
+
+- `hardware/wearable_20x20/led_matrix.kicad_sch` содержит 400 LED;
+- `hardware/wearable_28x28/led_matrix.kicad_sch` содержит 784 LED;
+- воспроизводятся `hardware/tools/generate_led_matrix_schematics.py`;
+- references `D1…D400/784` совпадают с PCB и назначаются row-major;
+- pin 1 каждого LED подключён к `ROW_nn_ANODE`, pins 2/3/4 — к
+  `COL_R/G/B_nn`;
+- оба листа проходят KiCad 10 ERC с `0 violations`; XML netlist подтверждает
+  80/112 уникальных row и color-column nets.
+
+KiCad 10 row-selection sheets:
+
+- `hardware/wearable_20x20/row_selection.kicad_sch`;
+- `hardware/wearable_28x28/row_selection.kicad_sch`;
+- воспроизводятся `hardware/tools/generate_row_selection_schematics.py`;
+- содержат `SN74LVC8T245RHLR`, два `74HC154PW,118`, 20/28 `AO3403`,
+  gate-series 33 Ом, gate pull-up 47 кОм, B-side defaults и decoupling;
+- неиспользуемые translator inputs заземлены через 0 Ом, соответствующие
+  outputs и неиспользуемые decoder outputs явно отмечены NC;
+- оба листа проходят ERC с `0 violations`; XML netlist подтверждает точное
+  соответствие decoder outputs строкам и 14/6 NC pins;
+- footprint `SN74LVC8T245RHLR` намеренно оставлен открытым до проверки точного
+  TI RHL-24 land pattern.
 
 ### Расчёт обновления
 
@@ -110,12 +158,12 @@
 
 ### Максимальный LED-ток
 
-При 10 мА на цвет и одной активной строке:
+При 9,41 мА на цвет и одной активной строке:
 
 | Версия | Ток LED_4V1 | Мощность LED_4V1 |
 |---|---:|---:|
-| 20×20 | 600 мА | 2,46 Вт |
-| 28×28 | 840 мА | 3,44 Вт |
+| 20×20 | 565 мА | 2,32 Вт |
+| 28×28 | 791 мА | 3,24 Вт |
 
 Полный белый должен ограничиваться прошивкой. Для носимого непрерывного режима ориентироваться на суммарную мощность около 1–1,2 Вт и дополнительно ограничивать её по температуре и аккумулятору.
 
@@ -144,7 +192,7 @@
 | SYS | BQ25185 power path | LDO, LED DC/DC |
 | AON_3V3 | TPS7A2033 | ESP32-S3, BMI270, MAX17048 |
 | LED_4V1 | TPS63802 | LED-аноды, row decoders |
-| LED_LOGIC_3V3 | TPS22917DBVR | MBI5124, SN74LV125A |
+| LED_LOGIC_3V3 | TPS22917DBVR | MBI5124, SN74LV125A, SN74LVC1G125 |
 | AUDIO_3V3 | TPS22917DBVR | microphone, TLV9001 |
 
 TPS63802:
@@ -315,7 +363,7 @@ KiCad 10 PCB-каркасы:
 - `B.SilkS`: `PCB CREATED BY ILLIA PLIUKHIN` и маленькая пятиконечная звезда;
 - LED references находятся на `F.Fab`; все остальные компоненты должны иметь физические reference designators не меньше 1,0/0,15 мм без перекрытий.
 
-Текущие outline 49,3 × 49,3 мм и 61,2 × 61,2 мм ещё не заморожены для производства, но увеличивать их сейчас не требуется. Специальные top-left и 180°-rotated bottom-right escapes с 0,40 мм edge row bus и RGB-переходами на L4 прошли KiCad DRC без геометрических нарушений для шага 2,50 и 2,20 мм. Probe и расчёты находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. До freeze необходимо проверить переход между ориентациями, bottom-left corner, размножить pattern на полный массив и проверить целостность L2 и выходы к драйверам.
+Текущие outline 49,3 × 49,3 мм и 61,2 × 61,2 мм ещё не заморожены для производства, но увеличивать их сейчас не требуется. Все 18 локальных corner/orientation probes прошли KiCad 10.0.6 DRC без геометрических нарушений для шага 2,50 и 2,20 мм. Проверенная карта 0°/90°/180°/270° размножена на полные массивы: обе сгенерированные платы имеют `0 DRC violations` и `0 unconnected items`. Семантическая проверка подтверждает 400/784 LED, 1 564/3 084 стандартных through vias, правильные ориентации, все row nets на физическом L3 (`In2.Cu`) и 0 tracks на L2 (`In1.Cu`). Midpoint cells используют L1/L3/L4 crossover-коридоры и локальные row buses 0,40 мм. Генератор, платы, DRC reports и расчёты находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. До freeze необходимо добавить L2 GND zone, проверить return-path continuity, разместить backside components и провести row/RGB exits к драйверам без нарушения доказанных коридоров.
 
 ### Placement
 
@@ -433,7 +481,7 @@ Lanyard loop выполняется корпусом, не PCB. IP-рейтин�
 
 1. Binning и approved alternate MHPA1010RGBDT.
 2. Реальные switching times и voltage drop AO3403 с выбранным дешифратором.
-3. Power-ramp/back-power проверка SN74LVC8T245, SN74LV125A и TPS22917.
+3. Power-ramp/back-power проверка SN74LVC8T245, SN74LV125A, SN74LVC1G125 и TPS22917.
 4. TPS63802 output-current/thermal margin в закрытом корпусе.
 5. Полный ESP32-S3FN8 pin audit, reset glitches и ADC-конфликты.
 6. USB-C connector по механическому разрезу корпуса.
@@ -459,4 +507,7 @@ test/
 docs/
 ```
 
-Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, а схемная архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап: общая схема, два matrix sheets, ERC, механика и только затем placement/routing.
+Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, а схемная
+архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап: power и
+MCU sheets, общая иерархия, механика и только затем production
+placement/routing.

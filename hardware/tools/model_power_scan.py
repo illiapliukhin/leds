@@ -33,7 +33,7 @@ VARIANTS = (
     Variant(
         name="wearable_20x20",
         matrix_size=20,
-        serialized_bits_per_row=64,
+        serialized_bits_per_row=96,
         target_refresh_hz=175.0,
     ),
     Variant(
@@ -45,7 +45,14 @@ VARIANTS = (
 )
 
 OUTPUT_VOLTAGE_V = 4.099
-CHANNEL_CURRENT_A = 0.01005
+DRIVER_REFERENCE_VOLTAGE_V = 1.23
+DRIVER_CURRENT_GAIN = 15
+DRIVER_REFERENCE_RESISTANCE_OHM = 1_960
+CHANNEL_CURRENT_A = (
+    DRIVER_REFERENCE_VOLTAGE_V
+    * DRIVER_CURRENT_GAIN
+    / DRIVER_REFERENCE_RESISTANCE_OHM
+)
 COLOR_CHANNELS_PER_PIXEL = 3
 PHYSICAL_BIT_PLANES = 6
 SPI_CLOCK_HZ = 20_000_000
@@ -55,6 +62,20 @@ MINIMUM_BATTERY_VOLTAGE_V = 3.15
 NOMINAL_CONVERTER_EFFICIENCY = 0.90
 TPS63802_THERMAL_RESISTANCE_C_PER_W = 81.0
 WEARABLE_CONTINUOUS_LIMITS_W = (1.0, 1.2)
+
+
+def validate_variant(variant: Variant) -> None:
+    expected_serialized_bits = (
+        (variant.matrix_size + 15)
+        // 16
+        * 16
+        * COLOR_CHANNELS_PER_PIXEL
+    )
+    if variant.serialized_bits_per_row != expected_serialized_bits:
+        raise ValueError(
+            f"{variant.name}: expected {expected_serialized_bits} serialized "
+            "bits for color-homogeneous 16-channel drivers"
+        )
 
 
 def calculate_model_result(variant: Variant) -> ModelResult:
@@ -136,7 +157,11 @@ def write_csv(results: tuple[ModelResult, ...], output_path: Path) -> None:
     field_names = tuple(ModelResult.__dataclass_fields__.keys())
 
     with output_path.open("w", encoding="utf-8", newline="") as output_file:
-        writer = csv.DictWriter(output_file, fieldnames=field_names)
+        writer = csv.DictWriter(
+            output_file,
+            fieldnames=field_names,
+            lineterminator="\n",
+        )
         writer.writeheader()
 
         for result in results:
@@ -158,6 +183,7 @@ def write_markdown(results: tuple[ModelResult, ...], output_path: Path) -> None:
         "",
         f"- LED rail: {OUTPUT_VOLTAGE_V:.3f} V.",
         f"- Peak channel current: {CHANNEL_CURRENT_A * 1000:.2f} mA.",
+        "- Six color-homogeneous drivers and 96 serialized bits per row.",
         f"- Physical PWM depth: {PHYSICAL_BIT_PLANES} bits.",
         f"- SPI clock: {SPI_CLOCK_HZ / 1_000_000:.1f} MHz.",
         f"- Row transition dead time: {ROW_DEAD_TIME_US:.1f} us per bit-plane row.",
@@ -237,6 +263,9 @@ def main() -> None:
     repository_root = Path(__file__).resolve().parents[2]
     output_directory = repository_root / "hardware" / "analysis"
     output_directory.mkdir(parents=True, exist_ok=True)
+
+    for variant in VARIANTS:
+        validate_variant(variant)
 
     results = tuple(calculate_model_result(variant) for variant in VARIANTS)
 
