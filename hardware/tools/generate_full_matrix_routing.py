@@ -98,6 +98,7 @@ def route_profiled_anode(
     profile: OrientationRoutingProfile,
     row_bus_y_mm: float,
     row_bus_width_mm: float,
+    minimum_via_y_mm: float,
     maximum_via_y_mm: float,
 ) -> float:
     if profile.vertical_direction > 0:
@@ -107,6 +108,7 @@ def route_profiled_anode(
             row_bus_y_mm,
             row_bus_width_mm,
             profile.anode_via_x_offset_mm,
+            minimum_via_y_mm,
         )
     return route_rotated_anode(
         board,
@@ -721,6 +723,7 @@ def route_full_matrix(
                 )
             )
 
+    minimum_via_y_mm = get_outer_row_bus_y(variant, top=True)
     maximum_via_y_mm = get_outer_row_bus_y(variant, top=False)
     for row_number in range(1, variant.matrix_size + 1):
         row_bus_y_mm, row_bus_width_mm = get_row_bus_spec(
@@ -743,6 +746,7 @@ def route_full_matrix(
                 profile,
                 row_bus_y_mm,
                 row_bus_width_mm,
+                minimum_via_y_mm,
                 maximum_via_y_mm,
             )
             row_via_positions.setdefault(row_number, []).append(via_x_mm)

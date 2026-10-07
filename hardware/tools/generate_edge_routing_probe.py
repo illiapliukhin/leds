@@ -380,11 +380,12 @@ def route_anode(
     row_bus_y_mm: float,
     row_bus_width_mm: float,
     via_x_offset_mm: float = 0.54,
+    minimum_via_y_mm: float = 0.525,
 ) -> float:
     anode_pad = get_pad(footprint, "1")
     anode_pad_x_mm, anode_pad_y_mm = millimeters(anode_pad.GetPosition())
     via_x_mm = anode_pad_x_mm + via_x_offset_mm
-    via_y_mm = max(anode_pad_y_mm, 0.525)
+    via_y_mm = max(anode_pad_y_mm, minimum_via_y_mm)
 
     add_track(
         board,
