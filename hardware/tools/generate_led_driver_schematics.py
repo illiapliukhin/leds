@@ -601,6 +601,7 @@ def write_project_library_tables(output_directory: Path) -> None:
 """
     (output_directory / "sym-lib-table").write_text(symbol_table, encoding="utf-8")
     (output_directory / "fp-lib-table").write_text(footprint_table, encoding="utf-8")
+    (output_directory / "led_drivers.kicad_pro").write_text("{}\n", encoding="utf-8")
 
 
 def generate_variant_schematic(repository_root: Path, variant: MatrixVariant) -> Path:
