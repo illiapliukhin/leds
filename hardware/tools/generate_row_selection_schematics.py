@@ -62,10 +62,11 @@ def add_resistor(
         value=value,
         position=position,
         footprint=RESISTOR_FOOTPRINT,
+        rotation=90,
         properties={"Function": function_name},
     )
-    add_pin_label(schematic, generation_key, reference, "1", first_net)
-    add_pin_label(schematic, generation_key, reference, "2", second_net)
+    add_pin_label(schematic, generation_key, reference, "2", first_net)
+    add_pin_label(schematic, generation_key, reference, "1", second_net)
 
 
 def add_capacitor(
