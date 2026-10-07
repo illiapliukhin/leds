@@ -17,6 +17,9 @@ from generate_edge_routing_probe import (
 )
 
 
+BOUNDARY_ANODE_VIA_X_OFFSET_MM = 0.45
+
+
 @dataclass(frozen=True)
 class OrientationRoutingProfile:
     orientation_degrees: int
@@ -32,7 +35,7 @@ NORMAL_PROFILE = OrientationRoutingProfile(
     side_pad_offsets=(("3", -0.375), ("2", 0.375)),
     central_pad_number="4",
     vertical_direction=1.0,
-    anode_via_x_offset_mm=0.54,
+    anode_via_x_offset_mm=BOUNDARY_ANODE_VIA_X_OFFSET_MM,
     trunk_offsets=(
         ("G", -0.375, 0.925),
         ("B", 0.0, 1.275),
@@ -45,7 +48,7 @@ TOP_RIGHT_PROFILE = OrientationRoutingProfile(
     side_pad_offsets=(("3", 0.375), ("4", -0.375)),
     central_pad_number="2",
     vertical_direction=1.0,
-    anode_via_x_offset_mm=-0.54,
+    anode_via_x_offset_mm=-BOUNDARY_ANODE_VIA_X_OFFSET_MM,
     trunk_offsets=(
         ("G", 0.375, 0.925),
         ("B", -0.375, 0.925),
@@ -58,7 +61,7 @@ ROTATED_PROFILE = OrientationRoutingProfile(
     side_pad_offsets=(("3", 0.375), ("2", -0.375)),
     central_pad_number="4",
     vertical_direction=-1.0,
-    anode_via_x_offset_mm=-0.54,
+    anode_via_x_offset_mm=-BOUNDARY_ANODE_VIA_X_OFFSET_MM,
     trunk_offsets=(
         ("G", 0.375, -0.925),
         ("B", 0.0, -1.275),
@@ -71,7 +74,7 @@ BOTTOM_LEFT_PROFILE = OrientationRoutingProfile(
     side_pad_offsets=(("3", -0.375), ("4", 0.375)),
     central_pad_number="2",
     vertical_direction=-1.0,
-    anode_via_x_offset_mm=0.54,
+    anode_via_x_offset_mm=BOUNDARY_ANODE_VIA_X_OFFSET_MM,
     trunk_offsets=(
         ("G", -0.375, -0.925),
         ("B", 0.375, -0.925),
@@ -257,6 +260,138 @@ def generate_column_boundary_probe(
     return output_path
 
 
+def get_trunk_offset(
+    profile: OrientationRoutingProfile,
+    color_name: str,
+) -> tuple[float, float]:
+    for profile_color_name, x_offset_mm, y_offset_mm in (
+        profile.trunk_offsets
+    ):
+        if profile_color_name == color_name:
+            return x_offset_mm, y_offset_mm
+
+    raise ValueError(
+        f"Unable to find {color_name} in orientation profile "
+        f"{profile.orientation_degrees}"
+    )
+
+
+def generate_row_boundary_probe(
+    repository_root: Path,
+    variant: ProbeVariant,
+    top_right: bool,
+) -> Path:
+    boundary_name = "top_right" if top_right else "bottom_left"
+    output_path = (
+        repository_root
+        / "hardware"
+        / "analysis"
+        / (
+            f"{variant.board_name}_{boundary_name}"
+            "_row_boundary_routing_probe.kicad_pcb"
+        )
+    )
+    board = pcbnew.LoadBoard(str(get_board_path(repository_root, variant)))
+
+    if top_right:
+        row_profiles = (
+            (2, TOP_RIGHT_PROFILE),
+            (3, NORMAL_PROFILE),
+        )
+        column_numbers = (
+            variant.matrix_size - 1,
+            variant.matrix_size,
+        )
+    else:
+        row_profiles = (
+            (variant.matrix_size - 2, ROTATED_PROFILE),
+            (variant.matrix_size - 1, BOTTOM_LEFT_PROFILE),
+        )
+        column_numbers = (1, 2)
+
+    row_via_extents: dict[int, list[float]] = {}
+    for row_number, profile in row_profiles:
+        row_center_y_mm = (
+            0.9 + (row_number - 1) * variant.led_pitch_mm
+        )
+        for column_number in column_numbers:
+            footprint = get_led(
+                board,
+                get_led_reference(variant, row_number, column_number),
+            )
+            via_x_mm = route_profiled_led(
+                board,
+                footprint,
+                profile,
+                row_center_y_mm,
+                row_center_y_mm,
+                INNER_ROW_WIDTH_MM,
+                variant.board_size_mm - 0.525,
+            )
+            row_via_extents.setdefault(row_number, []).append(via_x_mm)
+
+    for row_number, _ in row_profiles:
+        row_center_y_mm = (
+            0.9 + (row_number - 1) * variant.led_pitch_mm
+        )
+        row_net = get_pad(
+            get_led(
+                board,
+                get_led_reference(
+                    variant,
+                    row_number,
+                    column_numbers[0],
+                ),
+            ),
+            "1",
+        ).GetNet()
+        row_via_x_values = row_via_extents[row_number]
+        add_track(
+            board,
+            row_net,
+            pcbnew.In2_Cu,
+            min(row_via_x_values),
+            row_center_y_mm,
+            max(row_via_x_values),
+            row_center_y_mm,
+            INNER_ROW_WIDTH_MM,
+        )
+
+    upper_row_number, upper_profile = row_profiles[0]
+    lower_row_number, lower_profile = row_profiles[1]
+    upper_row_center_y_mm = (
+        0.9 + (upper_row_number - 1) * variant.led_pitch_mm
+    )
+    lower_row_center_y_mm = (
+        0.9 + (lower_row_number - 1) * variant.led_pitch_mm
+    )
+    for column_number in column_numbers:
+        column_center_x_mm = (
+            0.9 + (column_number - 1) * variant.led_pitch_mm
+        )
+        for color_name in ("R", "G", "B"):
+            upper_x_offset_mm, upper_y_offset_mm = get_trunk_offset(
+                upper_profile,
+                color_name,
+            )
+            lower_x_offset_mm, lower_y_offset_mm = get_trunk_offset(
+                lower_profile,
+                color_name,
+            )
+            add_track(
+                board,
+                board.FindNet(f"COL_{color_name}_{column_number:02d}"),
+                pcbnew.B_Cu,
+                column_center_x_mm + upper_x_offset_mm,
+                upper_row_center_y_mm + upper_y_offset_mm,
+                column_center_x_mm + lower_x_offset_mm,
+                lower_row_center_y_mm + lower_y_offset_mm,
+            )
+
+    pcbnew.SaveBoard(str(output_path), board)
+    return output_path
+
+
 if __name__ == "__main__":
     root_path = Path(__file__).resolve().parents[2]
     for probe_variant in PROBE_VARIANTS:
@@ -272,3 +407,15 @@ if __name__ == "__main__":
             top_right=False,
         )
         print(f"Generated {generated_bottom_left_path}")
+        generated_top_right_row_path = generate_row_boundary_probe(
+            root_path,
+            probe_variant,
+            top_right=True,
+        )
+        print(f"Generated {generated_top_right_row_path}")
+        generated_bottom_left_row_path = generate_row_boundary_probe(
+            root_path,
+            probe_variant,
+            top_right=False,
+        )
+        print(f"Generated {generated_bottom_left_row_path}")
