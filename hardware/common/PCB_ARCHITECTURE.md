@@ -1,10 +1,12 @@
 # Common PCB architecture
 
-Status: partial KiCad 10 implementation. Generated LED-driver, complete
-LED-matrix, and row-selection projects exist for both variants, and the
-DRC-proven matrix routing is promoted into both working PCBs. Power, MCU,
-top-level hierarchy, backside placement/routing, and L2 GND remain incomplete.
-Values marked `EVT` require measurement before production release.
+Status: conditional KiCad 10 hierarchy. Generated power, MCU/USB,
+IMU/gauge/input, audio, LED-driver, complete LED-matrix, and row-selection
+sheets are assembled into harness-free roots for both variants. The DRC-proven
+matrix routing is promoted into both working PCBs. Exact externally selected
+parts, several critical footprints, backside placement/routing, and L2 GND
+remain incomplete. Values marked `EVT` require measurement before production
+release.
 
 ## Power domains
 

@@ -434,10 +434,19 @@ def add_erc_harness(
 def generate_variant_row_selection(
     repository_root: Path,
     variant: MatrixVariant,
+    *,
+    standalone_erc: bool = False,
 ) -> Path:
     generation_key = f"row-selection:{variant.directory_name}"
+    if standalone_erc:
+        generation_key += ":standalone-erc"
     output_directory = repository_root / "hardware" / variant.directory_name
-    output_path = output_directory / "row_selection.kicad_sch"
+    output_name = (
+        "row_selection_standalone_erc.kicad_sch"
+        if standalone_erc
+        else "row_selection.kicad_sch"
+    )
+    output_path = output_directory / output_name
     output_directory.mkdir(parents=True, exist_ok=True)
     write_project_library_tables(output_directory, project_name="row_selection")
 
@@ -458,7 +467,8 @@ def generate_variant_row_selection(
     )
     add_translator(schematic, generation_key)
     add_row_banks(schematic, generation_key, variant)
-    add_erc_harness(schematic, generation_key, variant)
+    if standalone_erc:
+        add_erc_harness(schematic, generation_key, variant)
     schematic.save(output_path)
     subprocess.run(
         ("kicad-cli", "sch", "upgrade", "--force", str(output_path)),
@@ -479,6 +489,12 @@ def main() -> None:
             variant,
         )
         print(f"Generated {generated_path}")
+        standalone_path = generate_variant_row_selection(
+            repository_root,
+            variant,
+            standalone_erc=True,
+        )
+        print(f"Generated {standalone_path}")
 
 
 if __name__ == "__main__":

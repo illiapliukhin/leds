@@ -2,7 +2,9 @@
 
 Дата проверки: 2026-10-07.
 
-Статус: частичный freeze. Компоненты со статусом `OPEN` нельзя переносить в финальную схему или заказывать для PCBA без закрытия указанной проверки.
+Статус: частичный freeze. Полная generated hierarchy существует, но детали со
+статусом `BLOCKED` не имеют разрешённых production footprints и не могут
+заказываться для PCBA без закрытия указанной проверки.
 
 ## Источники
 
@@ -94,10 +96,11 @@
 - При SPI 20 МГц и 1,5 мкс break-before-make расчётный LSB hold остаётся положительным: 4,09 мкс и 4,33 мкс.
 - Это screening model, не замена SPICE, SI/PI, enclosure thermal и EVT-измерениям.
 
-## Блокирующие вопросы до схемы
+## Блокирующие вопросы до production layout
 
 1. Выбрать точный USB-C и завершить механический cross-section.
-2. Завершить pin audit ESP32-S3FN8, включая reset glitches и состояние всех LED/charger GPIO до запуска firmware.
+2. Завершить reset-glitch/ESP-IDF audit ESP32-S3FN8; физические QFN56 pins и
+   GPIO назначения проверены в `hardware/common/MCU_PIN_AUDIT.md`.
 3. Проверить оставшиеся критические компоненты: BMI270, MAX17048, TPS7A2033, microphone, TLV9001 и USB ESD.
 4. Получить актуальные stock/lifecycle данные и compatible alternate минимум для LED, драйвера, microphone и DC/DC.
 
@@ -115,5 +118,8 @@ Row-selection projects содержат translator, два decoder banks и 20/2
 decoder-output/gate/row и явные NC. Точный TI RHL-24 footprint translator
 назначен и проверяется из локальной библиотеки
 `hardware/libraries/packages.pretty`.
-Non-BOM ERC harness необходимо заменить реальными top-level MCU, power и matrix
-sheets при сборке полной иерархии. USB placement нельзя фиксировать до пункта 1.
+Обе harness-free top-level hierarchy содержат power, MCU/USB, IMU/gauge/input,
+audio, LED drivers, row selection и полную matrix; standalone harness sheets
+сохранены только для автономного ERC. USB connector, battery/NTC/button,
+microphone и несколько package land patterns остаются намеренно заблокированы,
+поэтому hierarchy не является разрешением на PCBA-заказ.

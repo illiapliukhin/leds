@@ -2,11 +2,10 @@
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
 Важно: доказанная полная трассировка LED-матрицы перенесена в рабочие KiCad 10
-PCB обеих версий. Сгенерированные LED-driver
-полные LED-matrix и row-selection проекты обеих версий проходят автономный ERC
-без нарушений, но общая иерархия, power/MCU sheets, footprints остальных
-компонентов, backside placement/routing, L2 GND и физические измерения ещё не
-выполнены.
+PCB обеих версий. Harness-free roots включают generated power, MCU/USB,
+IMU/gauge/input, audio, LED-driver, полные LED-matrix и row-selection sheets.
+Точные внешние компоненты, несколько критических footprints, backside
+placement/routing, L2 GND и физические измерения ещё не выполнены.
 Все значения, помеченные как требующие проверки, нельзя считать
 production-ready.
 
@@ -64,12 +63,15 @@ production-ready.
 | 35 | DEC_B_EN_N |
 | 36 | LED_EN |
 | 37 | AUDIO_EN |
-| 38…42 | charger control/status/ship |
+| 38…41 | charger control/status/ship |
+| 42 | LED_LOGIC_EN |
 | 43/44 | service UART |
 | 47 | ROW_XLAT_OE_N |
 | 48 | LED_SDO_RETURN |
 
-Проверить полный pin map, reset glitches, ADC-конфликты и ограничения выбранного ESP-IDF peripheral routing.
+Физические QFN56 pins и GPIO-функции проверены в
+`hardware/common/MCU_PIN_AUDIT.md`. Reset glitches, ADC-конфликты и ограничения
+выбранного ESP-IDF peripheral routing остаются EVT/firmware-проверками.
 
 ### RGB-матрица
 
@@ -527,5 +529,6 @@ docs/
 Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, схемная
 архитектура — в `hardware/common/PCB_ARCHITECTURE.md`, расчётные ограничения —
 в `hardware/analysis/DESIGN_BUDGETS.md`, а release gates — в
-`manufacturing/RELEASE_CHECKLIST.md`. Следующий этап: power и MCU sheets, общая
-иерархия, backside placement/routing и L2 GND.
+`manufacturing/RELEASE_CHECKLIST.md`. Следующий этап: закрыть заблокированные
+component land patterns и внешние MPN, затем выполнить backside
+placement/routing и L2 GND.
