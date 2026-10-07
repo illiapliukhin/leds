@@ -378,7 +378,7 @@ def route_edge_row_transition_rgb(
                 footprint_y_mm,
             )
             approach_y_mm = via_y_mm + (
-                0.2 if via_y_mm > transition_center_y_mm else -0.2
+                0.18 if via_y_mm > transition_center_y_mm else -0.18
             )
             add_track(
                 board,
@@ -468,52 +468,88 @@ def route_edge_row_transition_rgb(
     lower_blue_via = via_positions_by_pad_number[id(lower_blue_pad)]
     upper_red_via = via_positions_by_pad_number[id(upper_red_pad)]
     lower_red_via = via_positions_by_pad_number[id(lower_red_pad)]
-    crossover_routes = (
-        (
-            upper_blue_pad.GetNet(),
-            pcbnew.In2_Cu,
-            upper_blue_via,
-            lower_blue_via,
-            transition_center_y_mm - 0.5,
-        ),
-        (
-            upper_red_pad.GetNet(),
-            pcbnew.B_Cu,
-            upper_red_via,
-            lower_red_via,
-            transition_center_y_mm + 0.5,
-        ),
-    )
-    for net, layer, upper_via, lower_via, crossover_y_mm in (
-        crossover_routes
-    ):
-        add_track(
-            board,
-            net,
-            layer,
-            upper_via[0],
-            upper_via[1],
-            upper_via[0],
-            crossover_y_mm,
+    if top_right:
+        crossover_routes = (
+            (
+                upper_blue_pad.GetNet(),
+                pcbnew.In2_Cu,
+                (
+                    upper_blue_via,
+                    (
+                        upper_blue_via[0],
+                        transition_center_y_mm - 0.5,
+                    ),
+                    (
+                        lower_blue_via[0],
+                        transition_center_y_mm - 0.5,
+                    ),
+                    lower_blue_via,
+                ),
+            ),
+            (
+                upper_red_pad.GetNet(),
+                pcbnew.B_Cu,
+                (
+                    upper_red_via,
+                    (
+                        upper_red_via[0],
+                        transition_center_y_mm + 0.5,
+                    ),
+                    (
+                        lower_red_via[0],
+                        transition_center_y_mm + 0.5,
+                    ),
+                    lower_red_via,
+                ),
+            ),
         )
-        add_track(
-            board,
-            net,
-            layer,
-            upper_via[0],
-            crossover_y_mm,
-            lower_via[0],
-            crossover_y_mm,
+    else:
+        outside_x_mm = upper_center_x_mm + 1.4
+        crossover_routes = (
+            (
+                upper_blue_pad.GetNet(),
+                pcbnew.In2_Cu,
+                (
+                    upper_blue_via,
+                    (
+                        upper_blue_via[0],
+                        transition_center_y_mm - 0.5,
+                    ),
+                    (outside_x_mm, transition_center_y_mm - 0.5),
+                    (outside_x_mm, lower_blue_via[1]),
+                    lower_blue_via,
+                ),
+            ),
+            (
+                upper_red_pad.GetNet(),
+                pcbnew.B_Cu,
+                (
+                    upper_red_via,
+                    (outside_x_mm, upper_red_via[1]),
+                    (outside_x_mm, transition_center_y_mm + 0.5),
+                    (
+                        lower_red_via[0],
+                        transition_center_y_mm + 0.5,
+                    ),
+                    lower_red_via,
+                ),
+            ),
         )
-        add_track(
-            board,
-            net,
-            layer,
-            lower_via[0],
-            crossover_y_mm,
-            lower_via[0],
-            lower_via[1],
-        )
+
+    for net, layer, route_points in crossover_routes:
+        for start_point, end_point in zip(
+            route_points,
+            route_points[1:],
+        ):
+            add_track(
+                board,
+                net,
+                layer,
+                start_point[0],
+                start_point[1],
+                end_point[0],
+                end_point[1],
+            )
 
 
 def generate_row_boundary_probe(
