@@ -2,6 +2,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 import math
 from pathlib import Path
+import uuid
 
 import pcbnew
 
@@ -56,6 +57,58 @@ SOLDER_MASK_EXPANSION_MM = 0.0
 MINIMUM_SILK_TEXT_HEIGHT_MM = 1.0
 MINIMUM_SILK_TEXT_THICKNESS_MM = 0.15
 MINIMUM_SILK_CLEARANCE_MM = 0.15
+
+
+def deterministic_kiid(name: str) -> pcbnew.KIID:
+    return pcbnew.KIID(str(uuid.uuid5(uuid.NAMESPACE_URL, name)))
+
+
+def assign_deterministic_board_uuids(
+    board: pcbnew.BOARD,
+    generation_key: str,
+) -> None:
+    board.SetUuid(deterministic_kiid(f"{generation_key}:board"))
+
+    for footprint_index, footprint in enumerate(
+        sorted(
+            board.GetFootprints(),
+            key=lambda item: item.GetReference(),
+        )
+    ):
+        footprint_key = (
+            f"{generation_key}:footprint:{footprint_index}:"
+            f"{footprint.GetReference()}"
+        )
+        footprint.SetUuid(deterministic_kiid(footprint_key))
+        for field_index, field in enumerate(footprint.GetFields()):
+            field.SetUuid(
+                deterministic_kiid(f"{footprint_key}:field:{field_index}")
+            )
+        for pad_index, pad in enumerate(footprint.Pads()):
+            pad.SetUuid(
+                deterministic_kiid(f"{footprint_key}:pad:{pad_index}")
+            )
+        for graphic_index, graphic in enumerate(footprint.GraphicalItems()):
+            graphic.SetUuid(
+                deterministic_kiid(
+                    f"{footprint_key}:graphic:{graphic_index}"
+                )
+            )
+
+    for drawing_index, drawing in enumerate(board.Drawings()):
+        drawing.SetUuid(
+            deterministic_kiid(f"{generation_key}:drawing:{drawing_index}")
+        )
+
+    for track_index, track in enumerate(board.GetTracks()):
+        track.SetUuid(
+            deterministic_kiid(f"{generation_key}:track:{track_index}")
+        )
+
+    for zone_index, zone in enumerate(board.Zones()):
+        zone.SetUuid(
+            deterministic_kiid(f"{generation_key}:zone:{zone_index}")
+        )
 
 
 def add_line(
@@ -463,6 +516,10 @@ def create_board(
 ) -> pcbnew.BOARD:
     board = configure_board(variant, repository_root)
     validate_board(board, variant)
+    assign_deterministic_board_uuids(
+        board,
+        f"matrix-skeleton:{variant.name}",
+    )
     return board
 
 

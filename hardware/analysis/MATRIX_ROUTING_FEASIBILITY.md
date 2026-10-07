@@ -104,6 +104,9 @@ The full-matrix generator expands the proven orientation map across every LED wh
   the working production PCB, so repeated runs cannot duplicate matrix copper;
 - `generate_board_skeletons.py` writes reviewable skeletons under
   `hardware/analysis` instead of overwriting working boards;
+- generated board/items receive deterministic KiCad UUIDs, and
+  `verify_matrix_generation.py` compares SHA-256 across two complete runs
+  before applying the promotion topology checks;
 - standard midpoint cells keep G on L3, R on L4, and B continuity on L1;
 - edge midpoint cells use one L3 crossover, one short L4 crossover, and separated L4 doglegs around the row vias;
 - regular L4 RGB trunks resume outside each transition cell;

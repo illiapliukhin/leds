@@ -3,7 +3,11 @@ from pathlib import Path
 
 import pcbnew
 
-from generate_board_skeletons import create_board, get_board_variant
+from generate_board_skeletons import (
+    assign_deterministic_board_uuids,
+    create_board,
+    get_board_variant,
+)
 from generate_edge_routing_probe import (
     INNER_ROW_WIDTH_MM,
     MATRIX_RGB_VIA_DIAMETER_MM,
@@ -261,6 +265,10 @@ def generate_column_boundary_probe(
                 row_center_y_values[1] + y_offset_mm,
             )
 
+    assign_deterministic_board_uuids(
+        board,
+        f"orientation-probe:{output_path.stem}",
+    )
     pcbnew.SaveBoard(str(output_path), board)
     return output_path
 
@@ -678,6 +686,10 @@ def generate_row_boundary_probe(
             TRANSITION_ROW_WIDTH_MM,
         )
 
+    assign_deterministic_board_uuids(
+        board,
+        f"orientation-probe:{output_path.stem}",
+    )
     pcbnew.SaveBoard(str(output_path), board)
     return output_path
 

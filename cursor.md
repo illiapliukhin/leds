@@ -64,4 +64,8 @@
 - Do not let an analysis generator use the mutable production PCB as its input.
   Build probes and repeated routing from a clean skeleton so reruns cannot
   duplicate copper or erase later backside placement.
+- KiCad assigns fresh internal UUIDs to newly created board items unless the
+  generator sets them explicitly. Do not use whole-file hashes as a
+  reproducibility gate until board, footprint, pad, graphic, track, via, and
+  zone UUIDs are deterministic.
 

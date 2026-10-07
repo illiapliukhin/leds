@@ -404,6 +404,9 @@ KiCad 10 рабочие PCB:
   full-matrix и boundary generators всегда начинают с нового skeleton в
   памяти и не читают production PCB, а доказанная трассировка переносится
   `hardware/tools/promote_matrix_routing.py` после проверки topology;
+- `hardware/tools/verify_matrix_generation.py` дважды строит skeleton/full
+  artifacts, требует одинаковые SHA-256 при deterministic KiCad UUIDs и
+  затем повторяет все promotion semantic checks;
 - содержат 400/784 электрических LED footprints, row/RGB-column nets, четыре copper layers, optical centers и provisional battery envelope;
 - содержат DRC-ограничения JLCPCB Standard PCBA из `manufacturing/JLCPCB_STANDARD_PCBA_RULES.md`;
 - полная матрица имеет 0 DRC violations и 0 unconnected matrix pads; это не

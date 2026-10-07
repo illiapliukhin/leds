@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pcbnew
 
+from generate_board_skeletons import assign_deterministic_board_uuids
 from generate_edge_routing_probe import (
     INNER_ROW_WIDTH_MM,
     MATRIX_RGB_VIA_DIAMETER_MM,
@@ -871,6 +872,10 @@ def route_full_matrix(
                 lower_waypoints,
             )
 
+    assign_deterministic_board_uuids(
+        board,
+        f"full-matrix:{variant.board_name}",
+    )
     pcbnew.SaveBoard(str(output_path), board)
     return output_path
 
