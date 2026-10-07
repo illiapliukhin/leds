@@ -68,4 +68,7 @@
   generator sets them explicitly. Do not use whole-file hashes as a
   reproducibility gate until board, footprint, pad, graphic, track, via, and
   zone UUIDs are deterministic.
+- `pcbnew.SaveBoard` can create or rewrite a sibling `.kicad_pro`. Generated
+  analysis boards must be saved in a temporary directory and copied back as
+  `.kicad_pcb` only, so verification cannot mutate project metadata.
 

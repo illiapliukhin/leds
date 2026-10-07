@@ -2,6 +2,8 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 import math
 from pathlib import Path
+import shutil
+import tempfile
 import uuid
 
 import pcbnew
@@ -109,6 +111,19 @@ def assign_deterministic_board_uuids(
         zone.SetUuid(
             deterministic_kiid(f"{generation_key}:zone:{zone_index}")
         )
+
+
+def save_board_without_project_side_effects(
+    output_path: Path,
+    board: pcbnew.BOARD,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        temporary_path = (
+            Path(temporary_directory) / output_path.name
+        )
+        pcbnew.SaveBoard(str(temporary_path), board)
+        shutil.copyfile(temporary_path, output_path)
 
 
 def add_line(
@@ -533,7 +548,7 @@ def generate_boards(repository_root: Path) -> None:
         )
 
         board = create_board(repository_root, variant)
-        pcbnew.SaveBoard(str(output_path), board)
+        save_board_without_project_side_effects(output_path, board)
         print(f"Generated {output_path}")
 
 

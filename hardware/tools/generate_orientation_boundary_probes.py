@@ -7,6 +7,7 @@ from generate_board_skeletons import (
     assign_deterministic_board_uuids,
     create_board,
     get_board_variant,
+    save_board_without_project_side_effects,
 )
 from generate_edge_routing_probe import (
     INNER_ROW_WIDTH_MM,
@@ -269,7 +270,7 @@ def generate_column_boundary_probe(
         board,
         f"orientation-probe:{output_path.stem}",
     )
-    pcbnew.SaveBoard(str(output_path), board)
+    save_board_without_project_side_effects(output_path, board)
     return output_path
 
 
@@ -690,7 +691,7 @@ def generate_row_boundary_probe(
         board,
         f"orientation-probe:{output_path.stem}",
     )
-    pcbnew.SaveBoard(str(output_path), board)
+    save_board_without_project_side_effects(output_path, board)
     return output_path
 
 
