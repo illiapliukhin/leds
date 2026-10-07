@@ -154,12 +154,17 @@ KiCad 10 row-selection sheets:
 - точный footprint `SN74LVC8T245RHLR` выпущен в
   `hardware/libraries/packages.pretty` по TI `RHL0024A`, drawing 4225250
   Rev. C; generic QFN не используется;
+- primary-drawing footprints выпущены для `BQ25185` (TI DLH0010A), `BMI270`
+  (Bosch LGA-14) и `MAX17048G+T10` (Maxim 21-0168/90-0065);
 - единый реестр механических входных данных и внешних блокеров находится в
   `mechanical/MECHANICAL_INPUTS.md`;
 - построчный статус freeze находится в
   `manufacturing/BOM_FREEZE_STATUS.csv`;
 - USB-C `C52209107` подтверждён только как EVT-кандидат; footprint и положение
   остаются заблокированы до утверждения разреза корпуса.
+- `hardware/tools/export_manufacturing_package.py` формирует immutable
+  Gerber/drill/BOM/CPL/PDF/IPC/STEP package с SHA-256, но отказывает в экспорте,
+  пока `check_release_readiness.py` видит хотя бы один незакрытый gate.
 
 ### Расчёт обновления
 
