@@ -1,0 +1,102 @@
+(footprint "MHPA1010RGBDT"
+  (version 20240108)
+  (generator "pcbnew")
+  (layer "F.Cu")
+  (descr "MEIHUA MHPA1010RGBDT 1.0x1.0 mm common-anode RGB LED; land pattern from manufacturer datasheet Rev.2 page 2")
+  (tags "RGB LED 1010 common anode")
+  (property "Reference" "D"
+    (at 0 -1.25 0)
+    (layer "F.SilkS")
+    (effects
+      (font
+        (size 0.7 0.7)
+        (thickness 0.1)
+      )
+    )
+  )
+  (property "Value" "MHPA1010RGBDT"
+    (at 0 1.25 0)
+    (layer "F.Fab")
+    (effects
+      (font
+        (size 0.5 0.5)
+        (thickness 0.08)
+      )
+    )
+  )
+  (attr smd)
+  (fp_rect
+    (start -0.5 -0.5)
+    (end 0.5 0.5)
+    (stroke
+      (width 0.05)
+      (type default)
+    )
+    (fill none)
+    (layer "F.Fab")
+  )
+  (fp_rect
+    (start -0.85 -0.85)
+    (end 0.85 0.85)
+    (stroke
+      (width 0.05)
+      (type default)
+    )
+    (fill none)
+    (layer "F.CrtYd")
+  )
+  (fp_poly
+    (pts
+      (xy 0.5 -0.5)
+      (xy 0.2 -0.5)
+      (xy 0.5 -0.2)
+    )
+    (stroke
+      (width 0.08)
+      (type solid)
+    )
+    (fill none)
+    (layer "F.Fab")
+  )
+  (fp_text user "${REFERENCE}"
+    (at 0 0 0)
+    (layer "F.Fab")
+    (effects
+      (font
+        (size 0.3 0.3)
+        (thickness 0.05)
+      )
+    )
+  )
+  (pad "1" smd rect
+    (at 0.385 -0.385)
+    (size 0.43 0.43)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (pinfunction "A")
+    (pintype "passive")
+  )
+  (pad "2" smd roundrect
+    (at 0.385 0.385)
+    (size 0.43 0.43)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.15)
+    (pinfunction "K_R")
+    (pintype "passive")
+  )
+  (pad "3" smd roundrect
+    (at -0.385 0.385)
+    (size 0.43 0.43)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.15)
+    (pinfunction "K_G")
+    (pintype "passive")
+  )
+  (pad "4" smd roundrect
+    (at -0.385 -0.385)
+    (size 0.43 0.43)
+    (layers "F.Cu" "F.Paste" "F.Mask")
+    (roundrect_rratio 0.15)
+    (pinfunction "K_B")
+    (pintype "passive")
+  )
+)
