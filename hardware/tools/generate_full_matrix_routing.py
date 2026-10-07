@@ -28,7 +28,6 @@ from generate_orientation_boundary_probes import (
     OrientationRoutingProfile,
     get_board_path,
     get_led_reference,
-    route_edge_row_transition_rgb,
 )
 
 
@@ -300,6 +299,225 @@ def route_full_standard_transition_rgb(
             )
 
 
+def route_full_edge_transition_rgb(
+    board: pcbnew.BOARD,
+    upper_footprint: pcbnew.FOOTPRINT,
+    lower_footprint: pcbnew.FOOTPRINT,
+    top_right: bool,
+) -> None:
+    center_x_mm, upper_center_y_mm = millimeters(
+        upper_footprint.GetPosition()
+    )
+    _, lower_center_y_mm = millimeters(lower_footprint.GetPosition())
+    transition_center_y_mm = (
+        upper_center_y_mm + lower_center_y_mm
+    ) / 2
+    upper_via_y_mm = (
+        transition_center_y_mm - TRANSITION_SIDE_VIA_Y_OFFSET_MM
+    )
+    lower_via_y_mm = (
+        transition_center_y_mm + TRANSITION_SIDE_VIA_Y_OFFSET_MM
+    )
+    upper_central_y_mm = transition_center_y_mm - 0.2
+    lower_central_y_mm = transition_center_y_mm + 0.1
+
+    upper_blue_pad = get_pad(upper_footprint, "4")
+    upper_red_pad = get_pad(upper_footprint, "2")
+    upper_green_pad = get_pad(upper_footprint, "3")
+    lower_blue_pad = get_pad(lower_footprint, "4")
+    lower_red_pad = get_pad(lower_footprint, "2")
+    lower_green_pad = get_pad(lower_footprint, "3")
+
+    if top_right:
+        shared_green_x_mm = center_x_mm + 0.4
+        transition_vias = (
+            (
+                upper_blue_pad,
+                center_x_mm - 1.05,
+                upper_via_y_mm,
+                False,
+            ),
+            (
+                upper_red_pad,
+                center_x_mm - 0.1,
+                upper_central_y_mm,
+                True,
+            ),
+            (
+                lower_blue_pad,
+                center_x_mm - 0.5,
+                lower_central_y_mm,
+                True,
+            ),
+            (
+                lower_red_pad,
+                center_x_mm - 1.05,
+                lower_via_y_mm,
+                False,
+            ),
+        )
+    else:
+        shared_green_x_mm = center_x_mm - 0.4
+        transition_vias = (
+            (
+                upper_blue_pad,
+                center_x_mm + 0.1,
+                upper_central_y_mm,
+                True,
+            ),
+            (
+                upper_red_pad,
+                center_x_mm + 1.05,
+                upper_via_y_mm,
+                False,
+            ),
+            (
+                lower_blue_pad,
+                center_x_mm + 1.05,
+                lower_via_y_mm,
+                False,
+            ),
+            (
+                lower_red_pad,
+                center_x_mm + 0.5,
+                lower_central_y_mm,
+                True,
+            ),
+        )
+
+    via_positions: dict[int, tuple[float, float]] = {}
+    for pad, via_x_mm, via_y_mm, route_through_center in transition_vias:
+        pad_x_mm, pad_y_mm = millimeters(pad.GetPosition())
+        route_points = [(pad_x_mm, pad_y_mm)]
+        if route_through_center:
+            footprint_x_mm, footprint_y_mm = millimeters(
+                pad.GetParent().GetPosition()
+            )
+            approach_y_mm = via_y_mm + (
+                0.18 if via_y_mm > transition_center_y_mm else -0.18
+            )
+            route_points.extend(
+                (
+                    (footprint_x_mm, footprint_y_mm),
+                    (footprint_x_mm, approach_y_mm),
+                    (via_x_mm, approach_y_mm),
+                )
+            )
+        else:
+            route_points.append((via_x_mm, pad_y_mm))
+        route_points.append((via_x_mm, via_y_mm))
+        for start_position, end_position in zip(
+            route_points,
+            route_points[1:],
+        ):
+            add_track(
+                board,
+                pad.GetNet(),
+                pcbnew.F_Cu,
+                start_position[0],
+                start_position[1],
+                end_position[0],
+                end_position[1],
+            )
+        add_through_via(
+            board,
+            pad.GetNet(),
+            via_x_mm,
+            via_y_mm,
+            MATRIX_RGB_VIA_DIAMETER_MM,
+        )
+        via_positions[id(pad)] = (via_x_mm, via_y_mm)
+
+    for green_pad in (upper_green_pad, lower_green_pad):
+        pad_x_mm, pad_y_mm = millimeters(green_pad.GetPosition())
+        add_track(
+            board,
+            green_pad.GetNet(),
+            pcbnew.F_Cu,
+            pad_x_mm,
+            pad_y_mm,
+            shared_green_x_mm,
+            transition_center_y_mm,
+        )
+    add_through_via(
+        board,
+        upper_green_pad.GetNet(),
+        shared_green_x_mm,
+        transition_center_y_mm,
+        MATRIX_RGB_VIA_DIAMETER_MM,
+    )
+
+    if top_right:
+        crossover_routes = (
+            (
+                upper_red_pad.GetNet(),
+                pcbnew.In2_Cu,
+                (
+                    via_positions[id(upper_red_pad)],
+                    (
+                        center_x_mm - 0.1,
+                        transition_center_y_mm + 0.7,
+                    ),
+                    (
+                        center_x_mm - 1.05,
+                        transition_center_y_mm + 0.7,
+                    ),
+                    via_positions[id(lower_red_pad)],
+                ),
+            ),
+            (
+                upper_blue_pad.GetNet(),
+                pcbnew.B_Cu,
+                (
+                    via_positions[id(upper_blue_pad)],
+                    via_positions[id(lower_blue_pad)],
+                ),
+            ),
+        )
+    else:
+        crossover_routes = (
+            (
+                upper_blue_pad.GetNet(),
+                pcbnew.In2_Cu,
+                (
+                    via_positions[id(upper_blue_pad)],
+                    (
+                        center_x_mm + 0.1,
+                        transition_center_y_mm + 0.7,
+                    ),
+                    (
+                        center_x_mm + 1.05,
+                        transition_center_y_mm + 0.7,
+                    ),
+                    via_positions[id(lower_blue_pad)],
+                ),
+            ),
+            (
+                upper_red_pad.GetNet(),
+                pcbnew.B_Cu,
+                (
+                    via_positions[id(upper_red_pad)],
+                    via_positions[id(lower_red_pad)],
+                ),
+            ),
+        )
+
+    for net, layer, route_points in crossover_routes:
+        for start_position, end_position in zip(
+            route_points,
+            route_points[1:],
+        ):
+            add_track(
+                board,
+                net,
+                layer,
+                start_position[0],
+                start_position[1],
+                end_position[0],
+                end_position[1],
+            )
+
+
 def get_edge_transition_positions(
     upper_footprint: pcbnew.FOOTPRINT,
     lower_footprint: pcbnew.FOOTPRINT,
@@ -354,18 +572,24 @@ def add_rgb_connection(
     start_position: tuple[float, float],
     end_position: tuple[float, float],
     layer: int = pcbnew.B_Cu,
+    waypoints: tuple[tuple[float, float], ...] = (),
 ) -> None:
     if start_position == end_position:
         return
-    add_track(
-        board,
-        board.FindNet(f"COL_{color_name}_{column_number:02d}"),
-        layer,
-        start_position[0],
-        start_position[1],
-        end_position[0],
-        end_position[1],
-    )
+    route_points = (start_position, *waypoints, end_position)
+    for route_start, route_end in zip(
+        route_points,
+        route_points[1:],
+    ):
+        add_track(
+            board,
+            board.FindNet(f"COL_{color_name}_{column_number:02d}"),
+            layer,
+            route_start[0],
+            route_start[1],
+            route_end[0],
+            route_end[1],
+        )
 
 
 def route_full_matrix(
@@ -455,7 +679,7 @@ def route_full_matrix(
             lower_profile.orientation_degrees
         )
         if column_number <= 2:
-            route_edge_row_transition_rgb(
+            route_full_edge_transition_rgb(
                 board,
                 upper_footprint,
                 lower_footprint,
@@ -469,7 +693,7 @@ def route_full_matrix(
                 )
             )
         elif column_number >= variant.matrix_size - 1:
-            route_edge_row_transition_rgb(
+            route_full_edge_transition_rgb(
                 board,
                 upper_footprint,
                 lower_footprint,
@@ -592,6 +816,30 @@ def route_full_matrix(
             transition_colors += (("B", pcbnew.F_Cu),)
 
         for color_name, layer in transition_colors:
+            top_right = column_number >= variant.matrix_size - 1
+            upper_dogleg_color = "B" if top_right else "R"
+            lower_dogleg_color = "R" if top_right else "B"
+            edge_column = (
+                column_number <= 2
+                or column_number >= variant.matrix_size - 1
+            )
+            transition_center_y_mm = upper_transition_positions["G"][1]
+            upper_waypoints: tuple[tuple[float, float], ...] = ()
+            lower_waypoints: tuple[tuple[float, float], ...] = ()
+            if edge_column and color_name == upper_dogleg_color:
+                upper_waypoints = (
+                    (
+                        upper_regular_positions[color_name][0],
+                        transition_center_y_mm - 1.0,
+                    ),
+                )
+            if edge_column and color_name == lower_dogleg_color:
+                lower_waypoints = (
+                    (
+                        lower_regular_positions[color_name][0],
+                        transition_center_y_mm + 1.0,
+                    ),
+                )
             add_rgb_connection(
                 board,
                 column_number,
@@ -599,6 +847,7 @@ def route_full_matrix(
                 upper_regular_positions[color_name],
                 upper_transition_positions[color_name],
                 layer,
+                upper_waypoints,
             )
             add_rgb_connection(
                 board,
@@ -607,6 +856,7 @@ def route_full_matrix(
                 lower_transition_positions[color_name],
                 lower_regular_positions[color_name],
                 layer,
+                lower_waypoints,
             )
 
     pcbnew.SaveBoard(str(output_path), board)
