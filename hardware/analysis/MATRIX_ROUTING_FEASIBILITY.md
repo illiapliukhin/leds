@@ -1,6 +1,6 @@
 # Matrix routing feasibility
 
-Status: top-left, bottom-right, and normal-to-180-degree orientation-transition routing probes pass KiCad 10 DRC for both matrix pitches. This proves both terminal-row directions and the orientation transition locally, not the completed board.
+Status: all four corner probes and the normal-to-180-degree orientation-transition probe pass KiCad 10 DRC for both matrix pitches. This proves the corners and one orientation transition locally, not the completed board.
 
 ## Verified artifacts
 
@@ -16,9 +16,17 @@ Status: top-left, bottom-right, and normal-to-180-degree orientation-transition 
 - `wearable_20x20_orientation_transition_routing_probe_drc.rpt`
 - `wearable_28x28_orientation_transition_routing_probe.kicad_pcb`
 - `wearable_28x28_orientation_transition_routing_probe_drc.rpt`
+- `wearable_20x20_top_right_routing_probe.kicad_pcb`
+- `wearable_20x20_top_right_routing_probe_drc.rpt`
+- `wearable_20x20_bottom_left_routing_probe.kicad_pcb`
+- `wearable_20x20_bottom_left_routing_probe_drc.rpt`
+- `wearable_28x28_top_right_routing_probe.kicad_pcb`
+- `wearable_28x28_top_right_routing_probe_drc.rpt`
+- `wearable_28x28_bottom_left_routing_probe.kicad_pcb`
+- `wearable_28x28_bottom_left_routing_probe_drc.rpt`
 - Generator: `hardware/tools/generate_edge_routing_probe.py`
 
-All six DRC reports contain zero geometric violations. They still report 499 unconnected groups because only four LEDs are routed in each probe and no driver electronics exist.
+All ten DRC reports contain zero geometric violations. They still report 499 unconnected groups because only four LEDs are routed in each probe and no driver electronics exist.
 
 ## DRC-proven local pattern
 
@@ -50,6 +58,14 @@ The orientation-transition probe uses a normal upper row and a 180-degree lower 
 - a 0.40 mm local neck in each L3 row bus through the transition cell.
 
 The normal 1.20 mm interior row-bus width resumes outside the transition cell. All row buses now use KiCad `In2.Cu`, the physical L3 layer; `In1.Cu` remains reserved for the L2 ground plane.
+
+The mirrored corners require corner-specific quarter-turn orientations:
+
+- top-right LEDs use 90 degrees, with G/B side escapes and a central R escape toward the board interior;
+- bottom-left LEDs use 270 degrees with the same topology mirrored vertically;
+- anode vias escape inward, retaining the standard 0.45/0.20 mm geometry.
+
+These probes prove the local corners only. A complete matrix must still prove the boundaries between the 90/270-degree corner cells and the 0/180-degree interior pattern.
 
 ## Preliminary electrical estimate
 
@@ -84,14 +100,14 @@ This is a conventional through-via process but creates substantial L2 ground-pla
 1. confirm JLCPCB accepts the repeated 0.40/0.20 mm vias at quoted yield;
 2. inspect L2 neck widths and return-current continuity after antipads;
 3. reserve L4 vertical channels from backside component pads;
-4. test the bottom-left and top-right corners;
+4. prove the boundaries between quarter-turn corner cells and the interior orientation pattern;
 5. compare against a lower-via interior pattern only if it remains simpler and DRC-clean.
 
 ## Release gate
 
 Do not copy the probe directly into production output until:
 
-- all four corners pass DRC; the orientation transition is already proven locally;
+- all four corners and the normal-to-180-degree transition are already proven locally;
 - a complete repeated matrix has zero geometric DRC violations;
 - row feeds, driver exits, and backside placement are included;
 - L2 plane continuity is reviewed visually and by field-current inspection;

@@ -28,4 +28,6 @@
 - Do not assume a repeated LED escape that works at the top edge automatically closes at the bottom edge. Prove terminal rows and orientation transitions separately before expanding the complete matrix.
 - Map logical stackup names to KiCad layer constants before generating copper. On a four-layer board, `In1.Cu` is physical L2 and `In2.Cu` is physical L3; reserve `In1.Cu` for the ground plane and place row buses on `In2.Cu`.
 - Do not assume a 180-degree LED orientation transition can reuse one three-via RGB set. Rotation reverses the lateral G/R pad order, so prove the required crossover and local row-bus neck with DRC at every production pitch.
+- Do not mirror a dense corner escape by changing only the anode-via direction. Verify the transformed pad map through `pcbnew`; the opposite corners require 90/270-degree footprints and a different central RGB escape.
+- A DRC-clean corner-specific orientation does not prove that it tiles into the full matrix. Test each boundary between 0/90/180/270-degree regions before production expansion.
 

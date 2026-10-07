@@ -91,80 +91,66 @@ def route_rgb_to_back(
     board: pcbnew.BOARD,
     footprint: pcbnew.FOOTPRINT,
     row_center_y_mm: float,
+    side_pad_offsets: tuple[tuple[str, float], ...] = (
+        ("3", -0.375),
+        ("2", 0.375),
+    ),
+    central_pad_number: str = "4",
+    vertical_direction: float = 1.0,
 ) -> None:
-    green_pad = get_pad(footprint, "3")
-    blue_pad = get_pad(footprint, "4")
-    red_pad = get_pad(footprint, "2")
-
-    green_pad_x_mm, green_pad_y_mm = millimeters(green_pad.GetPosition())
-    blue_pad_x_mm, blue_pad_y_mm = millimeters(blue_pad.GetPosition())
-    red_pad_x_mm, red_pad_y_mm = millimeters(red_pad.GetPosition())
-
     footprint_center_x_mm, _ = millimeters(footprint.GetPosition())
-    green_via_x_mm = footprint_center_x_mm - 0.375
-    green_via_y_mm = row_center_y_mm + 0.925
-    blue_via_x_mm = footprint_center_x_mm
-    blue_via_y_mm = row_center_y_mm + 1.275
-    red_via_x_mm = footprint_center_x_mm + 0.375
-    red_via_y_mm = row_center_y_mm + 0.925
+    side_via_y_mm = row_center_y_mm + vertical_direction * 0.925
+    for pad_number, via_x_offset_mm in side_pad_offsets:
+        side_pad = get_pad(footprint, pad_number)
+        side_pad_x_mm, side_pad_y_mm = millimeters(
+            side_pad.GetPosition()
+        )
+        side_via_x_mm = footprint_center_x_mm + via_x_offset_mm
+        add_track(
+            board,
+            side_pad.GetNet(),
+            pcbnew.F_Cu,
+            side_pad_x_mm,
+            side_pad_y_mm,
+            side_via_x_mm,
+            side_via_y_mm,
+        )
+        add_through_via(
+            board,
+            side_pad.GetNet(),
+            side_via_x_mm,
+            side_via_y_mm,
+            MATRIX_RGB_VIA_DIAMETER_MM,
+        )
 
+    central_pad = get_pad(footprint, central_pad_number)
+    central_pad_x_mm, central_pad_y_mm = millimeters(
+        central_pad.GetPosition()
+    )
+    central_via_y_mm = row_center_y_mm + vertical_direction * 1.275
     add_track(
         board,
-        green_pad.GetNet(),
+        central_pad.GetNet(),
         pcbnew.F_Cu,
-        green_pad_x_mm,
-        green_pad_y_mm,
-        green_via_x_mm,
-        green_via_y_mm,
-    )
-    add_through_via(
-        board,
-        green_pad.GetNet(),
-        green_via_x_mm,
-        green_via_y_mm,
-        MATRIX_RGB_VIA_DIAMETER_MM,
-    )
-
-    add_track(
-        board,
-        red_pad.GetNet(),
-        pcbnew.F_Cu,
-        red_pad_x_mm,
-        red_pad_y_mm,
-        red_via_x_mm,
-        red_via_y_mm,
-    )
-    add_through_via(
-        board,
-        red_pad.GetNet(),
-        red_via_x_mm,
-        red_via_y_mm,
-        MATRIX_RGB_VIA_DIAMETER_MM,
-    )
-
-    add_track(
-        board,
-        blue_pad.GetNet(),
-        pcbnew.F_Cu,
-        blue_pad_x_mm,
-        blue_pad_y_mm,
+        central_pad_x_mm,
+        central_pad_y_mm,
         footprint_center_x_mm,
         row_center_y_mm,
     )
     add_track(
         board,
-        blue_pad.GetNet(),
+        central_pad.GetNet(),
         pcbnew.F_Cu,
         footprint_center_x_mm,
         row_center_y_mm,
-        blue_via_x_mm,
-        blue_via_y_mm,
+        footprint_center_x_mm,
+        central_via_y_mm,
     )
     add_through_via(
         board,
-        blue_pad.GetNet(),
-        blue_via_x_mm,
-        blue_via_y_mm,
+        central_pad.GetNet(),
+        footprint_center_x_mm,
+        central_via_y_mm,
         MATRIX_RGB_VIA_DIAMETER_MM,
     )
 
@@ -174,80 +160,12 @@ def route_rotated_rgb_to_back(
     footprint: pcbnew.FOOTPRINT,
     row_center_y_mm: float,
 ) -> None:
-    green_pad = get_pad(footprint, "3")
-    blue_pad = get_pad(footprint, "4")
-    red_pad = get_pad(footprint, "2")
-
-    green_pad_x_mm, green_pad_y_mm = millimeters(green_pad.GetPosition())
-    blue_pad_x_mm, blue_pad_y_mm = millimeters(blue_pad.GetPosition())
-    red_pad_x_mm, red_pad_y_mm = millimeters(red_pad.GetPosition())
-
-    footprint_center_x_mm, _ = millimeters(footprint.GetPosition())
-    green_via_x_mm = footprint_center_x_mm + 0.375
-    green_via_y_mm = row_center_y_mm - 0.925
-    blue_via_x_mm = footprint_center_x_mm
-    blue_via_y_mm = row_center_y_mm - 1.275
-    red_via_x_mm = footprint_center_x_mm - 0.375
-    red_via_y_mm = row_center_y_mm - 0.925
-
-    add_track(
+    route_rgb_to_back(
         board,
-        green_pad.GetNet(),
-        pcbnew.F_Cu,
-        green_pad_x_mm,
-        green_pad_y_mm,
-        green_via_x_mm,
-        green_via_y_mm,
-    )
-    add_through_via(
-        board,
-        green_pad.GetNet(),
-        green_via_x_mm,
-        green_via_y_mm,
-        MATRIX_RGB_VIA_DIAMETER_MM,
-    )
-
-    add_track(
-        board,
-        red_pad.GetNet(),
-        pcbnew.F_Cu,
-        red_pad_x_mm,
-        red_pad_y_mm,
-        red_via_x_mm,
-        red_via_y_mm,
-    )
-    add_through_via(
-        board,
-        red_pad.GetNet(),
-        red_via_x_mm,
-        red_via_y_mm,
-        MATRIX_RGB_VIA_DIAMETER_MM,
-    )
-
-    add_track(
-        board,
-        blue_pad.GetNet(),
-        pcbnew.F_Cu,
-        blue_pad_x_mm,
-        blue_pad_y_mm,
-        footprint_center_x_mm,
+        footprint,
         row_center_y_mm,
-    )
-    add_track(
-        board,
-        blue_pad.GetNet(),
-        pcbnew.F_Cu,
-        footprint_center_x_mm,
-        row_center_y_mm,
-        blue_via_x_mm,
-        blue_via_y_mm,
-    )
-    add_through_via(
-        board,
-        blue_pad.GetNet(),
-        blue_via_x_mm,
-        blue_via_y_mm,
-        MATRIX_RGB_VIA_DIAMETER_MM,
+        side_pad_offsets=(("3", 0.375), ("2", -0.375)),
+        vertical_direction=-1.0,
     )
 
 
@@ -770,12 +688,15 @@ def generate_mirrored_corner_probe(
             (0.525, OUTER_ROW_WIDTH_MM),
             (0.9 + variant.led_pitch_mm, INNER_ROW_WIDTH_MM),
         )
-        rotated = False
+        orientation_degrees = 90
         anode_via_x_offset_mm = -0.54
+        side_pad_offsets = (("3", 0.375), ("4", -0.375))
+        central_pad_number = "2"
+        vertical_direction = 1.0
         rgb_trunk_offsets = (
-            ("G", -0.375, 0.925),
-            ("B", 0.0, 1.275),
-            ("R", 0.375, 0.925),
+            ("G", 0.375, 0.925),
+            ("B", -0.375, 0.925),
+            ("R", 0.0, 1.275),
         )
     else:
         row_numbers = (variant.matrix_size - 1, variant.matrix_size)
@@ -787,12 +708,15 @@ def generate_mirrored_corner_probe(
             (second_last_row_center_y_mm, INNER_ROW_WIDTH_MM),
             (variant.board_size_mm - 0.525, OUTER_ROW_WIDTH_MM),
         )
-        rotated = True
+        orientation_degrees = 270
         anode_via_x_offset_mm = 0.54
+        side_pad_offsets = (("3", -0.375), ("4", 0.375))
+        central_pad_number = "2"
+        vertical_direction = -1.0
         rgb_trunk_offsets = (
-            ("G", 0.375, -0.925),
-            ("B", 0.0, -1.275),
-            ("R", -0.375, -0.925),
+            ("G", -0.375, -0.925),
+            ("B", 0.375, -0.925),
+            ("R", 0.0, -1.275),
         )
 
     row_center_y_values = tuple(
@@ -812,28 +736,30 @@ def generate_mirrored_corner_probe(
                 (row_number - 1) * variant.matrix_size + column_number
             )
             footprint = get_led(board, f"D{reference_number}")
-            if rotated:
-                footprint.SetOrientationDegrees(180)
-                route_rotated_rgb_to_back(
+            footprint.SetOrientationDegrees(orientation_degrees)
+            route_rgb_to_back(
+                board,
+                footprint,
+                row_center_y_mm,
+                side_pad_offsets,
+                central_pad_number,
+                vertical_direction,
+            )
+            if top_right:
+                via_x_mm = route_anode(
                     board,
                     footprint,
-                    row_center_y_mm,
+                    row_bus_y_mm,
+                    row_bus_width_mm,
+                    anode_via_x_offset_mm,
                 )
+            else:
                 via_x_mm = route_rotated_anode(
                     board,
                     footprint,
                     row_bus_y_mm,
                     row_bus_width_mm,
                     variant.board_size_mm - 0.525,
-                    anode_via_x_offset_mm,
-                )
-            else:
-                route_rgb_to_back(board, footprint, row_center_y_mm)
-                via_x_mm = route_anode(
-                    board,
-                    footprint,
-                    row_bus_y_mm,
-                    row_bus_width_mm,
                     anode_via_x_offset_mm,
                 )
             row_via_extents.setdefault(row_number, []).append(via_x_mm)
