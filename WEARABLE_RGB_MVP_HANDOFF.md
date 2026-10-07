@@ -433,6 +433,18 @@ KiCad 10 рабочие PCB:
 - 20×20: 700–800 мА·ч, около 32×40×6 мм;
 - 28×28: 1200–1400 мА·ч, около 40×50×6 мм.
 
+Проверенные RFQ-кандидаты, ещё не утверждённые:
+
+- HiMAXBATT `LP603040`, 800 мА·ч, PCM + 10 кОм NTC, заявленные UN38.3 и
+  IEC 62133, 1,6 А continuous; finished pack 6,3×30,5×42,5 мм не помещается
+  в текущий provisional keepout 32×40×6 мм;
+- Akyga `LP604050`, distributor index `AKY0679`, 1200 мА·ч, PCM+NTC,
+  6,0×40×50 мм и 3-pin 1,25 мм; требуется новый короткий Pico-Lock harness
+  и exact-part UN38.3 test summary.
+
+Оба варианта остаются `BLOCKED_EXTERNAL` до production-intent drawing,
+compliance evidence и fit-check samples.
+
 Требования:
 
 - protected Li-Po с PCM и NTC;

@@ -19,6 +19,23 @@ The current PCB outlines are proven for all four matrix edges. They are not
 production-frozen because the connector, battery, enclosure, and panel tabs
 have not been reconciled in one mechanical assembly.
 
+## Battery candidate screening
+
+- 20×20: HiMAXBATT `LP603040`, 800 mAh, is the closest documented pack with
+  PCM, 10 kΩ NTC, 1.6 A continuous discharge, and stated UN38.3/IEC 62133
+  compliance. Its finished 6.3 × 30.5 × 42.5 mm envelope exceeds the
+  provisional 32 × 40 × 6 mm keepout in length and thickness, so it is a
+  fit-check candidate, not an approved battery.
+- 28×28: Akyga `LP604050` / distributor index `AKY0679`, 1200 mAh, is listed
+  as a 6.0 × 40 × 50 mm PCM+NTC pack with a three-pin 1.25 mm connector.
+  The listed 150 mm lead is unsuitable for the enclosure, the connector does
+  not match the selected Pico-Lock set, and an exact-part UN38.3 test summary
+  was not found. Use it only as an RFQ baseline for a production-intent harness.
+
+Neither candidate is frozen. Require a finished-pack drawing that includes PCM,
+insulation, wire exit, connector, bend radius, swelling allowance, NTC table,
+and compliance document identifiers before changing the keepouts.
+
 ## Stack budget
 
 | Element | Baseline | Validation |
@@ -113,3 +130,5 @@ assembled EVT matrix.
 - HH `16P TYPE-C (Y385)` supplier listing and datasheet, LCSC `C52209107`
 - Molex drawings for `504050-0391`, `504051-0301`, and `504052-0098`
 - Panasonic `EVPBL2A1F000` product page and `EVPBL` series drawing
+- HiMAXBATT `LP603040` product specification
+- Akyga `LP604050`, distributor index `AKY0679`

@@ -18,7 +18,7 @@ USB ESD,USBLC6-2SC6,CONDITIONAL,"Placement and USB signal integrity open","Compl
 Crystal,L327S400H11L,CONDITIONAL,"Exact 4-pin symbol and SMD3225-4P footprint released; load network and layout open","Complete layout; frequency/startup measurement"
 USB-C connector,"HH 16P TYPE-C (Y385), C52209107",BLOCKED_EXTERNAL,"Enclosure cross-section not frozen","Supplier drawing; enclosure fit; mating-cycle requirement"
 Battery connector,"Molex 504050-0391 / 504051-0301 / 504052-0098",CONDITIONAL,"EVT connector set selected; battery harness and wire exit are not confirmed","Battery supplier mating confirmation; pin order; polarity; wire gauge; bend envelope"
-Battery,"TBD protected Li-Po",BLOCKED_EXTERNAL,"No supplier drawing/PCM/NTC/UN38.3","Qualified supplier pack and compliance evidence"
+Battery,"20x20 candidate HiMAXBATT LP603040; 28x28 RFQ baseline Akyga LP604050 AKY0679",BLOCKED_EXTERNAL,"20x20 finished pack exceeds provisional keepout; 28x28 harness and exact-part UN38.3 are not acceptable/confirmed","Production-intent finished-pack drawings; Pico-Lock harness; NTC table; UN38.3 test summaries; samples"
 Inductor,DFE201612E-R47M=P2,CONDITIONAL,"Manufacturer footprint released; ordering code stock/lifecycle open","Authorized distributor lifecycle and stock review"
 Rear button,Panasonic EVPBL2A1F000,CONDITIONAL,"Manufacturer land pattern released; enclosure plunger and preload remain undefined","Placement review; rear-cover plunger tolerance stack"
 Battery NTC,"10k B3435",BLOCKED_EXTERNAL,"Must match selected pack","Battery supplier resistance table"
