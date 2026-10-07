@@ -1,5 +1,5 @@
 ** Drc report for wearable_28x28_edge_routing_probe.kicad_pcb **
-** Created on 2026-10-07T18:50:29 **
+** Created on 2026-10-07T16:12:35 **
 ** Report includes: Errors, Warnings **
 
 ** Found 0 DRC violations **
@@ -1844,7 +1844,7 @@
 [unconnected_items]: Missing connection between items
     Local override; error
     @(5.6850 mm, 0.5150 mm): Pad 1 [ROW_01_ANODE] of D3 on F.Cu
-    @(1.8250 mm, 0.5250 mm): Track [ROW_01_ANODE] on In1.Cu, length 2.2000 mm
+    @(1.8250 mm, 0.5250 mm): Track [ROW_01_ANODE] on In2.Cu, length 2.2000 mm
 [unconnected_items]: Missing connection between items
     Local override; error
     @(7.8850 mm, 0.5150 mm): Pad 1 [ROW_01_ANODE] of D4 on F.Cu

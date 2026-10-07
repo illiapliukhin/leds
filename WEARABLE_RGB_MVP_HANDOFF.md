@@ -1,7 +1,7 @@
 # Wearable RGB MVP — передача проекта
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
-Важно: KiCad 10 PCB-каркасы созданы и проходят DRC, но схемы, footprints, placement/routing, ERC и физические измерения ещё не выполнены. Все значения, помеченные как требующие проверки, нельзя считать production-ready.
+Важно: KiCad 10 PCB-каркасы созданы и проходят DRC, но схемы, footprints компонентов кроме LED, полные placement/routing, ERC и физические измерения ещё не выполнены. Все значения, помеченные как требующие проверки, нельзя считать production-ready.
 
 ## 1. Цель
 
@@ -315,7 +315,7 @@ KiCad 10 PCB-каркасы:
 - `B.SilkS`: `PCB CREATED BY ILLIA PLIUKHIN` и маленькая пятиконечная звезда;
 - LED references находятся на `F.Fab`; все остальные компоненты должны иметь физические reference designators не меньше 1,0/0,15 мм без перекрытий.
 
-Текущие outline 49,3 × 49,3 мм и 61,2 × 61,2 мм ещё не заморожены для производства, но увеличивать их сейчас не требуется. Специальные top-left и 180°-rotated bottom-right escapes с 0,40 мм edge row bus и RGB-переходами на L4 прошли KiCad DRC без геометрических нарушений для шага 2,50 и 2,20 мм. Probe и расчёты находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. До freeze необходимо проверить переход между ориентациями, bottom-left corner, размножить pattern на полный массив и проверить целостность L2 и выходы к драйверам.
+Текущие outline 49,3 × 49,3 мм и 61,2 × 61,2 мм ещё не заморожены для производства, но увеличивать их сейчас не требуется. Специальные top-left, 180°-rotated bottom-right и normal-to-180° transition escapes прошли KiCad 10.0.6 DRC без геометрических нарушений для шага 2,50 и 2,20 мм. Row buses находятся на физическом L3 (`In2.Cu`), а L2 (`In1.Cu`) зарезервирован под сплошной GND. Transition-cell требует пяти RGB vias на колонку, локального G/R crossover на L3/L4 и сужения row bus до 0,40 мм. Probe и расчёты находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. До freeze необходимо проверить bottom-left и top-right corners, размножить pattern на полный массив, проверить целостность L2 и выходы к драйверам.
 
 ### Placement
 

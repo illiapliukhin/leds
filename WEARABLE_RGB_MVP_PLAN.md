@@ -61,7 +61,7 @@
 - Соблюсти USB differential pair, crystal keepout, непрерывные возвратные пути, локальную развязку и Kelvin feedback DC/DC.
 - Выполнить DRC, проверку токовых путей, падений напряжения, тепловых зон и экспорт 3D-модели.
 
-Статус: LED footprints и row/RGB-column nets добавлены. Pre-route DRC проходит с 0 violations; 499 unrouted groups ожидаются до драйверов и трассировки. Отдельные top-left и 180°-rotated bottom-right 2×2 routing probes проходят с 0 geometric violations для обоих pitches; детали в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. Copper zones, переход между ориентациями, bottom-left corner, полный повтор pattern и driver exits ещё не проверены, поэтому этот DRC не является финальным.
+Статус: LED footprints и row/RGB-column nets добавлены. Pre-route DRC проходит с 0 violations; 499 unrouted groups ожидаются до драйверов и трассировки. Отдельные top-left, 180°-rotated bottom-right и normal-to-180° transition 2×2 routing probes проходят с 0 geometric violations для обоих pitches; row buses исправлены на физический L3 (`In2.Cu`). Transition-cell использует пять RGB vias на колонку и локальное сужение row bus до 0,40 мм. Детали находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. Copper zones, bottom-left/top-right corners, полный повтор pattern и driver exits ещё не проверены, поэтому этот DRC не является финальным.
 
 ## 8. Подготовить прошивочную платформу
 

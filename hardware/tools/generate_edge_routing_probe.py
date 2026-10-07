@@ -20,11 +20,14 @@ PROBE_VARIANTS = (
 TRACK_WIDTH_MM = 0.1
 OUTER_ROW_WIDTH_MM = 0.4
 INNER_ROW_WIDTH_MM = 1.2
+TRANSITION_ROW_WIDTH_MM = 0.4
 STANDARD_VIA_DIAMETER_MM = 0.45
 MATRIX_RGB_VIA_DIAMETER_MM = 0.4
 VIA_DRILL_MM = 0.2
-TRANSITION_SIDE_VIA_X_OFFSET_MM = 0.45
+TRANSITION_SIDE_VIA_X_OFFSET_MM = 0.5
 TRANSITION_SIDE_VIA_Y_OFFSET_MM = 0.3
+TRANSITION_CROSSOVER_X_OFFSET_MM = 0.9
+TRANSITION_CROSSOVER_Y_OFFSET_MM = 0.75
 
 
 def add_track(
@@ -354,25 +357,72 @@ def route_orientation_transition_rgb(
         shared_blue_via_y_mm,
         MATRIX_RGB_VIA_DIAMETER_MM,
     )
-
     add_track(
         board,
-        normal_green_pad.GetNet(),
-        pcbnew.In2_Cu,
-        normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
-        normal_via_y_mm,
-        normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
-        rotated_via_y_mm,
-    )
-    add_track(
-        board,
-        normal_red_pad.GetNet(),
+        normal_blue_pad.GetNet(),
         pcbnew.B_Cu,
-        normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
-        normal_via_y_mm,
-        normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
-        rotated_via_y_mm,
+        shared_blue_via_x_mm,
+        shared_blue_via_y_mm,
+        shared_blue_via_x_mm,
+        shared_blue_via_y_mm + 0.2,
     )
+
+    crossover_y_mm = (
+        transition_center_y_mm + TRANSITION_CROSSOVER_Y_OFFSET_MM
+    )
+    crossover_routes = (
+        (
+            normal_green_pad.GetNet(),
+            pcbnew.In2_Cu,
+            normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
+            normal_center_x_mm - TRANSITION_CROSSOVER_X_OFFSET_MM,
+            normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
+        ),
+        (
+            normal_red_pad.GetNet(),
+            pcbnew.B_Cu,
+            normal_center_x_mm + TRANSITION_SIDE_VIA_X_OFFSET_MM,
+            normal_center_x_mm + TRANSITION_CROSSOVER_X_OFFSET_MM,
+            normal_center_x_mm - TRANSITION_SIDE_VIA_X_OFFSET_MM,
+        ),
+    )
+    for net, layer, start_x_mm, outside_x_mm, end_x_mm in crossover_routes:
+        add_track(
+            board,
+            net,
+            layer,
+            start_x_mm,
+            normal_via_y_mm,
+            outside_x_mm,
+            normal_via_y_mm,
+        )
+        add_track(
+            board,
+            net,
+            layer,
+            outside_x_mm,
+            normal_via_y_mm,
+            outside_x_mm,
+            crossover_y_mm,
+        )
+        add_track(
+            board,
+            net,
+            layer,
+            outside_x_mm,
+            crossover_y_mm,
+            end_x_mm,
+            crossover_y_mm,
+        )
+        add_track(
+            board,
+            net,
+            layer,
+            end_x_mm,
+            crossover_y_mm,
+            end_x_mm,
+            rotated_via_y_mm,
+        )
 
 
 def route_anode(
@@ -745,7 +795,7 @@ def generate_orientation_transition_probe(
                 board,
                 normal_footprint,
                 normal_row_center_y_mm,
-                INNER_ROW_WIDTH_MM,
+                TRANSITION_ROW_WIDTH_MM,
             )
         )
         rotated_row_via_x_values.append(
@@ -753,7 +803,7 @@ def generate_orientation_transition_probe(
                 board,
                 rotated_footprint,
                 rotated_row_center_y_mm,
-                INNER_ROW_WIDTH_MM,
+                TRANSITION_ROW_WIDTH_MM,
                 variant.board_size_mm - 0.525,
             )
         )
@@ -785,7 +835,7 @@ def generate_orientation_transition_probe(
             row_center_y_mm,
             max(row_via_x_values),
             row_center_y_mm,
-            INNER_ROW_WIDTH_MM,
+            TRANSITION_ROW_WIDTH_MM,
         )
 
     pcbnew.SaveBoard(str(output_path), board)
