@@ -1,10 +1,12 @@
 # Wearable RGB MVP — передача проекта
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
-Важно: KiCad 10 PCB-каркасы созданы и проходят DRC. Сгенерированные LED-driver
+Важно: доказанная полная трассировка LED-матрицы перенесена в рабочие KiCad 10
+PCB обеих версий. Сгенерированные LED-driver
 полные LED-matrix и row-selection проекты обеих версий проходят автономный ERC
 без нарушений, но общая иерархия, power/MCU sheets, footprints остальных
-компонентов, полный placement/routing и физические измерения ещё не выполнены.
+компонентов, backside placement/routing, L2 GND и физические измерения ещё не
+выполнены.
 Все значения, помеченные как требующие проверки, нельзя считать
 production-ready.
 
@@ -363,14 +365,17 @@ Firmware tasks:
 - crystal keepout и отсутствие сигналов под crystal;
 - DC/DC feedback вести Kelvin route вдали от SW node.
 
-KiCad 10 PCB-каркасы:
+KiCad 10 рабочие PCB:
 
 - `hardware/wearable_20x20/wearable_20x20.kicad_pcb`;
 - `hardware/wearable_28x28/wearable_28x28.kicad_pcb`;
-- воспроизводятся скриптом `hardware/tools/generate_board_skeletons.py`;
+- исходный каркас воспроизводится `hardware/tools/generate_board_skeletons.py`,
+  а доказанная трассировка переносится
+  `hardware/tools/promote_matrix_routing.py`;
 - содержат 400/784 электрических LED footprints, row/RGB-column nets, четыре copper layers, optical centers и provisional battery envelope;
 - содержат DRC-ограничения JLCPCB Standard PCBA из `manufacturing/JLCPCB_STANDARD_PCBA_RULES.md`;
-- DRC: 0 violations для обеих pre-route плат; 499 unrouted groups ожидаются до подключения драйверов и трассировки;
+- полная матрица имеет 0 DRC violations и 0 unconnected matrix pads; это не
+  доказывает connectivity всего продукта до добавления backside components;
 - copper-to-edge rule — 0,30 мм, поэтому исходные preliminary outlines увеличены на 0,1 мм;
 - `B.SilkS`: `PCB CREATED BY ILLIA PLIUKHIN` и маленькая пятиконечная звезда;
 - LED references находятся на `F.Fab`; все остальные компоненты должны иметь физические reference designators не меньше 1,0/0,15 мм без перекрытий.
@@ -519,7 +524,8 @@ test/
 docs/
 ```
 
-Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, а схемная
-архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап: power и
-MCU sheets, общая иерархия, механика и только затем production
-placement/routing.
+Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, схемная
+архитектура — в `hardware/common/PCB_ARCHITECTURE.md`, расчётные ограничения —
+в `hardware/analysis/DESIGN_BUDGETS.md`, а release gates — в
+`manufacturing/RELEASE_CHECKLIST.md`. Следующий этап: power и MCU sheets, общая
+иерархия, backside placement/routing и L2 GND.

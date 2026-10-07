@@ -45,4 +45,6 @@
 - Verify generated connectivity through the exported XML netlist when symbols are rotated. `kicad-sch-api` pin-based label placement on a 90-degree two-pin resistor connects labels to the opposite serialized pin numbers, so compensate the requested endpoints explicitly. Simply removing rotation caused vertically stacked resistor endpoints to overlap and merge unrelated labels.
 - This environment does not provide a `python` alias. Invoke repository
   generators with `python3` after checking the setup status.
+- In KiCad 10 Python checks, `CONNECTIVITY_DATA.GetUnconnectedCount` requires
+  the `visibleOnly` boolean argument; pass `False` for a complete board check.
 
