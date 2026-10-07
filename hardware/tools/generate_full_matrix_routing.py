@@ -26,7 +26,7 @@ from generate_orientation_boundary_probes import (
     ROTATED_PROFILE,
     TOP_RIGHT_PROFILE,
     OrientationRoutingProfile,
-    get_board_path,
+    create_skeleton_board,
     get_led_reference,
 )
 
@@ -602,7 +602,7 @@ def route_full_matrix(
         / "analysis"
         / f"{variant.board_name}_full_matrix_routing.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(get_board_path(repository_root, variant)))
+    board = create_skeleton_board(repository_root, variant)
     upper_transition_row = variant.matrix_size // 2
     lower_transition_row = upper_transition_row + 1
     transition_positions: dict[

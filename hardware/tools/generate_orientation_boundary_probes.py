@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pcbnew
 
+from generate_board_skeletons import create_board, get_board_variant
 from generate_edge_routing_probe import (
     INNER_ROW_WIDTH_MM,
     MATRIX_RGB_VIA_DIAMETER_MM,
@@ -88,13 +89,12 @@ BOTTOM_LEFT_PROFILE = OrientationRoutingProfile(
 )
 
 
-def get_board_path(repository_root: Path, variant: ProbeVariant) -> Path:
-    return (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
+def create_skeleton_board(
+    repository_root: Path,
+    variant: ProbeVariant,
+) -> pcbnew.BOARD:
+    board_variant = get_board_variant(variant.board_name)
+    return create_board(repository_root, board_variant)
 
 
 def get_led_reference(
@@ -161,7 +161,7 @@ def generate_column_boundary_probe(
             "_column_boundary_routing_probe.kicad_pcb"
         )
     )
-    board = pcbnew.LoadBoard(str(get_board_path(repository_root, variant)))
+    board = create_skeleton_board(repository_root, variant)
 
     if top_right:
         row_numbers = (1, 2)
@@ -566,7 +566,7 @@ def generate_row_boundary_probe(
             "_row_boundary_routing_probe.kicad_pcb"
         )
     )
-    board = pcbnew.LoadBoard(str(get_board_path(repository_root, variant)))
+    board = create_skeleton_board(repository_root, variant)
 
     upper_row_number = variant.matrix_size // 2
     lower_row_number = upper_row_number + 1

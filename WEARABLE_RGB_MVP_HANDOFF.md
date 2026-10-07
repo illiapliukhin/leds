@@ -399,9 +399,11 @@ KiCad 10 рабочие PCB:
 
 - `hardware/wearable_20x20/wearable_20x20.kicad_pcb`;
 - `hardware/wearable_28x28/wearable_28x28.kicad_pcb`;
-- исходный каркас воспроизводится `hardware/tools/generate_board_skeletons.py`,
-  а доказанная трассировка переносится
-  `hardware/tools/promote_matrix_routing.py`;
+- чистые matrix skeletons воспроизводятся
+  `hardware/tools/generate_board_skeletons.py` только как analysis-артефакты;
+  full-matrix и boundary generators всегда начинают с нового skeleton в
+  памяти и не читают production PCB, а доказанная трассировка переносится
+  `hardware/tools/promote_matrix_routing.py` после проверки topology;
 - содержат 400/784 электрических LED footprints, row/RGB-column nets, четыре copper layers, optical centers и provisional battery envelope;
 - содержат DRC-ограничения JLCPCB Standard PCBA из `manufacturing/JLCPCB_STANDARD_PCBA_RULES.md`;
 - полная матрица имеет 0 DRC violations и 0 unconnected matrix pads; это не

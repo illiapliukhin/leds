@@ -61,4 +61,7 @@
   tables alone; packaging dimensions can be mistaken for land-pattern
   dimensions. Inspect the primary drawing and its graphical dimension arrows
   before encoding pad geometry.
+- Do not let an analysis generator use the mutable production PCB as its input.
+  Build probes and repeated routing from a clean skeleton so reruns cannot
+  duplicate copper or erase later backside placement.
 

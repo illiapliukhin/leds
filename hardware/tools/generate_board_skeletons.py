@@ -449,14 +449,33 @@ def validate_board(board: pcbnew.BOARD, variant: BoardVariant) -> None:
         )
 
 
+def get_board_variant(variant_name: str) -> BoardVariant:
+    for variant in BOARD_VARIANTS:
+        if variant.name == variant_name:
+            return variant
+
+    raise ValueError(f"Unknown board variant: {variant_name}")
+
+
+def create_board(
+    repository_root: Path,
+    variant: BoardVariant,
+) -> pcbnew.BOARD:
+    board = configure_board(variant, repository_root)
+    validate_board(board, variant)
+    return board
+
+
 def generate_boards(repository_root: Path) -> None:
     for variant in BOARD_VARIANTS:
-        output_directory = repository_root / "hardware" / variant.name
+        output_directory = repository_root / "hardware" / "analysis"
         output_directory.mkdir(parents=True, exist_ok=True)
-        output_path = output_directory / f"{variant.name}.kicad_pcb"
+        output_path = (
+            output_directory
+            / f"{variant.name}_matrix_skeleton.kicad_pcb"
+        )
 
-        board = configure_board(variant, repository_root)
-        validate_board(board, variant)
+        board = create_board(repository_root, variant)
         pcbnew.SaveBoard(str(output_path), board)
         print(f"Generated {output_path}")
 
