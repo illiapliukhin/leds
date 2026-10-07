@@ -42,4 +42,5 @@
 - When deriving a generated symbol with ordered text substitutions, replace specific metadata strings before broad part-name substitutions. A broad `MBI5252GP` replacement changed the source datasheet URL and made the later exact URL replacement fail.
 - Use fail-fast shell execution for multi-stage verification commands. Without `set -e`, a failed Python assertion was masked by later successful commands and the shell returned exit code zero.
 - Run all KiCad CLI schematic commands sequentially, including ERC and exports. Parallel `kicad-cli` processes share an instance lock directory and emit invalid-lock warnings; this mistake recurred when row-selector ERC was parallelized after the narrower export-only rule had already been recorded.
+- Verify generated connectivity through the exported XML netlist when symbols are rotated. `kicad-sch-api` pin-based label placement on a 90-degree two-pin resistor connected labels to the opposite serialized pin numbers; keep such passives unrotated unless the transformed mapping is explicitly verified.
 
