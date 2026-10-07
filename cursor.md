@@ -41,5 +41,5 @@
 - Do not specify mandatory configuration readback without reserving the complete physical return path. Include an MCU input, switched-domain isolation with specified `Ioff`, a deterministic MCU-side default level, decoupling, and the connection from the final device in the serial chain.
 - When deriving a generated symbol with ordered text substitutions, replace specific metadata strings before broad part-name substitutions. A broad `MBI5252GP` replacement changed the source datasheet URL and made the later exact URL replacement fail.
 - Use fail-fast shell execution for multi-stage verification commands. Without `set -e`, a failed Python assertion was masked by later successful commands and the shell returned exit code zero.
-- Run KiCad CLI schematic exports sequentially. Parallel `kicad-cli` processes share an instance lock directory and can emit invalid-lock warnings even when both output files are produced.
+- Run all KiCad CLI schematic commands sequentially, including ERC and exports. Parallel `kicad-cli` processes share an instance lock directory and emit invalid-lock warnings; this mistake recurred when row-selector ERC was parallelized after the narrower export-only rule had already been recorded.
 

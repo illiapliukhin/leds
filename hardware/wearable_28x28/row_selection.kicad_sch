@@ -3308,6 +3308,16 @@
 		)
 		(uuid "1690b438-de50-5bb0-9748-761d1211707c")
 	)
+	(label "ROW_XLAT_A7_UNUSED"
+		(at 45.72 68.58 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "17a70338-bd0a-547c-b720-14e2b0e617e5")
+	)
 	(label "U202_Y04_N"
 		(at 139.7 48.26 180)
 		(effects
@@ -3437,6 +3447,16 @@
 			(justify left bottom)
 		)
 		(uuid "27791d51-32b8-5548-8378-2432d01e2eb8")
+	)
+	(label "ROW_XLAT_A8_UNUSED"
+		(at 45.72 73.66 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "2815a431-9632-5a10-a41e-3447b37d8443")
 	)
 	(label "ROW_07_GATE"
 		(at 120.65 190.5 0)
@@ -3748,6 +3768,16 @@
 		)
 		(uuid "4205bd5e-1185-5d1d-9c4d-080fa5d86481")
 	)
+	(label "ROW_XLAT_A8_UNUSED"
+		(at 87.63 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "425c78b8-9a97-547b-8018-6cbb6503e6b1")
+	)
 	(label "ROW_28_ANODE"
 		(at 314.96 135.89 180)
 		(effects
@@ -3787,16 +3817,6 @@
 			(justify right bottom)
 		)
 		(uuid "44bc125e-7fd3-593e-bb0b-90b5fd6071b2")
-	)
-	(label "GND"
-		(at 45.72 73.66 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "44c1ec4c-f9c8-5088-b814-378b02462e85")
 	)
 	(label "ROW_11_GATE"
 		(at 111.76 248.92 0)
@@ -3957,16 +3977,6 @@
 			(justify right bottom)
 		)
 		(uuid "535c5b2e-c5e1-582d-b6af-038062b1b711")
-	)
-	(label "GND"
-		(at 45.72 68.58 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "55339d18-8c93-57ea-8e0b-29b24bdf4107")
 	)
 	(label "LED_4V1"
 		(at 119.38 241.3 270)
@@ -4507,6 +4517,16 @@
 			(justify right bottom)
 		)
 		(uuid "82bf4cd0-c84f-5dbf-83df-85c5e93c787b")
+	)
+	(label "ROW_XLAT_A7_UNUSED"
+		(at 87.63 93.98 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "8334a0c9-39bb-54a4-96b9-7d620f634223")
 	)
 	(label "LED_4V1"
 		(at 220.98 165.1 270)
@@ -5958,6 +5978,16 @@
 		)
 		(uuid "e8e516bd-8b19-558e-a62a-10ede4f13341")
 	)
+	(label "GND"
+		(at 80.01 93.98 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ea7fca70-616f-5457-8b3d-4505cc3a9aac")
+	)
 	(label "ROW_02_GATE"
 		(at 120.65 127 0)
 		(effects
@@ -6217,6 +6247,16 @@
 			(justify left bottom)
 		)
 		(uuid "fb63a585-9b89-5916-95a1-a3374c5602c4")
+	)
+	(label "GND"
+		(at 80.01 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "fc16a413-8b94-53b9-8ebe-f889701aeaf6")
 	)
 	(label "GND"
 		(at 80.01 43.18 180)
@@ -7681,6 +7721,96 @@
 			(project "row_selection"
 				(path "/90d886cc-44f6-562e-8bc8-fc6320a84b7f"
 					(reference "R328")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 83.82 93.98 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "23f615ce-fabb-55ee-b495-e9d91f9fb966")
+		(property "Reference" "R408"
+			(at 83.82 96.012 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0R"
+			(at 83.82 93.98 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 82.042 93.98 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 83.82 93.98 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 83.82 93.98 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Function" "ROW_XLAT_A7_GROUND_LINK"
+			(at 86.36 99.0599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "dba4d7ee-f8bb-5a18-aa1b-01f6a762afd9")
+		)
+		(pin "2"
+			(uuid "fe529ec8-e9f3-5d6a-8e81-e456a3ee6ee7")
+		)
+		(instances
+			(project "row_selection"
+				(path "/90d886cc-44f6-562e-8bc8-fc6320a84b7f"
+					(reference "R408")
 					(unit 1)
 				)
 			)
@@ -14203,6 +14333,96 @@
 			(project "row_selection"
 				(path "/90d886cc-44f6-562e-8bc8-fc6320a84b7f"
 					(reference "R220")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 83.82 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "dc6de6e8-5fd7-5f8b-a94c-031ba95b55f2")
+		(property "Reference" "R409"
+			(at 83.82 103.632 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0R"
+			(at 83.82 101.6 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 82.042 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 83.82 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 83.82 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Function" "ROW_XLAT_A8_GROUND_LINK"
+			(at 86.36 106.6799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "64999569-2086-5dc7-a4b6-55b78419c969")
+		)
+		(pin "2"
+			(uuid "ef725825-8d17-5dfb-9300-ac23d84c77d5")
+		)
+		(instances
+			(project "row_selection"
+				(path "/90d886cc-44f6-562e-8bc8-fc6320a84b7f"
+					(reference "R409")
 					(unit 1)
 				)
 			)

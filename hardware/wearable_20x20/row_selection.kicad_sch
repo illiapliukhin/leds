@@ -3406,6 +3406,16 @@
 		)
 		(uuid "36ec160d-3c9f-55e7-b9c1-ae6df5ce6080")
 	)
+	(label "ROW_XLAT_A7_UNUSED"
+		(at 87.63 93.98 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "3a185df5-05fb-5b95-81b4-0b7a7c27392c")
+	)
 	(label "ROW_A2_4V1"
 		(at 87.63 58.42 0)
 		(effects
@@ -3726,16 +3736,6 @@
 		)
 		(uuid "592654d3-ad50-5750-b127-90a8ac73aab1")
 	)
-	(label "GND"
-		(at 45.72 68.58 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "5a4c02a4-c916-5cac-8dec-228c59e5c06e")
-	)
 	(label "U202_Y06_N"
 		(at 102.87 198.12 0)
 		(effects
@@ -3825,6 +3825,16 @@
 			(justify right bottom)
 		)
 		(uuid "62022135-5524-5d1c-b178-15c089667aba")
+	)
+	(label "ROW_XLAT_A8_UNUSED"
+		(at 87.63 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "6468f447-d04b-59b0-8661-94e315de32cf")
 	)
 	(label "ROW_20_GATE"
 		(at 196.85 185.42 180)
@@ -4596,6 +4606,16 @@
 		)
 		(uuid "a7130072-cac5-57a6-8e3a-f7de0ae05db0")
 	)
+	(label "GND"
+		(at 80.01 101.6 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "a93de511-cd71-5bdf-9a83-0af51cf973a1")
+	)
 	(label "DEC_B_EN_N"
 		(at 45.72 63.5 0)
 		(effects
@@ -4936,6 +4956,16 @@
 		)
 		(uuid "c34208b9-07e5-548f-931c-75507694d308")
 	)
+	(label "GND"
+		(at 80.01 93.98 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "c3691b6b-ffca-51ae-9656-11f8e3f9b6e2")
+	)
 	(label "U202_Y15_N"
 		(at 139.7 76.2 180)
 		(effects
@@ -5056,6 +5086,16 @@
 		)
 		(uuid "d2206fda-b293-55b6-a63b-172b80a60184")
 	)
+	(label "ROW_XLAT_A8_UNUSED"
+		(at 45.72 73.66 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d2515287-3d1c-512f-a10a-478f788ed242")
+	)
 	(label "ROW_20_GATE"
 		(at 213.36 185.42 0)
 		(effects
@@ -5105,6 +5145,16 @@
 			(justify left bottom)
 		)
 		(uuid "d6ac7d0b-aa76-5797-9c09-8b132b1491a6")
+	)
+	(label "ROW_XLAT_A7_UNUSED"
+		(at 45.72 68.58 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d787efc9-ebed-52ea-92fd-1667e361f160")
 	)
 	(label "LED_4V1"
 		(at 214.63 114.3 180)
@@ -5375,16 +5425,6 @@
 			(justify right bottom)
 		)
 		(uuid "f77d55e4-48d0-5a3d-bbb7-a3efbcc6ea5d")
-	)
-	(label "GND"
-		(at 45.72 73.66 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "f824e613-9622-512a-962f-4854db2e9a48")
 	)
 	(label "ROW_14_ANODE"
 		(at 119.38 281.94 90)
@@ -11734,6 +11774,96 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 83.82 101.6 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "cd3f6013-1b10-5bc4-afc0-317a78502dde")
+		(property "Reference" "R409"
+			(at 83.82 103.632 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0R"
+			(at 83.82 101.6 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 82.042 101.6 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 83.82 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 83.82 101.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Function" "ROW_XLAT_A8_GROUND_LINK"
+			(at 86.36 106.6799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "81900584-3467-5c09-b672-b45728db14a0")
+		)
+		(pin "2"
+			(uuid "7bb15938-a56b-5562-9c9a-97aec51a378f")
+		)
+		(instances
+			(project "row_selection"
+				(path "/1ea4952c-cf84-5739-b8b2-3d6a71ef719a"
+					(reference "R409")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Transistor_FET:Q_PMOS_GSD")
 		(at 116.84 287.02 0)
 		(unit 1)
@@ -12444,6 +12574,96 @@
 			(project "row_selection"
 				(path "/1ea4952c-cf84-5739-b8b2-3d6a71ef719a"
 					(reference "U201")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 83.82 93.98 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ef411297-e5da-5e1d-8a85-0bed40e7a483")
+		(property "Reference" "R408"
+			(at 83.82 96.012 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0R"
+			(at 83.82 93.98 180)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 82.042 93.98 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 83.82 93.98 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 83.82 93.98 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Function" "ROW_XLAT_A7_GROUND_LINK"
+			(at 86.36 99.0599 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "b3820038-2b64-56a2-ba35-232a03ac2f06")
+		)
+		(pin "2"
+			(uuid "5379f75c-a85f-53f0-a4e5-d387f73901a5")
+		)
+		(instances
+			(project "row_selection"
+				(path "/1ea4952c-cf84-5739-b8b2-3d6a71ef719a"
+					(reference "R408")
 					(unit 1)
 				)
 			)

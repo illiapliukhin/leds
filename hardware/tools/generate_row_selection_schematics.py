@@ -119,8 +119,20 @@ def add_translator(schematic: Schematic, generation_key: str) -> None:
         )
     add_pin_label(schematic, generation_key, reference, "7", "DEC_A_EN_N")
     add_pin_label(schematic, generation_key, reference, "8", "DEC_B_EN_N")
-    add_pin_label(schematic, generation_key, reference, "9", "GND")
-    add_pin_label(schematic, generation_key, reference, "10", "GND")
+    add_pin_label(
+        schematic,
+        generation_key,
+        reference,
+        "9",
+        "ROW_XLAT_A7_UNUSED",
+    )
+    add_pin_label(
+        schematic,
+        generation_key,
+        reference,
+        "10",
+        "ROW_XLAT_A8_UNUSED",
+    )
     for ground_pin in ("11", "12", "13"):
         add_pin_label(schematic, generation_key, reference, ground_pin, "GND")
 
@@ -171,6 +183,17 @@ def add_translator(schematic: Schematic, generation_key: str) -> None:
             f"DEC_{bank_name}_EN_4V1_N",
             "LED_4V1",
             f"DEC_{bank_name}_ENABLE_PULLUP",
+        )
+    for unused_channel_index in range(2):
+        add_resistor(
+            schematic,
+            generation_key,
+            f"R{408 + unused_channel_index}",
+            "0R",
+            (83.82, 93.98 + unused_channel_index * 7.62),
+            f"ROW_XLAT_A{7 + unused_channel_index}_UNUSED",
+            "GND",
+            f"ROW_XLAT_A{7 + unused_channel_index}_GROUND_LINK",
         )
 
     add_capacitor(

@@ -79,7 +79,8 @@ bulk capacitance at the driver group.
 - `DIR = AON_3V3`, fixed A-to-B.
 - `/OE = ROW_XLAT_OE_N`; pull up with 10 kΩ to `AON_3V3`.
 - Channels 1…6 translate `ROW_A0…ROW_A3`, `DEC_A_EN_N`, and `DEC_B_EN_N`.
-- Tie unused A-side inputs to GND and leave the corresponding B-side outputs unconnected.
+- Tie unused A-side inputs to GND through 0 Ω links and leave the corresponding
+  B-side outputs unconnected.
 - Pull B-side decoder address inputs down with 100 kΩ.
 - Pull each B-side decoder enable up to `LED_4V1` with 47 kΩ.
 
