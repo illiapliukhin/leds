@@ -54,4 +54,7 @@
   Verify the manufacturer terminal table and model signal pins plus grounded
   case pads explicitly; `L327S400H11L` requires signals on pins 1/3 and GND on
   pins 2/4.
+- When counting KiCad DRC categories in a text report, match category headers
+  at the start of a line. Counting `[` characters also counts bracketed net
+  names such as `[GND]` in violation details and produces false failures.
 

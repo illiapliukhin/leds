@@ -155,6 +155,15 @@ This is a conventional through-via process but creates substantial L2 ground-pla
 4. add row feeds and RGB driver exits without blocking the proven corridors;
 5. compare against a lower-via interior pattern only if it remains simpler and DRC-clean.
 
+`hardware/tools/add_l2_ground_plane.py` generates a non-production 20×20
+probe with a 0.30 mm edge inset and 0.10 mm clearance/minimum thickness.
+After all 1,564 matrix-via antipads are applied, KiCad reports one contiguous
+fill outline, 1,919.9 mm² of copper, and 81.0% coverage of the nominal zone.
+The probe intentionally retains an isolated-copper warning because no
+backside GND pad exists yet. This proves gross geometric continuity only; it
+does not prove electrical grounding, local return-path quality, or minimum
+neck width after component placement.
+
 ## Release gate
 
 Do not treat the DRC-clean repeated matrix as production output until:

@@ -14,6 +14,10 @@ class ReleaseCheck:
 
 
 VARIANTS = ("wearable_20x20", "wearable_28x28")
+EXPECTED_NON_LED_FOOTPRINTS = {
+    "wearable_20x20": 169,
+    "wearable_28x28": 193,
+}
 REQUIRED_ROOT_SHEETS = (
     "power.kicad_sch",
     "mcu_usb.kicad_sch",
@@ -82,16 +86,33 @@ def check_board(repository_root: Path, variant: str) -> list[ReleaseCheck]:
         for zone in board.Zones()
         if zone.GetLayer() == pcbnew.In1_Cu and zone.GetNetname() == "GND"
     ]
+    ground_pads = [
+        pad
+        for footprint in non_led_footprints
+        for pad in footprint.Pads()
+        if pad.GetNetname() == "GND"
+    ]
 
     return [
         ReleaseCheck(
             name=f"{variant} backside placement",
-            passed=bool(non_led_footprints),
-            detail=f"{len(non_led_footprints)} non-LED footprints",
+            passed=(
+                len(non_led_footprints)
+                == EXPECTED_NON_LED_FOOTPRINTS[variant]
+            ),
+            detail=(
+                f"{len(non_led_footprints)}/"
+                f"{EXPECTED_NON_LED_FOOTPRINTS[variant]} "
+                "non-LED footprints"
+            ),
         ),
         ReleaseCheck(
             name=f"{variant} connectivity",
-            passed=unconnected_count == 0 and bool(non_led_footprints),
+            passed=(
+                unconnected_count == 0
+                and len(non_led_footprints)
+                == EXPECTED_NON_LED_FOOTPRINTS[variant]
+            ),
             detail=(
                 f"{unconnected_count} unconnected matrix items; "
                 "full-product connectivity requires backside placement"
@@ -99,8 +120,11 @@ def check_board(repository_root: Path, variant: str) -> list[ReleaseCheck]:
         ),
         ReleaseCheck(
             name=f"{variant} L2 ground plane",
-            passed=bool(ground_zones),
-            detail=f"{len(ground_zones)} GND zones on physical L2",
+            passed=bool(ground_zones) and bool(ground_pads),
+            detail=(
+                f"{len(ground_zones)} GND zones and "
+                f"{len(ground_pads)} GND component pads on physical L2"
+            ),
         ),
     ]
 
