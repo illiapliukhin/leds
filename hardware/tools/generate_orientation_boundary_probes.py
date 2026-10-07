@@ -513,9 +513,9 @@ def route_edge_row_transition_rgb(
                     upper_blue_via,
                     (
                         upper_blue_via[0],
-                        transition_center_y_mm - 0.5,
+                        transition_center_y_mm - 0.65,
                     ),
-                    (outside_x_mm, transition_center_y_mm - 0.5),
+                    (outside_x_mm, transition_center_y_mm - 0.65),
                     (outside_x_mm, lower_blue_via[1]),
                     lower_blue_via,
                 ),
@@ -526,10 +526,10 @@ def route_edge_row_transition_rgb(
                 (
                     upper_red_via,
                     (outside_x_mm, upper_red_via[1]),
-                    (outside_x_mm, transition_center_y_mm + 0.5),
+                    (outside_x_mm, transition_center_y_mm + 0.65),
                     (
                         lower_red_via[0],
-                        transition_center_y_mm + 0.5,
+                        transition_center_y_mm + 0.65,
                     ),
                     lower_red_via,
                 ),
