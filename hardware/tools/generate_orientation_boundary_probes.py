@@ -290,9 +290,13 @@ def route_edge_row_transition_rgb(
     lower_via_y_mm = (
         transition_center_y_mm + TRANSITION_SIDE_VIA_Y_OFFSET_MM
     )
-    horizontal_offset_mm = TRANSITION_SIDE_VIA_X_OFFSET_MM
-    central_via_x_offset_mm = horizontal_offset_mm / 2
-    central_via_y_offset_mm = TRANSITION_SIDE_VIA_Y_OFFSET_MM / 2
+    outer_via_x_offset_mm = (
+        TRANSITION_SIDE_VIA_X_OFFSET_MM + 0.15
+    )
+    central_via_x_offset_mm = 0.1
+    central_via_y_offset_mm = (
+        TRANSITION_SIDE_VIA_Y_OFFSET_MM - 0.02
+    )
 
     upper_blue_pad = get_pad(upper_footprint, "4")
     upper_red_pad = get_pad(upper_footprint, "2")
@@ -306,7 +310,7 @@ def route_edge_row_transition_rgb(
         transition_vias = (
             (
                 upper_blue_pad,
-                upper_center_x_mm - horizontal_offset_mm,
+                upper_center_x_mm - outer_via_x_offset_mm,
                 upper_via_y_mm,
                 False,
             ),
@@ -318,13 +322,13 @@ def route_edge_row_transition_rgb(
             ),
             (
                 lower_blue_pad,
-                upper_center_x_mm + central_via_x_offset_mm,
+                upper_center_x_mm - central_via_x_offset_mm,
                 transition_center_y_mm + central_via_y_offset_mm,
                 True,
             ),
             (
                 lower_red_pad,
-                upper_center_x_mm - horizontal_offset_mm,
+                upper_center_x_mm - outer_via_x_offset_mm,
                 lower_via_y_mm,
                 False,
             ),
@@ -340,19 +344,19 @@ def route_edge_row_transition_rgb(
             ),
             (
                 upper_red_pad,
-                upper_center_x_mm + horizontal_offset_mm,
+                upper_center_x_mm + outer_via_x_offset_mm,
                 upper_via_y_mm,
                 False,
             ),
             (
                 lower_blue_pad,
-                upper_center_x_mm + horizontal_offset_mm,
+                upper_center_x_mm + outer_via_x_offset_mm,
                 lower_via_y_mm,
                 False,
             ),
             (
                 lower_red_pad,
-                upper_center_x_mm - central_via_x_offset_mm,
+                upper_center_x_mm + central_via_x_offset_mm,
                 transition_center_y_mm + central_via_y_offset_mm,
                 True,
             ),
@@ -376,7 +380,16 @@ def route_edge_row_transition_rgb(
                 footprint_y_mm,
             )
             pad_x_mm = footprint_x_mm
-            pad_y_mm = footprint_y_mm
+            add_track(
+                board,
+                pad.GetNet(),
+                pcbnew.F_Cu,
+                footprint_x_mm,
+                footprint_y_mm,
+                footprint_x_mm,
+                via_y_mm,
+            )
+            pad_y_mm = via_y_mm
         add_track(
             board,
             pad.GetNet(),
@@ -413,15 +426,6 @@ def route_edge_row_transition_rgb(
         shared_green_via_x_mm,
         shared_green_via_y_mm,
         MATRIX_RGB_VIA_DIAMETER_MM,
-    )
-    add_track(
-        board,
-        upper_green_pad.GetNet(),
-        pcbnew.B_Cu,
-        shared_green_via_x_mm,
-        shared_green_via_y_mm,
-        shared_green_via_x_mm,
-        shared_green_via_y_mm + 0.2,
     )
 
     upper_blue_via = via_positions_by_pad_number[id(upper_blue_pad)]
