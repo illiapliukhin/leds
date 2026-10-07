@@ -377,7 +377,9 @@ def route_edge_row_transition_rgb(
                 footprint_x_mm,
                 footprint_y_mm,
             )
-            pad_x_mm = footprint_x_mm
+            approach_y_mm = via_y_mm + (
+                0.2 if via_y_mm > transition_center_y_mm else -0.2
+            )
             add_track(
                 board,
                 pad.GetNet(),
@@ -385,18 +387,45 @@ def route_edge_row_transition_rgb(
                 footprint_x_mm,
                 footprint_y_mm,
                 footprint_x_mm,
+                approach_y_mm,
+            )
+            add_track(
+                board,
+                pad.GetNet(),
+                pcbnew.F_Cu,
+                footprint_x_mm,
+                approach_y_mm,
+                via_x_mm,
+                approach_y_mm,
+            )
+            add_track(
+                board,
+                pad.GetNet(),
+                pcbnew.F_Cu,
+                via_x_mm,
+                approach_y_mm,
+                via_x_mm,
                 via_y_mm,
             )
-            pad_y_mm = via_y_mm
-        add_track(
-            board,
-            pad.GetNet(),
-            pcbnew.F_Cu,
-            pad_x_mm,
-            pad_y_mm,
-            via_x_mm,
-            via_y_mm,
-        )
+        else:
+            add_track(
+                board,
+                pad.GetNet(),
+                pcbnew.F_Cu,
+                pad_x_mm,
+                pad_y_mm,
+                via_x_mm,
+                pad_y_mm,
+            )
+            add_track(
+                board,
+                pad.GetNet(),
+                pcbnew.F_Cu,
+                via_x_mm,
+                pad_y_mm,
+                via_x_mm,
+                via_y_mm,
+            )
         add_through_via(
             board,
             pad.GetNet(),
@@ -439,24 +468,52 @@ def route_edge_row_transition_rgb(
     lower_blue_via = via_positions_by_pad_number[id(lower_blue_pad)]
     upper_red_via = via_positions_by_pad_number[id(upper_red_pad)]
     lower_red_via = via_positions_by_pad_number[id(lower_red_pad)]
-    add_track(
-        board,
-        upper_blue_pad.GetNet(),
-        pcbnew.In2_Cu,
-        upper_blue_via[0],
-        upper_blue_via[1],
-        lower_blue_via[0],
-        lower_blue_via[1],
+    crossover_routes = (
+        (
+            upper_blue_pad.GetNet(),
+            pcbnew.In2_Cu,
+            upper_blue_via,
+            lower_blue_via,
+            transition_center_y_mm - 0.5,
+        ),
+        (
+            upper_red_pad.GetNet(),
+            pcbnew.B_Cu,
+            upper_red_via,
+            lower_red_via,
+            transition_center_y_mm + 0.5,
+        ),
     )
-    add_track(
-        board,
-        upper_red_pad.GetNet(),
-        pcbnew.B_Cu,
-        upper_red_via[0],
-        upper_red_via[1],
-        lower_red_via[0],
-        lower_red_via[1],
-    )
+    for net, layer, upper_via, lower_via, crossover_y_mm in (
+        crossover_routes
+    ):
+        add_track(
+            board,
+            net,
+            layer,
+            upper_via[0],
+            upper_via[1],
+            upper_via[0],
+            crossover_y_mm,
+        )
+        add_track(
+            board,
+            net,
+            layer,
+            upper_via[0],
+            crossover_y_mm,
+            lower_via[0],
+            crossover_y_mm,
+        )
+        add_track(
+            board,
+            net,
+            layer,
+            lower_via[0],
+            crossover_y_mm,
+            lower_via[0],
+            lower_via[1],
+        )
 
 
 def generate_row_boundary_probe(
