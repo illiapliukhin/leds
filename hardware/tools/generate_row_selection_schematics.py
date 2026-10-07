@@ -24,6 +24,10 @@ DECODER_LIBRARY_ID = "74xx:74LS154"
 PMOS_LIBRARY_ID = "Transistor_FET:Q_PMOS_GSD"
 DECODER_FOOTPRINT = "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm"
 PMOS_FOOTPRINT = "Package_TO_SOT_SMD:SOT-23"
+TRANSLATOR_FOOTPRINT = (
+    "PartSignal_Packages:"
+    "TI_RHL0024A_VQFN-24-1EP_3.5x5.5mm_P0.5mm_EP2.05x4.05mm"
+)
 DECODER_OUTPUT_PINS = (
     "1",
     "2",
@@ -100,10 +104,10 @@ def add_translator(schematic: Schematic, generation_key: str) -> None:
         reference=reference,
         value="SN74LVC8T245RHLR",
         position=(55.88, 55.88),
-        footprint="",
+        footprint=TRANSLATOR_FOOTPRINT,
         properties={
             "Function": "U_ROW_XLAT",
-            "FootprintStatus": "OPEN_RHL24_LAND_PATTERN",
+            "FootprintStatus": "RELEASED_TI_RHL0024A_4225250_REV_C",
         },
     )
 

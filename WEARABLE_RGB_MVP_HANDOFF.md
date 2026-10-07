@@ -142,8 +142,20 @@ KiCad 10 row-selection sheets:
   outputs и неиспользуемые decoder outputs явно отмечены NC;
 - оба листа проходят ERC с `0 violations`; XML netlist подтверждает точное
   соответствие decoder outputs строкам и 14/6 NC pins;
-- footprint `SN74LVC8T245RHLR` намеренно оставлен открытым до проверки точного
-  TI RHL-24 land pattern.
+- footprint `SN74LVC8T245RHLR` назначен на проверенный TI `RHL0024A`
+  land pattern из локальной библиотеки.
+
+Обновление production-readiness:
+
+- точный footprint `SN74LVC8T245RHLR` выпущен в
+  `hardware/libraries/packages.pretty` по TI `RHL0024A`, drawing 4225250
+  Rev. C; generic QFN не используется;
+- единый реестр механических входных данных и внешних блокеров находится в
+  `mechanical/MECHANICAL_INPUTS.md`;
+- построчный статус freeze находится в
+  `manufacturing/BOM_FREEZE_STATUS.csv`;
+- USB-C `C52209107` подтверждён только как EVT-кандидат; footprint и положение
+  остаются заблокированы до утверждения разреза корпуса.
 
 ### Расчёт обновления
 

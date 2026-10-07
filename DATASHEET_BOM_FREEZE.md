@@ -74,6 +74,11 @@
 
 - Прямое управление 74HC154 от ESP32-S3 запрещено: при LED_4V1 = 4,1 В требуемый `VIH` около 2,87 В, а гарантированный MCU `VOH` около 2,64 В.
 - Выбран `SN74LVC8T245RHLR`: VCCA = 3,3 В, VCCB = LED_4V1, `Ioff`, VCC isolation и аппаратный `/OE` pull-up.
+- Для `SN74LVC8T245RHLR` создан точный footprint TI `RHL0024A` по
+  package drawing 4225250 Rev. C: VQFN-24 3,5×5,5 мм, pitch 0,5 мм,
+  signal lands 0,60×0,24 мм и exposed pad 2,05×4,05 мм. Exposed pad
+  электрически объединён с GND pin 11; paste разбита на четыре окна с
+  покрытием около 78%.
 - Выбраны два Nexperia `74HC154PW,118` в TSSOP-24 и `AO3403` для каждой строки.
 - `AO3403` имеет Qg около 2,8 нКл typical и RDS(on) до 200 мОм при VGS = −2,5 В. Voltage drop и switching dead time остаются EVT-параметрами.
 - Для изоляции MBI5124 выбран `SN74LV125APWR`, который явно специфицирует `Ioff`; похожий `SN74LVC125A` отклонён из-за отсутствия явной partial-power-down гарантии.
@@ -108,6 +113,7 @@ row и RGB-column connections.
 Row-selection projects содержат translator, два decoder banks и 20/28 PMOS;
 оба проходят ERC без нарушений, а XML netlist подтверждает каждую цепь
 decoder-output/gate/row и явные NC. Точный TI RHL-24 footprint translator
-остаётся открытым и не назначен.
+назначен и проверяется из локальной библиотеки
+`hardware/libraries/packages.pretty`.
 Non-BOM ERC harness необходимо заменить реальными top-level MCU, power и matrix
 sheets при сборке полной иерархии. USB placement нельзя фиксировать до пункта 1.
