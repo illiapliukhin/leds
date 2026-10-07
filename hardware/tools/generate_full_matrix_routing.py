@@ -42,7 +42,7 @@ def get_orientation_profile(
     upper_half = row_number <= variant.matrix_size // 2
     if upper_half and column_number >= variant.matrix_size - 1:
         return TOP_RIGHT_PROFILE
-    if not upper_half and column_number == 1:
+    if not upper_half and column_number <= 2:
         return BOTTOM_LEFT_PROFILE
     if upper_half:
         return NORMAL_PROFILE
@@ -324,7 +324,7 @@ def route_full_matrix(
         lower_footprint.SetOrientationDegrees(
             lower_profile.orientation_degrees
         )
-        if column_number == 1:
+        if column_number <= 2:
             route_edge_row_transition_rgb(
                 board,
                 upper_footprint,
