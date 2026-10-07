@@ -120,6 +120,20 @@ MCU-side default pulls:
 
 Add 22 Ω source-series footprints after the buffer on `LED_CLK`, `LED_SDI`, and `LED_LE`; start EVT populated. Add a 47 kΩ pull-up from the buffered `LED_OE_N` to `LED_LOGIC_3V3`.
 
+Route the final MBI5124 `SDO` through `U_LED_SDO_BUF`, a TI
+`SN74LVC1G125DBVR` powered by `LED_LOGIC_3V3`:
+
+- A receives the final `SDO`;
+- Y drives `LED_SDO_RETURN` and ESP32-S3 `GPIO48`;
+- `/OE` is tied to GND;
+- add 100 kΩ from `LED_SDO_RETURN` to GND on the MCU side;
+- add 100 nF directly between the buffer VCC and GND pins.
+
+The buffer's specified `Ioff` makes its output high-impedance when
+`LED_LOGIC_3V3` is off. The pull-down then guarantees a LOW MCU input and
+prevents an accidental MCU pull-up or output configuration from back-powering
+the switched domain.
+
 ## Safe sequencing
 
 ### Start
@@ -168,9 +182,15 @@ Hardware pull resistors must make this state safe during reset, deep sleep, and 
 - Output: 2×22 µF X5R/X7R with at least 7 µF total effective capacitance.
 - Use Kelvin feedback routing and keep the switch node away from microphone, IMU, crystal, and ADC nets.
 
-## ESP32-S3 pin-map addition
+## ESP32-S3 pin-map additions
 
-Reserve `GPIO47` as `ROW_XLAT_OE_N`. It is not a deep-sleep wake source. The complete pin map still requires a schematic-level audit before symbol annotation is frozen.
+- Reserve `GPIO47` as `ROW_XLAT_OE_N`.
+- Reserve `GPIO48` as the `LED_SDO_RETURN` configuration-readback input.
+
+Neither signal is a deep-sleep wake source. `GPIO48` is not a strapping pin
+and is not allocated to the in-package Quad SPI flash on `ESP32-S3FN8`. The
+complete pin map still requires a schematic-level audit before symbol
+annotation is frozen.
 
 ## Board and marking conventions
 

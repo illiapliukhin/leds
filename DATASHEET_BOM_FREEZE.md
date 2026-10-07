@@ -15,6 +15,7 @@
 - MHPA1010RGBDT datasheet Rev. 2: https://www.lcsc.com/datasheet/C404280.pdf
 - SN74LVC8T245 datasheet Rev. D: https://www.ti.com/lit/ds/symlink/sn74lvc8t245.pdf
 - SN74LV125A datasheet Rev. O: https://www.ti.com/lit/ds/symlink/sn74lv125a.pdf
+- SN74LVC1G125 datasheet Rev. V: https://www.ti.com/lit/ds/symlink/sn74lvc1g125.pdf
 - Nexperia 74HC154/HCT154 datasheet: https://assets.nexperia.com/documents/data-sheet/74HC_HCT154.pdf
 - AO3403 datasheet: https://www.aosmd.com/res/datasheets/AO3403.pdf
 - TPS22917 datasheet Rev. B: https://www.ti.com/lit/ds/symlink/tps22917.pdf
@@ -76,6 +77,7 @@
 - Выбраны два Nexperia `74HC154PW,118` в TSSOP-24 и `AO3403` для каждой строки.
 - `AO3403` имеет Qg около 2,8 нКл typical и RDS(on) до 200 мОм при VGS = −2,5 В. Voltage drop и switching dead time остаются EVT-параметрами.
 - Для изоляции MBI5124 выбран `SN74LV125APWR`, который явно специфицирует `Ioff`; похожий `SN74LVC125A` отклонён из-за отсутствия явной partial-power-down гарантии.
+- Для обязательного configuration readback выбран отдельный `SN74LVC1G125DBVR`: вход от SDO последнего MBI5124, выход `LED_SDO_RETURN` на `GPIO48`, `/OE` на GND и 100 кОм pull-down на стороне MCU. Его `Ioff` гарантирует изоляцию при выключенном `LED_LOGIC_3V3`.
 - Для обоих отключаемых 3,3-вольтовых доменов выбран `TPS22917DBVR`; нужны внешние enable pull-down и configurable QOD.
 - Полная topology, pulls и sequencing зафиксированы в `hardware/common/PCB_ARCHITECTURE.md`.
 

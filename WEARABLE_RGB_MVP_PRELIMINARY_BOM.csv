@@ -6,6 +6,7 @@ Row translator,U_ROW_XLAT,SN74LVC8T245RHLR,"8-bit dual-supply translator with Io
 Row decoder,U_DEC1-U_DEC2,"74HC154PW,118","4-to-16 active-low decoder; TSSOP-24",- ,2,2,"CONDITIONAL: selected behind translator; verify stock and measured gate timing"
 Row PMOS,Q_ROW1-Q_ROW20/28,AO3403,"-30V low-Qg P-channel MOSFET; SOT-23",- ,20,28,"CONDITIONAL: full production; 2.8nC typical Qg and 200mR max at -2.5V; measure drop and switching"
 LED signal buffer,U_LED_BUF,SN74LV125APWR,"Quad buffer with Ioff for switched MBI5124 domain",- ,1,1,"CONDITIONAL: selected for GPIO back-power isolation; verify stock and power-up behavior"
+LED SDO return buffer,U_LED_SDO_BUF,SN74LVC1G125DBVR,"Single buffer with Ioff for MBI5124 configuration readback",- ,1,1,"CONDITIONAL: SDO return to GPIO48 with always-enabled output and MCU-side 100k pull-down; verify stock and power-up behavior"
 IMU,U_IMU,BMI270,"6-axis accelerometer and gyroscope",C2836813,1,1,"Selected; verify interrupt and low-power configuration"
 Charger,U_CHG,BQ25185,"1-cell linear charger with power path and ship mode",C19725033,1,1,"CONDITIONAL: 24k/18k ILIM and 1k/750R ISET confirmed; design CE resampling TS network and thermal policy"
 LED DC/DC,U_LED_PWR,TPS63802DLAR,"Synchronous buck-boost converter; VSON-HR-10",C2845237,1,1,"CONDITIONAL: use 655k/91k feedback 10uF input 2x22uF output; verify thermal/load margin"

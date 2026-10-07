@@ -60,6 +60,7 @@
 | 38…42 | charger control/status/ship |
 | 43/44 | service UART |
 | 47 | ROW_XLAT_OE_N |
+| 48 | LED_SDO_RETURN |
 
 Проверить полный pin map, reset glitches, ADC-конфликты и ограничения выбранного ESP-IDF peripheral routing.
 
@@ -86,6 +87,7 @@
 - `SN74LVC8T245RHLR` переводит A0…A3 и два bank-enable с 3,3 В на LED_4V1;
 - translator имеет `Ioff`, VCC isolation и аппаратный `/OE` pull-up;
 - `SN74LV125APWR` изолирует LED clock/data/latch/OE от выключенного LED_LOGIC_3V3;
+- `SN74LVC1G125DBVR` возвращает SDO последнего MBI5124 на `GPIO48`, имеет `Ioff`, постоянно разрешён и дополнен 100 кОм pull-down на стороне MCU;
 - отдельные DEC_A_EN_N и DEC_B_EN_N исключают включение двух банков.
 
 Безопасная последовательность строки:
@@ -148,7 +150,7 @@
 | SYS | BQ25185 power path | LDO, LED DC/DC |
 | AON_3V3 | TPS7A2033 | ESP32-S3, BMI270, MAX17048 |
 | LED_4V1 | TPS63802 | LED-аноды, row decoders |
-| LED_LOGIC_3V3 | TPS22917DBVR | MBI5124, SN74LV125A |
+| LED_LOGIC_3V3 | TPS22917DBVR | MBI5124, SN74LV125A, SN74LVC1G125 |
 | AUDIO_3V3 | TPS22917DBVR | microphone, TLV9001 |
 
 TPS63802:
@@ -437,7 +439,7 @@ Lanyard loop выполняется корпусом, не PCB. IP-рейтин�
 
 1. Binning и approved alternate MHPA1010RGBDT.
 2. Реальные switching times и voltage drop AO3403 с выбранным дешифратором.
-3. Power-ramp/back-power проверка SN74LVC8T245, SN74LV125A и TPS22917.
+3. Power-ramp/back-power проверка SN74LVC8T245, SN74LV125A, SN74LVC1G125 и TPS22917.
 4. TPS63802 output-current/thermal margin в закрытом корпусе.
 5. Полный ESP32-S3FN8 pin audit, reset glitches и ADC-конфликты.
 6. USB-C connector по механическому разрезу корпуса.

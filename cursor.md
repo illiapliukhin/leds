@@ -38,4 +38,5 @@
 - In KiCad 10 Python checks, call `PCB_VIA.GetWidth(layer)` with an explicit copper layer. Calling `GetWidth()` without a layer emits one assertion per via and obscures otherwise valid semantic-test output.
 - Do not infer that an LED-driver configuration register is per-channel from a color table. The MBI5124 has one 16-bit pre-charge configuration per IC, so color-specific settings require color-homogeneous driver assignments unless Macroblock documents a mixed-color mode.
 - Do not select a nominal current at or above a datasheet operating-range boundary. Combine resistor tolerance with both IC-to-IC and channel-to-channel maximum errors; omitting the MBI5124 ±2.5% channel error made 1.91 kΩ appear safe when its combined worst case exceeded 10 mA.
+- Do not specify mandatory configuration readback without reserving the complete physical return path. Include an MCU input, switched-domain isolation with specified `Ioff`, a deterministic MCU-side default level, decoupling, and the connection from the final device in the serial chain.
 
