@@ -430,10 +430,11 @@ def route_anode(
     footprint: pcbnew.FOOTPRINT,
     row_bus_y_mm: float,
     row_bus_width_mm: float,
+    via_x_offset_mm: float = 0.54,
 ) -> float:
     anode_pad = get_pad(footprint, "1")
     anode_pad_x_mm, anode_pad_y_mm = millimeters(anode_pad.GetPosition())
-    via_x_mm = anode_pad_x_mm + 0.54
+    via_x_mm = anode_pad_x_mm + via_x_offset_mm
     via_y_mm = max(anode_pad_y_mm, 0.525)
 
     add_track(
@@ -467,10 +468,11 @@ def route_rotated_anode(
     row_bus_y_mm: float,
     row_bus_width_mm: float,
     maximum_via_y_mm: float,
+    via_x_offset_mm: float = -0.54,
 ) -> float:
     anode_pad = get_pad(footprint, "1")
     anode_pad_x_mm, anode_pad_y_mm = millimeters(anode_pad.GetPosition())
-    via_x_mm = anode_pad_x_mm - 0.54
+    via_x_mm = anode_pad_x_mm + via_x_offset_mm
     via_y_mm = min(anode_pad_y_mm, maximum_via_y_mm)
 
     add_track(
@@ -741,6 +743,147 @@ def generate_bottom_right_probe(
     return output_path
 
 
+def generate_mirrored_corner_probe(
+    repository_root: Path,
+    variant: ProbeVariant,
+    top_right: bool,
+) -> Path:
+    source_path = (
+        repository_root
+        / "hardware"
+        / variant.board_name
+        / f"{variant.board_name}.kicad_pcb"
+    )
+    corner_name = "top_right" if top_right else "bottom_left"
+    output_path = (
+        repository_root
+        / "hardware"
+        / "analysis"
+        / f"{variant.board_name}_{corner_name}_routing_probe.kicad_pcb"
+    )
+    board = pcbnew.LoadBoard(str(source_path))
+
+    if top_right:
+        row_numbers = (1, 2)
+        column_numbers = (variant.matrix_size - 1, variant.matrix_size)
+        row_bus_specs = (
+            (0.525, OUTER_ROW_WIDTH_MM),
+            (0.9 + variant.led_pitch_mm, INNER_ROW_WIDTH_MM),
+        )
+        rotated = False
+        anode_via_x_offset_mm = -0.54
+        rgb_trunk_offsets = (
+            ("G", -0.375, 0.925),
+            ("B", 0.0, 1.275),
+            ("R", 0.375, 0.925),
+        )
+    else:
+        row_numbers = (variant.matrix_size - 1, variant.matrix_size)
+        column_numbers = (1, 2)
+        second_last_row_center_y_mm = (
+            0.9 + (row_numbers[0] - 1) * variant.led_pitch_mm
+        )
+        row_bus_specs = (
+            (second_last_row_center_y_mm, INNER_ROW_WIDTH_MM),
+            (variant.board_size_mm - 0.525, OUTER_ROW_WIDTH_MM),
+        )
+        rotated = True
+        anode_via_x_offset_mm = 0.54
+        rgb_trunk_offsets = (
+            ("G", 0.375, -0.925),
+            ("B", 0.0, -1.275),
+            ("R", -0.375, -0.925),
+        )
+
+    row_center_y_values = tuple(
+        0.9 + (row_number - 1) * variant.led_pitch_mm
+        for row_number in row_numbers
+    )
+    row_via_extents: dict[int, list[float]] = {}
+    for row_number, row_center_y_mm, row_bus_spec in zip(
+        row_numbers,
+        row_center_y_values,
+        row_bus_specs,
+        strict=True,
+    ):
+        row_bus_y_mm, row_bus_width_mm = row_bus_spec
+        for column_number in column_numbers:
+            reference_number = (
+                (row_number - 1) * variant.matrix_size + column_number
+            )
+            footprint = get_led(board, f"D{reference_number}")
+            if rotated:
+                footprint.SetOrientationDegrees(180)
+                route_rotated_rgb_to_back(
+                    board,
+                    footprint,
+                    row_center_y_mm,
+                )
+                via_x_mm = route_rotated_anode(
+                    board,
+                    footprint,
+                    row_bus_y_mm,
+                    row_bus_width_mm,
+                    variant.board_size_mm - 0.525,
+                    anode_via_x_offset_mm,
+                )
+            else:
+                route_rgb_to_back(board, footprint, row_center_y_mm)
+                via_x_mm = route_anode(
+                    board,
+                    footprint,
+                    row_bus_y_mm,
+                    row_bus_width_mm,
+                    anode_via_x_offset_mm,
+                )
+            row_via_extents.setdefault(row_number, []).append(via_x_mm)
+
+    for row_number, row_center_y_mm, row_bus_spec in zip(
+        row_numbers,
+        row_center_y_values,
+        row_bus_specs,
+        strict=True,
+    ):
+        row_bus_y_mm, row_bus_width_mm = row_bus_spec
+        first_reference_number = (
+            (row_number - 1) * variant.matrix_size + column_numbers[0]
+        )
+        row_net = get_pad(
+            get_led(board, f"D{first_reference_number}"),
+            "1",
+        ).GetNet()
+        row_via_x_values = row_via_extents[row_number]
+        add_track(
+            board,
+            row_net,
+            pcbnew.In2_Cu,
+            min(row_via_x_values),
+            row_bus_y_mm,
+            max(row_via_x_values),
+            row_bus_y_mm,
+            row_bus_width_mm,
+        )
+
+    for column_number in column_numbers:
+        column_center_x_mm = (
+            0.9 + (column_number - 1) * variant.led_pitch_mm
+        )
+        for color_name, x_offset_mm, y_offset_mm in rgb_trunk_offsets:
+            trunk_x_mm = column_center_x_mm + x_offset_mm
+            add_track(
+                board,
+                board.FindNet(f"COL_{color_name}_{column_number:02d}"),
+                pcbnew.B_Cu,
+                trunk_x_mm,
+                row_center_y_values[0] + y_offset_mm,
+                trunk_x_mm,
+                row_center_y_values[1] + y_offset_mm,
+            )
+
+    pcbnew.SaveBoard(str(output_path), board)
+    return output_path
+
+
 def generate_orientation_transition_probe(
     repository_root: Path,
     variant: ProbeVariant,
@@ -852,6 +995,18 @@ if __name__ == "__main__":
             probe_variant,
         )
         print(f"Generated {generated_bottom_right_path}")
+        generated_top_right_path = generate_mirrored_corner_probe(
+            root_path,
+            probe_variant,
+            top_right=True,
+        )
+        print(f"Generated {generated_top_right_path}")
+        generated_bottom_left_path = generate_mirrored_corner_probe(
+            root_path,
+            probe_variant,
+            top_right=False,
+        )
+        print(f"Generated {generated_bottom_left_path}")
         generated_transition_path = generate_orientation_transition_probe(
             root_path,
             probe_variant,
