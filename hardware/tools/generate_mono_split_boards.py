@@ -846,8 +846,9 @@ def electronics_parts() -> list[PlacedPart]:
             {
                 # DLH top view: left 1 SYS, 2 BAT, 3 STAT2, 4 /CE, 5 GND.
                 # Right, bottom to top: 6 TS/MR, 7 ILIM/VSET, 8 ISET, 9 STAT1, 10 IN.
-                # ISET is 600 ohm: 500 mA, at or below 0.5C for a 1000-1500 mAh cell.
-                # STAT pins and TS/MR stay open. /CE is held low so charge is enabled.
+                # ISET is 600 ohm: 500 mA, the 0.5C point of the 1000 mAh Jauch pack.
+                # STAT pins stay open. /CE is held low so charge is enabled.
+                # TS/MR is the pack thermistor, not an onboard resistor.
                 "1": "SYS",
                 "2": "BAT_RAW",
                 "4": "GND",
@@ -861,14 +862,20 @@ def electronics_parts() -> list[PlacedPart]:
         ),
         PlacedPart(
             "J_BAT",
-            "BAT_3P",
-            "JST_GH_BM03B-GHS-TBT_1x03-1MP_P1.25mm_Vertical",
-            8.0,
-            58.0,
-            180.0,
-            8.0,
-            64.0,
-            {},
+            "53398-0371",
+            "Molex_PicoBlade_53398-0371_1x03-1MP_P1.25mm_Vertical",
+            6.5,
+            56.5,
+            0.0,
+            6.5,
+            61.8,
+            {
+                # Jauch LP523450JU, Molex 51021-0300: pin 1 red BAT+,
+                # pin 2 yellow NTC, pin 3 black GND. This header mates with it.
+                "1": "BAT_RAW",
+                "2": "TS_MR",
+                "3": "GND",
+            },
         ),
         PlacedPart(
             "U_LED_PWR",
@@ -1421,7 +1428,6 @@ def electronics_parts() -> list[PlacedPart]:
         ("R_AUD_PD", "100k", "AUDIO_EN", "GND", 15.11, 72.5),
         ("R_ILIM", "18k", "ILIM_VSET", "GND", 22.8, 42.6),
         ("R_ISET", "600R", "ISET", "GND", 21.6, 40.6),
-        ("R_TS", "10k", "TS_MR", "GND", 21.0, 45.4),
     ):
         parts.append(
             PlacedPart(
@@ -1498,7 +1504,6 @@ def add_electronics_components(
                 "C_LDO",
                 "C_CHG",
                 "R_ILIM",
-                "R_TS",
                 "R_ISET",
             )
         )
@@ -2455,7 +2460,9 @@ def route_converter_rails(board: pcbnew.BOARD) -> None:
 
 def route_charger(board: pcbnew.BOARD) -> None:
     # BQ25185 DLH at (18, 42). 18 kΩ is 4.2 V and 500 mA input limit.
-    # 600 Ω on ISET is 500 mA charge, the 0.5C point of a 1000 mAh cell.
+    # 600 Ω on ISET is 500 mA charge, the 0.5C point of the Jauch 1000 mAh pack.
+    # J_BAT is Molex 53398-0371 at (6.5, 56.5). Pad 1 is BAT+, pad 2 is the
+    # pack NTC, pad 3 is GND. No onboard 10 kΩ shares TS/MR with that NTC.
     route_net_polyline(
         board, "VBUS", pcbnew.In2_Cu, [(2.05, 20.45), (2.05, 23.20)], 0.30
     )
@@ -2604,20 +2611,31 @@ def route_charger(board: pcbnew.BOARD) -> None:
         board, "TS_MR", pcbnew.In2_Cu, [(19.60, 43.00), (19.60, 45.00)], 0.15
     )
     add_through_via(board, ts_net, 19.60, 45.00, diameter_mm=0.40)
+    # Pack connector, north of the body. Pin 1 leaves on the open left edge
+    # and joins the BAT via above the 0805. Pin 2 crosses the ground spine on
+    # F.Cu and meets the TS via. Pin 3 drops onto that spine.
+    route_net_polyline(
+        board,
+        "BAT_RAW",
+        pcbnew.F_Cu,
+        [(5.25, 55.25), (5.25, 45.20), (14.70, 45.20)],
+        0.40,
+    )
     route_net_polyline(
         board,
         "TS_MR",
         pcbnew.F_Cu,
-        [(19.60, 45.00), (20.49, 45.00), (20.49, 45.40)],
+        [(6.50, 55.25), (6.50, 48.40), (19.60, 48.40), (19.60, 45.00)],
         0.15,
     )
     route_net_polyline(
         board,
         "GND",
         pcbnew.F_Cu,
-        [(21.51, 45.40), (21.51, 43.60)],
-        0.15,
+        [(7.75, 55.25), (7.75, 53.50), (13.20, 53.50)],
+        0.30,
     )
+    add_through_via(board, board.FindNet("GND"), 13.20, 53.50, diameter_mm=0.40)
 
 
 def route_converter_caps(board: pcbnew.BOARD) -> None:
