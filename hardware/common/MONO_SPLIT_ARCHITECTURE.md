@@ -110,15 +110,25 @@ Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as function
 |---:|---:|---|---|
 | — | 4 | `CHIP_PU` | EN (`R_CHIP_PU` / `C_CHIP_PU`) |
 | 0 | 5 | `GPIO0_BOOT` | Boot strap + `SW1` |
-| 8–10 | 13–15 | `IMU_SDA` / `IMU_SCL` / `IMU_INT1` | BMI270 |
-| 13–16 | 18–22 | `LED_CLK` … `LED_OE_N` | MBI5124 control (reserve → buffer) |
-| 17–21,33 | 23–24,27,38 | `ROW_A0`…`ROW_A3` | `SN74LVC8T245` A-side |
-| 34–35 | 39–40 | `DEC_A_EN_N` / `DEC_B_EN_N` | 74HC154 enables |
-| 36–37 | 41–42 | `LED_EN` / `LED_LOGIC_EN` | Power switches |
-| 19–20 | 25–26 | `USB_D_N_MCU` / `USB_D_P_MCU` | USB after series resistors |
-| 42 | 48 | `AUDIO_EN` | Audio `TPS22917` |
+| 8 | 13 | `IMU_SDA` | BMI270 I²C |
+| 9 | 14 | `IMU_SCL` | BMI270 I²C |
+| 10 | 15 | `IMU_INT1` | BMI270 interrupt |
+| 13–16 | 18,19,21,22 | `LED_CLK` … `LED_OE_N` | MBI5124 control (reserve → buffer) |
+| 17 | 23 | `ROW_A0` | Row address |
+| 18 | 24 | `ROW_A1` | Row address |
+| 21 | 27 | `ROW_A2` | Row address |
+| 33 | 38 | `ROW_A3` | Row address |
+| 34 | 39 | `DEC_A_EN_N` | 74HC154 A enable |
+| 35 | 40 | `DEC_B_EN_N` | 74HC154 B enable |
+| 36 | 41 | `LED_EN` | `TPS63802` enable |
+| 37 | 42 | `LED_LOGIC_EN` | LED logic switch |
+| 19 | 25 | `USB_D_N_MCU` | Native USB D− |
+| 20 | 26 | `USB_D_P_MCU` | Native USB D+ |
+| 42 | 48 | `AUDIO_EN` | Audio switch |
 | 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
-| — | 53–54 | `XTAL_P` / `XTAL_N` | 40 MHz crystal |
+| — | 53–54 | `XTAL_N` / `XTAL_P` | 40 MHz crystal |
+
+**Part choice:** BOM targets **ESP32-S3FN8** (in-package **quad** flash). Row address uses `GPIO17`/`18`/`21`/`33`; USB uses `GPIO19`/`20` only — no GPIO overlap. `GPIO33`–`GPIO37` are valid on FN8 but conflict with **octal** `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin or firmware remap.
 
 Copper is generated in `hardware/tools/mono_split_esp32.py` and called from `generate_mono_split_boards.py`.
 
