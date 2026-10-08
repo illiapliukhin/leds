@@ -864,14 +864,17 @@ def electronics_parts() -> list[PlacedPart]:
             "J_BAT",
             "53398-0371",
             "Molex_PicoBlade_53398-0371_1x03-1MP_P1.25mm_Vertical",
-            6.5,
-            56.5,
-            0.0,
-            6.5,
-            61.8,
+            6.8,
+            58.0,
+            90.0,
+            6.8,
+            50.5,
             {
-                # Jauch LP523450JU, Molex 51021-0300: pin 1 red BAT+,
-                # pin 2 yellow NTC, pin 3 black GND. This header mates with it.
+                # Jauch LP523450JU drawing, wires leaving the cell: black on
+                # top next to the minus mark, yellow in the middle, red on
+                # the bottom next to the plus mark. Molex 51021-0300 still
+                # numbers pin 1 red BAT+, pin 2 yellow NTC, pin 3 black GND.
+                # Rotated so that order is top to bottom on the board.
                 "1": "BAT_RAW",
                 "2": "TS_MR",
                 "3": "GND",
@@ -2461,8 +2464,9 @@ def route_converter_rails(board: pcbnew.BOARD) -> None:
 def route_charger(board: pcbnew.BOARD) -> None:
     # BQ25185 DLH at (18, 42). 18 kΩ is 4.2 V and 500 mA input limit.
     # 600 Ω on ISET is 500 mA charge, the 0.5C point of the Jauch 1000 mAh pack.
-    # J_BAT is Molex 53398-0371 at (6.5, 56.5). Pad 1 is BAT+, pad 2 is the
-    # pack NTC, pad 3 is GND. No onboard 10 kΩ shares TS/MR with that NTC.
+    # J_BAT is Molex 53398-0371 at (6.8, 58), rotated so the Jauch wire order
+    # is top to bottom: pin 3 GND, pin 2 NTC, pin 1 BAT+. No onboard 10 kΩ
+    # shares TS/MR with the pack thermistor.
     route_net_polyline(
         board, "VBUS", pcbnew.In2_Cu, [(2.05, 20.45), (2.05, 23.20)], 0.30
     )
@@ -2611,31 +2615,32 @@ def route_charger(board: pcbnew.BOARD) -> None:
         board, "TS_MR", pcbnew.In2_Cu, [(19.60, 43.00), (19.60, 45.00)], 0.15
     )
     add_through_via(board, ts_net, 19.60, 45.00, diameter_mm=0.40)
-    # Pack connector, north of the body. Pin 1 leaves on the open left edge
-    # and joins the BAT via above the 0805. Pin 2 crosses the ground spine on
-    # F.Cu and meets the TS via. Pin 3 drops onto that spine.
+    # Contacts face the left edge. Top pin is GND, bottom pin is BAT+.
     route_net_polyline(
         board,
-        "BAT_RAW",
+        "GND",
         pcbnew.F_Cu,
-        [(5.25, 55.25), (5.25, 45.20), (14.70, 45.20)],
-        0.40,
+        [(5.55, 56.75), (5.55, 56.20), (4.00, 56.20)],
+        0.30,
+    )
+    add_through_via(board, board.FindNet("GND"), 4.00, 56.20, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In2_Cu, [(4.00, 56.20), (13.20, 56.20)], 0.30
     )
     route_net_polyline(
         board,
         "TS_MR",
         pcbnew.F_Cu,
-        [(6.50, 55.25), (6.50, 48.40), (19.60, 48.40), (19.60, 45.00)],
+        [(5.55, 58.00), (3.40, 58.00), (3.40, 48.40), (19.60, 48.40), (19.60, 45.00)],
         0.15,
     )
     route_net_polyline(
         board,
-        "GND",
+        "BAT_RAW",
         pcbnew.F_Cu,
-        [(7.75, 55.25), (7.75, 53.50), (13.20, 53.50)],
-        0.30,
+        [(5.55, 59.25), (2.70, 59.25), (2.70, 45.20), (14.70, 45.20)],
+        0.40,
     )
-    add_through_via(board, board.FindNet("GND"), 13.20, 53.50, diameter_mm=0.40)
 
 
 def route_converter_caps(board: pcbnew.BOARD) -> None:
