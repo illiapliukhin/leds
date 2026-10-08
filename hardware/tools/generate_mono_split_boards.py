@@ -846,7 +846,7 @@ def electronics_parts() -> list[PlacedPart]:
             {
                 # DLH top view: left 1 SYS, 2 BAT, 3 STAT2, 4 /CE, 5 GND.
                 # Right, bottom to top: 6 TS/MR, 7 ILIM/VSET, 8 ISET, 9 STAT1, 10 IN.
-                # ISET stays open (~1.5 mA) until the cell size is chosen.
+                # ISET is 600 ohm: 500 mA, at or below 0.5C for a 1000-1500 mAh cell.
                 # STAT pins and TS/MR stay open. /CE is held low so charge is enabled.
                 "1": "SYS",
                 "2": "BAT_RAW",
@@ -854,6 +854,7 @@ def electronics_parts() -> list[PlacedPart]:
                 "5": "GND",
                 "6": "TS_MR",
                 "7": "ILIM_VSET",
+                "8": "ISET",
                 "10": "VBUS",
                 "11": "GND",
             },
@@ -1418,7 +1419,8 @@ def electronics_parts() -> list[PlacedPart]:
         ("R_LOGIC_PD", "100k", "LED_LOGIC_EN", "GND", 15.4, 64.6),
         ("R_QOD", "1k", "LED_QOD", "LED_LOGIC_3V3", 25.6, 63.2),
         ("R_AUD_PD", "100k", "AUDIO_EN", "GND", 15.11, 72.5),
-        ("R_ILIM", "24k", "ILIM_VSET", "GND", 22.8, 42.6),
+        ("R_ILIM", "18k", "ILIM_VSET", "GND", 22.8, 42.6),
+        ("R_ISET", "600R", "ISET", "GND", 21.6, 40.6),
         ("R_TS", "10k", "TS_MR", "GND", 21.0, 45.4),
     ):
         parts.append(
@@ -1497,6 +1499,7 @@ def add_electronics_components(
                 "C_CHG",
                 "R_ILIM",
                 "R_TS",
+                "R_ISET",
             )
         )
         footprint.Reference().SetLayer(
@@ -2451,8 +2454,8 @@ def route_converter_rails(board: pcbnew.BOARD) -> None:
 
 
 def route_charger(board: pcbnew.BOARD) -> None:
-    # BQ25185 DLH at (18, 42). Local 10 µF ceramics are 0805 so the 5 V
-    # rails still have capacitance after bias. ISET and TS stay open.
+    # BQ25185 DLH at (18, 42). 18 kΩ is 4.2 V and 500 mA input limit.
+    # 600 Ω on ISET is 500 mA charge, the 0.5C point of a 1000 mAh cell.
     route_net_polyline(
         board, "VBUS", pcbnew.In2_Cu, [(2.05, 20.45), (2.05, 23.20)], 0.30
     )
@@ -2525,6 +2528,13 @@ def route_charger(board: pcbnew.BOARD) -> None:
     )
     route_net_polyline(
         board,
+        "ISET",
+        pcbnew.F_Cu,
+        [(18.86, 42.00), (21.09, 42.00), (21.09, 40.60)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
         "GND",
         pcbnew.F_Cu,
         [(17.14, 42.40), (16.70, 42.40), (16.70, 42.80), (17.14, 42.80)],
@@ -2550,6 +2560,13 @@ def route_charger(board: pcbnew.BOARD) -> None:
         pcbnew.F_Cu,
         [(24.55, 38.80), (24.55, 43.60)],
         0.25,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(22.11, 40.60), (23.40, 40.60), (23.40, 43.60)],
+        0.15,
     )
     route_net_polyline(
         board,
