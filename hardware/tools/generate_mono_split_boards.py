@@ -837,13 +837,25 @@ def electronics_parts() -> list[PlacedPart]:
         PlacedPart(
             "U_CHG",
             "BQ25185",
-            "Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm",
+            "Texas_DLH0010A_WSON-10-1EP_2x2mm_P0.4mm_EP0.9x1.5mm",
             18.0,
             42.0,
             0.0,
             18.0,
-            37.5,
-            {},
+            36.2,
+            {
+                # DLH top view: left 1 SYS, 2 BAT, 3 STAT2, 4 /CE, 5 GND.
+                # Right, bottom to top: 6 TS/MR, 7 ILIM/VSET, 8 ISET, 9 STAT1, 10 IN.
+                # ISET stays open (~1.5 mA) until the cell size is chosen.
+                # STAT pins and TS/MR stay open. /CE is held low so charge is enabled.
+                "1": "SYS",
+                "2": "BAT_RAW",
+                "4": "GND",
+                "5": "GND",
+                "7": "ILIM_VSET",
+                "10": "VBUS",
+                "11": "GND",
+            },
         ),
         PlacedPart(
             "J_BAT",
@@ -1405,12 +1417,31 @@ def electronics_parts() -> list[PlacedPart]:
         ("R_LOGIC_PD", "100k", "LED_LOGIC_EN", "GND", 15.4, 64.6),
         ("R_QOD", "1k", "LED_QOD", "LED_LOGIC_3V3", 25.6, 63.2),
         ("R_AUD_PD", "100k", "AUDIO_EN", "GND", 15.11, 72.5),
+        ("R_ILIM", "24k", "ILIM_VSET", "GND", 22.8, 42.6),
     ):
         parts.append(
             PlacedPart(
                 reference,
                 value,
                 "R_0402_1005Metric",
+                center_x,
+                center_y,
+                0.0,
+                center_x,
+                center_y,
+                {"1": pad1_net, "2": pad2_net},
+            )
+        )
+    for reference, value, pad1_net, pad2_net, center_x, center_y in (
+        ("C_CHG_SYS", "1u", "GND", "SYS", 14.6, 39.4),
+        ("C_CHG_BAT", "1u", "GND", "BAT_RAW", 14.6, 37.9),
+        ("C_CHG_IN", "1u", "VBUS", "GND", 21.4, 40.8),
+    ):
+        parts.append(
+            PlacedPart(
+                reference,
+                value,
+                "C_0402_1005Metric",
                 center_x,
                 center_y,
                 0.0,
@@ -1461,6 +1492,8 @@ def add_electronics_components(
                 "C_LED",
                 "C_SYS",
                 "C_LDO",
+                "C_CHG",
+                "R_ILIM",
             )
         )
         footprint.Reference().SetLayer(
@@ -2112,7 +2145,6 @@ def route_buffer_passives(board: pcbnew.BOARD) -> None:
 
 def route_converter_rails(board: pcbnew.BOARD) -> None:
     # TPS63802 at (34, 48), inductor pad 1 on the left. MODE is tied low.
-    # BQ25185 is a 10-pin DLH, so the placed DSG-8 charger stays unbonded.
     route_net_polyline(
         board,
         "SW_L2",
@@ -2412,6 +2444,120 @@ def route_converter_rails(board: pcbnew.BOARD) -> None:
         0.15,
     )
     route_converter_caps(board)
+    route_charger(board)
+
+
+def route_charger(board: pcbnew.BOARD) -> None:
+    # BQ25185 DLH at (18, 42). /CE is tied to GND. ISET and TS stay open.
+    route_net_polyline(
+        board, "VBUS", pcbnew.In2_Cu, [(2.05, 20.45), (2.05, 23.20)], 0.30
+    )
+    vbus = board.FindNet("VBUS")
+    add_through_via(board, vbus, 2.05, 23.20, diameter_mm=0.40)
+    route_net_polyline(
+        board, "VBUS", pcbnew.In1_Cu, [(2.05, 23.20), (20.89, 23.20)], 0.30
+    )
+    add_through_via(board, vbus, 20.89, 23.20, diameter_mm=0.40)
+    add_through_via(board, vbus, 20.89, 41.50, diameter_mm=0.40)
+    route_net_polyline(
+        board, "VBUS", pcbnew.In2_Cu, [(20.89, 41.50), (20.89, 23.20)], 0.30
+    )
+    route_net_polyline(
+        board,
+        "VBUS",
+        pcbnew.F_Cu,
+        [(20.89, 41.50), (20.89, 40.80), (18.80, 40.80), (18.80, 41.20)],
+        0.25,
+    )
+    route_net_polyline(
+        board,
+        "SYS",
+        pcbnew.F_Cu,
+        [(17.20, 41.20), (17.20, 39.40), (15.11, 39.40)],
+        0.25,
+    )
+    route_net_polyline(
+        board,
+        "SYS",
+        pcbnew.F_Cu,
+        [(17.20, 39.40), (30.40, 39.40)],
+        0.25,
+    )
+    sys_net = board.FindNet("SYS")
+    add_through_via(board, sys_net, 30.40, 39.40, diameter_mm=0.40)
+    route_net_polyline(
+        board, "SYS", pcbnew.In2_Cu, [(30.40, 39.40), (30.40, 46.10)], 0.25
+    )
+    route_net_polyline(
+        board,
+        "BAT_RAW",
+        pcbnew.F_Cu,
+        [(17.20, 41.60), (16.20, 41.60), (16.20, 40.20)],
+        0.25,
+    )
+    bat = board.FindNet("BAT_RAW")
+    add_through_via(board, bat, 16.20, 40.20, diameter_mm=0.40)
+    route_net_polyline(
+        board, "BAT_RAW", pcbnew.In2_Cu, [(16.20, 40.20), (16.20, 38.60)], 0.25
+    )
+    add_through_via(board, bat, 16.20, 38.60, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "BAT_RAW",
+        pcbnew.F_Cu,
+        [(16.20, 38.60), (15.11, 38.60), (15.11, 37.90)],
+        0.25,
+    )
+    route_net_polyline(
+        board,
+        "ILIM_VSET",
+        pcbnew.F_Cu,
+        [(18.80, 42.40), (22.29, 42.40), (22.29, 42.60)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(17.20, 42.40), (16.70, 42.40), (16.70, 42.80), (17.20, 42.80)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(17.20, 42.80), (16.20, 42.80), (16.20, 43.60), (13.20, 43.60), (24.20, 43.60)],
+        0.20,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(23.31, 42.60), (23.31, 43.60)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(21.91, 40.80), (24.20, 40.80), (24.20, 43.60)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(14.09, 37.90), (14.09, 43.60)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(18.00, 42.20), (18.00, 43.60)],
+        0.20,
+    )
+    add_through_via(board, board.FindNet("GND"), 13.20, 43.60, diameter_mm=0.40)
 
 
 def route_converter_caps(board: pcbnew.BOARD) -> None:
