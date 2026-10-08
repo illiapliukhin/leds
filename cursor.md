@@ -85,6 +85,12 @@
   rectangle as placeable: the through-via LED field leaves only a border, and
   the measured via-to-via gap is 0.10 mm. Blind vias can turn the matrix back
   side into placement area; a larger outline is the through-via alternative.
+- `FOOTPRINT.Flip` segfaults before `board.Add`. Align placement to
+  `GetBoundingBox(False, False)`, because the footprint anchor is not the
+  courtyard center. Force reference text angle to 0 after rotation, and keep
+  footprint envelopes at least 0.30 mm apart so 0.15 mm silk clearance holds.
+  Do not batch-remove footprints from one materialized footprint list; the
+  proxies dangle. Regenerate backside placement from the matrix artifact.
 - Do not change a generated board outline while routing generators still use
   hard-coded LED margins or edge-bus coordinates. Derive LED centers and outer
   row buses from board size, matrix size, and pitch, then rerun every topology

@@ -426,7 +426,10 @@ row/RGB exits к драйверам.
 ### Placement
 
 - Все LED на лицевой стороне.
-- Вся остальная электроника и test pads сзади.
+- 172 non-LED компонента размещены на `B.Cu` вне поля via скриптом
+  `hardware/tools/place_backside_components.py`. Геометрический DRC этой
+  укладки чистый: 0 violations. Остаются 492 unconnected pads — это открытые
+  цепи до platform routing, не дефект посадки.
 - USB-C по центру боковой грани.
 - Battery projection остаётся component-free. Дополнительно запрещена
   установка backside pads внутри поля сквозных via: 172 footprint envelopes
