@@ -73,9 +73,20 @@ Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets s
 The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one copper path from the driver pad to the matching FFC pin. `LED_4V1` is one rail across the transistor sources, the gate pull-ups, and `TPS63802` VOUT. USB `VBUS` is one net across the stacked receptacle pads. `GND` joins the USB shells and ground pins, BMI270 pads 6–7, both MBI5124 pad 1 pins, `TP2`, and the converter returns. `AON_3V3` joins BMI270 VDDIO and VDD, `TP1`, and `TPS7A2033` OUT. Each `REXT` reaches its 1.82 kΩ resistor, and `LED_LOGIC_3V3` ties the two driver logic pins. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
-2. ESP32-S3FN8 on the top edge, crystal directly under it, BMI270 on that same edge and away from the inductor. The open strip to the right of the MCU is the pin-escape field.
+2. **MCU corner (2026-10-08 rework):** `U1` at **(46, 10) mm**, **270°** so row/decoder/LED GPIOs leave the **west face** already **east of the row fan-in** (`x≈37`). Crystal **`Y1`** sits **north** of the chip (short XTAL, no routing under the resonator). **`U_IMU`** moves to **(62, 4.5) mm** (east of the MCU, clear of the switcher). Strap/USB passives sit in a **west cluster** near **x≈36–40**. GPIO map unchanged.
 
-**MCU escape (generator):** Row/decoder GPIOs still use staggered F_Cu columns into the existing decoder spines. `LED_CLK` / `LED_SDI` / `LED_LE` / `LED_OE_N` must **not** reuse the LV125A reserve-drop vias near `x≈37` (that path shorted `LED_SDI` against `ROW_08_Y`). Those four nets use a **eastern In2 spine**: short F_Cu to `x=34 mm`, then In2 east to `x≈121 mm`, down to the reserve rail, and F_Cu only to the `RP_*` pad. Further cleanup likely needs the same pattern for USB, XTAL, and row-address columns (In2 lanes east of the row-select grid, not long F_Cu through it).
+### Why the old corner was congested
+
+| Source | Effect |
+|---|---|
+| QFN **0.4 mm** south row at **0°** | Row, LED, USB pads shared one **`y≈11.4 mm`** line — parallel F escapes collided. |
+| Row-select **fan-in / reserve drops** near **`x≈37`** | MCU paths to MBI reserves crossed **`ROW_nn_Y`** (e.g. **`LED_SDI` vs `ROW_08_Y`**). |
+| **`route_mcu_side_to_drop`** through the grid | Long F/In1 columns from **`x≈28–40`** through the row farm. |
+| Fixed **decoder spines** at **`x≈63–70`** | Every MCU move still needs a clean **In2 corridor** at **`x≈44–50`**, not ad-hoc F columns. |
+
+**Routing (generator):** Row/decoder nets still use F columns + decoder spines (must be rewritten for **270°** — tracked in PR). **`LED_*`** use the **eastern In2 spine** (`hop` at **`x≈44 mm`**, In2 to reserve rail). USB connector uses **split `merge_y` + In2** to ESD; **`R_USB_*`** sit beside the west face.
+
+**Not done yet:** Copper **0 / 0** (shorts/crossings/unconnected), full geometric verify (silk/mask), and **In2 row joins** matched to this orientation.
 3. `BQ25185`, battery connector, `TPS63802`, inductor, AON LDO, and both `TPS22917` switches.
 4. Microphone and `TLV9001` on the far right, opposite the switcher.
 5. Row translator, both 74HC154 devices, and the 32 × `AO3403` farm with gate and pull-up resistors.
