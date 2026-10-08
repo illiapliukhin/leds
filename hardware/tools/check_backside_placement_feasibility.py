@@ -9,9 +9,13 @@ import xml.etree.ElementTree as ElementTree
 import pcbnew
 
 
-BOARD_SIZE_MM = 57.0
+BOARD_SIZE_MM = 69.0
 BATTERY_WIDTH_MM = 32.0
 BATTERY_HEIGHT_MM = 40.0
+MATRIX_SIZE = 20
+LED_PITCH_MM = 2.5
+VIA_FIELD_OVERHANG_MM = 0.6
+EDGE_CLEARANCE_MM = 0.3
 EXPECTED_LED_COUNT = 400
 EXPECTED_NON_LED_COUNT = 172
 LED_VALUE = "MHPA1010RGBDT"
@@ -147,20 +151,32 @@ def main() -> None:
     component_envelope_area_mm2 = sum(
         component.area_mm2 for component in non_led_envelopes
     )
-    area_outside_battery_mm2 = (
-        BOARD_SIZE_MM * BOARD_SIZE_MM
-        - BATTERY_WIDTH_MM * BATTERY_HEIGHT_MM
+    via_field_size_mm = (
+        (MATRIX_SIZE - 1) * LED_PITCH_MM + 2 * VIA_FIELD_OVERHANG_MM
+    )
+    border_width_mm = (
+        BOARD_SIZE_MM - via_field_size_mm
+    ) / 2 - EDGE_CLEARANCE_MM
+    placeable_outer_size_mm = BOARD_SIZE_MM - 2 * EDGE_CLEARANCE_MM
+    placeable_area_mm2 = (
+        placeable_outer_size_mm * placeable_outer_size_mm
+        - via_field_size_mm * via_field_size_mm
     )
     utilization_percent = (
-        component_envelope_area_mm2 / area_outside_battery_mm2 * 100.0
+        component_envelope_area_mm2 / placeable_area_mm2 * 100.0
     )
-    theoretical_minimum_side_mm = math.sqrt(
-        component_envelope_area_mm2
-        + BATTERY_WIDTH_MM * BATTERY_HEIGHT_MM
+    widest_component = max(
+        non_led_envelopes,
+        key=lambda component: min(component.width_mm, component.height_mm),
     )
-    practical_minimum_side_mm = math.sqrt(
-        component_envelope_area_mm2 / PRACTICAL_PACKING_EFFICIENCY
-        + BATTERY_WIDTH_MM * BATTERY_HEIGHT_MM
+    required_border_mm = min(
+        widest_component.width_mm,
+        widest_component.height_mm,
+    )
+    practical_area_mm2 = component_envelope_area_mm2 / PRACTICAL_PACKING_EFFICIENCY
+    practical_side_mm = (
+        math.sqrt(practical_area_mm2 + via_field_size_mm * via_field_size_mm)
+        + 2 * EDGE_CLEARANCE_MM
     )
 
     print(
@@ -172,31 +188,30 @@ def main() -> None:
         f"{component_envelope_area_mm2:.1f} mm^2"
     )
     print(
-        "Board area outside provisional battery projection: "
-        f"{area_outside_battery_mm2:.1f} mm^2"
+        "Via-free border: "
+        f"{border_width_mm:.2f} mm around a {via_field_size_mm:.1f} mm field"
     )
-    print(f"Minimum rectangular-envelope utilization: {utilization_percent:.1f}%")
+    print(f"Via-free placeable area: {placeable_area_mm2:.1f} mm^2")
+    print(f"Envelope utilization of via-free area: {utilization_percent:.1f}%")
     print(
-        "Theoretical square-side floor at 100% packing: "
-        f"{theoretical_minimum_side_mm:.1f} mm"
-    )
-    print(
-        "Square-side baseline at "
-        f"{PRACTICAL_PACKING_EFFICIENCY:.0%} packing: "
-        f"{practical_minimum_side_mm:.1f} mm"
+        "Square-side baseline for "
+        f"{PRACTICAL_PACKING_EFFICIENCY:.0%} via-free packing: "
+        f"{practical_side_mm:.1f} mm"
     )
 
-    if component_envelope_area_mm2 > area_outside_battery_mm2:
+    if border_width_mm < required_border_mm:
         raise ValueError(
-            "component-free 32x40 mm battery projection is infeasible: "
-            "component envelopes exceed all area outside the projection. "
-            f"the outline must be at least "
-            f"{theoretical_minimum_side_mm:.1f} mm square even at impossible "
-            "100% packing, and approximately "
-            f"{practical_minimum_side_mm:.1f} mm at the declared packing "
-            "baseline. Freeze a larger outline, split the electronics onto "
-            "another PCB, or qualify a revised battery/component stack before "
-            "production placement."
+            f"{widest_component.reference} needs a {required_border_mm:.2f} mm "
+            "border after rotation, but the via-free border is "
+            f"{border_width_mm:.2f} mm"
+        )
+    if component_envelope_area_mm2 > (
+        placeable_area_mm2 * PRACTICAL_PACKING_EFFICIENCY
+    ):
+        raise ValueError(
+            "through-via matrix leaves insufficient backside area: "
+            f"component envelopes need {practical_side_mm:.1f} mm at "
+            f"{PRACTICAL_PACKING_EFFICIENCY:.0%} packing"
         )
 
 

@@ -201,10 +201,9 @@ annotation is frozen.
 
 ## Board and marking conventions
 
-- Preliminary outlines are 57.0 × 57.0 mm and 61.2 × 61.2 mm. The 20×20
-  outline is an unfrozen single-board placement study baseline derived from
-  measured non-LED footprint envelopes; the 28×28 outline retains the extra
-  0.1 mm used to provide 0.30 mm copper-to-routed-edge clearance.
+- Preliminary outlines are 69.0 × 69.0 mm and 61.2 × 61.2 mm. The 20×20
+  outline is an unfrozen study baseline sized to place backside parts outside
+  the 48.7 mm through-via field; the 28×28 outline retains its prior envelope.
 - These outlines are not production-frozen. A dedicated top-edge escape using a 0.40 mm L3 row bus and RGB transitions to L4 passes KiCad DRC at both matrix pitches. Keep the current bezel-free outline while expanding and checking the full matrix, the other three edges, L2 continuity, and driver exits. See `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`.
 - Fabrication and panel rules are defined in `manufacturing/JLCPCB_STANDARD_PCBA_RULES.md`. Use JLCPCB Standard PCBA, not Economic PCBA, because assembly is two-sided.
 - `hardware/libraries/leds.pretty/MHPA1010RGBDT.kicad_mod` comes from manufacturer datasheet Rev.2 page 2.

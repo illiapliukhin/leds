@@ -8,7 +8,7 @@ listed evidence is received.
 
 | Input | 20×20 | 28×28 | Status |
 |---|---:|---:|---|
-| PCB outline | 57.0 × 57.0 mm | 61.2 × 61.2 mm | 20×20 STUDY BASELINE; NOT FROZEN |
+| PCB outline | 69.0 × 69.0 mm | 61.2 × 61.2 mm | 20×20 STUDY BASELINE; NOT FROZEN |
 | PCB thickness | 1.0 mm | 1.0 mm | EVT BASELINE |
 | LED pitch | 2.50 mm | 2.20 mm | ROUTING-PROVEN |
 | Battery plan envelope | 32 × 40 mm | 40 × 50 mm | PROVISIONAL |
@@ -38,22 +38,15 @@ and compliance document identifiers before changing the keepouts.
 
 ## 20×20 placement feasibility
 
-The current 49.3 mm square outline cannot preserve a component-free 32 × 40 mm
-battery projection. The 172 non-LED assembly envelopes measured from the root
-netlist and assigned footprint libraries total approximately 1673.2 mm², while
-the board area outside the battery projection is only approximately 1150.5 mm².
-This is a necessary-condition utilization of 145.4% before courtyard spacing,
-USB, branding, reference text, or routing reserves.
-
-For the current component set and battery projection, the square-outline floor
-is approximately 54.3 mm at impossible 100% packing and approximately 57.0 mm
-at an 85% rectangular-envelope packing baseline. The generated 20×20 matrix
-now uses 57.0 mm as its single-board mechanical study size, not a frozen
-production dimension. HDI and
-blind vias may remove backside via conflicts but do not close this area deficit.
-If the 49.3 mm product envelope is mandatory, the alternatives are a
-supplier-qualified component-under-battery stack or a separate logic PCB; both
-require a new thickness, thermal, interconnect, and assembly budget.
+The LED through-via field is 48.7 mm square and its minimum via-edge gap is
+0.10 mm, so SMT pads cannot occupy the matrix back side. Area outside the
+battery rectangle is therefore not placement area when it still lies inside
+that via field. The 172 non-LED envelopes total approximately 1673.2 mm².
+A 69.0 mm outline leaves a 9.85 mm via-free border and approximately 2307 mm²
+of placeable area, or 72.5% envelope utilization. This is the current
+single-board study size, not a frozen production dimension. HDI blind vias
+remain the alternative if the product envelope must shrink back over the LED
+field. The battery projection stays component-free.
 
 ## Stack budget
 

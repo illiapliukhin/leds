@@ -20,7 +20,7 @@ class ProbeVariant:
 
 
 PROBE_VARIANTS = (
-    ProbeVariant("wearable_20x20", 20, 57.0, 2.5),
+    ProbeVariant("wearable_20x20", 20, 69.0, 2.5),
     ProbeVariant("wearable_28x28", 28, 61.2, 2.2),
 )
 

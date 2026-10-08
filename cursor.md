@@ -81,8 +81,10 @@
   projection, so a component-free projection cannot be claimed.
 - Do not replace measured footprint-envelope area with a guessed average area
   per component. The resulting side-rail zoning understated 20×20 placement
-  demand by more than 2×. Also do not present HDI as an area fix: blind vias
-  can remove backside via conflicts, but they do not create component area.
+  demand by more than 2×. Also do not treat all area outside the battery
+  rectangle as placeable: the through-via LED field leaves only a border, and
+  the measured via-to-via gap is 0.10 mm. Blind vias can turn the matrix back
+  side into placement area; a larger outline is the through-via alternative.
 - Do not change a generated board outline while routing generators still use
   hard-coded LED margins or edge-bus coordinates. Derive LED centers and outer
   row buses from board size, matrix size, and pitch, then rerun every topology

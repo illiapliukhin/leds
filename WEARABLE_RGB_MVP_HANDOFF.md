@@ -15,7 +15,7 @@ production-ready.
 
 | Версия | Матрица | Пиксели | Ориентировочная PCB | Шаг LED |
 |---|---:|---:|---:|---:|
-| Compact | 20×20 | 400 | 57,0×57,0 мм study baseline | 2,50 мм |
+| Compact | 20×20 | 400 | 69,0×69,0 мм study baseline | 2,50 мм |
 | High-resolution | 28×28 | 784 | 61,2×61,2 мм | 2,20 мм |
 
 Функции:
@@ -415,37 +415,25 @@ KiCad 10 рабочие PCB:
 - `B.SilkS`: `PCB CREATED BY ILLIA PLIUKHIN` и маленькая пятиконечная звезда;
 - LED references находятся на `F.Fab`; все остальные компоненты должны иметь физические reference designators не меньше 1,0/0,15 мм без перекрытий.
 
-Outline 20×20 увеличивается с 49,3 до 57,0 мм как single-board study
-baseline после доказанного дефицита backside-площади; 28×28 остаётся 61,2 мм.
-Генераторы вычисляют LED centers и крайние row buses из outline, matrix size и
-pitch вместо жёсткого margin 0,9 мм. Ранее доказанная карта
-0°/90°/180°/270°, 1 564/3 084 via и L1/L3/L4 topology должна пройти повторную
-детерминированную генерацию, semantic checks и DRC перед promotion нового
-20×20 outline. Размер 57,0 мм остаётся mechanical study baseline, а не
-production freeze. До freeze также необходимо добавить production L2 GND
-после placement, проверить return paths/neck widths и провести row/RGB exits
-к драйверам без нарушения доказанных коридоров.
+Outline 20×20 установлен в 69,0 мм. Поле сквозных via матрицы занимает 48,7 мм
+и имеет минимальный зазор 0,10 мм, поэтому компоненты можно ставить только в
+внешнюю рамку. 28×28 остаётся 61,2 мм. Генераторы вычисляют LED centers и
+крайние row buses из outline, matrix size и pitch. Размер 69,0 мм остаётся
+mechanical study baseline, а не production freeze. До freeze необходимо
+добавить production L2 GND после placement, проверить return paths и провести
+row/RGB exits к драйверам.
 
 ### Placement
 
 - Все LED на лицевой стороне.
 - Вся остальная электроника и test pads сзади.
 - USB-C по центру боковой грани.
-- Исходное требование component-free battery keepout для 20×20 пока
-  невыполнимо: 172 non-LED footprint envelopes занимают около 1673 мм², а
-  вне provisional проекции батареи 32×40 мм доступно только около 1150 мм².
-  `hardware/tools/check_backside_placement_feasibility.py` проверяет этот
-  конфликт напрямую по root netlist и footprint libraries. До production
-  placement нужно либо изменить battery/PCB/stack envelope, либо письменно
-  разрешить конкретные низкопрофильные компоненты под батареей с изоляцией и
-  подтверждённым зазором; текущая проекция остаётся provisional guide, а не
-  доказанным keepout. Теоретический минимум квадратной платы составляет
-  около 54,3 мм даже при невозможной 100% упаковке; текущий одноплатный
-  mechanical study baseline установлен в 57,0 мм при 85% упаковке. HDI/blind vias
-  могут убрать выходы matrix vias на backside, но сами по себе не устраняют
-  дефицит площади. Если 49,3 мм обязательны, требуется отдельная logic PCB
-  либо квалифицированный component-under-battery stack с новым thermal и
-  thickness budget.
+- Battery projection остаётся component-free. Дополнительно запрещена
+  установка backside pads внутри поля сквозных via: 172 footprint envelopes
+  занимают около 1673 мм², а свободная рамка платы 69,0 мм даёт около 2307 мм².
+  `hardware/tools/check_backside_placement_feasibility.py` проверяет и площадь,
+  и ширину рамки относительно самого крупного корпуса. HDI/blind vias остаются
+  альтернативой, если корпус нужно вернуть ближе к полю LED.
 - Нельзя размещать DC/DC и LED drivers под аккумулятором.
 - IMU в жёсткой зоне, вдали от дросселя и края с USB.
 - Microphone вдали от DC/DC и с прямым акустическим каналом.
