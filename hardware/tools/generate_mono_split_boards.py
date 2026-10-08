@@ -708,6 +708,51 @@ def generate_panel_board(
     return board
 
 
+DECODER_Y_PINS = (
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+)
+
+
+def row_gate_net(row_number: int) -> str:
+    return f"ROW_{row_number:02d}_GATE"
+
+
+def row_select_net(row_number: int) -> str:
+    return f"ROW_{row_number:02d}_Y"
+
+
+def decoder_pad_nets(first_row: int) -> dict[str, str]:
+    enable_net = "DEC_A_EN_N" if first_row == 1 else "DEC_B_EN_N"
+    nets = {
+        "12": "GND",
+        "18": enable_net,
+        "19": "GND",
+        "20": "ROW_A3",
+        "21": "ROW_A2",
+        "22": "ROW_A1",
+        "23": "ROW_A0",
+        "24": "LED_4V1",
+    }
+    for offset, pin in enumerate(DECODER_Y_PINS):
+        nets[pin] = row_select_net(first_row + offset)
+    return nets
+
+
 def electronics_parts() -> list[PlacedPart]:
     parts = [
         PlacedPart(
@@ -924,7 +969,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             86.0,
             8.5,
-            {},
+            decoder_pad_nets(1),
         ),
         PlacedPart(
             "U_DEC_B",
@@ -935,7 +980,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             102.0,
             8.5,
-            {},
+            decoder_pad_nets(17),
         ),
         PlacedPart(
             "U_LED_BUF",
@@ -1004,7 +1049,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             70.0,
             81.0,
-            {"1": "REXT1"},
+            {"1": "REXT1", "2": "GND"},
         ),
         PlacedPart(
             "R_EXT2",
@@ -1015,7 +1060,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             118.0,
             81.0,
-            {"1": "REXT2"},
+            {"1": "REXT2", "2": "GND"},
         ),
         PlacedPart(
             "C_USB1",
@@ -1121,6 +1166,8 @@ def electronics_parts() -> list[PlacedPart]:
         origin_x_mm = 48.0 + column_index * 10.0
         origin_y_mm = 26.0 + farm_row_index * 12.0
         drain_net = row_net_name(row_number)
+        gate_net = row_gate_net(row_number)
+        select_net = row_select_net(row_number)
         parts.append(
             PlacedPart(
                 f"Q_ROW{row_number:02d}",
@@ -1132,6 +1179,7 @@ def electronics_parts() -> list[PlacedPart]:
                 origin_x_mm - 1.0,
                 origin_y_mm - 5.2,
                 {
+                    "1": gate_net,
                     "2": "LED_4V1",
                     "3": drain_net,
                 },
@@ -1147,7 +1195,7 @@ def electronics_parts() -> list[PlacedPart]:
                 0.0,
                 origin_x_mm + 4.2,
                 origin_y_mm + 5.2,
-                {},
+                {"1": gate_net, "2": select_net},
             )
         )
         parts.append(
@@ -1160,7 +1208,7 @@ def electronics_parts() -> list[PlacedPart]:
                 0.0,
                 origin_x_mm + 5.5,
                 origin_y_mm - 5.2,
-                {"2": "LED_4V1"},
+                {"1": gate_net, "2": "LED_4V1"},
             )
         )
 
@@ -1770,6 +1818,411 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     route_reserve_drop(board, "LED_OE_N", 58.49, 71.40, 58.49)
 
 
+def route_gate_cells(board: pcbnew.BOARD) -> None:
+    for row_number in range(1, MATRIX_CHANNEL_COUNT + 1):
+        transistor = footprint_by_reference(board, f"Q_ROW{row_number:02d}")
+        series = footprint_by_reference(board, f"R_G{row_number:02d}")
+        pull_up = footprint_by_reference(board, f"R_PU{row_number:02d}")
+        gate_x, gate_y = millimeters(get_pad(transistor, "1").GetPosition())
+        pull_x, pull_y = millimeters(get_pad(pull_up, "1").GetPosition())
+        series_x, series_y = millimeters(get_pad(series, "1").GetPosition())
+        net_name = row_gate_net(row_number)
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(gate_x, gate_y), (gate_x, pull_y), (pull_x, pull_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(pull_x, pull_y), (series_x, series_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+
+
+def spaced_coordinates(
+    start_mm: float,
+    count: int,
+    step_mm: float,
+    skip: tuple[float, float] | None = None,
+) -> list[float]:
+    coordinates = []
+    cursor_mm = start_mm
+    while len(coordinates) < count:
+        if skip is not None and skip[0] <= cursor_mm <= skip[1]:
+            cursor_mm = skip[1] + step_mm
+            continue
+        coordinates.append(round(cursor_mm, 2))
+        cursor_mm += step_mm
+    return coordinates
+
+
+def assign_select_escapes(outputs: list[dict]) -> None:
+    buckets: dict[str, list[dict]] = {
+        "a_left": [],
+        "a_pin13": [],
+        "a_jog": [],
+        "b_left": [],
+        "b_native": [],
+        "b_jog": [],
+    }
+    for output in outputs:
+        row_number = output["row"]
+        if row_number <= 11:
+            buckets["a_left"].append(output)
+        elif row_number == 12:
+            buckets["a_pin13"].append(output)
+        elif row_number <= 16:
+            buckets["a_jog"].append(output)
+        elif row_number <= 27:
+            buckets["b_left"].append(output)
+        elif row_number == 28:
+            buckets["b_native"].append(output)
+        else:
+            buckets["b_jog"].append(output)
+    for output in buckets["a_left"]:
+        output["jog"] = False
+    for output in buckets["a_pin13"]:
+        output["jog"] = False
+        output["escape_x"] = round(output["pad_x"] + 1.25, 2)
+    for output in buckets["b_left"]:
+        output["jog"] = False
+    for output in buckets["b_native"]:
+        output["jog"] = False
+    buckets["a_left"].sort(key=lambda item: item["pad_y"])
+    for rank, output in enumerate(buckets["a_left"]):
+        output["escape_x"] = round(81.70 - rank * 0.48, 2)
+    buckets["a_jog"].sort(key=lambda item: item["pad_y"])
+    for rank, output in enumerate(buckets["a_jog"]):
+        output["jog"] = True
+        output["escape_x"] = round(92.35 - rank * 0.55, 2)
+        output["entry_y"] = round(20.55 + rank * 0.42, 2)
+    buckets["b_left"].sort(key=lambda item: item["pad_y"])
+    for rank, output in enumerate(buckets["b_left"]):
+        output["escape_x"] = round(97.90 - rank * 0.42, 2)
+    for output in buckets["b_native"]:
+        output["escape_x"] = round(output["pad_x"] + 1.25, 2)
+    for output in outputs:
+        if output["row"] == 1:
+            output["jog"] = True
+            output["entry_y"] = 9.70
+    buckets["b_jog"].sort(key=lambda item: item["pad_y"])
+    for rank, output in enumerate(buckets["b_jog"]):
+        output["jog"] = True
+        output["escape_x"] = round(108.40 - rank * 0.55, 2)
+        output["entry_y"] = round(18.55 + (3 - rank) * 0.42, 2)
+
+
+def park_select_output(board: pcbnew.BOARD, output: dict) -> None:
+    net_name = output["net"]
+    pad_x = output["pad_x"]
+    pad_y = output["pad_y"]
+    escape_x = output["escape_x"]
+    if output["jog"]:
+        entry_y = output["entry_y"]
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(pad_x, pad_y), (escape_x, pad_y), (escape_x, entry_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+    else:
+        entry_y = pad_y
+        output["entry_y"] = entry_y
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(pad_x, pad_y), (escape_x, pad_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+    net = board.FindNet(net_name)
+    add_through_via(board, net, escape_x, entry_y, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        net_name,
+        pcbnew.In1_Cu,
+        [(escape_x, entry_y), (output["comb_x"], entry_y)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+
+
+def finish_select_output(board: pcbnew.BOARD, output: dict) -> None:
+    net = board.FindNet(output["net"])
+    comb_x = output["comb_x"]
+    entry_y = output["entry_y"]
+    travel_y = output["travel_y"]
+    approach_x = output["approach_x"]
+    target_x = output["target_x"]
+    target_y = output["target_y"]
+    add_through_via(board, net, comb_x, entry_y, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        output["net"],
+        pcbnew.In2_Cu,
+        [(comb_x, entry_y), (comb_x, travel_y)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, net, comb_x, travel_y, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        output["net"],
+        pcbnew.In1_Cu,
+        [(comb_x, travel_y), (approach_x, travel_y)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, net, approach_x, travel_y, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        output["net"],
+        pcbnew.In2_Cu,
+        [(approach_x, travel_y), (approach_x, target_y)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, net, approach_x, target_y, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        output["net"],
+        pcbnew.F_Cu,
+        [(approach_x, target_y), (target_x, target_y)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+
+
+def route_row_select(board: pcbnew.BOARD) -> None:
+    route_gate_cells(board)
+    outputs = []
+    for row_number in range(1, MATRIX_CHANNEL_COUNT + 1):
+        bank_row = (row_number - 1) % 16
+        decoder_name = "U_DEC_A" if row_number <= 16 else "U_DEC_B"
+        decoder = footprint_by_reference(board, decoder_name)
+        pad = get_pad(decoder, DECODER_Y_PINS[bank_row])
+        pad_x, pad_y = millimeters(pad.GetPosition())
+        series = footprint_by_reference(board, f"R_G{row_number:02d}")
+        target_x, target_y = millimeters(get_pad(series, "2").GetPosition())
+        farm_index = row_number - 1
+        column_index = farm_index % 8
+        farm_row = farm_index // 8
+        outputs.append(
+            {
+                "row": row_number,
+                "net": row_select_net(row_number),
+                "pad_x": pad_x,
+                "pad_y": pad_y,
+                "left": pad_x < millimeters(decoder.GetPosition())[0],
+                "bank": decoder_name,
+                "target_x": target_x,
+                "target_y": target_y,
+                "approach_x": 48.0 + column_index * 10.0 + 5.55,
+                "farm_row": farm_row,
+                "column": column_index,
+            }
+        )
+
+    travel_by_row = (
+        [23.50, 23.95, 24.40, 24.85, 29.10, 29.55, 30.00, 30.45],
+        [35.50, 35.95, 36.40, 36.85, 41.05, 41.50, 41.95, 42.40],
+        [47.50, 47.95, 48.40, 48.85, 53.05, 53.50, 53.95, 54.40],
+        [59.50, 59.95, 60.40, 60.85, 65.10, 65.55, 66.00, 66.45],
+    )
+    left_outputs = [item for item in outputs if item["row"] <= 12]
+    right_outputs = [item for item in outputs if item["row"] > 12]
+    left_comb = spaced_coordinates(33.40, len(left_outputs), 0.48)
+    right_comb = spaced_coordinates(
+        125.20, len(right_outputs), 0.50, skip=(127.35, 128.90)
+    )
+    for output, comb_x in zip(left_outputs, left_comb):
+        output["comb_x"] = comb_x
+    for output, comb_x in zip(right_outputs, right_comb):
+        output["comb_x"] = comb_x
+    assign_select_escapes(outputs)
+    for output in outputs:
+        output["travel_y"] = travel_by_row[output["farm_row"]][output["column"]]
+        park_select_output(board, output)
+        finish_select_output(board, output)
+
+
+def route_decoder_address(board: pcbnew.BOARD) -> None:
+    address_pins = (
+        ("ROW_A0", "23", 6.20, 66.30, 98.80),
+        ("ROW_A1", "22", 6.60, 71.80, 99.30),
+        ("ROW_A2", "21", 7.00, 51.20, 99.75),
+        ("ROW_A3", "20", 7.40, 59.20, 102.30),
+        ("DEC_A_EN_N", "18", 7.80, 61.40, 102.80),
+        ("DEC_B_EN_N", "18", 8.15, 119.40, 103.30),
+    )
+    for net_name, pin, entry_y, drop_x, bottom_y in address_pins:
+        decoders = ("U_DEC_A", "U_DEC_B")
+        if net_name == "DEC_A_EN_N":
+            decoders = ("U_DEC_A",)
+        elif net_name == "DEC_B_EN_N":
+            decoders = ("U_DEC_B",)
+        inward_mm = {
+            "ROW_A0": 1.05,
+            "ROW_A1": 1.55,
+            "ROW_A2": 2.05,
+            "ROW_A3": 2.55,
+            "DEC_A_EN_N": 3.55,
+            "DEC_B_EN_N": 3.55,
+        }
+        escape_points = []
+        for decoder_name in decoders:
+            decoder = footprint_by_reference(board, decoder_name)
+            pad_x, pad_y = millimeters(get_pad(decoder, pin).GetPosition())
+            escape_x = round(pad_x - inward_mm[net_name], 2)
+            route_net_polyline(
+                board,
+                net_name,
+                pcbnew.F_Cu,
+                [(pad_x, pad_y), (escape_x, pad_y), (escape_x, entry_y)],
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+            net = board.FindNet(net_name)
+            add_through_via(board, net, escape_x, entry_y, diameter_mm=0.40)
+            escape_points.append(escape_x)
+        pad_x = reserve_pad_x(board, net_name)
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.In1_Cu,
+            [
+                (min(escape_points + [drop_x]), entry_y),
+                (max(escape_points + [drop_x]), entry_y),
+            ],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        net = board.FindNet(net_name)
+        add_through_via(board, net, drop_x, entry_y, diameter_mm=0.40)
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.In2_Cu,
+            [(drop_x, entry_y), (drop_x, bottom_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(board, net, drop_x, bottom_y, diameter_mm=0.40)
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(drop_x, bottom_y), (pad_x, bottom_y), (pad_x, 98.00)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+
+
+def reserve_pad_x(board: pcbnew.BOARD, net_name: str) -> float:
+    for footprint in board.GetFootprints():
+        if not footprint.GetReference().startswith("RP"):
+            continue
+        pad = get_pad(footprint, "1")
+        if pad.GetNetname() == net_name:
+            return millimeters(pad.GetPosition())[0]
+    raise ValueError(f"Unable to find reserve pad for {net_name}")
+
+
+def route_decoder_rails(board: pcbnew.BOARD) -> None:
+    gnd_escape_x = []
+    for decoder_name, vcc_escape_x, gnd_escape, enable_escape in (
+        ("U_DEC_A", 89.50, 73.40, 93.05),
+        ("U_DEC_B", 109.20, 98.20, 110.20),
+    ):
+        decoder = footprint_by_reference(board, decoder_name)
+        vcc_x, vcc_y = millimeters(get_pad(decoder, "24").GetPosition())
+        gnd_x, gnd_y = millimeters(get_pad(decoder, "12").GetPosition())
+        enable_x, enable_y = millimeters(get_pad(decoder, "19").GetPosition())
+        route_net_polyline(
+            board,
+            "LED_4V1",
+            pcbnew.F_Cu,
+            [(vcc_x, vcc_y), (vcc_escape_x, vcc_y), (vcc_escape_x, 8.80)],
+            0.20,
+        )
+        add_through_via(
+            board, board.FindNet("LED_4V1"), vcc_escape_x, 8.80, diameter_mm=0.40
+        )
+        route_net_polyline(
+            board,
+            "LED_4V1",
+            pcbnew.In2_Cu,
+            [(vcc_escape_x, 8.80), (vcc_escape_x, 32.40)],
+            0.20,
+        )
+        add_through_via(
+            board, board.FindNet("LED_4V1"), vcc_escape_x, 32.40, diameter_mm=0.40
+        )
+        route_net_polyline(
+            board,
+            "GND",
+            pcbnew.F_Cu,
+            [(gnd_x, gnd_y), (gnd_escape, gnd_y), (gnd_escape, 22.35)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        route_net_polyline(
+            board,
+            "GND",
+            pcbnew.F_Cu,
+            [
+                (enable_x, enable_y),
+                (enable_escape, enable_y),
+                (enable_escape, 22.35),
+            ],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(board, board.FindNet("GND"), gnd_escape, 22.35, diameter_mm=0.40)
+        add_through_via(
+            board, board.FindNet("GND"), enable_escape, 22.35, diameter_mm=0.40
+        )
+        gnd_escape_x.extend((gnd_escape, enable_escape))
+    route_net_polyline(
+        board,
+        "LED_4V1",
+        pcbnew.In1_Cu,
+        [(89.50, 32.40), (140.00, 32.40)],
+        0.25,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.In1_Cu,
+        [(max(gnd_escape_x), 22.35), (13.20, 22.35)],
+        0.25,
+    )
+    gnd = board.FindNet("GND")
+    add_through_via(board, gnd, 13.20, 22.35, diameter_mm=0.40)
+
+
+def route_rext_return(board: pcbnew.BOARD) -> None:
+    gnd = board.FindNet("GND")
+    add_through_via(board, gnd, 13.20, 81.30, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In2_Cu, [(13.20, 80.00), (13.20, 81.30)], 0.25
+    )
+    return_x = []
+    for reference in ("R_EXT1", "R_EXT2"):
+        resistor = footprint_by_reference(board, reference)
+        pad_x, pad_y = millimeters(get_pad(resistor, "2").GetPosition())
+        return_x.append(pad_x)
+        add_through_via(board, gnd, pad_x, 81.30, diameter_mm=0.40)
+        route_net_polyline(
+            board,
+            "GND",
+            pcbnew.F_Cu,
+            [(pad_x, 81.30), (pad_x, pad_y)],
+            0.20,
+        )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.In1_Cu,
+        [(13.20, 81.30), (max(return_x), 81.30)],
+        0.25,
+    )
+
+
 def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     board = pcbnew.BOARD()
     apply_design_rules(board, copper_layer_count=4)
@@ -1831,6 +2284,10 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     route_led_anode_rail(board)
     route_imu_sense(board)
     route_power_and_blank(board)
+    route_row_select(board)
+    route_decoder_address(board)
+    route_decoder_rails(board)
+    route_rext_return(board)
     add_text(
         board,
         "SCAN AND IMU SIGNAL RESERVE",
