@@ -1433,15 +1433,15 @@ def electronics_parts() -> list[PlacedPart]:
             )
         )
     for reference, value, pad1_net, pad2_net, center_x, center_y in (
-        ("C_CHG_SYS", "1u", "GND", "SYS", 14.6, 39.4),
-        ("C_CHG_BAT", "1u", "GND", "BAT_RAW", 14.6, 37.9),
-        ("C_CHG_IN", "1u", "VBUS", "GND", 21.4, 40.8),
+        ("C_CHG_SYS", "10u", "GND", "SYS", 14.2, 38.2),
+        ("C_CHG_BAT", "10u", "GND", "BAT_RAW", 15.2, 46.3),
+        ("C_CHG_IN", "10u", "VBUS", "GND", 23.6, 38.8),
     ):
         parts.append(
             PlacedPart(
                 reference,
                 value,
-                "C_0402_1005Metric",
+                "C_0805_2012Metric",
                 center_x,
                 center_y,
                 0.0,
@@ -2448,65 +2448,70 @@ def route_converter_rails(board: pcbnew.BOARD) -> None:
 
 
 def route_charger(board: pcbnew.BOARD) -> None:
-    # BQ25185 DLH at (18, 42). /CE is tied to GND. ISET and TS stay open.
+    # BQ25185 DLH at (18, 42). Local 10 µF ceramics are 0805 so the 5 V
+    # rails still have capacitance after bias. ISET and TS stay open.
     route_net_polyline(
         board, "VBUS", pcbnew.In2_Cu, [(2.05, 20.45), (2.05, 23.20)], 0.30
     )
     vbus = board.FindNet("VBUS")
     add_through_via(board, vbus, 2.05, 23.20, diameter_mm=0.40)
     route_net_polyline(
-        board, "VBUS", pcbnew.In1_Cu, [(2.05, 23.20), (20.89, 23.20)], 0.30
+        board, "VBUS", pcbnew.In1_Cu, [(2.05, 23.20), (22.65, 23.20)], 0.30
     )
-    add_through_via(board, vbus, 20.89, 23.20, diameter_mm=0.40)
-    add_through_via(board, vbus, 20.89, 41.50, diameter_mm=0.40)
+    add_through_via(board, vbus, 22.65, 23.20, diameter_mm=0.40)
     route_net_polyline(
-        board, "VBUS", pcbnew.In2_Cu, [(20.89, 41.50), (20.89, 23.20)], 0.30
+        board, "VBUS", pcbnew.In2_Cu, [(22.65, 23.20), (22.65, 37.60)], 0.30
     )
+    add_through_via(board, vbus, 22.65, 37.60, diameter_mm=0.40)
     route_net_polyline(
         board,
         "VBUS",
         pcbnew.F_Cu,
-        [(20.89, 41.50), (20.89, 40.80), (18.86, 40.80), (18.86, 41.20)],
-        0.25,
+        [(22.65, 37.60), (22.65, 38.80), (18.86, 38.80), (18.86, 41.20)],
+        0.30,
     )
     route_net_polyline(
         board,
         "SYS",
         pcbnew.F_Cu,
-        [(17.14, 41.20), (17.14, 39.40), (15.11, 39.40)],
-        0.25,
+        [(17.14, 41.20), (15.15, 41.20), (15.15, 38.20)],
+        0.30,
     )
     route_net_polyline(
         board,
         "SYS",
         pcbnew.F_Cu,
-        [(17.14, 39.40), (30.40, 39.40)],
-        0.25,
+        [(17.14, 41.20), (17.14, 40.00)],
+        0.30,
     )
     sys_net = board.FindNet("SYS")
-    add_through_via(board, sys_net, 30.40, 39.40, diameter_mm=0.40)
+    add_through_via(board, sys_net, 17.14, 40.00, diameter_mm=0.40)
     route_net_polyline(
-        board, "SYS", pcbnew.In2_Cu, [(30.40, 39.40), (30.40, 46.10)], 0.25
+        board, "SYS", pcbnew.In1_Cu, [(17.14, 40.00), (30.40, 40.00)], 0.30
+    )
+    add_through_via(board, sys_net, 30.40, 40.00, diameter_mm=0.40)
+    route_net_polyline(
+        board, "SYS", pcbnew.In2_Cu, [(30.40, 40.00), (30.40, 46.10)], 0.30
     )
     route_net_polyline(
         board,
         "BAT_RAW",
         pcbnew.F_Cu,
-        [(17.14, 41.60), (16.20, 41.60), (16.20, 40.20)],
-        0.25,
+        [(17.14, 41.60), (14.70, 41.60), (14.70, 40.40)],
+        0.20,
     )
     bat = board.FindNet("BAT_RAW")
-    add_through_via(board, bat, 16.20, 40.20, diameter_mm=0.40)
+    add_through_via(board, bat, 14.70, 40.40, diameter_mm=0.40)
     route_net_polyline(
-        board, "BAT_RAW", pcbnew.In2_Cu, [(16.20, 40.20), (16.20, 38.60)], 0.25
+        board, "BAT_RAW", pcbnew.In2_Cu, [(14.70, 40.40), (14.70, 45.20)], 0.30
     )
-    add_through_via(board, bat, 16.20, 38.60, diameter_mm=0.40)
+    add_through_via(board, bat, 14.70, 45.20, diameter_mm=0.40)
     route_net_polyline(
         board,
         "BAT_RAW",
         pcbnew.F_Cu,
-        [(16.20, 38.60), (15.11, 38.60), (15.11, 37.90)],
-        0.25,
+        [(14.70, 45.20), (16.50, 45.20), (16.50, 46.30)],
+        0.30,
     )
     route_net_polyline(
         board,
@@ -2526,36 +2531,44 @@ def route_charger(board: pcbnew.BOARD) -> None:
         board,
         "GND",
         pcbnew.F_Cu,
-        [(17.14, 42.80), (16.20, 42.80), (16.20, 43.60), (13.20, 43.60), (24.20, 43.60)],
-        0.20,
+        [(17.14, 42.80), (16.20, 42.80), (16.20, 43.60), (13.20, 43.60), (24.55, 43.60)],
+        0.25,
     )
     route_net_polyline(
         board,
         "GND",
         pcbnew.F_Cu,
         [(23.31, 42.60), (23.31, 43.60)],
-        0.15,
+        0.20,
     )
     route_net_polyline(
         board,
         "GND",
         pcbnew.F_Cu,
-        [(21.91, 40.80), (24.20, 40.80), (24.20, 43.60)],
-        0.15,
+        [(24.55, 38.80), (24.55, 43.60)],
+        0.25,
     )
     route_net_polyline(
         board,
         "GND",
         pcbnew.F_Cu,
-        [(14.09, 37.90), (14.09, 43.60)],
-        0.15,
+        [(13.25, 38.20), (13.25, 43.60)],
+        0.25,
     )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(14.25, 46.30), (13.20, 46.30)],
+        0.25,
+    )
+    add_through_via(board, board.FindNet("GND"), 13.20, 46.30, diameter_mm=0.40)
     route_net_polyline(
         board,
         "GND",
         pcbnew.F_Cu,
         [(18.00, 42.20), (18.00, 43.60)],
-        0.20,
+        0.25,
     )
     add_through_via(board, board.FindNet("GND"), 13.20, 43.60, diameter_mm=0.40)
 
