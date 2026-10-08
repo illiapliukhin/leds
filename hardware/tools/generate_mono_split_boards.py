@@ -852,6 +852,7 @@ def electronics_parts() -> list[PlacedPart]:
                 "2": "BAT_RAW",
                 "4": "GND",
                 "5": "GND",
+                "6": "TS_MR",
                 "7": "ILIM_VSET",
                 "10": "VBUS",
                 "11": "GND",
@@ -1418,6 +1419,7 @@ def electronics_parts() -> list[PlacedPart]:
         ("R_QOD", "1k", "LED_QOD", "LED_LOGIC_3V3", 25.6, 63.2),
         ("R_AUD_PD", "100k", "AUDIO_EN", "GND", 15.11, 72.5),
         ("R_ILIM", "24k", "ILIM_VSET", "GND", 22.8, 42.6),
+        ("R_TS", "10k", "TS_MR", "GND", 21.0, 45.4),
     ):
         parts.append(
             PlacedPart(
@@ -1494,6 +1496,7 @@ def add_electronics_components(
                 "C_LDO",
                 "C_CHG",
                 "R_ILIM",
+                "R_TS",
             )
         )
         footprint.Reference().SetLayer(
@@ -2571,6 +2574,33 @@ def route_charger(board: pcbnew.BOARD) -> None:
         0.25,
     )
     add_through_via(board, board.FindNet("GND"), 13.20, 43.60, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "TS_MR",
+        pcbnew.F_Cu,
+        [(18.86, 42.80), (19.60, 42.80), (19.60, 43.00)],
+        0.15,
+    )
+    ts_net = board.FindNet("TS_MR")
+    add_through_via(board, ts_net, 19.60, 43.00, diameter_mm=0.40)
+    route_net_polyline(
+        board, "TS_MR", pcbnew.In2_Cu, [(19.60, 43.00), (19.60, 45.00)], 0.15
+    )
+    add_through_via(board, ts_net, 19.60, 45.00, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "TS_MR",
+        pcbnew.F_Cu,
+        [(19.60, 45.00), (20.49, 45.00), (20.49, 45.40)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(21.51, 45.40), (21.51, 43.60)],
+        0.15,
+    )
 
 
 def route_converter_caps(board: pcbnew.BOARD) -> None:
