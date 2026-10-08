@@ -1020,7 +1020,22 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             62.0,
             70.5,
-            {},
+            {
+                "1": "GND",
+                "2": "LED_CLK",
+                "3": "LED_CLK_Y",
+                "4": "GND",
+                "5": "LED_SDI",
+                "6": "LED_SDI_Y",
+                "7": "GND",
+                "8": "LED_LE_Y",
+                "9": "LED_LE",
+                "10": "GND",
+                "11": "LED_OE_Y",
+                "12": "LED_OE_N",
+                "13": "GND",
+                "14": "LED_LOGIC_3V3",
+            },
         ),
         PlacedPart(
             "U_LED1",
@@ -1037,10 +1052,10 @@ def electronics_parts() -> list[PlacedPart]:
             }
             | {
                 "1": "GND",
-                "2": "LED_SDI",
-                "3": "LED_CLK",
-                "4": "LED_LE",
-                "21": "LED_OE_N",
+                "2": "LED_SDI_Y",
+                "3": "LED_CLK_Y",
+                "4": "LED_LE_Y",
+                "21": "LED_OE_Y",
                 "22": "LED_SDO",
                 "23": "REXT1",
                 "24": "LED_LOGIC_3V3",
@@ -1062,9 +1077,9 @@ def electronics_parts() -> list[PlacedPart]:
             | {
                 "1": "GND",
                 "2": "LED_SDO",
-                "3": "LED_CLK",
-                "4": "LED_LE",
-                "21": "LED_OE_N",
+                "3": "LED_CLK_Y",
+                "4": "LED_LE_Y",
+                "21": "LED_OE_Y",
                 "23": "REXT2",
                 "24": "LED_LOGIC_3V3",
             },
@@ -1665,6 +1680,7 @@ def route_reserve_drop(
     drop_x_mm: float,
     corridor_y_mm: float,
     pad_x_mm: float,
+    bottom_y_mm: float = 97.35,
 ) -> None:
     net = board.FindNet(net_name)
     add_through_via(board, net, drop_x_mm, corridor_y_mm, diameter_mm=0.40)
@@ -1672,24 +1688,24 @@ def route_reserve_drop(
         board,
         net_name,
         pcbnew.In2_Cu,
-        [(drop_x_mm, corridor_y_mm), (drop_x_mm, 97.35)],
+        [(drop_x_mm, corridor_y_mm), (drop_x_mm, bottom_y_mm)],
         FAN_IN_TRACK_WIDTH_MM,
     )
-    add_through_via(board, net, drop_x_mm, 97.35, diameter_mm=0.40)
+    add_through_via(board, net, drop_x_mm, bottom_y_mm, diameter_mm=0.40)
     if abs(drop_x_mm - pad_x_mm) > 0.01:
         route_net_polyline(
             board,
             net_name,
             pcbnew.In1_Cu,
-            [(drop_x_mm, 97.35), (pad_x_mm, 97.35)],
+            [(drop_x_mm, bottom_y_mm), (pad_x_mm, bottom_y_mm)],
             FAN_IN_TRACK_WIDTH_MM,
         )
-        add_through_via(board, net, pad_x_mm, 97.35, diameter_mm=0.40)
+        add_through_via(board, net, pad_x_mm, bottom_y_mm, diameter_mm=0.40)
     route_net_polyline(
         board,
         net_name,
         pcbnew.F_Cu,
-        [(pad_x_mm, 97.35), (pad_x_mm, 98.00)],
+        [(pad_x_mm, bottom_y_mm), (pad_x_mm, 98.00)],
         FAN_IN_TRACK_WIDTH_MM,
     )
 
@@ -1818,28 +1834,19 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     # MBI5124GP pin configuration: 2 SDI, 3 CLK, 4 LE, 21 OE, 22 SDO,
     # 23 R-EXT, 24 VDD. A lower pin escapes farther from the body so its
     # stub stays clear of the pin above it.
-    route_pad_escape(board, "LED_SDI", 83.40, 73.142, 82.30, 68.70)
-    route_pad_escape(board, "LED_CLK", 83.40, 73.778, 81.60, 69.15)
-    route_pad_escape(board, "LED_LE", 83.40, 74.412, 80.90, 69.60)
+    route_pad_escape(board, "LED_SDI_Y", 83.40, 73.142, 82.30, 67.55)
+    route_pad_escape(board, "LED_CLK_Y", 83.40, 73.778, 81.60, 67.05)
+    route_pad_escape(board, "LED_LE_Y", 83.40, 74.412, 80.90, 69.60)
     route_pad_escape(board, "LED_LOGIC_3V3", 88.60, 72.507, 90.20, 70.05)
     route_pad_escape(board, "REXT1", 88.60, 73.142, 90.90, 70.50)
     route_pad_escape(board, "LED_SDO", 88.60, 73.778, 91.60, 70.95)
-    route_pad_escape(board, "LED_OE_N", 88.60, 74.412, 92.30, 71.40)
+    route_pad_escape(board, "LED_OE_Y", 88.60, 74.412, 92.30, 71.40)
     route_pad_escape(board, "LED_SDO", 103.40, 73.142, 102.40, 70.95)
-    route_pad_escape(board, "LED_CLK", 103.40, 73.778, 101.80, 69.15)
-    route_pad_escape(board, "LED_LE", 103.40, 74.412, 101.20, 69.60)
+    route_pad_escape(board, "LED_CLK_Y", 103.40, 73.778, 101.80, 67.05)
+    route_pad_escape(board, "LED_LE_Y", 103.40, 74.412, 101.20, 69.60)
     route_pad_escape(board, "LED_LOGIC_3V3", 108.60, 72.507, 109.70, 70.05)
     route_pad_escape(board, "REXT2", 108.60, 73.142, 110.15, 70.50)
-    route_pad_escape(board, "LED_OE_N", 108.60, 74.412, 111.45, 71.40)
-    route_net_polyline(
-        board, "LED_SDI", pcbnew.In1_Cu, [(36.80, 68.70), (82.30, 68.70)], 0.15
-    )
-    route_net_polyline(
-        board, "LED_CLK", pcbnew.In1_Cu, [(32.99, 69.15), (101.80, 69.15)], 0.15
-    )
-    route_net_polyline(
-        board, "LED_LE", pcbnew.In1_Cu, [(43.20, 69.60), (101.20, 69.60)], 0.15
-    )
+    route_pad_escape(board, "LED_OE_Y", 108.60, 74.412, 111.45, 71.40)
     route_net_polyline(
         board, "LED_LOGIC_3V3", pcbnew.In1_Cu, [(90.20, 70.05), (109.70, 70.05)], 0.15
     )
@@ -1851,9 +1858,6 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     )
     route_net_polyline(
         board, "LED_SDO", pcbnew.In1_Cu, [(91.60, 70.95), (102.40, 70.95)], 0.15
-    )
-    route_net_polyline(
-        board, "LED_OE_N", pcbnew.In1_Cu, [(58.49, 71.40), (111.45, 71.40)], 0.15
     )
     rext1 = board.FindNet("REXT1")
     add_through_via(board, rext1, 69.49, 70.50, diameter_mm=0.40)
@@ -1868,7 +1872,171 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     route_reserve_drop(board, "LED_SDI", 36.80, 68.70, 41.49)
     route_reserve_drop(board, "LED_CLK", 32.99, 69.15, 32.99)
     route_reserve_drop(board, "LED_LE", 43.20, 69.60, 49.99)
-    route_reserve_drop(board, "LED_OE_N", 58.49, 71.40, 58.49)
+    route_reserve_drop(board, "LED_OE_N", 48.20, 71.40, 58.49, bottom_y_mm=96.70)
+    route_led_buffer(board)
+
+
+def route_buffer_stub(
+    board: pcbnew.BOARD,
+    net_name: str,
+    pad_x_mm: float,
+    pad_y_mm: float,
+    escape_x_mm: float,
+    corridor_y_mm: float,
+) -> None:
+    route_net_polyline(
+        board,
+        net_name,
+        pcbnew.F_Cu,
+        [(pad_x_mm, pad_y_mm), (escape_x_mm, pad_y_mm), (escape_x_mm, corridor_y_mm)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(
+        board,
+        board.FindNet(net_name),
+        escape_x_mm,
+        corridor_y_mm,
+        diameter_mm=0.40,
+    )
+
+
+def route_led_buffer(board: pcbnew.BOARD) -> None:
+    buffer = footprint_by_reference(board, "U_LED_BUF")
+    # Left pins step outward and climb. A lower pin stays closer to the body
+    # so its stub does not cross the vertical of the pin above it.
+    # Top pin escapes closest to the body. Every lower stub stops outside it,
+    # and every vertical climbs, so the stubs do not cross.
+    left_stubs = (
+        ("2", 53.35, 69.15),
+        ("3", 52.80, 67.05),
+        ("5", 52.25, 68.70),
+        ("6", 51.70, 67.55),
+    )
+    right_stubs = (
+        ("12", 66.80, 71.40),
+        ("11", 67.40, 71.40),
+        ("9", 68.00, 69.60),
+        ("8", 68.60, 69.60),
+    )
+    for pin, escape_x, corridor_y in left_stubs + right_stubs:
+        pad_x, pad_y = millimeters(get_pad(buffer, pin).GetPosition())
+        route_buffer_stub(
+            board,
+            get_pad(buffer, pin).GetNetname(),
+            pad_x,
+            pad_y,
+            escape_x,
+            corridor_y,
+        )
+    vcc_x, vcc_y = millimeters(get_pad(buffer, "14").GetPosition())
+    route_net_polyline(
+        board,
+        "LED_LOGIC_3V3",
+        pcbnew.F_Cu,
+        [(vcc_x, vcc_y), (vcc_x, 73.30), (63.70, 73.30), (63.70, 70.05)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(
+        board, board.FindNet("LED_LOGIC_3V3"), 63.70, 70.05, diameter_mm=0.40
+    )
+    pin1_x, pin1_y = millimeters(get_pad(buffer, "1").GetPosition())
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(pin1_x, pin1_y), (53.90, pin1_y), (53.90, 68.20)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, board.FindNet("GND"), 53.90, 68.20, diameter_mm=0.40)
+    ground = board.FindNet("GND")
+    for pin, escape_x in (("4", 57.90), ("7", 57.30)):
+        pad_x, pad_y = millimeters(get_pad(buffer, pin).GetPosition())
+        route_net_polyline(
+            board,
+            "GND",
+            pcbnew.F_Cu,
+            [(pad_x, pad_y), (escape_x, pad_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(board, ground, escape_x, pad_y, diameter_mm=0.40)
+        add_through_via(board, ground, escape_x, 78.80, diameter_mm=0.40)
+        route_net_polyline(
+            board,
+            "GND",
+            pcbnew.In2_Cu,
+            [(escape_x, pad_y), (escape_x, 78.80)],
+            0.15,
+        )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.In1_Cu,
+        [(57.90, 78.80), (46.50, 78.80), (57.30, 78.80)],
+        0.15,
+    )
+    add_through_via(board, ground, 46.50, 78.80, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(46.50, 78.80), (46.50, 81.30)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, ground, 46.50, 81.30, diameter_mm=0.40)
+    pin13_x, pin13_y = millimeters(get_pad(buffer, "13").GetPosition())
+    pin10_x, pin10_y = millimeters(get_pad(buffer, "10").GetPosition())
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [
+            (pin13_x, pin13_y),
+            (63.40, pin13_y),
+            (63.40, 78.40),
+            (72.40, 78.40),
+            (72.40, 81.30),
+        ],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(pin10_x, pin10_y), (63.40, pin10_y)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, board.FindNet("GND"), 72.40, 81.30, diameter_mm=0.40)
+    route_net_polyline(
+        board, "LED_SDI", pcbnew.In1_Cu, [(36.80, 68.70), (52.25, 68.70)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_SDI_Y", pcbnew.In1_Cu, [(51.70, 67.55), (82.30, 67.55)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_CLK", pcbnew.In1_Cu, [(32.99, 69.15), (53.35, 69.15)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_CLK_Y", pcbnew.In1_Cu, [(52.80, 67.05), (101.80, 67.05)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_LE_Y", pcbnew.In1_Cu, [(68.60, 69.60), (101.20, 69.60)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_LE", pcbnew.In1_Cu, [(43.20, 69.60), (68.00, 69.60)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_OE_Y", pcbnew.In1_Cu, [(67.40, 71.40), (111.45, 71.40)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_OE_N", pcbnew.In1_Cu, [(48.20, 71.40), (66.80, 71.40)], 0.15
+    )
+    route_net_polyline(
+        board,
+        "LED_LOGIC_3V3",
+        pcbnew.In1_Cu,
+        [(63.70, 70.05), (90.20, 70.05)],
+        0.15,
+    )
 
 
 def route_gate_cells(board: pcbnew.BOARD) -> None:
