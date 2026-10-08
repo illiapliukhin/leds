@@ -84,9 +84,18 @@ The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one 
 | **`route_mcu_side_to_drop`** through the grid | Long F/In1 columns from **`x≈28–40`** through the row farm. |
 | Fixed **decoder spines** at **`x≈63–70`** | Every MCU move still needs a clean **In2 corridor** at **`x≈44–50`**, not ad-hoc F columns. |
 
-**Routing (generator):** Row/decoder nets still use F columns + decoder spines (must be rewritten for **270°** — tracked in PR). **`LED_*`** use the **eastern In2 spine** (`hop` at **`x≈44 mm`**, In2 to reserve rail). USB connector uses **split `merge_y` + In2** to ESD; **`R_USB_*`** sit beside the west face.
+**Routing (generator, 270°):** Legacy **F-column** MCU escapes are **removed**. Constants in `mono_split_esp32.py`:
 
-**Not done yet:** Copper **0 / 0** (shorts/crossings/unconnected), full geometric verify (silk/mask), and **In2 row joins** matched to this orientation.
+| Corridor | Role |
+|---|---|
+| **`WEST_SOUTH_ESCAPE_Y_BY_PAD`** | Separate south-escape **`y`** for each west-column pad (shared **`x≈42.56`**) |
+| **`x≈49.0–50.1`** | Per-net **row-address stub** on F, then **In2 at spine `y`** (63.8/18.7 … 65.2/25.35) |
+| **`x≈52` + `y≈20.5–22.15`** | South-face **ROW_A3**, **DEC_***, **`ROW_XLAT_OE_N`** In2 buses |
+| **`MCU_LED_STUB_X≈51.5`** | **LED_CLK/SDI/LE/OE_N** → eastern **In2** rail to reserves (clears **`x≈37`** fan-in) |
+| **`MCU_BOOT_IN2_X≈31`** | **`GPIO0_BOOT`** to **`SW1`** |
+| USB | **`R_USB_*`** via staggered south escape; **J_USB** **split `merge_y` + In2** to **`U_ESD`** |
+
+**Not done yet:** Copper **0/0/0**, full geometric verify (silk/mask). **`verify_mono_split_boards.py`** still checks electronics **shorts + crossings only** until copper is clean.
 3. `BQ25185`, battery connector, `TPS63802`, inductor, AON LDO, and both `TPS22917` switches.
 4. Microphone and `TLV9001` on the far right, opposite the switcher.
 5. Row translator, both 74HC154 devices, and the 32 × `AO3403` farm with gate and pull-up resistors.
