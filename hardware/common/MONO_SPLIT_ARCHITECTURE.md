@@ -10,7 +10,7 @@ The same electronics board drives both LED panels. Two `MBI5124GP-B` devices pro
 |---|---|---|---|
 | `mono_panel_20x20` | 2 | 136.3 × 136.3 mm | 400 × `NCD0603W1` on `F.Cu`; two FFC receptacles on `B.Cu` |
 | `mono_panel_32x32` | 2 | 166.7 × 166.7 mm | 1024 × `NCD0603W1` on `F.Cu`; two FFC receptacles on `B.Cu` |
-| `mono_electronics` | 4 | 120 × 80 mm | MCU, power, IMU, audio, row farm, column drivers, matching FFC plugs |
+| `mono_electronics` | 4 | 140 × 90 mm | MCU, power, IMU, audio, row farm, column drivers, matching FFC plugs |
 
 Outlines are spacious first-pass envelopes, not frozen mechanics. The 44 mm panel margin is required so a 32-net U-turn fan-in can keep three bands from overlapping: the `J_ROW` courtyard, a 0.55 mm via row, and unique 0.28 mm front channels. Matching back-copper L-routes then drop from that via row to the 0.50 mm FFC pads. Shrinking this margin is a later step.
 
@@ -64,7 +64,7 @@ Preliminary mono rail: 4.24 V from `TPS63802` with 681 kΩ / 91 kΩ 0.1% (`EVT`,
 
 ## Electronics zones
 
-The 120 × 80 mm electronics board is a placement-only first pass. Routing of power planes and the MCU is not part of this step. Zones from left to right:
+The 140 × 90 mm electronics board is a placement-only first pass. Routing of power planes and the MCU is not part of this step. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
 2. ESP32-S3FN8 and 40 MHz crystal, with BMI270 nearby and away from the inductor.
@@ -75,7 +75,7 @@ The 120 × 80 mm electronics board is a placement-only first pass. Routing of po
 7. Rear button and factory pads.
 8. Bottom 6 mm reserved for `PCB CREATED BY ILLIA PLIUKHIN` and the star. No components or test pads in that strip.
 
-`J_ROW` and `J_COL` sit on the right edge, cable exit to the right, same pinout as the panels.
+`J_ROW` and `J_COL` sit on the right edge, cable exit to the right, same pinout as the panels. Row-farm transistor references stay on `F.SilkS` at 1.0 mm. The paired 0402 gate and pull-up references for that farm sit on `F.Fab` because three 1.0 mm silk strings cannot fit in one transistor cell.
 
 Power domains, row-translator connections, MBI isolation, and sequencing follow [PCB_ARCHITECTURE.md](PCB_ARCHITECTURE.md) except for the LED-rail divider above and the FFC break between matrix and drivers.
 

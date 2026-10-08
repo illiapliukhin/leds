@@ -60,6 +60,7 @@ COLUMN_CONNECTOR_EDGE_OFFSET_MM = 8.3
 ROW_FAN_VIA_START_X_MM = 13.2
 ROW_FAN_VIA_Y_MM = 16.0
 ROW_FAN_CORRIDOR_Y_START_MM = 4.0
+COLUMN_FAN_APPROACH_OFFSET_MM = 8.0
 CATHODE_VIA_OFFSET_Y_MM = 1.10
 LED_ROTATION_DEGREES = 180.0
 REPOSITORY_LED_LIBRARY = Path("hardware/libraries/leds.pretty")
@@ -583,19 +584,25 @@ def route_column_fan_in(
     connector: pcbnew.FOOTPRINT,
     assigned_pins: int,
 ) -> None:
+    pad_y_values_mm = [
+        millimeters(get_pad(connector, str(pin_index + 1)).GetPosition())[1]
+        for pin_index in range(assigned_pins)
+    ]
+    approach_y_mm = min(pad_y_values_mm) - COLUMN_FAN_APPROACH_OFFSET_MM
     for pin_index in range(assigned_pins):
         net, start_x_mm, start_y_mm = starts[pin_index]
         pad_x_mm, pad_y_mm = millimeters(
             get_pad(connector, str(pin_index + 1)).GetPosition()
         )
-        add_track(
+        add_polyline(
             board,
             net,
             pcbnew.B_Cu,
-            start_x_mm,
-            start_y_mm,
-            pad_x_mm,
-            pad_y_mm,
+            [
+                (start_x_mm, start_y_mm),
+                (pad_x_mm, approach_y_mm),
+                (pad_x_mm, pad_y_mm),
+            ],
             FAN_IN_TRACK_WIDTH_MM,
         )
 
@@ -710,8 +717,18 @@ def electronics_parts() -> list[PlacedPart]:
             18.0,
             90.0,
             6.5,
-            8.5,
-            {},
+            29.5,
+            {
+                "A1": "GND",
+                "A12": "GND",
+                "B1": "GND",
+                "B12": "GND",
+                "A4": "VBUS",
+                "A9": "VBUS",
+                "B4": "VBUS",
+                "B9": "VBUS",
+                "SH": "GND",
+            },
         ),
         PlacedPart(
             "U_ESD",
@@ -787,7 +804,7 @@ def electronics_parts() -> list[PlacedPart]:
             48.0,
             0.0,
             34.0,
-            43.0,
+            53.5,
             {},
         ),
         PlacedPart(
@@ -806,32 +823,32 @@ def electronics_parts() -> list[PlacedPart]:
             "TPS7A2033",
             "SOT-23-5",
             34.0,
-            58.0,
+            62.0,
             0.0,
             34.0,
-            53.5,
+            57.5,
             {},
         ),
         PlacedPart(
             "U_LED_LOGIC",
             "TPS22917",
             "SOT-23-6",
-            44.0,
-            58.0,
+            20.0,
+            62.0,
             0.0,
-            44.0,
-            53.5,
+            20.0,
+            57.5,
             {},
         ),
         PlacedPart(
             "U_AUDIO_SW",
             "TPS22917",
             "SOT-23-6",
-            54.0,
-            58.0,
+            20.0,
+            70.0,
             0.0,
-            54.0,
-            53.5,
+            20.0,
+            74.5,
             {},
         ),
         PlacedPart(
@@ -849,88 +866,88 @@ def electronics_parts() -> list[PlacedPart]:
             "MIC1",
             "MA-HFA381",
             "Knowles_LGA-5_3.5x2.65mm",
-            108.0,
-            12.0,
+            100.0,
+            10.0,
             0.0,
-            108.0,
-            7.5,
+            100.0,
+            5.5,
             {},
         ),
         PlacedPart(
             "U_AUDIO",
             "TLV9001",
             "SOT-353_SC-70-5",
-            108.0,
-            20.0,
+            100.0,
+            18.0,
             0.0,
-            108.0,
-            16.0,
+            107.0,
+            18.0,
             {},
         ),
         PlacedPart(
             "SW1",
             "KMR2",
             "SW_Push_1P1T_NO_CK_KMR2",
-            96.0,
-            68.0,
+            124.0,
+            76.0,
             0.0,
-            96.0,
-            63.5,
+            124.0,
+            71.5,
             {},
         ),
         PlacedPart(
             "U_ROW_XLAT",
             "SN74LVC8T245",
             "VQFN-24-1EP_4x4mm_P0.5mm_EP2.5x2.5mm",
-            58.0,
-            16.0,
+            54.0,
+            10.0,
             0.0,
-            58.0,
-            10.5,
+            54.0,
+            4.5,
             {},
         ),
         PlacedPart(
             "U_DEC_A",
             "74HC154",
             "TSSOP-24_4.4x7.8mm_P0.65mm",
-            72.0,
-            14.0,
+            68.0,
+            10.0,
             0.0,
-            72.0,
-            7.5,
+            68.0,
+            4.5,
             {},
         ),
         PlacedPart(
             "U_DEC_B",
             "74HC154",
             "TSSOP-24_4.4x7.8mm_P0.65mm",
-            72.0,
-            28.0,
+            82.0,
+            10.0,
             0.0,
-            84.0,
-            28.0,
+            82.0,
+            4.5,
             {},
         ),
         PlacedPart(
             "U_LED_BUF",
             "SN74LV125A",
             "TSSOP-14_4.4x5mm_P0.65mm",
-            58.0,
-            68.0,
+            62.0,
+            76.0,
             0.0,
-            58.0,
-            62.5,
+            62.0,
+            70.5,
             {},
         ),
         PlacedPart(
             "U_LED1",
             "MBI5124GP-B",
             "SSOP-24_3.9x8.7mm_P0.635mm",
-            74.0,
-            68.0,
+            86.0,
+            76.0,
             0.0,
-            74.0,
-            61.5,
+            86.0,
+            67.0,
             {
                 str(pin_number): column_net_name(pin_number - 1)
                 for pin_number in range(2, 10)
@@ -944,11 +961,11 @@ def electronics_parts() -> list[PlacedPart]:
             "U_LED2",
             "MBI5124GP-B",
             "SSOP-24_3.9x8.7mm_P0.635mm",
-            88.0,
-            68.0,
+            102.0,
+            76.0,
             0.0,
-            88.0,
-            61.5,
+            102.0,
+            67.0,
             {
                 str(pin_number): column_net_name(pin_number + 15)
                 for pin_number in range(2, 10)
@@ -962,22 +979,22 @@ def electronics_parts() -> list[PlacedPart]:
             "R_EXT1",
             "1.82k",
             "R_0402_1005Metric",
-            74.0,
-            58.0,
+            70.0,
+            76.0,
             0.0,
-            80.0,
-            58.0,
+            70.0,
+            81.0,
             {},
         ),
         PlacedPart(
             "R_EXT2",
             "1.82k",
             "R_0402_1005Metric",
-            88.0,
-            58.0,
+            114.0,
+            76.0,
             0.0,
-            94.0,
-            58.0,
+            114.0,
+            81.0,
             {},
         ),
         PlacedPart(
@@ -985,10 +1002,10 @@ def electronics_parts() -> list[PlacedPart]:
             "100n",
             "C_0402_1005Metric",
             16.0,
-            18.0,
+            24.0,
             0.0,
-            21.5,
-            18.0,
+            16.0,
+            27.5,
             {},
         ),
         PlacedPart(
@@ -1007,21 +1024,21 @@ def electronics_parts() -> list[PlacedPart]:
             "22u",
             "C_0805_2012Metric",
             42.0,
-            54.5,
+            40.0,
             0.0,
-            48.5,
-            54.5,
+            42.0,
+            35.5,
             {},
         ),
         PlacedPart(
             "TH_PCB",
             "NTC10K",
             "R_0402_1005Metric",
-            48.0,
-            20.0,
+            40.0,
+            22.0,
             0.0,
-            48.0,
-            16.5,
+            40.0,
+            18.5,
             {},
         ),
         PlacedPart(
@@ -1029,10 +1046,10 @@ def electronics_parts() -> list[PlacedPart]:
             "AON_3V3",
             "R_0402_1005Metric",
             50.0,
-            68.0,
+            76.0,
             0.0,
             50.0,
-            64.5,
+            72.5,
             {"1": "AON_3V3"},
         ),
         PlacedPart(
@@ -1040,10 +1057,10 @@ def electronics_parts() -> list[PlacedPart]:
             "GND",
             "R_0402_1005Metric",
             50.0,
-            71.0,
+            80.0,
             0.0,
             44.5,
-            71.0,
+            80.0,
             {"1": "GND"},
         ),
     ]
@@ -1056,22 +1073,22 @@ def electronics_parts() -> list[PlacedPart]:
                 "J_ROW",
                 ROW_CONNECTOR_FOOTPRINT_NAME,
                 ROW_CONNECTOR_FOOTPRINT_NAME,
-                114.6,
-                22.0,
+                134.6,
+                18.0,
                 270.0,
-                114.6,
-                12.5,
+                124.0,
+                18.0,
                 row_pinout,
             ),
             PlacedPart(
                 "J_COL",
                 COLUMN_CONNECTOR_FOOTPRINT_NAME,
                 COLUMN_CONNECTOR_FOOTPRINT_NAME,
-                114.6,
-                50.0,
+                134.6,
+                52.0,
                 270.0,
-                114.6,
-                40.5,
+                124.0,
+                52.0,
                 column_pinout,
             ),
         ]
@@ -1081,8 +1098,8 @@ def electronics_parts() -> list[PlacedPart]:
         farm_index = row_number - 1
         column_index = farm_index % 8
         farm_row_index = farm_index // 8
-        origin_x_mm = 58.0 + column_index * 7.0
-        origin_y_mm = 36.0 + farm_row_index * 9.0
+        origin_x_mm = 48.0 + column_index * 10.0
+        origin_y_mm = 26.0 + farm_row_index * 12.0
         drain_net = row_net_name(row_number)
         parts.append(
             PlacedPart(
@@ -1092,8 +1109,8 @@ def electronics_parts() -> list[PlacedPart]:
                 origin_x_mm,
                 origin_y_mm,
                 0.0,
-                origin_x_mm,
-                origin_y_mm - 2.5,
+                origin_x_mm - 1.0,
+                origin_y_mm - 5.2,
                 {
                     "2": "LED_4V1",
                     "3": drain_net,
@@ -1105,11 +1122,11 @@ def electronics_parts() -> list[PlacedPart]:
                 f"R_G{row_number:02d}",
                 "33R",
                 "R_0402_1005Metric",
-                origin_x_mm + 3.1,
-                origin_y_mm,
+                origin_x_mm + 4.2,
+                origin_y_mm + 1.6,
                 0.0,
-                origin_x_mm + 3.1,
-                origin_y_mm + 1.8,
+                origin_x_mm + 4.2,
+                origin_y_mm + 5.2,
                 {},
             )
         )
@@ -1118,11 +1135,11 @@ def electronics_parts() -> list[PlacedPart]:
                 f"R_PU{row_number:02d}",
                 "47k",
                 "R_0402_1005Metric",
-                origin_x_mm + 3.1,
-                origin_y_mm - 1.7,
+                origin_x_mm + 4.2,
+                origin_y_mm - 1.6,
                 0.0,
-                origin_x_mm + 6.2,
-                origin_y_mm - 1.7,
+                origin_x_mm + 5.5,
+                origin_y_mm - 5.2,
                 {"2": "LED_4V1"},
             )
         )
@@ -1150,7 +1167,12 @@ def add_electronics_components(
         footprint.SetPosition(pcbnew.VECTOR2I_MM(part.x_mm, part.y_mm))
         footprint.SetOrientationDegrees(part.rotation_degrees)
         footprint.Value().SetVisible(False)
-        footprint.Reference().SetLayer(pcbnew.F_SilkS)
+        reference_is_dense_farm_passive = part.reference.startswith(
+            ("R_G", "R_PU")
+        )
+        footprint.Reference().SetLayer(
+            pcbnew.F_Fab if reference_is_dense_farm_passive else pcbnew.F_SilkS
+        )
         footprint.Reference().SetTextSize(
             pcbnew.VECTOR2I_MM(
                 MINIMUM_SILK_TEXT_HEIGHT_MM,

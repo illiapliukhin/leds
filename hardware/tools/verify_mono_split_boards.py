@@ -7,7 +7,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import pcbnew
 from mono_split_spec import (
+    BRANDING_STRIP_HEIGHT_MM,
     COLUMN_CONNECTOR_FOOTPRINT_NAME,
+    ELECTRONICS_HEIGHT_MM,
     FFC_PIN_COUNT,
     LED_FOOTPRINT_NAME,
     PANEL_VARIANTS,
@@ -29,6 +31,7 @@ GEOMETRIC_VIOLATION_TYPES = {
     "items_not_allowed",
     "malformed_courtyard",
     "shorting_items",
+    "silk_over_copper",
     "silk_overlap",
     "solder_mask_bridge",
     "text_on_edge_cuts",
@@ -172,10 +175,11 @@ def verify_repository(repository_root: Path) -> None:
     if electronics_board.GetCopperLayerCount() != 4:
         raise AssertionError("electronics board must be four-layer")
 
+    branding_keepout_mm = ELECTRONICS_HEIGHT_MM - BRANDING_STRIP_HEIGHT_MM
     branding_hits = [
         footprint.GetReference()
         for footprint in electronics_board.GetFootprints()
-        if pcbnew.ToMM(footprint.GetPosition().y) > 74.0
+        if pcbnew.ToMM(footprint.GetPosition().y) > branding_keepout_mm
     ]
     if branding_hits:
         raise AssertionError(

@@ -26,4 +26,10 @@
 - In KiCad, `m_MinClearance` is only the absolute board minimum; the default netclass can still enforce a larger clearance. Set and validate both, plus hole-to-copper clearance, before interpreting routing-probe DRC results.
 - Do not interpret a nonzero `kicad-cli pcb drc --exit-code-violations` result as a geometry failure without reading the report. A partial routing probe can have zero DRC violations while intentionally retaining unrouted groups.
 - Do not assume a repeated LED escape that works at the top edge automatically closes at the bottom edge. Prove terminal rows and orientation transitions separately before expanding the complete matrix.
+- Centerline-non-crossing fan-in is not pad clearance. Direct diagonals into a 0.50 mm FFC pad row clip the long axis of neighboring pads; stop the fan above the connector courtyard and drop vertically on each pad centerline.
+- A 32-net U-turn on two layers needs three non-overlapping X bands: connector courtyard, 0.55 mm via row, and 0.28 mm front channels. 32 mm of margin is not enough; prove the packed width before freezing the panel outline.
+- Matching L-routes on the via layer and nested L-routes on the source layer impose opposite X assignments. Do not mix them on the same via row.
+- `pcbnew` `Flip` after a 180° orientation can report 0°; dump pad coordinates instead of trusting the rotation used at placement time.
+- 1.0 mm silk cannot label a transistor plus two 0402s in one 7–10 mm cell. Keep the transistor reference on silk and put the dense farm passives on Fab.
+- USB-C stacked A/B pads DRC-short unless they share a net. Assign GND/VBUS to the coincident pairs before treating the receptacle as placement-clean.
 
