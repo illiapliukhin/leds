@@ -102,7 +102,27 @@ Power domains, row-translator connections, MBI isolation, and sequencing follow 
 
 These numbers are first-pass healthy values. Shrinking the outline and the courtyard comes after both panels pass geometric DRC and the electronics placement review.
 
+## ESP32-S3FN8 GPIO map (EVT)
+
+Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as functional outputs. In-package Quad SPI flash pins stay unnamed on the PCB. Native USB uses `GPIO19`/`GPIO20` as `USB_D_N_MCU` / `USB_D_P_MCU` through 22 Ω from `USB_D_N` / `USB_D_P` at the ESD device.
+
+| GPIO | QFN pad | Net | Role |
+|---:|---:|---|---|
+| — | 4 | `CHIP_PU` | EN (`R_CHIP_PU` / `C_CHIP_PU`) |
+| 0 | 5 | `GPIO0_BOOT` | Boot strap + `SW1` |
+| 8–10 | 13–15 | `IMU_SDA` / `IMU_SCL` / `IMU_INT1` | BMI270 |
+| 13–16 | 18–22 | `LED_CLK` … `LED_OE_N` | MBI5124 control (reserve → buffer) |
+| 17–21,33 | 23–24,27,38 | `ROW_A0`…`ROW_A3` | `SN74LVC8T245` A-side |
+| 34–35 | 39–40 | `DEC_A_EN_N` / `DEC_B_EN_N` | 74HC154 enables |
+| 36–37 | 41–42 | `LED_EN` / `LED_LOGIC_EN` | Power switches |
+| 19–20 | 25–26 | `USB_D_N_MCU` / `USB_D_P_MCU` | USB after series resistors |
+| 42 | 48 | `AUDIO_EN` | Audio `TPS22917` |
+| 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
+| — | 53–54 | `XTAL_P` / `XTAL_N` | 40 MHz crystal |
+
+Copper is generated in `hardware/tools/mono_split_esp32.py` and called from `generate_mono_split_boards.py`.
+
 ## DRC scope
 
 - LED panels: geometric DRC must be clean, including connectivity of every populated row and column to the matching FFC pin.
-- Electronics: geometric DRC must be clean. Every `ROW_01_ANODE`…`ROW_32_ANODE` and `COL_01`…`COL_32` must be a single connected net, along with `ROW_01_Y`…`ROW_32_Y`, `ROW_01_GATE`…`ROW_32_GATE`, `ROW_A0`…`ROW_A3`, `ROW_A0_4V`…`ROW_A3_4V`, `DEC_A_EN_N`, `DEC_B_EN_N`, `DEC_A_EN_N_4V`, `DEC_B_EN_N_4V`, `ROW_XLAT_OE_N`, `LED_4V1`, `IMU_SDA`, `IMU_SCL`, `IMU_INT1`, `GND`, `VBUS`, `AON_3V3`, `REXT1`, `REXT2`, `LED_LOGIC_3V3`, `LED_OE_N`, `LED_OE_Y`, `LED_CLK`, `LED_CLK_Y`, `LED_SDI`, `LED_SDI_Y`, `LED_LE`, `LED_LE_Y`, `LED_SDO`, `SYS`, `LED_FB`, `SW_L1`, `SW_L2`, `LED_EN`, `LED_LOGIC_EN`, `LED_QOD`, `AUDIO_EN`, `BAT_RAW`, `ILIM_VSET`, `ISET`, and `TS_MR`. The 100 kΩ address pulldowns, 47 kΩ decoder-enable pull-ups, and 10 kΩ `ROW_XLAT_OE_N` pull-up are routed. ESP32 GPIO nets stay open.
+- Electronics: matrix and driver nets listed in earlier revisions must remain one connected group each. MCU nets (`IMU_*`, `LED_CLK`/`LED_SDI`/`LED_LE`/`LED_OE_N`, row address, enables, `ROW_XLAT_OE_N`, `LED_EN`, `LED_LOGIC_EN`, `AUDIO_EN`, `CHIP_PU`, `GPIO0_BOOT`, `USB_D_*`, `XTAL_*`) are now assigned and routed in the generator; geometric clearance on the MCU escape field is still being cleaned up (not production-frozen).

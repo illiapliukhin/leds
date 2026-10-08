@@ -7,6 +7,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import pcbnew
+from mono_split_esp32 import esp32_s3_fn8_pad_nets, route_esp32_mcu
 from mono_split_spec import (
     BRANDING_STRIP_HEIGHT_MM,
     COLUMN_CONNECTOR_FOOTPRINT_NAME,
@@ -779,6 +780,10 @@ def electronics_parts() -> list[PlacedPart]:
                 "A9": "VBUS",
                 "B4": "VBUS",
                 "B9": "VBUS",
+                "A6": "USB_D_P",
+                "A7": "USB_D_N",
+                "B6": "USB_D_P",
+                "B7": "USB_D_N",
                 "SH": "GND",
             },
         ),
@@ -791,7 +796,14 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             16.0,
             8.5,
-            {},
+            {
+                "1": "USB_D_P",
+                "2": "GND",
+                "3": "USB_D_N",
+                "4": "GND",
+                "5": "GND",
+                "6": "USB_D_P",
+            },
         ),
         PlacedPart(
             "U1",
@@ -802,7 +814,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             36.0,
             3.2,
-            {},
+            esp32_s3_fn8_pad_nets(),
         ),
         PlacedPart(
             "Y1",
@@ -813,7 +825,12 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             36.0,
             17.0,
-            {},
+            {
+                "1": "XTAL_P",
+                "2": "GND",
+                "3": "XTAL_N",
+                "4": "GND",
+            },
         ),
         PlacedPart(
             "U_IMU",
@@ -1009,7 +1026,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             28.0,
             82.0,
-            {},
+            {"1": "GPIO0_BOOT", "2": "GND"},
         ),
         PlacedPart(
             "U_ROW_XLAT",
@@ -1171,7 +1188,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             16.0,
             27.5,
-            {},
+            {"1": "VBUS", "2": "GND"},
         ),
         PlacedPart(
             "C_MCU1",
@@ -1182,7 +1199,84 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             36.0,
             24.0,
-            {},
+            {"1": "AON_3V3", "2": "GND"},
+        ),
+        PlacedPart(
+            "R_CHIP_PU",
+            "10k",
+            "R_0402_1005Metric",
+            24.0,
+            22.0,
+            0.0,
+            24.0,
+            22.0,
+            {"1": "AON_3V3", "2": "CHIP_PU"},
+        ),
+        PlacedPart(
+            "C_CHIP_PU",
+            "1u",
+            "C_0603_1608Metric",
+            22.0,
+            22.4,
+            0.0,
+            22.0,
+            22.4,
+            {"1": "CHIP_PU", "2": "GND"},
+        ),
+        PlacedPart(
+            "R_BOOT0",
+            "10k",
+            "R_0402_1005Metric",
+            26.0,
+            22.0,
+            0.0,
+            26.0,
+            22.0,
+            {"1": "AON_3V3", "2": "GPIO0_BOOT"},
+        ),
+        PlacedPart(
+            "R_USB_P",
+            "22R",
+            "R_0402_1005Metric",
+            20.0,
+            10.2,
+            0.0,
+            20.0,
+            10.2,
+            {"1": "USB_D_P", "2": "USB_D_P_MCU"},
+        ),
+        PlacedPart(
+            "R_USB_N",
+            "22R",
+            "R_0402_1005Metric",
+            20.0,
+            11.0,
+            0.0,
+            20.0,
+            11.0,
+            {"1": "USB_D_N", "2": "USB_D_N_MCU"},
+        ),
+        PlacedPart(
+            "C_XTAL1",
+            "10p",
+            "C_0402_1005Metric",
+            26.0,
+            18.8,
+            0.0,
+            26.0,
+            18.8,
+            {"1": "XTAL_P", "2": "GND"},
+        ),
+        PlacedPart(
+            "C_XTAL2",
+            "10p",
+            "C_0402_1005Metric",
+            30.0,
+            18.8,
+            0.0,
+            30.0,
+            18.8,
+            {"1": "XTAL_N", "2": "GND"},
         ),
         PlacedPart(
             "C_SYS",
@@ -3688,6 +3782,7 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     route_translator_power(board)
     route_translator_bias(board)
     route_rext_return(board)
+    route_esp32_mcu(board)
     add_text(
         board,
         "SCAN AND IMU SIGNAL RESERVE",
