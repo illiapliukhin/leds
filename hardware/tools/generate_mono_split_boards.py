@@ -865,7 +865,20 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             34.0,
             53.5,
-            {},
+            {
+                # TPS63802 DLA, top view: 1 EN, 2 MODE, 3 AGND, 4 FB, 5 PG,
+                # 6 VOUT, 7 L2, 8 GND, 9 L1, 10 VIN. PG stays open.
+                "1": "LED_EN",
+                "2": "GND",
+                "3": "GND",
+                "4": "LED_FB",
+                "6": "LED_4V1",
+                "7": "SW_L2",
+                "8": "GND",
+                "9": "SW_L1",
+                "10": "SYS",
+                "11": "GND",
+            },
         ),
         PlacedPart(
             "L_LED",
@@ -876,7 +889,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             42.0,
             43.0,
-            {},
+            {"1": "SW_L2", "2": "SW_L1"},
         ),
         PlacedPart(
             "U_LDO",
@@ -887,7 +900,14 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             34.0,
             57.5,
-            {},
+            {
+                # TPS7A2033 DBV: 1 IN, 2 GND, 3 EN, 4 N/C, 5 OUT.
+                # EN tied to IN. The internal pulldown would hold the LDO off.
+                "1": "SYS",
+                "2": "GND",
+                "3": "SYS",
+                "5": "AON_3V3",
+            },
         ),
         PlacedPart(
             "U_LED_LOGIC",
@@ -898,7 +918,14 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             20.0,
             57.5,
-            {},
+            {
+                # TPS22917 DBV pin table: 1 VIN, 2 GND, 3 ON, 4 CT, 5 QOD, 6 VOUT.
+                "1": "AON_3V3",
+                "2": "GND",
+                "3": "LED_LOGIC_EN",
+                "5": "LED_QOD",
+                "6": "LED_LOGIC_3V3",
+            },
         ),
         PlacedPart(
             "U_AUDIO_SW",
@@ -909,7 +936,12 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             20.0,
             74.5,
-            {},
+            {
+                "1": "AON_3V3",
+                "2": "GND",
+                "3": "AUDIO_EN",
+                "6": "AUDIO_3V3",
+            },
         ),
         PlacedPart(
             "U_GAUGE",
@@ -919,7 +951,7 @@ def electronics_parts() -> list[PlacedPart]:
             50.0,
             0.0,
             26.0,
-            50.0,
+            55.5,
             {},
         ),
         PlacedPart(
@@ -1273,6 +1305,7 @@ def electronics_parts() -> list[PlacedPart]:
         "DEC_B_EN_N",
         "ROW_XLAT_OE_N",
         "LED_EN",
+        "LED_LOGIC_EN",
     )
     for index, net_name in enumerate(reserve_nets):
         origin_x_mm = 8.0 + index * 8.5
@@ -1322,6 +1355,12 @@ def electronics_parts() -> list[PlacedPart]:
         ("R_SDI_SER", "22R", "LED_SDI_PRE", "LED_SDI_Y", 80.2, 68.95),
         ("R_LE_SER", "22R", "LED_LE_PRE", "LED_LE_Y", 77.2, 71.00),
         ("R_OE_YPU", "47k", "LED_OE_Y", "LED_LOGIC_3V3", 73.5, 73.8),
+        ("R_FB_TOP", "681k", "LED_4V1", "LED_FB", 26.8, 50.6),
+        ("R_FB_BOT", "91k", "LED_FB", "GND", 24.2, 49.2),
+        ("R_EN_PD", "100k", "LED_EN", "GND", 27.2, 45.15),
+        ("R_LOGIC_PD", "100k", "LED_LOGIC_EN", "GND", 15.4, 64.6),
+        ("R_QOD", "1k", "LED_QOD", "LED_LOGIC_3V3", 25.6, 63.2),
+        ("R_AUD_PD", "100k", "AUDIO_EN", "GND", 15.11, 72.5),
     ):
         parts.append(
             PlacedPart(
@@ -1361,7 +1400,21 @@ def add_electronics_components(
         footprint.SetOrientationDegrees(part.rotation_degrees)
         footprint.Value().SetVisible(False)
         reference_is_dense_farm_passive = part.reference.startswith(
-            ("R_G", "R_PU", "R_ADDR", "R_EN", "R_XOE", "R_CLK", "R_SDI", "R_LE", "R_OE")
+            (
+                "R_G",
+                "R_PU",
+                "R_ADDR",
+                "R_EN",
+                "R_XOE",
+                "R_CLK",
+                "R_SDI",
+                "R_LE",
+                "R_OE",
+                "R_FB",
+                "R_LOGIC",
+                "R_QOD",
+                "R_AUD",
+            )
         )
         footprint.Reference().SetLayer(
             pcbnew.F_Fab if reference_is_dense_farm_passive else pcbnew.F_SilkS
@@ -1897,6 +1950,7 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     route_reserve_drop(board, "LED_LE", 43.20, 69.60, 49.99)
     route_reserve_drop(board, "LED_OE_N", 48.20, 71.40, 58.49, bottom_y_mm=96.70)
     route_led_buffer(board)
+    route_converter_rails(board)
 
 
 def route_buffer_stub(
@@ -2006,6 +2060,309 @@ def route_buffer_passives(board: pcbnew.BOARD) -> None:
     )
     add_through_via(
         board, board.FindNet("LED_LOGIC_3V3"), 74.01, 70.05, diameter_mm=0.40
+    )
+
+
+def route_converter_rails(board: pcbnew.BOARD) -> None:
+    # TPS63802 at (34, 48), inductor pad 1 on the left. MODE is tied low.
+    # BQ25185 is a 10-pin DLH, so the placed DSG-8 charger stays unbonded.
+    route_net_polyline(
+        board,
+        "SW_L2",
+        pcbnew.F_Cu,
+        [(35.0125, 48.50), (41.275, 48.50)],
+        0.30,
+    )
+    route_net_polyline(
+        board,
+        "SW_L1",
+        pcbnew.F_Cu,
+        [
+            (35.0125, 47.50),
+            (35.85, 47.50),
+            (35.85, 46.50),
+            (42.725, 46.50),
+            (42.725, 47.20),
+        ],
+        0.30,
+    )
+    route_net_polyline(
+        board,
+        "SYS",
+        pcbnew.F_Cu,
+        [(35.0125, 47.00), (35.0125, 46.10), (30.40, 46.10)],
+        0.25,
+    )
+    sys_net = board.FindNet("SYS")
+    add_through_via(board, sys_net, 30.40, 46.10, diameter_mm=0.40)
+    route_net_polyline(
+        board, "SYS", pcbnew.In2_Cu, [(30.40, 46.10), (30.40, 61.05)], 0.25
+    )
+    add_through_via(board, sys_net, 30.40, 61.05, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "SYS",
+        pcbnew.F_Cu,
+        [
+            (30.40, 61.05),
+            (32.8625, 61.05),
+            (31.30, 61.05),
+            (31.30, 62.95),
+            (32.8625, 62.95),
+        ],
+        0.20,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(34.00, 48.00), (40.20, 48.00)],
+        0.25,
+    )
+    gnd = board.FindNet("GND")
+    add_through_via(board, gnd, 40.20, 48.00, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In2_Cu, [(40.20, 48.00), (40.20, 51.00)], 0.25
+    )
+    add_through_via(board, gnd, 40.20, 51.00, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.F_Cu, [(40.20, 51.00), (41.00, 51.00)], 0.25
+    )
+    add_through_via(board, gnd, 41.00, 51.00, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [
+            (32.9875, 47.50),
+            (24.40, 47.50),
+            (24.40, 44.40),
+            (23.20, 44.40),
+            (23.20, 48.00),
+            (32.9875, 48.00),
+        ],
+        0.20,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(27.71, 45.15), (27.71, 44.40), (13.20, 44.40)],
+        0.20,
+    )
+    add_through_via(board, gnd, 13.20, 44.40, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(24.71, 49.20), (24.71, 51.80), (13.20, 51.80)],
+        0.20,
+    )
+    add_through_via(board, gnd, 13.20, 51.80, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_FB",
+        pcbnew.F_Cu,
+        [(32.9875, 48.50), (23.69, 48.50), (23.69, 49.20)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "LED_FB",
+        pcbnew.F_Cu,
+        [(27.31, 48.50), (27.31, 50.60)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "LED_4V1",
+        pcbnew.F_Cu,
+        [(35.0125, 49.00), (35.0125, 53.20), (54.00, 53.20), (54.00, 46.90)],
+        0.25,
+    )
+    led_rail = board.FindNet("LED_4V1")
+    add_through_via(board, led_rail, 54.00, 46.90, diameter_mm=0.40)
+    route_net_polyline(
+        board, "LED_4V1", pcbnew.In1_Cu, [(52.71, 46.90), (54.00, 46.90)], 0.25
+    )
+    route_net_polyline(
+        board,
+        "LED_4V1",
+        pcbnew.F_Cu,
+        [(35.0125, 53.20), (26.29, 53.20), (26.29, 50.60)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "LED_EN",
+        pcbnew.F_Cu,
+        [(32.9875, 47.00), (26.69, 47.00), (26.69, 45.15), (25.70, 45.15)],
+        0.15,
+    )
+    led_en = board.FindNet("LED_EN")
+    add_through_via(board, led_en, 25.70, 45.15, diameter_mm=0.40)
+    route_net_polyline(
+        board, "LED_EN", pcbnew.In2_Cu, [(25.70, 45.15), (25.70, 120.20)], 0.15
+    )
+    add_through_via(board, led_en, 25.70, 120.20, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_EN",
+        pcbnew.In1_Cu,
+        [(25.70, 120.20), (126.49, 120.20)],
+        0.15,
+    )
+    add_through_via(board, led_en, 126.49, 120.20, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_EN",
+        pcbnew.F_Cu,
+        [(126.49, 120.20), (126.49, 98.00)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(18.8625, 61.05), (16.20, 61.05), (16.20, 56.80)],
+        0.20,
+    )
+    aon = board.FindNet("AON_3V3")
+    add_through_via(board, aon, 16.20, 56.80, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(35.1375, 61.05), (36.40, 61.05), (36.40, 56.80)],
+        0.20,
+    )
+    add_through_via(board, aon, 36.40, 56.80, diameter_mm=0.40)
+    route_net_polyline(
+        board, "AON_3V3", pcbnew.In1_Cu, [(16.20, 56.80), (49.49, 56.80)], 0.20
+    )
+    add_through_via(board, aon, 49.49, 56.80, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(18.8625, 69.05), (16.20, 69.05), (16.20, 67.20)],
+        0.20,
+    )
+    add_through_via(board, aon, 16.20, 67.20, diameter_mm=0.40)
+    route_net_polyline(
+        board, "AON_3V3", pcbnew.In2_Cu, [(16.20, 67.20), (16.20, 56.80)], 0.20
+    )
+    route_net_polyline(
+        board,
+        "LED_LOGIC_3V3",
+        pcbnew.F_Cu,
+        [(21.1375, 61.05), (27.40, 61.05)],
+        0.20,
+    )
+    logic = board.FindNet("LED_LOGIC_3V3")
+    add_through_via(board, logic, 27.40, 61.05, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_LOGIC_3V3",
+        pcbnew.In2_Cu,
+        [(27.40, 61.05), (27.40, 70.05)],
+        0.20,
+    )
+    add_through_via(board, logic, 27.40, 70.05, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_LOGIC_3V3",
+        pcbnew.In1_Cu,
+        [(27.40, 70.05), (63.70, 70.05)],
+        0.20,
+    )
+    route_net_polyline(
+        board,
+        "LED_QOD",
+        pcbnew.F_Cu,
+        [(21.1375, 62.00), (22.60, 62.00), (22.60, 63.20), (25.09, 63.20)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "LED_LOGIC_3V3",
+        pcbnew.F_Cu,
+        [(26.11, 63.20), (27.40, 63.20)],
+        0.15,
+    )
+    add_through_via(board, logic, 27.40, 63.20, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(18.8625, 62.00), (20.20, 62.00), (20.20, 65.60), (13.20, 65.60)],
+        0.15,
+    )
+    add_through_via(board, gnd, 13.20, 65.60, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.F_Cu, [(15.91, 64.60), (15.91, 65.60)], 0.15
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(32.8625, 62.00), (31.90, 62.00)],
+        0.20,
+    )
+    add_through_via(board, gnd, 31.90, 62.00, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In2_Cu, [(31.90, 62.00), (31.90, 68.20)], 0.20
+    )
+    add_through_via(board, gnd, 31.90, 68.20, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_LOGIC_EN",
+        pcbnew.F_Cu,
+        [(18.8625, 62.95), (14.89, 62.95), (14.89, 64.60), (14.20, 64.60)],
+        0.15,
+    )
+    logic_en = board.FindNet("LED_LOGIC_EN")
+    add_through_via(board, logic_en, 14.20, 64.60, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_LOGIC_EN",
+        pcbnew.In2_Cu,
+        [(14.20, 64.60), (14.20, 120.80)],
+        0.15,
+    )
+    add_through_via(board, logic_en, 14.20, 120.80, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_LOGIC_EN",
+        pcbnew.In1_Cu,
+        [(14.20, 120.80), (134.99, 120.80)],
+        0.15,
+    )
+    add_through_via(board, logic_en, 134.99, 120.80, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_LOGIC_EN",
+        pcbnew.F_Cu,
+        [(134.99, 120.80), (134.99, 98.00)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(18.8625, 70.00), (13.20, 70.00), (13.20, 73.40), (15.62, 73.40)],
+        0.20,
+    )
+    add_through_via(board, gnd, 13.20, 73.40, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.F_Cu, [(15.62, 72.50), (15.62, 73.40)], 0.15
+    )
+    route_net_polyline(
+        board,
+        "AUDIO_EN",
+        pcbnew.F_Cu,
+        [(18.8625, 70.95), (14.60, 70.95), (14.60, 72.50)],
+        0.15,
     )
 
 
