@@ -1023,12 +1023,12 @@ def electronics_parts() -> list[PlacedPart]:
             {
                 "1": "GND",
                 "2": "LED_CLK",
-                "3": "LED_CLK_Y",
+                "3": "LED_CLK_PRE",
                 "4": "GND",
                 "5": "LED_SDI",
-                "6": "LED_SDI_Y",
+                "6": "LED_SDI_PRE",
                 "7": "GND",
-                "8": "LED_LE_Y",
+                "8": "LED_LE_PRE",
                 "9": "LED_LE",
                 "10": "GND",
                 "11": "LED_OE_Y",
@@ -1313,6 +1313,29 @@ def electronics_parts() -> list[PlacedPart]:
                 {"1": signal_net, "2": rail_net},
             )
         )
+    for reference, value, pad1_net, pad2_net, center_x, center_y in (
+        ("R_SDI_PD", "100k", "LED_SDI", "GND", 34.2, 73.2),
+        ("R_CLK_PD", "100k", "LED_CLK", "GND", 30.0, 73.2),
+        ("R_LE_PD", "100k", "LED_LE", "GND", 40.5, 73.2),
+        ("R_OE_PU", "47k", "LED_OE_N", "AON_3V3", 47.2, 73.2),
+        ("R_CLK_SER", "22R", "LED_CLK_PRE", "LED_CLK_Y", 70.2, 68.45),
+        ("R_SDI_SER", "22R", "LED_SDI_PRE", "LED_SDI_Y", 80.2, 68.95),
+        ("R_LE_SER", "22R", "LED_LE_PRE", "LED_LE_Y", 77.2, 71.00),
+        ("R_OE_YPU", "47k", "LED_OE_Y", "LED_LOGIC_3V3", 73.5, 73.8),
+    ):
+        parts.append(
+            PlacedPart(
+                reference,
+                value,
+                "R_0402_1005Metric",
+                center_x,
+                center_y,
+                0.0,
+                center_x,
+                center_y,
+                {"1": pad1_net, "2": pad2_net},
+            )
+        )
     return parts
 
 
@@ -1338,7 +1361,7 @@ def add_electronics_components(
         footprint.SetOrientationDegrees(part.rotation_degrees)
         footprint.Value().SetVisible(False)
         reference_is_dense_farm_passive = part.reference.startswith(
-            ("R_G", "R_PU", "R_ADDR", "R_EN", "R_XOE")
+            ("R_G", "R_PU", "R_ADDR", "R_EN", "R_XOE", "R_CLK", "R_SDI", "R_LE", "R_OE")
         )
         footprint.Reference().SetLayer(
             pcbnew.F_Fab if reference_is_dense_farm_passive else pcbnew.F_SilkS
@@ -1900,6 +1923,92 @@ def route_buffer_stub(
     )
 
 
+def route_series_on_corridor(
+    board: pcbnew.BOARD,
+    pre_net: str,
+    y_net: str,
+    center_x: float,
+    center_y: float,
+    corridor_y: float,
+) -> None:
+    for net_name, pad_x in ((pre_net, center_x - 0.51), (y_net, center_x + 0.51)):
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(pad_x, center_y), (pad_x, corridor_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(
+            board, board.FindNet(net_name), pad_x, corridor_y, diameter_mm=0.40
+        )
+
+
+def route_buffer_passives(board: pcbnew.BOARD) -> None:
+    route_series_on_corridor(board, "LED_CLK_PRE", "LED_CLK_Y", 70.2, 68.45, 67.05)
+    route_series_on_corridor(board, "LED_SDI_PRE", "LED_SDI_Y", 80.2, 68.95, 67.55)
+    route_series_on_corridor(board, "LED_LE_PRE", "LED_LE_Y", 77.2, 71.00, 69.60)
+    pulls = (
+        ("LED_CLK", "GND", 30.0, 69.15),
+        ("LED_SDI", "GND", 34.2, 68.70),
+        ("LED_LE", "GND", 40.5, 69.60),
+        ("LED_OE_N", "AON_3V3", 47.2, 71.40),
+    )
+    for signal_net, rail_net, center_x, corridor_y in pulls:
+        signal_x = center_x - 0.51
+        rail_x = center_x + 0.51
+        route_net_polyline(
+            board,
+            signal_net,
+            pcbnew.F_Cu,
+            [(signal_x, 73.2), (signal_x, corridor_y)],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(
+            board, board.FindNet(signal_net), signal_x, corridor_y, diameter_mm=0.40
+        )
+        if rail_net == "GND":
+            route_net_polyline(
+                board,
+                "GND",
+                pcbnew.F_Cu,
+                [(rail_x, 73.2), (rail_x, 68.20)],
+                0.15,
+            )
+            add_through_via(
+                board, board.FindNet("GND"), rail_x, 68.20, diameter_mm=0.40
+            )
+        else:
+            route_net_polyline(
+                board,
+                "AON_3V3",
+                pcbnew.F_Cu,
+                [(rail_x, 73.2), (49.49, 73.2)],
+                0.15,
+            )
+            add_through_via(
+                board, board.FindNet("AON_3V3"), 49.49, 73.2, diameter_mm=0.40
+            )
+    route_net_polyline(
+        board,
+        "LED_OE_Y",
+        pcbnew.F_Cu,
+        [(72.99, 73.8), (72.99, 71.40)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, board.FindNet("LED_OE_Y"), 72.99, 71.40, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_LOGIC_3V3",
+        pcbnew.F_Cu,
+        [(74.01, 73.8), (74.01, 70.05)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(
+        board, board.FindNet("LED_LOGIC_3V3"), 74.01, 70.05, diameter_mm=0.40
+    )
+
+
 def route_led_buffer(board: pcbnew.BOARD) -> None:
     buffer = footprint_by_reference(board, "U_LED_BUF")
     # Left pins step outward and climb. A lower pin stays closer to the body
@@ -2007,29 +2116,39 @@ def route_led_buffer(board: pcbnew.BOARD) -> None:
     )
     add_through_via(board, board.FindNet("GND"), 72.40, 81.30, diameter_mm=0.40)
     route_net_polyline(
-        board, "LED_SDI", pcbnew.In1_Cu, [(36.80, 68.70), (52.25, 68.70)], 0.15
+        board, "LED_SDI", pcbnew.In1_Cu, [(33.69, 68.70), (52.25, 68.70)], 0.15
     )
     route_net_polyline(
-        board, "LED_SDI_Y", pcbnew.In1_Cu, [(51.70, 67.55), (82.30, 67.55)], 0.15
+        board, "LED_SDI_PRE", pcbnew.In1_Cu, [(51.70, 67.55), (79.69, 67.55)], 0.15
     )
     route_net_polyline(
-        board, "LED_CLK", pcbnew.In1_Cu, [(32.99, 69.15), (53.35, 69.15)], 0.15
+        board, "LED_SDI_Y", pcbnew.In1_Cu, [(80.71, 67.55), (82.30, 67.55)], 0.15
     )
     route_net_polyline(
-        board, "LED_CLK_Y", pcbnew.In1_Cu, [(52.80, 67.05), (101.80, 67.05)], 0.15
+        board, "LED_CLK", pcbnew.In1_Cu, [(29.49, 69.15), (53.35, 69.15)], 0.15
     )
     route_net_polyline(
-        board, "LED_LE_Y", pcbnew.In1_Cu, [(68.60, 69.60), (101.20, 69.60)], 0.15
+        board, "LED_CLK_PRE", pcbnew.In1_Cu, [(52.80, 67.05), (69.69, 67.05)], 0.15
     )
     route_net_polyline(
-        board, "LED_LE", pcbnew.In1_Cu, [(43.20, 69.60), (68.00, 69.60)], 0.15
+        board, "LED_CLK_Y", pcbnew.In1_Cu, [(70.71, 67.05), (101.80, 67.05)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_LE_PRE", pcbnew.In1_Cu, [(68.60, 69.60), (76.69, 69.60)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_LE_Y", pcbnew.In1_Cu, [(77.71, 69.60), (101.20, 69.60)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_LE", pcbnew.In1_Cu, [(39.99, 69.60), (68.00, 69.60)], 0.15
     )
     route_net_polyline(
         board, "LED_OE_Y", pcbnew.In1_Cu, [(67.40, 71.40), (111.45, 71.40)], 0.15
     )
     route_net_polyline(
-        board, "LED_OE_N", pcbnew.In1_Cu, [(48.20, 71.40), (66.80, 71.40)], 0.15
+        board, "LED_OE_N", pcbnew.In1_Cu, [(46.69, 71.40), (66.80, 71.40)], 0.15
     )
+    route_buffer_passives(board)
     route_net_polyline(
         board,
         "LED_LOGIC_3V3",
