@@ -10,7 +10,7 @@ The same electronics board drives both LED panels. Two `MBI5124GP-B` devices pro
 |---|---|---|---|
 | `mono_panel_20x20` | 2 | 136.3 × 136.3 mm | 400 × `NCD0603W1` on `F.Cu`; two FFC receptacles on `B.Cu` |
 | `mono_panel_32x32` | 2 | 166.7 × 166.7 mm | 1024 × `NCD0603W1` on `F.Cu`; two FFC receptacles on `B.Cu` |
-| `mono_electronics` | 4 | 140 × 90 mm | MCU, power, IMU, audio, row farm, column drivers, matching FFC plugs |
+| `mono_electronics` | 4 | 160 × 110 mm | MCU, power, IMU, audio, row farm, column drivers, matching FFC plugs |
 
 Outlines are spacious first-pass envelopes, not frozen mechanics. The 44 mm panel margin is required so a 32-net U-turn fan-in can keep three bands from overlapping: the `J_ROW` courtyard, a 0.55 mm via row, and unique 0.28 mm front channels. Matching back-copper L-routes then drop from that via row to the 0.50 mm FFC pads. Shrinking this margin is a later step.
 
@@ -64,7 +64,11 @@ Preliminary mono rail: 4.24 V from `TPS63802` with 681 kΩ / 91 kΩ 0.1% (`EVT`,
 
 ## Electronics zones
 
-The 140 × 90 mm electronics board is a placement-only first pass. Routing of power planes and the MCU is not part of this step. Zones from left to right:
+Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets stay separate, so each pixel can be on or off by itself. BMI270 accelerometer and gyroscope use `IMU_SDA`, `IMU_SCL`, and `IMU_INT1`. The same names are on reserve pads in the open band above the branding strip, next to pads for `LED_CLK`, `LED_SDI`, `LED_LE`, `LED_OE_N`, the row address, and the decoder enables. Motion decides whether the scan runs and which pixels are loaded. `LED_OE_N` is the blank for the whole matrix. Those reserve pads are not copper-connected yet: a first fan-in shorted adjacent pins, so the tracks stay out until the escape clears the pad row. ESP32 QFN pads are not bonded until that pin map is checked. The open band is the corridor for this wiring.
+
+`U_LED1` pads 5–20 are `COL_01`–`COL_16` and `U_LED2` pads 5–20 are `COL_17`–`COL_32`. That is the usual MBI5124GP order, OUT0 on pad 5. Confirm it on the full pin figure before fabrication. Pads 1, 22, 23, and 24 are `GND`, `REXT`, `LED_LOGIC_3V3`, and `LED_OE_N`.
+
+The electronics board is 160 × 110 mm so the matrix fan-in, the `LED_4V1` trunk, and that signal reserve have room without stacking parts. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
 2. ESP32-S3FN8 and 40 MHz crystal, with BMI270 nearby and away from the inductor.

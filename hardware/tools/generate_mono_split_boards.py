@@ -213,11 +213,12 @@ def add_through_via(
     net: pcbnew.NETINFO_ITEM,
     x_mm: float,
     y_mm: float,
+    diameter_mm: float = STANDARD_VIA_DIAMETER_MM,
 ) -> None:
     via = pcbnew.PCB_VIA(board)
     via.SetNet(net)
     via.SetPosition(pcbnew.VECTOR2I_MM(x_mm, y_mm))
-    via.SetWidth(pcbnew.FromMM(STANDARD_VIA_DIAMETER_MM))
+    via.SetWidth(pcbnew.FromMM(diameter_mm))
     via.SetDrill(pcbnew.FromMM(MINIMUM_VIA_DRILL_MM))
     via.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
     board.Add(via)
@@ -772,7 +773,15 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             40.0,
             9.5,
-            {},
+            {
+                "4": "IMU_INT1",
+                "5": "AON_3V3",
+                "6": "GND",
+                "7": "GND",
+                "8": "AON_3V3",
+                "13": "IMU_SCL",
+                "14": "IMU_SDA",
+            },
         ),
         PlacedPart(
             "U_CHG",
@@ -949,12 +958,14 @@ def electronics_parts() -> list[PlacedPart]:
             86.0,
             67.0,
             {
-                str(pin_number): column_net_name(pin_number - 1)
-                for pin_number in range(2, 10)
+                str(5 + offset): column_net_name(1 + offset)
+                for offset in range(16)
             }
             | {
-                str(pin_number): column_net_name(pin_number - 6)
-                for pin_number in range(15, 23)
+                "1": "GND",
+                "22": "REXT1",
+                "23": "LED_LOGIC_3V3",
+                "24": "LED_OE_N",
             },
         ),
         PlacedPart(
@@ -967,12 +978,14 @@ def electronics_parts() -> list[PlacedPart]:
             102.0,
             67.0,
             {
-                str(pin_number): column_net_name(pin_number + 15)
-                for pin_number in range(2, 10)
+                str(5 + offset): column_net_name(17 + offset)
+                for offset in range(16)
             }
             | {
-                str(pin_number): column_net_name(pin_number + 10)
-                for pin_number in range(15, 23)
+                "1": "GND",
+                "22": "REXT2",
+                "23": "LED_LOGIC_3V3",
+                "24": "LED_OE_N",
             },
         ),
         PlacedPart(
@@ -984,7 +997,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             70.0,
             81.0,
-            {},
+            {"1": "REXT1"},
         ),
         PlacedPart(
             "R_EXT2",
@@ -995,7 +1008,7 @@ def electronics_parts() -> list[PlacedPart]:
             0.0,
             114.0,
             81.0,
-            {},
+            {"1": "REXT2"},
         ),
         PlacedPart(
             "C_USB1",
@@ -1073,22 +1086,22 @@ def electronics_parts() -> list[PlacedPart]:
                 "J_ROW",
                 ROW_CONNECTOR_FOOTPRINT_NAME,
                 ROW_CONNECTOR_FOOTPRINT_NAME,
-                134.6,
-                18.0,
+                152.0,
+                22.0,
                 270.0,
-                124.0,
-                18.0,
+                140.0,
+                22.0,
                 row_pinout,
             ),
             PlacedPart(
                 "J_COL",
                 COLUMN_CONNECTOR_FOOTPRINT_NAME,
                 COLUMN_CONNECTOR_FOOTPRINT_NAME,
-                134.6,
-                52.0,
+                152.0,
+                62.0,
                 270.0,
-                124.0,
-                52.0,
+                140.0,
+                62.0,
                 column_pinout,
             ),
         ]
@@ -1143,6 +1156,40 @@ def electronics_parts() -> list[PlacedPart]:
                 {"2": "LED_4V1"},
             )
         )
+
+    reserve_y_mm = 98.0
+    reserve_nets = (
+        "IMU_SDA",
+        "IMU_SCL",
+        "IMU_INT1",
+        "LED_CLK",
+        "LED_SDI",
+        "LED_LE",
+        "LED_OE_N",
+        "ROW_A0",
+        "ROW_A1",
+        "ROW_A2",
+        "ROW_A3",
+        "DEC_A_EN_N",
+        "DEC_B_EN_N",
+        "ROW_XLAT_OE_N",
+        "LED_EN",
+    )
+    for index, net_name in enumerate(reserve_nets):
+        origin_x_mm = 8.0 + index * 8.5
+        parts.append(
+            PlacedPart(
+                f"RP{index + 1:02d}",
+                net_name,
+                "R_0402_1005Metric",
+                origin_x_mm,
+                reserve_y_mm,
+                0.0,
+                origin_x_mm,
+                reserve_y_mm - 2.4,
+                {"1": net_name},
+            )
+        )
     return parts
 
 
@@ -1193,7 +1240,6 @@ def add_electronics_components(
         }
         assign_pad_nets(footprint, nets)
 
-
 def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     board = pcbnew.BOARD()
     apply_design_rules(board, copper_layer_count=4)
@@ -1225,6 +1271,23 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
         text_size_mm=0.8,
     )
     add_electronics_components(board, repository_root)
+    add_rectangle(
+        board,
+        pcbnew.Dwgs_User,
+        4.0,
+        84.0,
+        ELECTRONICS_WIDTH_MM - 4.0,
+        102.0,
+        GUIDE_LINE_WIDTH_MM,
+    )
+    add_text(
+        board,
+        "SCAN AND IMU SIGNAL RESERVE",
+        ELECTRONICS_WIDTH_MM / 2,
+        86.2,
+        pcbnew.Dwgs_User,
+        text_size_mm=0.8,
+    )
     add_text(
         board,
         "PCB CREATED BY ILLIA PLIUKHIN",

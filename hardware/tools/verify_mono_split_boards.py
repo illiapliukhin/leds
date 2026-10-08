@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import re
 import subprocess
 import sys
 
@@ -141,6 +142,15 @@ def run_drc(board_path: Path, output_json_path: Path) -> dict:
     return json.loads(output_json_path.read_text())
 
 
+MATRIX_CONNECTIVITY_NET = re.compile(
+    r"ROW_(?:0[1-9]|[12]\d|3[0-2])_ANODE|COL_(?:0[1-9]|[12]\d|3[0-2])\b|LED_4V1"
+)
+
+
+def unconnected_items(report: dict) -> list[dict]:
+    return list(report.get("unconnected_items", []))
+
+
 def geometric_violations(report: dict) -> list[dict]:
     violations = []
     for violation in report.get("violations", []):
@@ -229,11 +239,7 @@ def verify_repository(repository_root: Path) -> None:
         drc_json_path = board_path.with_name("drc.json")
         report = run_drc(board_path, drc_json_path)
         geometry_failures = geometric_violations(report)
-        unconnected = [
-            violation
-            for violation in report.get("violations", [])
-            if violation.get("type") == "unconnected_items"
-        ]
+        unconnected = unconnected_items(report)
         if geometry_failures:
             raise AssertionError(
                 f"{variant.name} geometric DRC failed: "
@@ -258,14 +264,16 @@ def verify_repository(repository_root: Path) -> None:
             f"{electronics_geometry[0]['type']} "
             f"{electronics_geometry[0].get('description')}"
         )
-    unconnected_count = sum(
-        1
-        for violation in electronics_report.get("violations", [])
-        if violation.get("type") == "unconnected_items"
-    )
+    electronics_unconnected = unconnected_items(electronics_report)
+    matrix_open = [
+        item
+        for item in electronics_unconnected
+        if MATRIX_CONNECTIVITY_NET.search(json.dumps(item))
+    ]
     print(
         "mono_electronics: pinout match, geometric DRC clean, "
-        f"{unconnected_count} unconnected groups expected before routing"
+        f"{len(electronics_unconnected)} unconnected groups, "
+        f"{len(matrix_open)} still touch a matrix net"
     )
 
 

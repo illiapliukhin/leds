@@ -32,4 +32,5 @@
 - `pcbnew` `Flip` after a 180° orientation can report 0°; dump pad coordinates instead of trusting the rotation used at placement time.
 - 1.0 mm silk cannot label a transistor plus two 0402s in one 7–10 mm cell. Keep the transistor reference on silk and put the dense farm passives on Fab.
 - USB-C stacked A/B pads DRC-short unless they share a net. Assign GND/VBUS to the coincident pairs before treating the receptacle as placement-clean.
+- A mono pixel is one row net crossed with one column net. Do not tie those nets together. Leave a corridor for BMI270 `IMU_SDA`, `IMU_SCL`, and `IMU_INT1` plus `LED_OE_N`, so motion can blank or rewrite every LED.
 
