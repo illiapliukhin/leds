@@ -1428,6 +1428,118 @@ def route_electronics_matrix(board: pcbnew.BOARD) -> None:
         travel_on_source_y=True,
     )
 
+def route_led_anode_rail(board: pcbnew.BOARD) -> None:
+    pads: list[tuple[float, float, float, pcbnew.NETINFO_ITEM]] = []
+    for footprint in board.GetFootprints():
+        reference = footprint.GetReference()
+        if reference.startswith("Q_ROW"):
+            via_direction = 1.0
+        elif reference.startswith("R_PU"):
+            via_direction = -1.0
+        else:
+            continue
+        pad = get_pad(footprint, "2")
+        if pad.GetNetname() != "LED_4V1":
+            continue
+        pad_x_mm, pad_y_mm = millimeters(pad.GetPosition())
+        pads.append((pad_x_mm, pad_y_mm, via_direction, pad.GetNet()))
+    if not pads:
+        return
+    net = pads[0][3]
+    trunk_x_mm = 140.0
+    via_ys: list[float] = []
+    for pad_x_mm, pad_y_mm, via_direction, _ in pads:
+        via_y_mm = pad_y_mm + via_direction * 1.5
+        via_ys.append(via_y_mm)
+        add_track(
+            board,
+            net,
+            pcbnew.F_Cu,
+            pad_x_mm,
+            pad_y_mm,
+            pad_x_mm,
+            via_y_mm,
+            0.20,
+        )
+        add_through_via(board, net, pad_x_mm, via_y_mm, diameter_mm=0.40)
+        add_track(
+            board,
+            net,
+            pcbnew.In1_Cu,
+            pad_x_mm,
+            via_y_mm,
+            trunk_x_mm,
+            via_y_mm,
+            0.25,
+        )
+    add_track(
+        board,
+        net,
+        pcbnew.In1_Cu,
+        trunk_x_mm,
+        min(via_ys),
+        trunk_x_mm,
+        max(via_ys),
+        0.50,
+    )
+
+
+def route_imu_sense(board: pcbnew.BOARD) -> None:
+    imu = footprint_by_reference(board, "U_IMU")
+    reserve = {}
+    for footprint in board.GetFootprints():
+        if footprint.GetReference().startswith("RP"):
+            pad = get_pad(footprint, "1")
+            reserve[pad.GetNetname()] = pad
+    routes = (
+        ("14", "IMU_SDA", 157.4, 4.2, 100.2, False),
+        ("13", "IMU_SCL", 158.2, 4.9, 100.9, False),
+        ("4", "IMU_INT1", 159.0, 5.6, 101.6, True),
+    )
+    for pad_number, net_name, lane_x_mm, top_y_mm, bottom_y_mm, escape_left in routes:
+        imu_pad = get_pad(imu, pad_number)
+        end_pad = reserve[net_name]
+        net = imu_pad.GetNet()
+        start_x_mm, start_y_mm = millimeters(imu_pad.GetPosition())
+        end_x_mm, end_y_mm = millimeters(end_pad.GetPosition())
+        rise_x_mm = start_x_mm - 1.6 if escape_left else start_x_mm
+        if escape_left:
+            add_track(
+                board, net, pcbnew.F_Cu,
+                start_x_mm, start_y_mm, rise_x_mm, start_y_mm,
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+        add_track(
+            board, net, pcbnew.F_Cu,
+            rise_x_mm, start_y_mm, rise_x_mm, top_y_mm,
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(board, net, rise_x_mm, top_y_mm, diameter_mm=0.40)
+        add_track(
+            board, net, pcbnew.In1_Cu,
+            rise_x_mm, top_y_mm, lane_x_mm, top_y_mm,
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(board, net, lane_x_mm, top_y_mm, diameter_mm=0.40)
+        add_track(
+            board, net, pcbnew.In2_Cu,
+            lane_x_mm, top_y_mm, lane_x_mm, bottom_y_mm,
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(board, net, lane_x_mm, bottom_y_mm, diameter_mm=0.40)
+        add_track(
+            board, net, pcbnew.In1_Cu,
+            lane_x_mm, bottom_y_mm, end_x_mm, bottom_y_mm,
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+        add_through_via(board, net, end_x_mm, bottom_y_mm, diameter_mm=0.40)
+        add_track(
+            board, net, pcbnew.F_Cu,
+            end_x_mm, bottom_y_mm, end_x_mm, end_y_mm,
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+
+
 def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     board = pcbnew.BOARD()
     apply_design_rules(board, copper_layer_count=4)
@@ -1486,6 +1598,8 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
         text_size_mm=0.8,
     )
     route_electronics_matrix(board)
+    route_led_anode_rail(board)
+    route_imu_sense(board)
     add_text(
         board,
         "SCAN AND IMU SIGNAL RESERVE",

@@ -68,7 +68,7 @@ Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets s
 
 `U_LED1` pads 5–20 are `COL_01`–`COL_16` and `U_LED2` pads 5–20 are `COL_17`–`COL_32`. That is the usual MBI5124GP order, OUT0 on pad 5. Confirm it on the full pin figure before fabrication. Pads 1, 22, 23, and 24 are `GND`, `REXT`, `LED_LOGIC_3V3`, and `LED_OE_N`.
 
-The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is now one copper path from the driver pad to the matching FFC pin. Row runs drop to the lower channel on an inner layer; column runs stay on the driver-pad height until the right-hand corridor. `LED_4V1` is still only labeled on the transistor sources, not tied together. Zones from left to right:
+The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one copper path from the driver pad to the matching FFC pin. `LED_4V1` is one rail across the transistor sources and the gate pull-ups. `IMU_SDA`, `IMU_SCL`, and `IMU_INT1` run from BMI270 to their reserve pads. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
 2. ESP32-S3FN8 on the top edge, crystal directly under it, BMI270 on that same edge and away from the inductor. The open strip to the right of the MCU is the pin-escape field.
