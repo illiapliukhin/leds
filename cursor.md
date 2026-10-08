@@ -95,4 +95,24 @@
   hard-coded LED margins or edge-bus coordinates. Derive LED centers and outer
   row buses from board size, matrix size, and pitch, then rerun every topology
   and DRC gate before promoting the resized board.
+- Do not route the border across `F.Cu`. LED pads and solder-mask webs sit
+  there; keep escapes on `B.Cu` and `In2.Cu`, and keep `In1.Cu` free for the
+  ground plane. Commit orthogonal runs, not one segment per grid step and not
+  a single diagonal between Manhattan endpoints.
+- Choose a pad escape toward the nearest courtyard edge. The larger offset
+  from the footprint center sends a top-row end pin sideways through the
+  neighboring pins. Block every other courtyard on `B.Cu` so one escape cannot
+  seal the rest of the package.
+- Do not treat a pad bounding box as copper. KiCad 10 roundrect pads leave the
+  box corner empty, so a track that stops there dangles and does not reduce
+  the ratsnest. Start and stop on an inset of the pad, then extend to the
+  pad center.
+- Keep new via centers at least one via diameter plus 0.10 mm apart, with an
+  extra half grid step. Stamping only the via diameter lets neighboring vias
+  land 0.05 mm inside the clearance rule.
+- Do not move all six MBI5124 packages into the low-Y border to create escape
+  channels. That strip already holds about 474 mm² of other envelopes, and the
+  side columns freed by the move are narrower than the displaced parts. The
+  90° drivers still have eight outputs on a short edge whose neighbor gap
+  fits one track.
 

@@ -598,14 +598,7 @@ def validate_placement(
                 raise ValueError(f"{reference} overlaps {other_reference}")
 
 
-def main() -> None:
-    repository_root = Path(__file__).resolve().parents[2]
-    board_path = (
-        repository_root
-        / "hardware"
-        / "wearable_20x20"
-        / "wearable_20x20.kicad_pcb"
-    )
+def build_placed_board(repository_root: Path) -> pcbnew.BOARD:
     matrix_path = (
         repository_root
         / "hardware"
@@ -648,11 +641,20 @@ def main() -> None:
         ),
         branding_bounds(board),
     )
-    save_board_without_project_side_effects(board_path, board)
-    print(
-        f"Placed {len(components)} backside components outside the "
-        f"{via_bounds.width:.2f} mm via field."
+    return board
+
+
+def main() -> None:
+    repository_root = Path(__file__).resolve().parents[2]
+    board_path = (
+        repository_root
+        / "hardware"
+        / "wearable_20x20"
+        / "wearable_20x20.kicad_pcb"
     )
+    board = build_placed_board(repository_root)
+    save_board_without_project_side_effects(board_path, board)
+    print("Placed 172 backside components outside the via field.")
 
 
 if __name__ == "__main__":
