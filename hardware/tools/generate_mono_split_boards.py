@@ -1540,6 +1540,177 @@ def route_imu_sense(board: pcbnew.BOARD) -> None:
         )
 
 
+def route_net_polyline(
+    board: pcbnew.BOARD,
+    net_name: str,
+    layer: int,
+    points_mm: list[tuple[float, float]],
+    width_mm: float,
+) -> None:
+    net = board.FindNet(net_name)
+    add_polyline(board, net, layer, points_mm, width_mm)
+
+
+def route_pad_escape(
+    board: pcbnew.BOARD,
+    net_name: str,
+    pad_x_mm: float,
+    pad_y_mm: float,
+    via_x_mm: float,
+    corridor_y_mm: float,
+) -> None:
+    net = board.FindNet(net_name)
+    route_net_polyline(
+        board,
+        net_name,
+        pcbnew.F_Cu,
+        [(pad_x_mm, pad_y_mm), (via_x_mm, pad_y_mm)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, net, via_x_mm, pad_y_mm, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        net_name,
+        pcbnew.In2_Cu,
+        [(via_x_mm, pad_y_mm), (via_x_mm, corridor_y_mm)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, net, via_x_mm, corridor_y_mm, diameter_mm=0.40)
+
+
+def route_power_and_blank(board: pcbnew.BOARD) -> None:
+    # USB signal pads share one X. Tie VBUS and GND on In2 so the verticals
+    # do not short the pin column, and keep both vias inside the SMD pads.
+    vbus = board.FindNet("VBUS")
+    add_through_via(board, vbus, 2.05, 20.45, diameter_mm=0.40)
+    add_through_via(board, vbus, 2.05, 15.55, diameter_mm=0.40)
+    route_net_polyline(
+        board, "VBUS", pcbnew.In2_Cu, [(2.05, 15.55), (2.05, 20.45)], 0.20
+    )
+
+    gnd = board.FindNet("GND")
+    add_through_via(board, gnd, 2.70, 21.25, diameter_mm=0.40)
+    add_through_via(board, gnd, 2.70, 14.75, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In2_Cu, [(2.70, 14.75), (2.70, 21.25)], 0.20
+    )
+    # Shield slots leave a 0.20 mm copper lip. Ride that lip, outside the drill.
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(2.70, 21.25), (2.70, 21.90), (7.50, 21.90)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(2.70, 14.75), (2.70, 14.08), (13.20, 14.08)],
+        0.15,
+    )
+    add_through_via(board, gnd, 13.20, 14.08, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In2_Cu, [(13.20, 14.08), (13.20, 80.00)], 0.25
+    )
+    add_through_via(board, gnd, 13.20, 68.20, diameter_mm=0.40)
+    add_through_via(board, gnd, 13.20, 80.00, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In1_Cu, [(13.20, 80.00), (49.49, 80.00)], 0.25
+    )
+    add_through_via(board, gnd, 49.49, 80.00, diameter_mm=0.40)
+
+    route_net_polyline(
+        board, "GND", pcbnew.F_Cu, [(44.00, 9.012), (44.50, 9.012)], 0.15
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(44.50, 9.012), (44.50, 11.20), (41.00, 11.20)],
+        0.15,
+    )
+    add_through_via(board, gnd, 41.00, 11.20, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In2_Cu, [(41.00, 11.20), (41.00, 80.00)], 0.20
+    )
+    add_through_via(board, gnd, 41.00, 80.00, diameter_mm=0.40)
+
+    for pin_x_mm in (83.40, 103.40):
+        route_net_polyline(
+            board,
+            "GND",
+            pcbnew.F_Cu,
+            [(pin_x_mm, 72.507), (pin_x_mm, 68.20)],
+            0.20,
+        )
+        add_through_via(board, gnd, pin_x_mm, 68.20, diameter_mm=0.40)
+    route_net_polyline(
+        board, "GND", pcbnew.In1_Cu, [(13.20, 68.20), (103.40, 68.20)], 0.25
+    )
+
+    # AON stays off the GND pads: down from VDDIO, around the right side to VDD.
+    route_net_polyline(
+        board, "AON_3V3", pcbnew.F_Cu, [(43.50, 9.012), (43.50, 10.15)], 0.15
+    )
+    aon = board.FindNet("AON_3V3")
+    add_through_via(board, aon, 43.50, 10.15, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(45.263, 8.75), (46.80, 8.75), (46.80, 10.15)],
+        0.15,
+    )
+    add_through_via(board, aon, 46.80, 10.15, diameter_mm=0.40)
+    route_net_polyline(
+        board, "AON_3V3", pcbnew.In1_Cu, [(43.50, 10.15), (49.49, 10.15)], 0.20
+    )
+    add_through_via(board, aon, 49.49, 10.15, diameter_mm=0.40)
+    route_net_polyline(
+        board, "AON_3V3", pcbnew.In2_Cu, [(49.49, 10.15), (49.49, 76.00)], 0.20
+    )
+    add_through_via(board, aon, 49.49, 76.00, diameter_mm=0.40)
+
+    # Right-side control pins escape to private X, then share a Y above the body.
+    # Lower pins reach farther right so their stubs do not cross the pin above.
+    route_pad_escape(board, "LED_OE_N", 88.60, 72.507, 90.20, 69.40)
+    route_pad_escape(board, "LED_LOGIC_3V3", 88.60, 73.142, 90.90, 70.00)
+    route_pad_escape(board, "REXT1", 88.60, 73.778, 91.60, 70.60)
+    route_pad_escape(board, "LED_OE_N", 108.60, 72.507, 112.00, 69.40)
+    route_pad_escape(board, "LED_LOGIC_3V3", 108.60, 73.142, 112.70, 70.00)
+    route_net_polyline(
+        board,
+        "REXT2",
+        pcbnew.F_Cu,
+        [(108.60, 73.778), (115.80, 73.778), (115.80, 76.00), (117.49, 76.00)],
+        0.15,
+    )
+    route_net_polyline(
+        board, "LED_OE_N", pcbnew.In1_Cu, [(58.49, 69.40), (112.00, 69.40)], 0.15
+    )
+    route_net_polyline(
+        board, "LED_LOGIC_3V3", pcbnew.In1_Cu, [(90.90, 70.00), (112.70, 70.00)], 0.15
+    )
+    route_net_polyline(
+        board, "REXT1", pcbnew.In1_Cu, [(69.49, 70.60), (91.60, 70.60)], 0.15
+    )
+    rext1 = board.FindNet("REXT1")
+    add_through_via(board, rext1, 69.49, 70.60, diameter_mm=0.40)
+    route_net_polyline(
+        board, "REXT1", pcbnew.F_Cu, [(69.49, 70.60), (69.49, 76.00)], 0.15
+    )
+    oe_net = board.FindNet("LED_OE_N")
+    add_through_via(board, oe_net, 58.49, 69.40, diameter_mm=0.40)
+    route_net_polyline(
+        board, "LED_OE_N", pcbnew.In2_Cu, [(58.49, 69.40), (58.49, 97.35)], 0.15
+    )
+    add_through_via(board, oe_net, 58.49, 97.35, diameter_mm=0.40)
+    route_net_polyline(
+        board, "LED_OE_N", pcbnew.F_Cu, [(58.49, 97.35), (58.49, 98.00)], 0.15
+    )
+
+
 def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     board = pcbnew.BOARD()
     apply_design_rules(board, copper_layer_count=4)
@@ -1600,6 +1771,7 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     route_electronics_matrix(board)
     route_led_anode_rail(board)
     route_imu_sense(board)
+    route_power_and_blank(board)
     add_text(
         board,
         "SCAN AND IMU SIGNAL RESERVE",

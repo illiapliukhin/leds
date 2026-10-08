@@ -144,7 +144,8 @@ def run_drc(board_path: Path, output_json_path: Path) -> dict:
 
 MATRIX_CONNECTIVITY_NET = re.compile(
     r"ROW_(?:0[1-9]|[12]\d|3[0-2])_ANODE|COL_(?:0[1-9]|[12]\d|3[0-2])\b|"
-    r"LED_4V1|IMU_SDA|IMU_SCL|IMU_INT1"
+    r"LED_4V1|IMU_SDA|IMU_SCL|IMU_INT1|"
+    r"\b(?:GND|VBUS|AON_3V3|REXT1|REXT2|LED_LOGIC_3V3|LED_OE_N)\b"
 )
 
 

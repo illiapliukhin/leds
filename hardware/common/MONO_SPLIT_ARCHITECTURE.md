@@ -64,11 +64,11 @@ Preliminary mono rail: 4.24 V from `TPS63802` with 681 kΩ / 91 kΩ 0.1% (`EVT`,
 
 ## Electronics zones
 
-Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets stay separate, so each pixel can be on or off by itself. BMI270 accelerometer and gyroscope use `IMU_SDA`, `IMU_SCL`, and `IMU_INT1`. The same names are on reserve pads in the open band above the branding strip, next to pads for `LED_CLK`, `LED_SDI`, `LED_LE`, `LED_OE_N`, the row address, and the decoder enables. Motion decides whether the scan runs and which pixels are loaded. `LED_OE_N` is the blank for the whole matrix. Those reserve pads are not copper-connected yet: a first fan-in shorted adjacent pins, so the tracks stay out until the escape clears the pad row. ESP32 QFN pads are not bonded until that pin map is checked. The open band is the corridor for this wiring.
+Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets stay separate, so each pixel can be on or off by itself. BMI270 accelerometer and gyroscope use `IMU_SDA`, `IMU_SCL`, and `IMU_INT1`, and those three nets run from the IMU to their reserve pads. The same band holds pads for `LED_CLK`, `LED_SDI`, `LED_LE`, the row address, and the decoder enables. Motion decides whether the scan runs and which pixels are loaded. `LED_OE_N` is the blank for the whole matrix: both MBI5124 OE pins tie to reserve pad `RP07`. ESP32 QFN pads are not bonded until that pin map is checked. The open band is the corridor for the remaining scan wiring.
 
 `U_LED1` pads 5–20 are `COL_01`–`COL_16` and `U_LED2` pads 5–20 are `COL_17`–`COL_32`. That is the usual MBI5124GP order, OUT0 on pad 5. Confirm it on the full pin figure before fabrication. Pads 1, 22, 23, and 24 are `GND`, `REXT`, `LED_LOGIC_3V3`, and `LED_OE_N`.
 
-The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one copper path from the driver pad to the matching FFC pin. `LED_4V1` is one rail across the transistor sources and the gate pull-ups. `IMU_SDA`, `IMU_SCL`, and `IMU_INT1` run from BMI270 to their reserve pads. Zones from left to right:
+The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one copper path from the driver pad to the matching FFC pin. `LED_4V1` is one rail across the transistor sources and the gate pull-ups. USB `VBUS` is one net across the stacked receptacle pads. `GND` joins the USB shells and ground pins, BMI270 pads 6–7, both MBI5124 pad 1 pins, and `TP2`. `AON_3V3` joins BMI270 VDDIO and VDD to `TP1`. Each `REXT` reaches its 1.82 kΩ resistor, and `LED_LOGIC_3V3` ties the two driver logic pins. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
 2. ESP32-S3FN8 on the top edge, crystal directly under it, BMI270 on that same edge and away from the inductor. The open strip to the right of the MCU is the pin-escape field.
@@ -103,4 +103,4 @@ These numbers are first-pass healthy values. Shrinking the outline and the court
 ## DRC scope
 
 - LED panels: geometric DRC must be clean, including connectivity of every populated row and column to the matching FFC pin.
-- Electronics: geometric DRC must be clean. Every `ROW_01_ANODE`…`ROW_32_ANODE` and `COL_01`…`COL_32` must be a single connected net. Other nets may stay open until power and the MCU are routed.
+- Electronics: geometric DRC must be clean. Every `ROW_01_ANODE`…`ROW_32_ANODE` and `COL_01`…`COL_32` must be a single connected net, along with `LED_4V1`, `IMU_SDA`, `IMU_SCL`, `IMU_INT1`, `GND`, `VBUS`, `AON_3V3`, `REXT1`, `REXT2`, `LED_LOGIC_3V3`, and `LED_OE_N`. Decoder, serial, charger, and ESP32 GPIO nets may stay open until those pins are bonded.
