@@ -10,7 +10,7 @@ The same electronics board drives both LED panels. Two `MBI5124GP-B` devices pro
 |---|---|---|---|
 | `mono_panel_20x20` | 2 | 136.3 × 136.3 mm | 400 × `NCD0603W1` on `F.Cu`; two FFC receptacles on `B.Cu` |
 | `mono_panel_32x32` | 2 | 166.7 × 166.7 mm | 1024 × `NCD0603W1` on `F.Cu`; two FFC receptacles on `B.Cu` |
-| `mono_electronics` | 4 | 160 × 110 mm | MCU, power, IMU, audio, row farm, column drivers, matching FFC plugs |
+| `mono_electronics` | 4 | 190 × 148 mm | MCU, power, IMU, audio, row farm, column drivers, matching FFC plugs |
 
 Outlines are spacious first-pass envelopes, not frozen mechanics. The 44 mm panel margin is required so a 32-net U-turn fan-in can keep three bands from overlapping: the `J_ROW` courtyard, a 0.55 mm via row, and unique 0.28 mm front channels. Matching back-copper L-routes then drop from that via row to the 0.50 mm FFC pads. Shrinking this margin is a later step.
 
@@ -68,7 +68,7 @@ Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets s
 
 `U_LED1` pads 5–20 are `COL_01`–`COL_16` and `U_LED2` pads 5–20 are `COL_17`–`COL_32`. That is the usual MBI5124GP order, OUT0 on pad 5. Confirm it on the full pin figure before fabrication. Pads 1, 22, 23, and 24 are `GND`, `REXT`, `LED_LOGIC_3V3`, and `LED_OE_N`.
 
-The electronics board is 160 × 110 mm so the matrix fan-in, the `LED_4V1` trunk, and that signal reserve have room without stacking parts. Zones from left to right:
+The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is now one copper path from the driver pad to the matching FFC pin. Row runs drop to the lower channel on an inner layer; column runs stay on the driver-pad height until the right-hand corridor. `LED_4V1` is still only labeled on the transistor sources, not tied together. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
 2. ESP32-S3FN8 on the top edge, crystal directly under it, BMI270 on that same edge and away from the inductor. The open strip to the right of the MCU is the pin-escape field.
@@ -103,4 +103,4 @@ These numbers are first-pass healthy values. Shrinking the outline and the court
 ## DRC scope
 
 - LED panels: geometric DRC must be clean, including connectivity of every populated row and column to the matching FFC pin.
-- Electronics: geometric DRC must be clean for outline, courtyards, silkscreen, and edge clearance. Unconnected nets are expected until driver-side routing exists.
+- Electronics: geometric DRC must be clean. Every `ROW_01_ANODE`…`ROW_32_ANODE` and `COL_01`…`COL_32` must be a single connected net. Other nets may stay open until power and the MCU are routed.

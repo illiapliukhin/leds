@@ -143,7 +143,7 @@ def run_drc(board_path: Path, output_json_path: Path) -> dict:
 
 
 MATRIX_CONNECTIVITY_NET = re.compile(
-    r"ROW_(?:0[1-9]|[12]\d|3[0-2])_ANODE|COL_(?:0[1-9]|[12]\d|3[0-2])\b|LED_4V1"
+    r"ROW_(?:0[1-9]|[12]\d|3[0-2])_ANODE|COL_(?:0[1-9]|[12]\d|3[0-2])\b"
 )
 
 
@@ -270,10 +270,14 @@ def verify_repository(repository_root: Path) -> None:
         for item in electronics_unconnected
         if MATRIX_CONNECTIVITY_NET.search(json.dumps(item))
     ]
+    if matrix_open:
+        raise AssertionError(
+            "mono_electronics matrix net still open: "
+            f"{matrix_open[0].get('description')}"
+        )
     print(
         "mono_electronics: pinout match, geometric DRC clean, "
-        f"{len(electronics_unconnected)} unconnected groups, "
-        f"{len(matrix_open)} still touch a matrix net"
+        f"{len(electronics_unconnected)} non-matrix unconnected groups"
     )
 
 

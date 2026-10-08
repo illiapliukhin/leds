@@ -897,21 +897,21 @@ def electronics_parts() -> list[PlacedPart]:
             "SW1",
             "KMR2",
             "SW_Push_1P1T_NO_CK_KMR2",
-            124.0,
-            76.0,
+            20.0,
+            82.0,
             0.0,
-            124.0,
-            71.5,
+            28.0,
+            82.0,
             {},
         ),
         PlacedPart(
             "U_ROW_XLAT",
             "SN74LVC8T245",
             "VQFN-24-1EP_4x4mm_P0.5mm_EP2.5x2.5mm",
-            100.0,
+            70.0,
             14.5,
             0.0,
-            100.0,
+            70.0,
             9.0,
             {},
         ),
@@ -919,10 +919,10 @@ def electronics_parts() -> list[PlacedPart]:
             "U_DEC_A",
             "74HC154",
             "TSSOP-24_4.4x7.8mm_P0.65mm",
-            116.0,
+            86.0,
             14.5,
             0.0,
-            116.0,
+            86.0,
             8.5,
             {},
         ),
@@ -930,10 +930,10 @@ def electronics_parts() -> list[PlacedPart]:
             "U_DEC_B",
             "74HC154",
             "TSSOP-24_4.4x7.8mm_P0.65mm",
-            132.0,
+            102.0,
             14.5,
             0.0,
-            132.0,
+            102.0,
             8.5,
             {},
         ),
@@ -972,10 +972,10 @@ def electronics_parts() -> list[PlacedPart]:
             "U_LED2",
             "MBI5124GP-B",
             "SSOP-24_3.9x8.7mm_P0.635mm",
-            102.0,
+            106.0,
             76.0,
             0.0,
-            102.0,
+            106.0,
             67.0,
             {
                 str(5 + offset): column_net_name(17 + offset)
@@ -1003,10 +1003,10 @@ def electronics_parts() -> list[PlacedPart]:
             "R_EXT2",
             "1.82k",
             "R_0402_1005Metric",
-            114.0,
+            118.0,
             76.0,
             0.0,
-            114.0,
+            118.0,
             81.0,
             {"1": "REXT2"},
         ),
@@ -1086,10 +1086,10 @@ def electronics_parts() -> list[PlacedPart]:
                 "J_ROW",
                 ROW_CONNECTOR_FOOTPRINT_NAME,
                 ROW_CONNECTOR_FOOTPRINT_NAME,
-                152.0,
+                182.0,
                 22.0,
                 270.0,
-                140.0,
+                170.0,
                 22.0,
                 row_pinout,
             ),
@@ -1097,10 +1097,10 @@ def electronics_parts() -> list[PlacedPart]:
                 "J_COL",
                 COLUMN_CONNECTOR_FOOTPRINT_NAME,
                 COLUMN_CONNECTOR_FOOTPRINT_NAME,
-                152.0,
+                182.0,
                 62.0,
                 270.0,
-                140.0,
+                170.0,
                 62.0,
                 column_pinout,
             ),
@@ -1240,6 +1240,194 @@ def add_electronics_components(
         }
         assign_pad_nets(footprint, nets)
 
+
+def footprint_by_reference(
+    board: pcbnew.BOARD,
+    reference: str,
+) -> pcbnew.FOOTPRINT:
+    for footprint in board.GetFootprints():
+        if footprint.GetReference() == reference:
+            return footprint
+    raise ValueError(f"Unable to find {reference}")
+
+
+def route_side_escape(
+    board: pcbnew.BOARD,
+    net: pcbnew.NETINFO_ITEM,
+    pad_x_mm: float,
+    pad_y_mm: float,
+    escape_x_mm: float,
+) -> None:
+    add_track(
+        board,
+        net,
+        pcbnew.F_Cu,
+        pad_x_mm,
+        pad_y_mm,
+        escape_x_mm,
+        pad_y_mm,
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    add_through_via(board, net, escape_x_mm, pad_y_mm)
+
+
+def route_sorted_fan_in(
+    board: pcbnew.BOARD,
+    sources: list[tuple[pcbnew.NETINFO_ITEM, float, float, float]],
+    destinations: list[tuple[float, float]],
+    highway_y0_mm: float,
+    entry_x0_mm: float,
+    travel_on_source_y: bool,
+) -> None:
+    order = sorted(range(len(destinations)), key=lambda index: destinations[index][1])
+    for sequence, index in enumerate(order):
+        net, source_x_mm, source_y_mm, escape_x_mm = sources[index]
+        dest_x_mm, dest_y_mm = destinations[index]
+        entry_x_mm = entry_x0_mm - sequence * 0.45
+        route_side_escape(board, net, source_x_mm, source_y_mm, escape_x_mm)
+        if travel_on_source_y:
+            travel_y_mm = 83.0 + sequence * 0.45
+            add_track(
+                board,
+                net,
+                pcbnew.In2_Cu,
+                escape_x_mm,
+                source_y_mm,
+                escape_x_mm,
+                travel_y_mm,
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+            add_through_via(
+                board, net, escape_x_mm, travel_y_mm, diameter_mm=0.40
+            )
+            add_track(
+                board,
+                net,
+                pcbnew.In1_Cu,
+                escape_x_mm,
+                travel_y_mm,
+                entry_x_mm,
+                travel_y_mm,
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+            add_through_via(
+                board, net, entry_x_mm, travel_y_mm, diameter_mm=0.40
+            )
+            add_track(
+                board,
+                net,
+                pcbnew.In2_Cu,
+                entry_x_mm,
+                travel_y_mm,
+                entry_x_mm,
+                dest_y_mm,
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+        else:
+            highway_y_mm = highway_y0_mm + sequence * 0.50
+            add_track(
+                board,
+                net,
+                pcbnew.In2_Cu,
+                escape_x_mm,
+                source_y_mm,
+                escape_x_mm,
+                highway_y_mm,
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+            add_through_via(
+                board, net, escape_x_mm, highway_y_mm, diameter_mm=0.40
+            )
+            add_track(
+                board,
+                net,
+                pcbnew.In1_Cu,
+                escape_x_mm,
+                highway_y_mm,
+                entry_x_mm,
+                highway_y_mm,
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+            add_through_via(
+                board, net, entry_x_mm, highway_y_mm, diameter_mm=0.40
+            )
+            add_track(
+                board,
+                net,
+                pcbnew.In2_Cu,
+                entry_x_mm,
+                highway_y_mm,
+                entry_x_mm,
+                dest_y_mm,
+                FAN_IN_TRACK_WIDTH_MM,
+            )
+        add_through_via(board, net, entry_x_mm, dest_y_mm, diameter_mm=0.40)
+        add_track(
+            board,
+            net,
+            pcbnew.F_Cu,
+            entry_x_mm,
+            dest_y_mm,
+            dest_x_mm,
+            dest_y_mm,
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+
+
+def route_electronics_matrix(board: pcbnew.BOARD) -> None:
+    row_connector = footprint_by_reference(board, "J_ROW")
+    column_connector = footprint_by_reference(board, "J_COL")
+    row_sources = []
+    row_destinations = []
+    for pin_index in range(MATRIX_CHANNEL_COUNT):
+        transistor = footprint_by_reference(board, f"Q_ROW{pin_index + 1:02d}")
+        drain_x_mm, drain_y_mm = millimeters(get_pad(transistor, "3").GetPosition())
+        net = get_pad(transistor, "3").GetNet()
+        farm_row = pin_index // 8
+        row_sources.append(
+            (net, drain_x_mm, drain_y_mm, drain_x_mm - 3.2 - farm_row * 0.4)
+        )
+        row_destinations.append(
+            millimeters(get_pad(row_connector, str(pin_index + 1)).GetPosition())
+        )
+    route_sorted_fan_in(
+        board,
+        row_sources,
+        row_destinations,
+        highway_y0_mm=104.0,
+        entry_x0_mm=156.0,
+        travel_on_source_y=False,
+    )
+
+    column_sources = []
+    column_destinations = []
+    for pin_index in range(MATRIX_CHANNEL_COUNT):
+        driver_name = "U_LED1" if pin_index < 16 else "U_LED2"
+        output_index = pin_index if pin_index < 16 else pin_index - 16
+        driver_pad = str(5 + output_index)
+        driver = footprint_by_reference(board, driver_name)
+        pad_x_mm, pad_y_mm = millimeters(get_pad(driver, driver_pad).GetPosition())
+        center_x_mm, _ = millimeters(driver.GetPosition())
+        side_index = output_index if output_index < 8 else output_index - 8
+        if pad_x_mm < center_x_mm:
+            outward_mm = 4.0 if driver_name == "U_LED1" else 1.8
+            escape_x_mm = pad_x_mm - outward_mm - side_index * 0.40
+        else:
+            escape_x_mm = pad_x_mm + 1.8 + side_index * 0.40
+        net = get_pad(driver, driver_pad).GetNet()
+        column_sources.append((net, pad_x_mm, pad_y_mm, escape_x_mm))
+        column_destinations.append(
+            millimeters(get_pad(column_connector, str(pin_index + 1)).GetPosition())
+        )
+    route_sorted_fan_in(
+        board,
+        column_sources,
+        column_destinations,
+        highway_y0_mm=120.4,
+        entry_x0_mm=174.0,
+        travel_on_source_y=True,
+    )
+
 def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     board = pcbnew.BOARD()
     apply_design_rules(board, copper_layer_count=4)
@@ -1297,6 +1485,7 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
         pcbnew.Dwgs_User,
         text_size_mm=0.8,
     )
+    route_electronics_matrix(board)
     add_text(
         board,
         "SCAN AND IMU SIGNAL RESERVE",
