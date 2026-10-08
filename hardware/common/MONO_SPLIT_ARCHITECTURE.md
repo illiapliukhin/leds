@@ -74,6 +74,8 @@ The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one 
 
 1. USB-C, ESD, CC on the left edge.
 2. ESP32-S3FN8 on the top edge, crystal directly under it, BMI270 on that same edge and away from the inductor. The open strip to the right of the MCU is the pin-escape field.
+
+**MCU escape (generator):** Row/decoder GPIOs still use staggered F_Cu columns into the existing decoder spines. `LED_CLK` / `LED_SDI` / `LED_LE` / `LED_OE_N` must **not** reuse the LV125A reserve-drop vias near `x≈37` (that path shorted `LED_SDI` against `ROW_08_Y`). Those four nets use a **eastern In2 spine**: short F_Cu to `x=34 mm`, then In2 east to `x≈121 mm`, down to the reserve rail, and F_Cu only to the `RP_*` pad. Further cleanup likely needs the same pattern for USB, XTAL, and row-address columns (In2 lanes east of the row-select grid, not long F_Cu through it).
 3. `BQ25185`, battery connector, `TPS63802`, inductor, AON LDO, and both `TPS22917` switches.
 4. Microphone and `TLV9001` on the far right, opposite the switcher.
 5. Row translator, both 74HC154 devices, and the 32 × `AO3403` farm with gate and pull-up resistors.

@@ -253,29 +253,58 @@ def route_mcu_row_xlat_oe(board: pcbnew.BOARD) -> None:
     )
 
 
-def route_mcu_led_drops(board: pcbnew.BOARD) -> None:
-    """Reuse the same reserve-drop spines as the LV125A buffer stubs."""
-    _, _, footprint_by_reference, get_pad, millimeters, route_side_to_drop, _ = (
-        _helpers()
+def route_mcu_led_reserves(board: pcbnew.BOARD) -> None:
+    """In2 eastern spine to reserve pads (clears row fan-in / LED_SDI vs ROW_08_Y)."""
+    from generate_mono_split_boards import (
+        FAN_IN_TRACK_WIDTH_MM,
+        add_through_via,
+        footprint_by_reference,
+        get_pad,
+        millimeters,
+        reserve_pad_x,
+        route_net_polyline,
     )
+
+    track_width = FAN_IN_TRACK_WIDTH_MM
     u1 = footprint_by_reference(board, "U1")
-    led_drops = (
-        ("LED_CLK", "18", 57.00, 26.50, 32.99, 97.35),
-        ("LED_SDI", "19", 59.40, 30.50, 36.80, 97.35),
-        ("LED_LE", "21", 59.40, 27.90, 43.20, 97.35),
-        ("LED_OE_N", "22", 61.80, 29.40, 48.20, 96.70),
+    hop_x = 34.00
+    led_specs = (
+        ("LED_CLK", "18", 120.50, 10.95, 97.35),
+        ("LED_SDI", "19", 121.25, 10.35, 97.35),
+        ("LED_LE", "21", 122.00, 9.75, 97.35),
+        ("LED_OE_N", "22", 122.75, 9.15, 96.70),
     )
-    for net_name, u1_pad, spine_x, via_y, drop_x, bottom_y in led_drops:
+    for net_name, u1_pad, lane_x, bus_y, rail_y in led_specs:
         pad_x, pad_y = millimeters(get_pad(u1, u1_pad).GetPosition())
-        route_side_to_drop(
+        reserve_x = reserve_pad_x(board, net_name)
+        route_net_polyline(
             board,
             net_name,
-            pad_x,
-            pad_y,
-            spine_x,
-            via_y,
-            drop_x,
-            bottom_y,
+            pcbnew.F_Cu,
+            [(pad_x, pad_y), (pad_x, bus_y), (hop_x, bus_y)],
+            track_width,
+        )
+        net = board.FindNet(net_name)
+        add_through_via(board, net, hop_x, bus_y, diameter_mm=0.40)
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.In2_Cu,
+            [
+                (hop_x, bus_y),
+                (lane_x, bus_y),
+                (lane_x, rail_y),
+                (reserve_x, rail_y),
+            ],
+            track_width,
+        )
+        add_through_via(board, net, reserve_x, rail_y, diameter_mm=0.40)
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(reserve_x, rail_y), (reserve_x, 98.00)],
+            track_width,
         )
 
 
@@ -529,5 +558,5 @@ def route_esp32_mcu(board: pcbnew.BOARD) -> None:
     route_mcu_imu_links(board)
     route_mcu_row_address_joins(board)
     route_mcu_row_xlat_oe(board)
-    route_mcu_led_drops(board)
+    route_mcu_led_reserves(board)
     route_mcu_enable_joins(board)
