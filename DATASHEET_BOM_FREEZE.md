@@ -2,7 +2,9 @@
 
 Дата проверки: 2026-10-07.
 
-Статус: частичный freeze. Компоненты со статусом `OPEN` нельзя переносить в финальную схему или заказывать для PCBA без закрытия указанной проверки.
+Статус: частичный freeze. Полная generated hierarchy существует, но детали со
+статусом `BLOCKED` не имеют разрешённых production footprints и не могут
+заказываться для PCBA без закрытия указанной проверки.
 
 ## Источники
 
@@ -19,6 +21,11 @@
 - Nexperia 74HC154/HCT154 datasheet: https://assets.nexperia.com/documents/data-sheet/74HC_HCT154.pdf
 - AO3403 datasheet: https://www.aosmd.com/res/datasheets/AO3403.pdf
 - TPS22917 datasheet Rev. B: https://www.ti.com/lit/ds/symlink/tps22917.pdf
+- Molex Pico-Lock `504050-0391`, `504051-0301`, and `504052-0098` product
+  drawings and specification `PS-504051-001-001`.
+- Panasonic `EVPBL2A1F000` product page and current `EVPBL` series drawing.
+- TE Connectivity surface-mount NTC datasheet `CAT-NTC0003`.
+- Gettop `NA-FFA381-A10-1` manufacturer datasheet and product page.
 
 ## Подтверждённые решения
 
@@ -29,6 +36,10 @@
 - `GPIO10` и `GPIO11` находятся в `VDD3P3_RTC`; предварительное назначение IMU/button wake допустимо.
 - Native USB использует `GPIO19` как D− и `GPIO20` как D+. Espressif рекомендует зарезервировать последовательные 22/33 Ом рядом с MCU.
 - Подтверждены обязательный кварц 40 МГц с точностью ±10 ppm и стартовое значение 24 нГн последовательно с `XTAL_P`.
+- Для `L327S400H11L` выпущены отдельные 4-pin symbol и footprint по
+  manufacturer drawing: pins 1/3 — `XTAL_P/XTAL_N`, pins 2/4 — GND,
+  lands 1,40×1,20 мм с зазорами 0,80×0,50 мм. Прежний двухвыводный символ
+  был электрически несовместим с корпусом SMD3225-4P и удалён из генератора.
 - Подтверждена стартовая цепь `CHIP_PU`: 10 кОм и 1 мкФ. Для медленного или нестабильного питания необходимо оставить возможность установить supervisor.
 - Остаются открытыми полный pin audit, power-up glitches, ADC-конфликты и проверка routing в выбранной версии ESP-IDF.
 
@@ -68,18 +79,74 @@
 - `VFB` nominal равен 0,5 В, нижний резистор divider не должен превышать 100 кОм.
 - Для 4,1 В выбран divider 655/91 кОм, 0,1%, nominal около 4,099 В.
 - Предварительно выбран Murata `DFE201612E-R47M=P2`: 0,47 мкГн, Isat 5,5 А, thermal current 4,5 А, DCR до 26 мОм, высота 1,2 мм.
+- Локальный footprint `Murata_DFE201612E_2.0x1.6mm` воспроизводит
+  manufacturer recommended pattern: два lands 0,55×1,60 мм, межпадовый
+  зазор 0,90 мм и общий span 2,00 мм.
+- `TPS63802DLAR` назначен на локальный
+  `PartSignal_Packages:TI_DLA0010A_VSON-HR-10_2x3mm_P0.5mm`, созданный
+  по TI 4223750 Rev. D. Footprint сохраняет асимметричную HotRod-геометрию:
+  пять lands 0,60×0,25 мм, четыре lands 0,90×0,25 мм и pad 8
+  1,30×0,25 мм с двумя stencil apertures и покрытием paste около 83,8%.
 - Остаются открытыми проверка точного ordering code/stock, output-current margin при минимальном BAT, enclosure thermal test и load-transient measurement.
 
 ### Row selection и domain isolation — CONDITIONAL
 
 - Прямое управление 74HC154 от ESP32-S3 запрещено: при LED_4V1 = 4,1 В требуемый `VIH` около 2,87 В, а гарантированный MCU `VOH` около 2,64 В.
 - Выбран `SN74LVC8T245RHLR`: VCCA = 3,3 В, VCCB = LED_4V1, `Ioff`, VCC isolation и аппаратный `/OE` pull-up.
+- Для `SN74LVC8T245RHLR` создан точный footprint TI `RHL0024A` по
+  package drawing 4225250 Rev. C: VQFN-24 3,5×5,5 мм, pitch 0,5 мм,
+  signal lands 0,60×0,24 мм и exposed pad 2,05×4,05 мм. Exposed pad
+  электрически объединён с GND pin 11; paste разбита на четыре окна с
+  покрытием около 78%.
 - Выбраны два Nexperia `74HC154PW,118` в TSSOP-24 и `AO3403` для каждой строки.
 - `AO3403` имеет Qg около 2,8 нКл typical и RDS(on) до 200 мОм при VGS = −2,5 В. Voltage drop и switching dead time остаются EVT-параметрами.
 - Для изоляции MBI5124 выбран `SN74LV125APWR`, который явно специфицирует `Ioff`; похожий `SN74LVC125A` отклонён из-за отсутствия явной partial-power-down гарантии.
 - Для обязательного configuration readback выбран отдельный `SN74LVC1G125DBVR`: вход от SDO последнего MBI5124, выход `LED_SDO_RETURN` на `GPIO48`, `/OE` на GND и 100 кОм pull-down на стороне MCU. Его `Ioff` гарантирует изоляцию при выключенном `LED_LOGIC_3V3`.
 - Для обоих отключаемых 3,3-вольтовых доменов выбран `TPS22917DBVR`; нужны внешние enable pull-down и configurable QOD.
 - Полная topology, pulls и sequencing зафиксированы в `hardware/common/PCB_ARCHITECTURE.md`.
+
+### BMI270, MAX17048 и package release — CONDITIONAL
+
+- `BMI270` назначен на KiCad
+  `Package_LGA:Bosch_LGA-14_3x2.5mm_P0.5mm`, соответствующий Bosch
+  14-pin LGA 3,0×2,5 мм и datasheet landing pattern.
+- `MAX17048G+T10` назначен на
+  `Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm`,
+  соответствующий Maxim package outline 21-0168 и land pattern 90-0065.
+  Exposed pad добавлен в symbol как GND pin 9.
+- `BQ25185DLHR` назначен на
+  `Package_DFN_QFN:Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm`.
+  Exposed pad добавлен в symbol как GND pin 11.
+- Эти package releases, включая `TPS63802DLAR`, закрывают геометрию, но не
+  заменяют low-power/wake,
+  fuel-gauge runtime, TS/NTC, charger thermal и power-ramp EVT.
+
+### Внешние EVT-компоненты — CONDITIONAL
+
+- Для трёхпроводного интерфейса аккумулятора выбран комплект Molex Pico-Lock
+  1.50 мм: SMT header `504050-0391`, housing `504051-0301` и terminals
+  `504052-0098`. Header рассчитан максимум на 3,5 А/contact, terminal — на
+  3,0 А/contact; диапазон провода 24–28 AWG, mated height 2,0 мм, ресурс
+  30 mating cycles, температура −40…+105 °C. До заморозки требуются
+  подтверждение жгута батареи, pin order, polarity, derating и wire exit.
+- Для задней кнопки выбран Panasonic `EVPBL2A1F000`: top-push SMD
+  2,8×1,9×0,53 мм, 1,6 Н, travel 0,15 мм, ресурс 300 000 циклов,
+  −40…+85 °C. IP67 относится только к отдельному компоненту; plunger stack,
+  preload и защита собранного корпуса остаются механическими проверками.
+  Локальный footprint воспроизводит четыре lands 0,63×0,60 мм и
+  manufacturer no-solder region.
+- PCB temperature sensor выбран как TE Connectivity `20021086-05`: NTC 0402,
+  10 кОм ±1% при 25 °C, B25/85 = 3435 К, −40…+150 °C. Battery NTC остаётся
+  частью квалифицированного battery pack и не заменяется этим компонентом.
+  В схеме назначен стандартный KiCad 0402 reflow footprint.
+- Для `MA-HFA381-H13-1AF` добавлен pin/acoustic-compatible EVT alternate
+  Gettop `NA-FFA381-A10-1`, LCSC `C50275774`: top-port analog MEMS,
+  2,75×1,85×1,0 мм, 1,6…3,6 В, 120 мкА typical, sensitivity −38 dBV ±1 dB,
+  SNR 64 dBA, AOP 127 dB SPL. Pins: 1 VDD, 2/3 GND, 4 OUT. Выпущены
+  отдельные symbol и manufacturer footprint с четырьмя lands 0,60×0,54 мм;
+  AFE bias/gain, acoustic seal и noise ещё требуют проверки.
+- Bottom-port `MA-HRA381-H23-3` отклонён как акустически несовместимый.
+  Panasonic `ERTJ0EG103FA` отклонён для нового дизайна из-за статуса `NRFND`.
 
 ### Расчётная модель — CONDITIONAL
 
@@ -89,12 +156,16 @@
 - При SPI 20 МГц и 1,5 мкс break-before-make расчётный LSB hold остаётся положительным: 4,09 мкс и 4,33 мкс.
 - Это screening model, не замена SPICE, SI/PI, enclosure thermal и EVT-измерениям.
 
-## Блокирующие вопросы до схемы
+## Блокирующие вопросы до production layout
 
 1. Выбрать точный USB-C и завершить механический cross-section.
-2. Завершить pin audit ESP32-S3FN8, включая reset glitches и состояние всех LED/charger GPIO до запуска firmware.
-3. Проверить оставшиеся критические компоненты: BMI270, MAX17048, TPS7A2033, microphone, TLV9001 и USB ESD.
-4. Получить актуальные stock/lifecycle данные и compatible alternate минимум для LED, драйвера, microphone и DC/DC.
+2. Завершить reset-glitch/ESP-IDF audit ESP32-S3FN8; физические QFN56 pins и
+   GPIO назначения проверены в `hardware/common/MCU_PIN_AUDIT.md`.
+3. Получить полный Molex sales drawing и выпустить точный 3-pin header
+   footprint; проверить TLV9001, TPS7A2033 и USB ESD layout.
+4. Получить актуальные stock/lifecycle данные и compatible alternate минимум
+   для LED, драйвера и DC/DC; Gettop microphone alternate уже выбран
+   условно, но требует supplier quote и footprint/AFE review.
 
 ## Gate для начала KiCad
 
@@ -108,6 +179,12 @@ row и RGB-column connections.
 Row-selection projects содержат translator, два decoder banks и 20/28 PMOS;
 оба проходят ERC без нарушений, а XML netlist подтверждает каждую цепь
 decoder-output/gate/row и явные NC. Точный TI RHL-24 footprint translator
-остаётся открытым и не назначен.
-Non-BOM ERC harness необходимо заменить реальными top-level MCU, power и matrix
-sheets при сборке полной иерархии. USB placement нельзя фиксировать до пункта 1.
+назначен и проверяется из локальной библиотеки
+`hardware/libraries/packages.pretty`.
+Обе harness-free top-level hierarchy содержат power, MCU/USB, IMU/gauge/input,
+audio, LED drivers, row selection и полную matrix; standalone harness sheets
+сохранены только для автономного ERC. USB connector, battery pack и battery
+NTC остаются заблокированы. Rear button, PCB NTC и alternate microphone
+добавлены в hierarchy с проверенными pad mappings; battery connector footprint,
+механические и акустические проверки ещё не выпущены, поэтому hierarchy не
+является разрешением на PCBA-заказ.

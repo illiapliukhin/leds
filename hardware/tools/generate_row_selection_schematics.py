@@ -24,6 +24,10 @@ DECODER_LIBRARY_ID = "74xx:74LS154"
 PMOS_LIBRARY_ID = "Transistor_FET:Q_PMOS_GSD"
 DECODER_FOOTPRINT = "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm"
 PMOS_FOOTPRINT = "Package_TO_SOT_SMD:SOT-23"
+TRANSLATOR_FOOTPRINT = (
+    "PartSignal_Packages:"
+    "TI_RHL0024A_VQFN-24-1EP_3.5x5.5mm_P0.5mm_EP2.05x4.05mm"
+)
 DECODER_OUTPUT_PINS = (
     "1",
     "2",
@@ -100,10 +104,10 @@ def add_translator(schematic: Schematic, generation_key: str) -> None:
         reference=reference,
         value="SN74LVC8T245RHLR",
         position=(55.88, 55.88),
-        footprint="",
+        footprint=TRANSLATOR_FOOTPRINT,
         properties={
             "Function": "U_ROW_XLAT",
-            "FootprintStatus": "OPEN_RHL24_LAND_PATTERN",
+            "FootprintStatus": "RELEASED_TI_RHL0024A_4225250_REV_C",
         },
     )
 
@@ -430,10 +434,19 @@ def add_erc_harness(
 def generate_variant_row_selection(
     repository_root: Path,
     variant: MatrixVariant,
+    *,
+    standalone_erc: bool = False,
 ) -> Path:
     generation_key = f"row-selection:{variant.directory_name}"
+    if standalone_erc:
+        generation_key += ":standalone-erc"
     output_directory = repository_root / "hardware" / variant.directory_name
-    output_path = output_directory / "row_selection.kicad_sch"
+    output_name = (
+        "row_selection_standalone_erc.kicad_sch"
+        if standalone_erc
+        else "row_selection.kicad_sch"
+    )
+    output_path = output_directory / output_name
     output_directory.mkdir(parents=True, exist_ok=True)
     write_project_library_tables(output_directory, project_name="row_selection")
 
@@ -454,7 +467,8 @@ def generate_variant_row_selection(
     )
     add_translator(schematic, generation_key)
     add_row_banks(schematic, generation_key, variant)
-    add_erc_harness(schematic, generation_key, variant)
+    if standalone_erc:
+        add_erc_harness(schematic, generation_key, variant)
     schematic.save(output_path)
     subprocess.run(
         ("kicad-cli", "sch", "upgrade", "--force", str(output_path)),
@@ -475,6 +489,12 @@ def main() -> None:
             variant,
         )
         print(f"Generated {generated_path}")
+        standalone_path = generate_variant_row_selection(
+            repository_root,
+            variant,
+            standalone_erc=True,
+        )
+        print(f"Generated {standalone_path}")
 
 
 if __name__ == "__main__":

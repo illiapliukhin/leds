@@ -43,4 +43,80 @@
 - Use fail-fast shell execution for multi-stage verification commands. Without `set -e`, a failed Python assertion was masked by later successful commands and the shell returned exit code zero.
 - Run all KiCad CLI schematic commands sequentially, including ERC and exports. Parallel `kicad-cli` processes share an instance lock directory and emit invalid-lock warnings; this mistake recurred when row-selector ERC was parallelized after the narrower export-only rule had already been recorded.
 - Verify generated connectivity through the exported XML netlist when symbols are rotated. `kicad-sch-api` pin-based label placement on a 90-degree two-pin resistor connects labels to the opposite serialized pin numbers, so compensate the requested endpoints explicitly. Simply removing rotation caused vertically stacked resistor endpoints to overlap and merge unrelated labels.
+- This environment does not provide a `python` alias. Invoke repository
+  generators with `python3` after checking the setup status.
+- In KiCad 10 Python checks, `CONNECTIVITY_DATA.GetUnconnectedCount` requires
+  the `visibleOnly` boolean argument; pass `False` for a complete board check.
+- Model multifunction strap pins by their use in the selected interface.
+  BMI270 `SDO` is an SPI output but an I²C address strap in this design; marking
+  it output caused a false output-to-power-output ERC error when tied to GND.
+- Do not assign a multi-pad crystal footprint to a generic two-pin symbol.
+  Verify the manufacturer terminal table and model signal pins plus grounded
+  case pads explicitly; `L327S400H11L` requires signals on pins 1/3 and GND on
+  pins 2/4.
+- When counting KiCad DRC categories in a text report, match category headers
+  at the start of a line. Counting `[` characters also counts bracketed net
+  names such as `[GND]` in violation details and produces false failures.
+- Do not derive a footprint from search-result synthesis or extracted dimension
+  tables alone; packaging dimensions can be mistaken for land-pattern
+  dimensions. Inspect the primary drawing and its graphical dimension arrows
+  before encoding pad geometry.
+- Do not let an analysis generator use the mutable production PCB as its input.
+  Build probes and repeated routing from a clean skeleton so reruns cannot
+  duplicate copper or erase later backside placement. This applies to every
+  probe generator, not only the full-matrix generator; the legacy edge probe
+  path duplicated vias after production promotion until it was converted too.
+- KiCad assigns fresh internal UUIDs to newly created board items unless the
+  generator sets them explicitly. Do not use whole-file hashes as a
+  reproducibility gate until board, footprint, pad, graphic, track, via, and
+  zone UUIDs are deterministic.
+- `pcbnew.SaveBoard` can create or rewrite a sibling `.kicad_pro`. Generated
+  analysis boards must be saved in a temporary directory and copied back as
+  `.kicad_pcb` only, so verification cannot mutate project metadata.
+- Do not begin dense backside placement from a nominal battery rectangle
+  without an area-feasibility check. Sum the actual non-text footprint
+  envelopes from the root netlist and compare them with the available board
+  area; the 20×20 design has approximately 1673 mm² of non-LED envelopes but
+  only approximately 1150 mm² outside its provisional 32×40 mm battery
+  projection, so a component-free projection cannot be claimed.
+- Do not replace measured footprint-envelope area with a guessed average area
+  per component. The resulting side-rail zoning understated 20×20 placement
+  demand by more than 2×. Also do not treat all area outside the battery
+  rectangle as placeable: the through-via LED field leaves only a border, and
+  the measured via-to-via gap is 0.10 mm. Blind vias can turn the matrix back
+  side into placement area; a larger outline is the through-via alternative.
+- `FOOTPRINT.Flip` segfaults before `board.Add`. Align placement to
+  `GetBoundingBox(False, False)`, because the footprint anchor is not the
+  courtyard center. Force reference text angle to 0 after rotation, and keep
+  footprint envelopes at least 0.30 mm apart so 0.15 mm silk clearance holds.
+  Do not batch-remove footprints from one materialized footprint list; the
+  proxies dangle. Regenerate backside placement from the matrix artifact.
+- Do not change a generated board outline while routing generators still use
+  hard-coded LED margins or edge-bus coordinates. Derive LED centers and outer
+  row buses from board size, matrix size, and pitch, then rerun every topology
+  and DRC gate before promoting the resized board.
+- Do not route the border across `F.Cu`. LED pads and solder-mask webs sit
+  there; keep escapes on `B.Cu` and `In2.Cu`, and keep `In1.Cu` free for the
+  ground plane. Commit orthogonal runs, not one segment per grid step and not
+  a single diagonal between Manhattan endpoints.
+- Choose a pad escape toward the nearest courtyard edge. The larger offset
+  from the footprint center sends a top-row end pin sideways through the
+  neighboring pins. Block every other courtyard on `B.Cu` so one escape cannot
+  seal the rest of the package.
+- Do not treat a pad bounding box as copper. KiCad 10 roundrect pads leave the
+  box corner empty, so a track that stops there dangles and does not reduce
+  the ratsnest. Start and stop on an inset of the pad, then extend to the
+  pad center.
+- Keep new via centers at least one via diameter plus 0.10 mm apart, with an
+  extra half grid step. Stamping only the via diameter lets neighboring vias
+  land 0.05 mm inside the clearance rule.
+- Do not move all six MBI5124 packages into the low-Y border to create escape
+  channels. That strip already holds about 474 mm² of other envelopes, and the
+  side columns freed by the move are narrower than the displaced parts.
+- The visible face stays LED-only. Do not grow the LED board into a wide
+  component rim so that 400 pixels become a larger product than 784. Put
+  the remaining circuits on the back, and when the through-via field blocks
+  that side, stack a rear board and join the pair with a mating
+  board-to-board connector. Do not freeze that connector from a pin count
+  alone; LED supply current has to cross it too.
 

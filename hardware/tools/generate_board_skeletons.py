@@ -2,6 +2,9 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 import math
 from pathlib import Path
+import shutil
+import tempfile
+import uuid
 
 import pcbnew
 
@@ -20,7 +23,7 @@ BOARD_VARIANTS = (
     BoardVariant(
         name="wearable_20x20",
         matrix_size=20,
-        board_size_mm=49.3,
+        board_size_mm=69.0,
         led_pitch_mm=2.5,
         battery_width_mm=32.0,
         battery_height_mm=40.0,
@@ -56,6 +59,71 @@ SOLDER_MASK_EXPANSION_MM = 0.0
 MINIMUM_SILK_TEXT_HEIGHT_MM = 1.0
 MINIMUM_SILK_TEXT_THICKNESS_MM = 0.15
 MINIMUM_SILK_CLEARANCE_MM = 0.15
+
+
+def deterministic_kiid(name: str) -> pcbnew.KIID:
+    return pcbnew.KIID(str(uuid.uuid5(uuid.NAMESPACE_URL, name)))
+
+
+def assign_deterministic_board_uuids(
+    board: pcbnew.BOARD,
+    generation_key: str,
+) -> None:
+    board.SetUuid(deterministic_kiid(f"{generation_key}:board"))
+
+    for footprint_index, footprint in enumerate(
+        sorted(
+            board.GetFootprints(),
+            key=lambda item: item.GetReference(),
+        )
+    ):
+        footprint_key = (
+            f"{generation_key}:footprint:{footprint_index}:"
+            f"{footprint.GetReference()}"
+        )
+        footprint.SetUuid(deterministic_kiid(footprint_key))
+        for field_index, field in enumerate(footprint.GetFields()):
+            field.SetUuid(
+                deterministic_kiid(f"{footprint_key}:field:{field_index}")
+            )
+        for pad_index, pad in enumerate(footprint.Pads()):
+            pad.SetUuid(
+                deterministic_kiid(f"{footprint_key}:pad:{pad_index}")
+            )
+        for graphic_index, graphic in enumerate(footprint.GraphicalItems()):
+            graphic.SetUuid(
+                deterministic_kiid(
+                    f"{footprint_key}:graphic:{graphic_index}"
+                )
+            )
+
+    for drawing_index, drawing in enumerate(board.Drawings()):
+        drawing.SetUuid(
+            deterministic_kiid(f"{generation_key}:drawing:{drawing_index}")
+        )
+
+    for track_index, track in enumerate(board.GetTracks()):
+        track.SetUuid(
+            deterministic_kiid(f"{generation_key}:track:{track_index}")
+        )
+
+    for zone_index, zone in enumerate(board.Zones()):
+        zone.SetUuid(
+            deterministic_kiid(f"{generation_key}:zone:{zone_index}")
+        )
+
+
+def save_board_without_project_side_effects(
+    output_path: Path,
+    board: pcbnew.BOARD,
+) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        temporary_path = (
+            Path(temporary_directory) / output_path.name
+        )
+        pcbnew.SaveBoard(str(temporary_path), board)
+        shutil.copyfile(temporary_path, output_path)
 
 
 def add_line(
@@ -449,15 +517,38 @@ def validate_board(board: pcbnew.BOARD, variant: BoardVariant) -> None:
         )
 
 
+def get_board_variant(variant_name: str) -> BoardVariant:
+    for variant in BOARD_VARIANTS:
+        if variant.name == variant_name:
+            return variant
+
+    raise ValueError(f"Unknown board variant: {variant_name}")
+
+
+def create_board(
+    repository_root: Path,
+    variant: BoardVariant,
+) -> pcbnew.BOARD:
+    board = configure_board(variant, repository_root)
+    validate_board(board, variant)
+    assign_deterministic_board_uuids(
+        board,
+        f"matrix-skeleton:{variant.name}",
+    )
+    return board
+
+
 def generate_boards(repository_root: Path) -> None:
     for variant in BOARD_VARIANTS:
-        output_directory = repository_root / "hardware" / variant.name
+        output_directory = repository_root / "hardware" / "analysis"
         output_directory.mkdir(parents=True, exist_ok=True)
-        output_path = output_directory / f"{variant.name}.kicad_pcb"
+        output_path = (
+            output_directory
+            / f"{variant.name}_matrix_skeleton.kicad_pcb"
+        )
 
-        board = configure_board(variant, repository_root)
-        validate_board(board, variant)
-        pcbnew.SaveBoard(str(output_path), board)
+        board = create_board(repository_root, variant)
+        save_board_without_project_side_effects(output_path, board)
         print(f"Generated {output_path}")
 
 

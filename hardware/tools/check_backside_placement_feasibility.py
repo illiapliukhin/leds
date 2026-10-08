@@ -1,0 +1,219 @@
+from dataclasses import dataclass
+import math
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+import xml.etree.ElementTree as ElementTree
+
+import pcbnew
+
+
+BOARD_SIZE_MM = 69.0
+BATTERY_WIDTH_MM = 32.0
+BATTERY_HEIGHT_MM = 40.0
+MATRIX_SIZE = 20
+LED_PITCH_MM = 2.5
+VIA_FIELD_OVERHANG_MM = 0.6
+EDGE_CLEARANCE_MM = 0.3
+EXPECTED_LED_COUNT = 400
+EXPECTED_NON_LED_COUNT = 172
+LED_VALUE = "MHPA1010RGBDT"
+PRACTICAL_PACKING_EFFICIENCY = 0.85
+LOCAL_FOOTPRINT_DIRECTORIES = {
+    "PartSignal_LEDs": Path(__file__).resolve().parents[1]
+    / "libraries"
+    / "leds.pretty",
+    "PartSignal_Packages": Path(__file__).resolve().parents[1]
+    / "libraries"
+    / "packages.pretty",
+}
+KICAD_FOOTPRINT_DIRECTORY = Path(
+    os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
+)
+
+
+@dataclass(frozen=True)
+class ComponentEnvelope:
+    reference: str
+    footprint_identifier: str
+    width_mm: float
+    height_mm: float
+
+    @property
+    def area_mm2(self) -> float:
+        return self.width_mm * self.height_mm
+
+
+def export_root_netlist(repository_root: Path, output_path: Path) -> None:
+    schematic_path = (
+        repository_root
+        / "hardware"
+        / "wearable_20x20"
+        / "wearable_20x20.kicad_sch"
+    )
+    subprocess.run(
+        (
+            "kicad-cli",
+            "sch",
+            "export",
+            "netlist",
+            "--format",
+            "kicadxml",
+            "-o",
+            str(output_path),
+            str(schematic_path),
+        ),
+        check=True,
+        cwd=schematic_path.parent,
+    )
+
+
+def resolve_footprint_directory(library_name: str) -> Path:
+    local_directory = LOCAL_FOOTPRINT_DIRECTORIES.get(library_name)
+    if local_directory is not None:
+        return local_directory
+    return KICAD_FOOTPRINT_DIRECTORY / f"{library_name}.pretty"
+
+
+def load_component_envelope(
+    reference: str,
+    footprint_identifier: str,
+) -> ComponentEnvelope:
+    if ":" not in footprint_identifier:
+        raise ValueError(
+            f"{reference}: invalid footprint identifier "
+            f"{footprint_identifier!r}"
+        )
+
+    library_name, footprint_name = footprint_identifier.split(":", 1)
+    footprint = pcbnew.FootprintLoad(
+        str(resolve_footprint_directory(library_name)),
+        footprint_name,
+    )
+    if footprint is None:
+        raise FileNotFoundError(
+            f"{reference}: cannot load {footprint_identifier}"
+        )
+
+    bounding_box = footprint.GetBoundingBox(False, False)
+    return ComponentEnvelope(
+        reference=reference,
+        footprint_identifier=footprint_identifier,
+        width_mm=pcbnew.ToMM(bounding_box.GetWidth()),
+        height_mm=pcbnew.ToMM(bounding_box.GetHeight()),
+    )
+
+
+def read_component_envelopes(
+    netlist_path: Path,
+) -> tuple[int, list[ComponentEnvelope]]:
+    root = ElementTree.parse(netlist_path).getroot()
+    components = root.findall("./components/comp")
+    led_count = sum(
+        component.findtext("value", default="") == LED_VALUE
+        for component in components
+    )
+    non_led_envelopes = [
+        load_component_envelope(
+            component.get("ref", ""),
+            component.findtext("footprint", default="").strip(),
+        )
+        for component in components
+        if component.findtext("value", default="") != LED_VALUE
+    ]
+    return led_count, non_led_envelopes
+
+
+def verify_component_counts(
+    led_count: int,
+    non_led_envelopes: list[ComponentEnvelope],
+) -> None:
+    if led_count != EXPECTED_LED_COUNT:
+        raise ValueError(
+            f"expected {EXPECTED_LED_COUNT} LEDs, found {led_count}"
+        )
+    if len(non_led_envelopes) != EXPECTED_NON_LED_COUNT:
+        raise ValueError(
+            f"expected {EXPECTED_NON_LED_COUNT} non-LED components, "
+            f"found {len(non_led_envelopes)}"
+        )
+
+
+def main() -> None:
+    repository_root = Path(__file__).resolve().parents[2]
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        netlist_path = Path(temporary_directory) / "wearable_20x20.xml"
+        export_root_netlist(repository_root, netlist_path)
+        led_count, non_led_envelopes = read_component_envelopes(netlist_path)
+
+    verify_component_counts(led_count, non_led_envelopes)
+    component_envelope_area_mm2 = sum(
+        component.area_mm2 for component in non_led_envelopes
+    )
+    via_field_size_mm = (
+        (MATRIX_SIZE - 1) * LED_PITCH_MM + 2 * VIA_FIELD_OVERHANG_MM
+    )
+    border_width_mm = (
+        BOARD_SIZE_MM - via_field_size_mm
+    ) / 2 - EDGE_CLEARANCE_MM
+    placeable_outer_size_mm = BOARD_SIZE_MM - 2 * EDGE_CLEARANCE_MM
+    placeable_area_mm2 = (
+        placeable_outer_size_mm * placeable_outer_size_mm
+        - via_field_size_mm * via_field_size_mm
+    )
+    utilization_percent = (
+        component_envelope_area_mm2 / placeable_area_mm2 * 100.0
+    )
+    widest_component = max(
+        non_led_envelopes,
+        key=lambda component: min(component.width_mm, component.height_mm),
+    )
+    required_border_mm = min(
+        widest_component.width_mm,
+        widest_component.height_mm,
+    )
+    practical_area_mm2 = component_envelope_area_mm2 / PRACTICAL_PACKING_EFFICIENCY
+    practical_side_mm = (
+        math.sqrt(practical_area_mm2 + via_field_size_mm * via_field_size_mm)
+        + 2 * EDGE_CLEARANCE_MM
+    )
+
+    print(
+        f"20x20: {led_count} LEDs and "
+        f"{len(non_led_envelopes)} non-LED components"
+    )
+    print(
+        "Non-LED assembly-envelope area: "
+        f"{component_envelope_area_mm2:.1f} mm^2"
+    )
+    print(
+        "Via-free border: "
+        f"{border_width_mm:.2f} mm around a {via_field_size_mm:.1f} mm field"
+    )
+    print(f"Via-free placeable area: {placeable_area_mm2:.1f} mm^2")
+    print(f"Envelope utilization of via-free area: {utilization_percent:.1f}%")
+    print(
+        "Square-side baseline for "
+        f"{PRACTICAL_PACKING_EFFICIENCY:.0%} via-free packing: "
+        f"{practical_side_mm:.1f} mm"
+    )
+
+    if border_width_mm < required_border_mm:
+        raise ValueError(
+            f"{widest_component.reference} needs a {required_border_mm:.2f} mm "
+            "border after rotation, but the via-free border is "
+            f"{border_width_mm:.2f} mm"
+        )
+    if component_envelope_area_mm2 > (
+        placeable_area_mm2 * PRACTICAL_PACKING_EFFICIENCY
+    ):
+        raise ValueError(
+            "through-via matrix leaves insufficient backside area: "
+            f"component envelopes need {practical_side_mm:.1f} mm at "
+            f"{PRACTICAL_PACKING_EFFICIENCY:.0%} packing"
+        )
+
+
+if __name__ == "__main__":
+    main()

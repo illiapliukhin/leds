@@ -100,6 +100,13 @@ Column-boundary probes prove the upper `0°|90°` and lower `270°|180°` juncti
 
 The full-matrix generator expands the proven orientation map across every LED while adapting the midpoint transitions to the neighboring trunks:
 
+- generation always starts from a clean in-memory skeleton and never consumes
+  the working production PCB, so repeated runs cannot duplicate matrix copper;
+- `generate_board_skeletons.py` writes reviewable skeletons under
+  `hardware/analysis` instead of overwriting working boards;
+- generated board/items receive deterministic KiCad UUIDs, and
+  `verify_matrix_generation.py` compares SHA-256 across two complete runs
+  before applying the promotion topology checks;
 - standard midpoint cells keep G on L3, R on L4, and B continuity on L1;
 - edge midpoint cells use one L3 crossover, one short L4 crossover, and separated L4 doglegs around the row vias;
 - regular L4 RGB trunks resume outside each transition cell;
@@ -117,7 +124,7 @@ KiCad semantic checks confirm:
 | Row nets present on L3 | 20 | 28 |
 | Tracks on L2 | 0 | 0 |
 
-The orientation counts are 180/20/180/20 for 0°/90°/180°/270° on 20×20 and 364/28/364/28 on 28×28. Every generated via is a standard through via with a 0.20 mm drill.
+The orientation counts are 180/20/180/20 for 0°/90°/180°/270° on 20×20 and 364/28/364/28 on 28×28. Every generated via is a standard through via with a 0.20 mm drill. Promotion rejects any mismatch in LED-only footprint scope, orientation counts, total tracks/vias, 0.40/0.45 mm via counts, drill size, L3 row-net coverage, L2 occupancy, or connectivity.
 
 ## Preliminary electrical estimate
 
@@ -154,6 +161,15 @@ This is a conventional through-via process but creates substantial L2 ground-pla
 3. reserve L4 vertical channels from backside component pads;
 4. add row feeds and RGB driver exits without blocking the proven corridors;
 5. compare against a lower-via interior pattern only if it remains simpler and DRC-clean.
+
+`hardware/tools/add_l2_ground_plane.py` generates a non-production 20×20
+probe with a 0.30 mm edge inset and 0.10 mm clearance/minimum thickness.
+After all 1,564 matrix-via antipads are applied, KiCad reports one contiguous
+fill outline, 1,919.9 mm² of copper, and 81.0% coverage of the nominal zone.
+The probe intentionally retains an isolated-copper warning because no
+backside GND pad exists yet. This proves gross geometric continuity only; it
+does not prove electrical grounding, local return-path quality, or minimum
+neck width after component placement.
 
 ## Release gate
 

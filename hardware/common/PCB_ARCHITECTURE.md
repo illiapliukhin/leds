@@ -1,9 +1,12 @@
 # Common PCB architecture
 
-Status: partial KiCad 10 schematic implementation. Generated LED-driver and
-complete LED-matrix and row-selection projects exist for both variants; power,
-MCU, and top-level hierarchy remain incomplete. Values marked `EVT` require
-measurement before production release.
+Status: conditional KiCad 10 hierarchy. Generated power, MCU/USB,
+IMU/gauge/input, audio, LED-driver, complete LED-matrix, and row-selection
+sheets are assembled into harness-free roots for both variants. The DRC-proven
+matrix routing is promoted into both working PCBs. Exact externally selected
+parts, several critical footprints, backside placement/routing, and L2 GND
+remain incomplete. Values marked `EVT` require measurement before production
+release.
 
 ## Power domains
 
@@ -198,7 +201,14 @@ annotation is frozen.
 
 ## Board and marking conventions
 
-- Preliminary outlines are 49.3 × 49.3 mm and 61.2 × 61.2 mm. The extra 0.1 mm over the original estimates provides 0.30 mm copper-to-routed-edge clearance at the outer LED pads.
+- The visible face of each product is the LED field only. No non-LED part
+  is placed on that face. Power, MCU, drivers, sensors, and connectors sit
+  on the back of the LED board when the via field leaves room, and otherwise
+  on a second board stacked behind it. The two boards mate through one
+  board-to-board connector that carries the row anodes, RGB columns, LED
+  supply, and ground. That connector is not frozen. The 28×28 LED field is
+  the larger of the two faces. A wide single-board rim is not the product
+  outline.
 - These outlines are not production-frozen. A dedicated top-edge escape using a 0.40 mm L3 row bus and RGB transitions to L4 passes KiCad DRC at both matrix pitches. Keep the current bezel-free outline while expanding and checking the full matrix, the other three edges, L2 continuity, and driver exits. See `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`.
 - Fabrication and panel rules are defined in `manufacturing/JLCPCB_STANDARD_PCBA_RULES.md`. Use JLCPCB Standard PCBA, not Economic PCBA, because assembly is two-sided.
 - `hardware/libraries/leds.pretty/MHPA1010RGBDT.kicad_mod` comes from manufacturer datasheet Rev.2 page 2.

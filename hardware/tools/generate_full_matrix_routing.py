@@ -2,6 +2,10 @@ from pathlib import Path
 
 import pcbnew
 
+from generate_board_skeletons import (
+    assign_deterministic_board_uuids,
+    save_board_without_project_side_effects,
+)
 from generate_edge_routing_probe import (
     INNER_ROW_WIDTH_MM,
     MATRIX_RGB_VIA_DIAMETER_MM,
@@ -14,7 +18,9 @@ from generate_edge_routing_probe import (
     add_track,
     add_through_via,
     get_led,
+    get_outer_row_bus_y,
     get_pad,
+    get_row_center,
     millimeters,
     route_anode,
     route_rgb_to_back,
@@ -26,7 +32,7 @@ from generate_orientation_boundary_probes import (
     ROTATED_PROFILE,
     TOP_RIGHT_PROFILE,
     OrientationRoutingProfile,
-    get_board_path,
+    create_skeleton_board,
     get_led_reference,
 )
 
@@ -53,17 +59,15 @@ def get_row_bus_spec(
     variant: ProbeVariant,
     row_number: int,
 ) -> tuple[float, float]:
-    row_center_y_mm = (
-        0.9 + (row_number - 1) * variant.led_pitch_mm
-    )
+    row_center_y_mm = get_row_center(variant, row_number)
     transition_rows = (
         variant.matrix_size // 2,
         variant.matrix_size // 2 + 1,
     )
     if row_number == 1:
-        return 0.525, OUTER_ROW_WIDTH_MM
+        return get_outer_row_bus_y(variant, top=True), OUTER_ROW_WIDTH_MM
     if row_number == variant.matrix_size:
-        return variant.board_size_mm - 0.525, OUTER_ROW_WIDTH_MM
+        return get_outer_row_bus_y(variant, top=False), OUTER_ROW_WIDTH_MM
     if row_number == transition_rows[0]:
         return row_center_y_mm - 0.385, TRANSITION_ROW_WIDTH_MM
     if row_number == transition_rows[1]:
@@ -94,6 +98,7 @@ def route_profiled_anode(
     profile: OrientationRoutingProfile,
     row_bus_y_mm: float,
     row_bus_width_mm: float,
+    minimum_via_y_mm: float,
     maximum_via_y_mm: float,
 ) -> float:
     if profile.vertical_direction > 0:
@@ -103,6 +108,7 @@ def route_profiled_anode(
             row_bus_y_mm,
             row_bus_width_mm,
             profile.anode_via_x_offset_mm,
+            minimum_via_y_mm,
         )
     return route_rotated_anode(
         board,
@@ -602,7 +608,7 @@ def route_full_matrix(
         / "analysis"
         / f"{variant.board_name}_full_matrix_routing.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(get_board_path(repository_root, variant)))
+    board = create_skeleton_board(repository_root, variant)
     upper_transition_row = variant.matrix_size // 2
     lower_transition_row = upper_transition_row + 1
     transition_positions: dict[
@@ -616,9 +622,7 @@ def route_full_matrix(
     row_via_positions: dict[int, list[float]] = {}
 
     for row_number in range(1, variant.matrix_size + 1):
-        row_center_y_mm = (
-            0.9 + (row_number - 1) * variant.led_pitch_mm
-        )
+        row_center_y_mm = get_row_center(variant, row_number)
         if row_number in (upper_transition_row, lower_transition_row):
             continue
         for column_number in range(1, variant.matrix_size + 1):
@@ -719,7 +723,8 @@ def route_full_matrix(
                 )
             )
 
-    maximum_via_y_mm = variant.board_size_mm - 0.525
+    minimum_via_y_mm = get_outer_row_bus_y(variant, top=True)
+    maximum_via_y_mm = get_outer_row_bus_y(variant, top=False)
     for row_number in range(1, variant.matrix_size + 1):
         row_bus_y_mm, row_bus_width_mm = get_row_bus_spec(
             variant,
@@ -741,6 +746,7 @@ def route_full_matrix(
                 profile,
                 row_bus_y_mm,
                 row_bus_width_mm,
+                minimum_via_y_mm,
                 maximum_via_y_mm,
             )
             row_via_positions.setdefault(row_number, []).append(via_x_mm)
@@ -871,7 +877,11 @@ def route_full_matrix(
                 lower_waypoints,
             )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    assign_deterministic_board_uuids(
+        board,
+        f"full-matrix:{variant.board_name}",
+    )
+    save_board_without_project_side_effects(output_path, board)
     return output_path
 
 

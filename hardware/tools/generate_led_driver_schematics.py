@@ -13,6 +13,7 @@ KICAD_SYMBOL_DIRECTORY = Path(
 )
 STANDARD_DRIVER_LIBRARY = KICAD_SYMBOL_DIRECTORY / "Driver_LED.kicad_sym"
 STANDARD_DEVICE_LIBRARY = KICAD_SYMBOL_DIRECTORY / "Device.kicad_sym"
+STANDARD_LOGIC_LIBRARY = KICAD_SYMBOL_DIRECTORY / "74xx.kicad_sym"
 CUSTOM_LIBRARY_NAME = "PartSignal_Wearable"
 CUSTOM_LIBRARY_PATH = (
     Path(__file__).resolve().parents[1]
@@ -21,8 +22,10 @@ CUSTOM_LIBRARY_PATH = (
 )
 MBI5124_LIBRARY_ID = f"{CUSTOM_LIBRARY_NAME}:MBI5124GP-B"
 MHPA1010_LIBRARY_ID = f"{CUSTOM_LIBRARY_NAME}:MHPA1010RGBDT"
+SN74LV125A_LIBRARY_ID = f"{CUSTOM_LIBRARY_NAME}:SN74LV125APWR"
 MBI5124_FOOTPRINT = "Package_SO:SSOP-24_3.9x8.7mm_P0.635mm"
 MHPA1010_FOOTPRINT = "PartSignal_LEDs:MHPA1010RGBDT"
+SN74LV125A_FOOTPRINT = "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
 BUFFER_LIBRARY_ID = "74xGxx:SN74LVC1G125DBV"
 BUFFER_FOOTPRINT = "Package_TO_SOT_SMD:SOT-23-5"
 RESISTOR_FOOTPRINT = "Resistor_SMD:R_0603_1608Metric"
@@ -309,6 +312,60 @@ def generate_row_selector_harness_symbol(matrix_size: int) -> str:
 \t)"""
 
 
+def generate_sn74lv125a_symbol() -> str:
+    definitions = (
+        ("input", "~{1OE}", 1), ("input", "1A", 2), ("output", "1Y", 3),
+        ("input", "~{2OE}", 4), ("input", "2A", 5), ("output", "2Y", 6),
+        ("power_in", "GND", 7), ("output", "3Y", 8), ("input", "3A", 9),
+        ("input", "~{3OE}", 10), ("output", "4Y", 11),
+        ("input", "4A", 12), ("input", "~{4OE}", 13),
+        ("power_in", "VCC", 14),
+    )
+    pins = []
+    for index, (pin_type, pin_name, pin_number) in enumerate(definitions):
+        left_side = index < 7
+        pins.append(
+            format_harness_pin(
+                pin_type,
+                pin_name,
+                pin_number,
+                -10.16 if left_side else 10.16,
+                7.62 - (index % 7) * 2.54,
+                0 if left_side else 180,
+            )
+        )
+    return f"""\
+	(symbol "SN74LV125APWR"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U" (at -7.62 11.43 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "SN74LV125APWR" (at 7.62 11.43 0)
+			(effects (font (size 1.27 1.27)) (justify right))
+		)
+		(property "Footprint" "{SN74LV125A_FOOTPRINT}" (at 0 0 0)
+			(hide yes) (effects (font (size 1.27 1.27)))
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/sn74lv125a.pdf" (at 0 0 0)
+			(hide yes) (effects (font (size 1.27 1.27)))
+		)
+		(property "Description" "Quad buffer with Ioff; pin map checked against TI Rev. O" (at 0 0 0)
+			(hide yes) (effects (font (size 1.27 1.27)))
+		)
+		(symbol "SN74LV125APWR_0_1"
+			(rectangle (start -7.62 10.16) (end 7.62 -10.16)
+				(stroke (width 0.254) (type default))
+				(fill (type background))
+			)
+		)
+		(symbol "SN74LV125APWR_1_1"
+{chr(10).join(pins)}
+		)
+	)"""
+
+
 def generate_custom_symbol_library() -> None:
     source_library_text = STANDARD_DRIVER_LIBRARY.read_text(encoding="utf-8")
     mbi_symbol_text = extract_symbol_expression(source_library_text, "MBI5252GP")
@@ -365,6 +422,7 @@ def generate_custom_symbol_library() -> None:
             '\t(generator_version "10.0")',
             mbi_symbol_text,
             led_symbol_text,
+            generate_sn74lv125a_symbol(),
             generate_harness_symbol(20),
             generate_harness_symbol(28),
             generate_row_selector_harness_symbol(20),
@@ -423,6 +481,33 @@ def configure_symbol_cache() -> None:
             f"expected {expected_led_pin_names}, found {actual_led_pin_names}"
         )
 
+    buffer_symbol = symbol_cache.get_symbol(SN74LV125A_LIBRARY_ID)
+    if buffer_symbol is None:
+        raise RuntimeError("Generated SN74LV125APWR symbol is not readable")
+    expected_buffer_pin_numbers = {
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+    }
+    actual_buffer_pin_numbers = {pin.number for pin in buffer_symbol.pins}
+    if actual_buffer_pin_numbers != expected_buffer_pin_numbers:
+        raise ValueError(
+            "SN74LV125APWR pin map mismatch: "
+            f"expected {expected_buffer_pin_numbers}, "
+            f"found {actual_buffer_pin_numbers}"
+        )
+
 
 def add_component(
     schematic: Schematic,
@@ -462,6 +547,9 @@ def add_pin_label(
     pin_number: str,
     net_name: str,
 ) -> None:
+    pin_position = schematic.get_component_pin_position(reference, pin_number)
+    if pin_position is None:
+        raise ValueError(f"Pin not found for label: {reference}.{pin_number}")
     schematic.add_label(
         net_name,
         pin=(reference, pin_number),
@@ -469,6 +557,20 @@ def add_pin_label(
             f"{generation_key}:label:{reference}:{pin_number}:{net_name}"
         ),
     )
+    if ":standalone-erc" not in generation_key:
+        hierarchical_label = schematic.hierarchical_labels.add(
+            net_name,
+            pin_position,
+            uuid=deterministic_uuid(
+                f"{generation_key}:hierarchical-label:"
+                f"{reference}:{pin_number}:{net_name}"
+            ),
+        )
+        schematic._sync_hierarchical_labels_to_data()
+        schematic._format_sync_manager.mark_dirty(
+            "hierarchical_label", "add", {"uuid": hierarchical_label.uuid}
+        )
+    schematic._modified = True
 
 
 def add_no_connect(
@@ -614,6 +716,116 @@ def add_mbi5124_chain(
         )
 
 
+def add_led_input_buffer(schematic: Schematic, generation_key: str) -> None:
+    reference = "U100"
+    add_component(
+        schematic,
+        generation_key=generation_key,
+        library_id=SN74LV125A_LIBRARY_ID,
+        reference=reference,
+        value="SN74LV125APWR",
+        position=(83.82, 25.4),
+        footprint=SN74LV125A_FOOTPRINT,
+        properties={"Function": "U_LED_BUF"},
+    )
+
+    channels = (
+        ("1", "2", "3", "MCU_LED_CLK", "LED_CLK"),
+        ("4", "5", "6", "MCU_LED_SDI", "LED_SDI"),
+        ("10", "9", "8", "MCU_LED_LE", "LED_LE"),
+        ("13", "12", "11", "MCU_LED_OE_N", "LED_OE_N"),
+    )
+    for channel_index, (
+        enable_pin,
+        input_pin,
+        output_pin,
+        input_net,
+        output_net,
+    ) in enumerate(channels):
+        add_pin_label(schematic, generation_key, reference, enable_pin, "GND")
+        add_pin_label(
+            schematic, generation_key, reference, input_pin, input_net
+        )
+        buffered_net = (
+            f"{output_net}_BUF" if channel_index < 3 else output_net
+        )
+        add_pin_label(
+            schematic, generation_key, reference, output_pin, buffered_net
+        )
+        if channel_index < 3:
+            resistor_reference = f"R{113 + channel_index}"
+            add_component(
+                schematic,
+                generation_key=generation_key,
+                library_id="Device:R",
+                reference=resistor_reference,
+                value="22R",
+                position=(45.72 + channel_index * 25.4, 40.64),
+                footprint=RESISTOR_FOOTPRINT,
+                rotation=90,
+                properties={"Function": f"{output_net}_SOURCE_SERIES"},
+            )
+            add_pin_label(
+                schematic,
+                generation_key,
+                resistor_reference,
+                "1",
+                buffered_net,
+            )
+            add_pin_label(
+                schematic,
+                generation_key,
+                resistor_reference,
+                "2",
+                output_net,
+            )
+
+    add_pin_label(schematic, generation_key, reference, "7", "GND")
+    add_pin_label(
+        schematic, generation_key, reference, "14", "LED_LOGIC_3V3"
+    )
+    pulls = (
+        ("R108", "100k", "MCU_LED_CLK", "GND"),
+        ("R109", "100k", "MCU_LED_SDI", "GND"),
+        ("R110", "100k", "MCU_LED_LE", "GND"),
+        ("R111", "47k", "MCU_LED_OE_N", "AON_3V3"),
+        ("R112", "47k", "LED_OE_N", "LED_LOGIC_3V3"),
+    )
+    for pull_index, (pull_reference, value, signal_net, rail_net) in enumerate(
+        pulls
+    ):
+        add_component(
+            schematic,
+            generation_key=generation_key,
+            library_id="Device:R",
+            reference=pull_reference,
+            value=value,
+            position=(160.02 + pull_index * 12.7, 25.4),
+            footprint=RESISTOR_FOOTPRINT,
+            rotation=90,
+            properties={"Function": f"{signal_net}_DEFAULT"},
+        )
+        add_pin_label(
+            schematic, generation_key, pull_reference, "1", signal_net
+        )
+        add_pin_label(
+            schematic, generation_key, pull_reference, "2", rail_net
+        )
+
+    add_component(
+        schematic,
+        generation_key=generation_key,
+        library_id="Device:C",
+        reference="C100",
+        value="100nF",
+        position=(228.6, 25.4),
+        footprint=CAPACITOR_FOOTPRINT,
+        properties={"Function": "U_LED_BUF_DECOUPLING"},
+    )
+    add_pin_label(schematic, generation_key, "C100", "1", "LED_LOGIC_3V3")
+    add_pin_label(schematic, generation_key, "C100", "2", "GND")
+
+
 def add_sdo_return_buffer(schematic: Schematic, generation_key: str) -> None:
     buffer_reference = "U107"
     add_component(
@@ -700,10 +912,10 @@ def add_erc_harness(
     harness._data.on_board = False
 
     net_names = [
-        "LED_SDI",
-        "LED_CLK",
-        "LED_LE",
-        "LED_OE_N",
+        "MCU_LED_SDI",
+        "MCU_LED_CLK",
+        "MCU_LED_LE",
+        "MCU_LED_OE_N",
         "LED_LOGIC_3V3",
         "GND",
         "LED_SDO_RETURN",
@@ -743,6 +955,7 @@ def write_project_library_tables(
   (lib (name "Package_SO")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_SO.pretty")(options "")(descr ""))
   (lib (name "Package_TO_SOT_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_TO_SOT_SMD.pretty")(options "")(descr ""))
   (lib (name "PartSignal_LEDs")(type "KiCad")(uri "${KIPRJMOD}/../libraries/leds.pretty")(options "")(descr "Part Signal LED footprints"))
+  (lib (name "PartSignal_Packages")(type "KiCad")(uri "${KIPRJMOD}/../libraries/packages.pretty")(options "")(descr "Part Signal verified package footprints"))
   (lib (name "Resistor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Resistor_SMD.pretty")(options "")(descr ""))
 )
 """
@@ -754,10 +967,22 @@ def write_project_library_tables(
     )
 
 
-def generate_variant_schematic(repository_root: Path, variant: MatrixVariant) -> Path:
+def generate_variant_schematic(
+    repository_root: Path,
+    variant: MatrixVariant,
+    *,
+    standalone_erc: bool = False,
+) -> Path:
     generation_key = f"led-drivers:{variant.directory_name}"
+    if standalone_erc:
+        generation_key += ":standalone-erc"
     output_directory = repository_root / "hardware" / variant.directory_name
-    output_path = output_directory / "led_drivers.kicad_sch"
+    output_name = (
+        "led_drivers_standalone_erc.kicad_sch"
+        if standalone_erc
+        else "led_drivers.kicad_sch"
+    )
+    output_path = output_directory / output_name
     output_directory.mkdir(parents=True, exist_ok=True)
     write_project_library_tables(output_directory)
 
@@ -782,8 +1007,10 @@ def generate_variant_schematic(repository_root: Path, variant: MatrixVariant) ->
         generation_key,
         variant.matrix_size,
     )
+    add_led_input_buffer(schematic, generation_key)
     add_sdo_return_buffer(schematic, generation_key)
-    add_erc_harness(schematic, generation_key, variant.matrix_size)
+    if standalone_erc:
+        add_erc_harness(schematic, generation_key, variant.matrix_size)
     schematic.save(output_path)
 
     subprocess.run(
@@ -802,6 +1029,10 @@ def main() -> None:
     for variant in MATRIX_VARIANTS:
         generated_path = generate_variant_schematic(repository_root, variant)
         print(f"Generated {generated_path}")
+        standalone_path = generate_variant_schematic(
+            repository_root, variant, standalone_erc=True
+        )
+        print(f"Generated {standalone_path}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,290 @@
+from dataclasses import dataclass
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+import xml.etree.ElementTree as ElementTree
+
+import pcbnew
+
+
+@dataclass(frozen=True)
+class Variant:
+    name: str
+    led_count: int
+    matrix_size: int
+
+
+VARIANTS = (
+    Variant("wearable_20x20", 400, 20),
+    Variant("wearable_28x28", 784, 28),
+)
+
+EXPECTED_CRITICAL_FOOTPRINTS = {
+    "L1": (
+        "PartSignal_Packages:"
+        "Murata_DFE201612E_2.0x1.6mm"
+    ),
+    "U1": (
+        "Package_DFN_QFN:"
+        "Texas_DLH0010A_WSON-10-1EP_2.2x2mm_P0.4mm_EP0.9x1.5mm"
+    ),
+    "U3": (
+        "PartSignal_Packages:"
+        "TI_DLA0010A_VSON-HR-10_2x3mm_P0.5mm"
+    ),
+    "U20": "Package_LGA:Bosch_LGA-14_3x2.5mm_P0.5mm",
+    "U21": (
+        "Package_DFN_QFN:"
+        "TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm"
+    ),
+    "Y1": (
+        "PartSignal_Packages:"
+        "Lucki_L327S400H11L_Crystal_3225-4Pin"
+    ),
+    "MIC1": (
+        "PartSignal_Packages:"
+        "Gettop_NA-FFA381-A10-1_TopPort_Microphone"
+    ),
+    "SW1": (
+        "PartSignal_Packages:"
+        "Panasonic_EVPBL2A1F000_Switch"
+    ),
+    "TH1": "Resistor_SMD:R_0402_1005Metric",
+}
+LOCAL_FOOTPRINT_DIRECTORIES = {
+    "PartSignal_LEDs": Path(__file__).resolve().parents[1]
+    / "libraries"
+    / "leds.pretty",
+    "PartSignal_Packages": Path(__file__).resolve().parents[1]
+    / "libraries"
+    / "packages.pretty",
+}
+KICAD_FOOTPRINT_DIRECTORY = Path(
+    os.environ.get("KICAD10_FOOTPRINT_DIR", "/usr/share/kicad/footprints")
+)
+
+
+def export_netlist(repository_root: Path, variant: Variant, output_path: Path) -> None:
+    schematic_path = (
+        repository_root
+        / "hardware"
+        / variant.name
+        / f"{variant.name}.kicad_sch"
+    )
+    subprocess.run(
+        (
+            "kicad-cli",
+            "sch",
+            "export",
+            "netlist",
+            "--format",
+            "kicadxml",
+            "-o",
+            str(output_path),
+            str(schematic_path),
+        ),
+        check=True,
+        cwd=schematic_path.parent,
+    )
+
+
+def build_pin_net_map(root: ElementTree.Element) -> dict[tuple[str, str], str]:
+    pin_net_map: dict[tuple[str, str], str] = {}
+    for net in root.findall("./nets/net"):
+        net_name = net.get("name", "")
+        for node in net.findall("node"):
+            reference = node.get("ref", "")
+            pin_number = node.get("pin", "")
+            pin_net_map[(reference, pin_number)] = net_name
+    return pin_net_map
+
+
+def resolve_footprint_directory(library_name: str) -> Path:
+    local_directory = LOCAL_FOOTPRINT_DIRECTORIES.get(library_name)
+    if local_directory is not None:
+        return local_directory
+    return KICAD_FOOTPRINT_DIRECTORY / f"{library_name}.pretty"
+
+
+def verify_component_footprints(
+    components: list[ElementTree.Element],
+    pin_net_map: dict[tuple[str, str], str],
+    variant: Variant,
+) -> int:
+    loaded_footprints: dict[str, pcbnew.FOOTPRINT] = {}
+    for component in components:
+        reference = component.get("ref", "")
+        footprint_identifier = component.findtext(
+            "footprint",
+            default="",
+        ).strip()
+        if not footprint_identifier or ":" not in footprint_identifier:
+            raise ValueError(
+                f"{variant.name}: {reference} has invalid footprint "
+                f"{footprint_identifier!r}"
+            )
+
+        footprint = loaded_footprints.get(footprint_identifier)
+        if footprint is None:
+            library_name, footprint_name = footprint_identifier.split(":", 1)
+            library_directory = resolve_footprint_directory(library_name)
+            footprint = pcbnew.FootprintLoad(
+                str(library_directory),
+                footprint_name,
+            )
+            if footprint is None:
+                raise FileNotFoundError(
+                    f"{variant.name}: cannot load {footprint_identifier} "
+                    f"for {reference}"
+                )
+            loaded_footprints[footprint_identifier] = footprint
+
+        pad_numbers = {
+            pad.GetNumber()
+            for pad in footprint.Pads()
+            if pad.GetNumber()
+        }
+        connected_pin_numbers = {
+            pin_number
+            for component_reference, pin_number in pin_net_map
+            if component_reference == reference
+        }
+        missing_pad_numbers = connected_pin_numbers - pad_numbers
+        if missing_pad_numbers:
+            raise ValueError(
+                f"{variant.name}: {reference} footprint "
+                f"{footprint_identifier} lacks connected pads "
+                f"{sorted(missing_pad_numbers)}"
+            )
+
+    return len(loaded_footprints)
+
+
+def assert_net_suffix(
+    pin_net_map: dict[tuple[str, str], str],
+    reference: str,
+    pin_number: str,
+    expected_suffix: str,
+) -> None:
+    actual_net = pin_net_map.get((reference, pin_number))
+    if actual_net is None or not actual_net.endswith(f"/{expected_suffix}"):
+        raise ValueError(
+            f"{reference}.{pin_number}: expected {expected_suffix}, "
+            f"found {actual_net}"
+        )
+
+
+def verify_variant(netlist_path: Path, variant: Variant) -> None:
+    root = ElementTree.parse(netlist_path).getroot()
+    components = root.findall("./components/comp")
+    component_values = {
+        component.findtext("value", default="")
+        for component in components
+    }
+    if any("ERC_HARNESS" in value for value in component_values):
+        raise ValueError(f"{variant.name}: root netlist contains an ERC harness")
+
+    led_count = sum(
+        1
+        for component in components
+        if component.findtext("value") == "MHPA1010RGBDT"
+    )
+    if led_count != variant.led_count:
+        raise ValueError(
+            f"{variant.name}: expected {variant.led_count} LEDs, found {led_count}"
+        )
+
+    components_by_reference = {
+        component.get("ref", ""): component
+        for component in components
+    }
+    for reference, expected_footprint in EXPECTED_CRITICAL_FOOTPRINTS.items():
+        component = components_by_reference.get(reference)
+        if component is None:
+            raise ValueError(f"{variant.name}: missing {reference}")
+        actual_footprint = component.findtext("footprint", default="")
+        if actual_footprint != expected_footprint:
+            raise ValueError(
+                f"{variant.name}: {reference} expected footprint "
+                f"{expected_footprint}, found {actual_footprint}"
+            )
+
+    pin_net_map = build_pin_net_map(root)
+    unique_footprint_count = verify_component_footprints(
+        components,
+        pin_net_map,
+        variant,
+    )
+    critical_pin_nets = {
+        ("U10", "18"): "MCU_LED_CLK",
+        ("U10", "19"): "MCU_LED_SDI",
+        ("U10", "21"): "MCU_LED_LE",
+        ("U10", "22"): "MCU_LED_OE_N",
+        ("U10", "25"): "USB_MCU_D_N",
+        ("U10", "26"): "USB_MCU_D_P",
+        ("U10", "36"): "LED_SDO_RETURN",
+        ("U10", "37"): "ROW_XLAT_OE_N",
+        ("U10", "47"): "CHG_SHIP_N",
+        ("U10", "48"): "LED_LOGIC_EN",
+        ("U21", "2"): "BAT_RAW",
+        ("U21", "3"): "BAT_RAW",
+        ("U30", "1"): "MIC_AFE_OUT",
+        ("U30", "3"): "MIC_AFE_IN",
+        ("U30", "4"): "MIC_AFE_FB",
+        ("MIC1", "1"): "MIC_VDD",
+        ("MIC1", "2"): "GND",
+        ("MIC1", "3"): "GND",
+        ("MIC1", "4"): "MIC_RAW",
+        ("SW1", "1"): "BUTTON_WAKE_N",
+        ("SW1", "2"): "GND",
+        ("TH1", "1"): "PCB_NTC_ADC",
+        ("TH1", "2"): "GND",
+        ("U100", "2"): "MCU_LED_CLK",
+        ("U100", "5"): "MCU_LED_SDI",
+        ("U100", "9"): "MCU_LED_LE",
+        ("U100", "12"): "MCU_LED_OE_N",
+        ("Y1", "1"): "XTAL_P",
+        ("Y1", "2"): "GND",
+        ("Y1", "3"): "XTAL_N",
+        ("Y1", "4"): "GND",
+    }
+    for (reference, pin_number), net_suffix in critical_pin_nets.items():
+        assert_net_suffix(pin_net_map, reference, pin_number, net_suffix)
+
+    for row_number in range(1, variant.matrix_size + 1):
+        row_net = f"ROW_{row_number:02d}_ANODE"
+        if not any(
+            net_name.endswith(f"/{row_net}")
+            for net_name in pin_net_map.values()
+        ):
+            raise ValueError(f"{variant.name}: missing {row_net}")
+
+    for color_name in ("R", "G", "B"):
+        for column_number in range(1, variant.matrix_size + 1):
+            column_net = f"COL_{color_name}_{column_number:02d}"
+            if not any(
+                net_name.endswith(f"/{column_net}")
+                for net_name in pin_net_map.values()
+            ):
+                raise ValueError(f"{variant.name}: missing {column_net}")
+
+    print(
+        f"{variant.name}: {len(components)} components, "
+        f"{len(root.findall('./nets/net'))} nets, {led_count} LEDs, "
+        f"{unique_footprint_count} resolved footprint types"
+    )
+
+
+def main() -> None:
+    repository_root = Path(__file__).resolve().parents[2]
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        temporary_path = Path(temporary_directory)
+        for variant in VARIANTS:
+            netlist_path = temporary_path / f"{variant.name}.net.xml"
+            export_netlist(repository_root, variant, netlist_path)
+            verify_variant(netlist_path, variant)
+
+
+if __name__ == "__main__":
+    main()

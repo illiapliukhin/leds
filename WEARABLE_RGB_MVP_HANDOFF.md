@@ -1,10 +1,11 @@
 # Wearable RGB MVP — передача проекта
 
 Статус документа: предварительная инженерная спецификация для продолжения в репозитории.  
-Важно: KiCad 10 PCB-каркасы созданы и проходят DRC. Сгенерированные LED-driver
-полные LED-matrix и row-selection проекты обеих версий проходят автономный ERC
-без нарушений, но общая иерархия, power/MCU sheets, footprints остальных
-компонентов, полный placement/routing и физические измерения ещё не выполнены.
+Важно: доказанная полная трассировка LED-матрицы перенесена в рабочие KiCad 10
+PCB обеих версий. Harness-free roots включают generated power, MCU/USB,
+IMU/gauge/input, audio, LED-driver, полные LED-matrix и row-selection sheets.
+Точные внешние компоненты, несколько критических footprints, backside
+placement/routing, L2 GND и физические измерения ещё не выполнены.
 Все значения, помеченные как требующие проверки, нельзя считать
 production-ready.
 
@@ -14,8 +15,8 @@ production-ready.
 
 | Версия | Матрица | Пиксели | Ориентировочная PCB | Шаг LED |
 |---|---:|---:|---:|---:|
-| Compact | 20×20 | 400 | 49,3×49,3 мм | 2,50 мм |
-| High-resolution | 28×28 | 784 | 61,2×61,2 мм | 2,20 мм |
+| Compact | 20×20 | 400 | лицевая плата по полю LED, электроника сзади | 2,50 мм |
+| High-resolution | 28×28 | 784 | лицевая плата по полю LED, электроника сзади | 2,20 мм |
 
 Функции:
 
@@ -62,12 +63,15 @@ production-ready.
 | 35 | DEC_B_EN_N |
 | 36 | LED_EN |
 | 37 | AUDIO_EN |
-| 38…42 | charger control/status/ship |
+| 38…41 | charger control/status/ship |
+| 42 | LED_LOGIC_EN |
 | 43/44 | service UART |
 | 47 | ROW_XLAT_OE_N |
 | 48 | LED_SDO_RETURN |
 
-Проверить полный pin map, reset glitches, ADC-конфликты и ограничения выбранного ESP-IDF peripheral routing.
+Физические QFN56 pins и GPIO-функции проверены в
+`hardware/common/MCU_PIN_AUDIT.md`. Reset glitches, ADC-конфликты и ограничения
+выбранного ESP-IDF peripheral routing остаются EVT/firmware-проверками.
 
 ### RGB-матрица
 
@@ -142,8 +146,42 @@ KiCad 10 row-selection sheets:
   outputs и неиспользуемые decoder outputs явно отмечены NC;
 - оба листа проходят ERC с `0 violations`; XML netlist подтверждает точное
   соответствие decoder outputs строкам и 14/6 NC pins;
-- footprint `SN74LVC8T245RHLR` намеренно оставлен открытым до проверки точного
-  TI RHL-24 land pattern.
+- footprint `SN74LVC8T245RHLR` назначен на проверенный TI `RHL0024A`
+  land pattern из локальной библиотеки.
+
+Обновление production-readiness:
+
+- точный footprint `SN74LVC8T245RHLR` выпущен в
+  `hardware/libraries/packages.pretty` по TI `RHL0024A`, drawing 4225250
+  Rev. C; generic QFN не используется;
+- primary-drawing footprints выпущены для `BQ25185` (TI DLH0010A),
+  `TPS63802` (TI DLA0010A HotRod), `BMI270` (Bosch LGA-14) и
+  `MAX17048G+T10` (Maxim 21-0168/90-0065);
+- manufacturer-pattern footprints также выпущены для Murata
+  `DFE201612E-R47M=P2`, Lucki `L327S400H11L`, Panasonic
+  `EVPBL2A1F000` и Gettop `NA-FFA381-A10-1`; у кварца pins 2/4 корпуса
+  явно подключены к GND отдельным 4-pin symbol;
+- геометрия DLA0010A, DFE201612E, SMD3225-4P, EVPBL и Gettop microphone
+  проверяется
+  `hardware/tools/verify_critical_footprints.py`;
+- XML-аудит загружает все 21 уникальный footprint type для 572/980
+  компонентов и подтверждает, что каждый connected symbol pin имеет
+  одноимённый physical pad; пустых назначений в root netlists нет;
+- единый реестр механических входных данных и внешних блокеров находится в
+  `mechanical/MECHANICAL_INPUTS.md`;
+- построчный статус freeze находится в
+  `manufacturing/BOM_FREEZE_STATUS.csv`;
+- для EVT выбраны Molex Pico-Lock `504050-0391` / `504051-0301` /
+  `504052-0098` как battery connector set, Panasonic `EVPBL2A1F000` как
+  rear button и TE Connectivity `20021086-05` как PCB NTC;
+- top-port microphone Gettop `NA-FFA381-A10-1`, LCSC `C50275774`, выбран
+  условным alternate для дефицитного `MA-HFA381-H13-1AF`; его отдельные
+  symbol и four-land footprint выпущены, AFE/acoustic validation обязательна;
+- USB-C `C52209107` подтверждён только как EVT-кандидат; footprint и положение
+  остаются заблокированы до утверждения разреза корпуса.
+- `hardware/tools/export_manufacturing_package.py` формирует immutable
+  Gerber/drill/BOM/CPL/PDF/IPC/STEP package с SHA-256, но отказывает в экспорте,
+  пока `check_release_readiness.py` видит хотя бы один незакрытый gate.
 
 ### Расчёт обновления
 
@@ -215,6 +253,8 @@ Power sequencing:
 - MAX17048G+T10, предварительный LCSC C2682616.
 - I²C общий с BMI270.
 - Battery NTC: 10 кОм B3435.
+- PCB NTC: TE Connectivity `20021086-05`, 0402, 10 кОм ±1%,
+  B25/85 = 3435 К; размещение и thermal correlation проверить на EVT.
 - Hardware charge window ориентировочно 0…60 °C.
 - MCU разрешает заряд ориентировочно только 0…45 °C.
 - Отдельный PCB NTC, divider включается GPIO только во время измерения.
@@ -246,9 +286,13 @@ IMU не заменяет микрофон: accelerometer улавливает �
 
 ## 5. Микрофон
 
-- Кандидат: MA-HFA381-H13-1AF, top-port analog MEMS.
-- Предварительный LCSC C50275762.
-- Запас компонента ранее был ограничен; для серии нужен approved alternate.
+- Основной кандидат: `MA-HFA381-H13-1AF`, top-port analog MEMS,
+  LCSC `C50275762`.
+- Условный alternate: Gettop `NA-FFA381-A10-1`, LCSC `C50275774`, top-port
+  analog MEMS, 2,75×1,85×1,0 мм, 1,6…3,6 В, 120 мкА typical,
+  −38 dBV ±1 dB, 64 dBA SNR.
+- У alternate pins 1/2/3/4 — VDD/GND/GND/OUT. Используется отдельный
+  manufacturer footprint с lands 0,60×0,54 мм.
 - Устанавливается сзади напротив акустического отверстия.
 - Нужны мягкая герметизирующая прокладка и acoustic mesh.
 
@@ -351,26 +395,51 @@ Firmware tasks:
 - crystal keepout и отсутствие сигналов под crystal;
 - DC/DC feedback вести Kelvin route вдали от SW node.
 
-KiCad 10 PCB-каркасы:
+KiCad 10 рабочие PCB:
 
 - `hardware/wearable_20x20/wearable_20x20.kicad_pcb`;
 - `hardware/wearable_28x28/wearable_28x28.kicad_pcb`;
-- воспроизводятся скриптом `hardware/tools/generate_board_skeletons.py`;
+- чистые matrix skeletons воспроизводятся
+  `hardware/tools/generate_board_skeletons.py` только как analysis-артефакты;
+  full-matrix, edge и boundary generators всегда начинают с нового skeleton
+  в памяти и не читают production PCB, а доказанная трассировка переносится
+  `hardware/tools/promote_matrix_routing.py` после проверки topology;
+- `hardware/tools/verify_matrix_generation.py` дважды строит skeleton/full
+  artifacts, требует одинаковые SHA-256 при deterministic KiCad UUIDs и
+  затем повторяет все promotion semantic checks;
 - содержат 400/784 электрических LED footprints, row/RGB-column nets, четыре copper layers, optical centers и provisional battery envelope;
 - содержат DRC-ограничения JLCPCB Standard PCBA из `manufacturing/JLCPCB_STANDARD_PCBA_RULES.md`;
-- DRC: 0 violations для обеих pre-route плат; 499 unrouted groups ожидаются до подключения драйверов и трассировки;
+- полная матрица имеет 0 DRC violations и 0 unconnected matrix pads; это не
+  доказывает connectivity всего продукта до добавления backside components;
 - copper-to-edge rule — 0,30 мм, поэтому исходные preliminary outlines увеличены на 0,1 мм;
 - `B.SilkS`: `PCB CREATED BY ILLIA PLIUKHIN` и маленькая пятиконечная звезда;
 - LED references находятся на `F.Fab`; все остальные компоненты должны иметь физические reference designators не меньше 1,0/0,15 мм без перекрытий.
 
-Текущие outline 49,3 × 49,3 мм и 61,2 × 61,2 мм ещё не заморожены для производства, но увеличивать их сейчас не требуется. Все 18 локальных corner/orientation probes прошли KiCad 10.0.6 DRC без геометрических нарушений для шага 2,50 и 2,20 мм. Проверенная карта 0°/90°/180°/270° размножена на полные массивы: обе сгенерированные платы имеют `0 DRC violations` и `0 unconnected items`. Семантическая проверка подтверждает 400/784 LED, 1 564/3 084 стандартных through vias, правильные ориентации, все row nets на физическом L3 (`In2.Cu`) и 0 tracks на L2 (`In1.Cu`). Midpoint cells используют L1/L3/L4 crossover-коридоры и локальные row buses 0,40 мм. Генератор, платы, DRC reports и расчёты находятся в `hardware/analysis/MATRIX_ROUTING_FEASIBILITY.md`. До freeze необходимо добавить L2 GND zone, проверить return-path continuity, разместить backside components и провести row/RGB exits к драйверам без нарушения доказанных коридоров.
+Лицевая панель каждого изделия — только светодиоды. Других компонентов на
+внешней стороне нет. Всё остальное стоит на обороте этой платы. Поле сквозных
+via занимает почти всю оборотную сторону тесного контура: у 20×20 это 48,7 мм
+при шаге центров 47,5 мм, у 28×28 поле ещё больше при шаге центров 59,4 мм.
+Минимальный зазор via 0,10 мм, поэтому SMT-корпуса на это поле не ставятся.
+172 non-LED компонента туда не входят. Когда оборот не вмещает сборку, изделия
+собираются бутербродом: задняя плата несёт питание, MCU, драйверы, датчики и
+разъёмы и соединяется с лицевой платой ответным межплатным коннектором.
+Коннектор проводит row anodes, RGB columns, питание светодиодов и GND. Его
+корпус не заморожен. 28×28 остаётся более крупной лицевой матрицей, чем 20×20.
 
 ### Placement
 
-- Все LED на лицевой стороне.
-- Вся остальная электроника и test pads сзади.
+- Все LED на лицевой стороне. Лицевая панель больше ничего не несёт.
+- 172 non-LED компонента относятся к задней плате, если не входят на оборот
+  лицевой. Скрипт `hardware/tools/place_backside_components.py` остаётся
+  проверкой одной широкой платы и не задаёт контур изделия.
 - USB-C по центру боковой грани.
-- Battery расположен в component-free keepout.
+- Battery projection остаётся component-free. Дополнительно запрещена
+  установка backside pads внутри поля сквозных via: 172 footprint envelopes
+  занимают около 1673 мм². На тесной лицевой плате этой площади нет, поэтому
+  её забирает задняя плата стека.
+  `hardware/tools/check_backside_placement_feasibility.py` проверяет и площадь,
+  и ширину рамки относительно самого крупного корпуса. HDI/blind vias остаются
+  альтернативой, если корпус нужно вернуть ближе к полю LED.
 - Нельзя размещать DC/DC и LED drivers под аккумулятором.
 - IMU в жёсткой зоне, вдали от дросселя и края с USB.
 - Microphone вдали от DC/DC и с прямым акустическим каналом.
@@ -386,10 +455,23 @@ KiCad 10 PCB-каркасы:
 - 20×20: 700–800 мА·ч, около 32×40×6 мм;
 - 28×28: 1200–1400 мА·ч, около 40×50×6 мм.
 
+Проверенные RFQ-кандидаты, ещё не утверждённые:
+
+- HiMAXBATT `LP603040`, 800 мА·ч, PCM + 10 кОм NTC, заявленные UN38.3 и
+  IEC 62133, 1,6 А continuous; finished pack 6,3×30,5×42,5 мм не помещается
+  в текущий provisional keepout 32×40×6 мм;
+- Akyga `LP604050`, distributor index `AKY0679`, 1200 мА·ч, PCM+NTC,
+  6,0×40×50 мм и 3-pin 1,25 мм; требуется новый короткий Pico-Lock harness
+  и exact-part UN38.3 test summary.
+
+Оба варианта остаются `BLOCKED_EXTERNAL` до production-intent drawing,
+compliance evidence и fit-check samples.
+
 Требования:
 
 - protected Li-Po с PCM и NTC;
-- трёхконтактный низкопрофильный разъём BAT+, NTC, GND;
+- трёхконтактный разъём BAT+, NTC, GND; EVT-кандидат Molex Pico-Lock
+  `504050-0391` с housing `504051-0301` и terminals `504052-0098`;
 - батарея полностью внутри PCB outline;
 - точные размеры и положение фиксировать только по чертежу конкретного поставщика.
 
@@ -489,7 +571,8 @@ Lanyard loop выполняется корпусом, не PCB. IP-рейтин�
 8. MSC compatibility с iPhone.
 9. Реальная яркость через выбранный diffuser.
 10. DFM двухстороннего PCBA и подтверждение reflow-профиля.
-11. Lifecycle, stock и approved alternates критических компонентов.
+11. Lifecycle, stock и approved alternates LED, драйвера и DC/DC; supplier
+    quote и footprint/AFE review microphone alternate.
 12. ERC, финальный DRC, SI/PI и независимое schematic/layout review.
 
 ## 14. Рекомендуемая структура репозитория
@@ -507,7 +590,10 @@ test/
 docs/
 ```
 
-Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, а схемная
-архитектура — в `hardware/common/PCB_ARCHITECTURE.md`. Следующий этап: power и
-MCU sheets, общая иерархия, механика и только затем production
-placement/routing.
+Результаты частичного freeze находятся в `DATASHEET_BOM_FREEZE.md`, схемная
+архитектура — в `hardware/common/PCB_ARCHITECTURE.md`, расчётные ограничения —
+в `hardware/analysis/DESIGN_BUDGETS.md`, а release gates — в
+`manufacturing/RELEASE_CHECKLIST.md`. Следующий этап: выбрать заблокированные
+внешние MPN и выполнить backside placement/routing и L2 GND; критический
+HotRod-footprint `TPS63802` уже выпущен, но его силовой layout и тепловые
+измерения остаются обязательными.

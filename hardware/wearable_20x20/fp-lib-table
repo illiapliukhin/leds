@@ -1,7 +1,11 @@
 (fp_lib_table
+  (lib (name "PartSignal_LEDs")(type "KiCad")(uri "${KIPRJMOD}/../libraries/leds.pretty")(options "")(descr ""))
+  (lib (name "PartSignal_Packages")(type "KiCad")(uri "${KIPRJMOD}/../libraries/packages.pretty")(options "")(descr ""))
   (lib (name "Capacitor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Capacitor_SMD.pretty")(options "")(descr ""))
+  (lib (name "Crystal")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Crystal.pretty")(options "")(descr ""))
+  (lib (name "Package_DFN_QFN")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_DFN_QFN.pretty")(options "")(descr ""))
+  (lib (name "Package_LGA")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_LGA.pretty")(options "")(descr ""))
   (lib (name "Package_SO")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_SO.pretty")(options "")(descr ""))
   (lib (name "Package_TO_SOT_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Package_TO_SOT_SMD.pretty")(options "")(descr ""))
-  (lib (name "PartSignal_LEDs")(type "KiCad")(uri "${KIPRJMOD}/../libraries/leds.pretty")(options "")(descr "Part Signal LED footprints"))
   (lib (name "Resistor_SMD")(type "KiCad")(uri "${KICAD10_FOOTPRINT_DIR}/Resistor_SMD.pretty")(options "")(descr ""))
 )

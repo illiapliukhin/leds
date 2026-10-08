@@ -3,6 +3,13 @@ from pathlib import Path
 
 import pcbnew
 
+from generate_board_skeletons import (
+    assign_deterministic_board_uuids,
+    create_board,
+    get_board_variant,
+    save_board_without_project_side_effects,
+)
+
 
 @dataclass(frozen=True)
 class ProbeVariant:
@@ -13,7 +20,7 @@ class ProbeVariant:
 
 
 PROBE_VARIANTS = (
-    ProbeVariant("wearable_20x20", 20, 49.3, 2.5),
+    ProbeVariant("wearable_20x20", 20, 69.0, 2.5),
     ProbeVariant("wearable_28x28", 28, 61.2, 2.2),
 )
 
@@ -28,6 +35,53 @@ TRANSITION_SIDE_VIA_X_OFFSET_MM = 0.5
 TRANSITION_SIDE_VIA_Y_OFFSET_MM = 0.3
 TRANSITION_CROSSOVER_X_OFFSET_MM = 0.9
 TRANSITION_CROSSOVER_Y_OFFSET_MM = 0.75
+
+
+def get_matrix_edge_margin(variant: ProbeVariant) -> float:
+    matrix_span_mm = (variant.matrix_size - 1) * variant.led_pitch_mm
+    return (variant.board_size_mm - matrix_span_mm) / 2
+
+
+def get_row_center(variant: ProbeVariant, row_number: int) -> float:
+    return (
+        get_matrix_edge_margin(variant)
+        + (row_number - 1) * variant.led_pitch_mm
+    )
+
+
+def get_column_center(variant: ProbeVariant, column_number: int) -> float:
+    return (
+        get_matrix_edge_margin(variant)
+        + (column_number - 1) * variant.led_pitch_mm
+    )
+
+
+def get_outer_row_bus_y(
+    variant: ProbeVariant,
+    top: bool,
+) -> float:
+    edge_row_center_mm = get_row_center(
+        variant,
+        1 if top else variant.matrix_size,
+    )
+    direction = -1.0 if top else 1.0
+    return edge_row_center_mm + direction * 0.375
+
+
+def create_probe_board(
+    repository_root: Path,
+    variant: ProbeVariant,
+) -> pcbnew.BOARD:
+    board_variant = get_board_variant(variant.board_name)
+    return create_board(repository_root, board_variant)
+
+
+def save_probe_board(output_path: Path, board: pcbnew.BOARD) -> None:
+    assign_deterministic_board_uuids(
+        board,
+        f"edge-probe:{output_path.stem}",
+    )
+    save_board_without_project_side_effects(output_path, board)
 
 
 def add_track(
@@ -349,11 +403,12 @@ def route_anode(
     row_bus_y_mm: float,
     row_bus_width_mm: float,
     via_x_offset_mm: float = 0.54,
+    minimum_via_y_mm: float = 0.525,
 ) -> float:
     anode_pad = get_pad(footprint, "1")
     anode_pad_x_mm, anode_pad_y_mm = millimeters(anode_pad.GetPosition())
     via_x_mm = anode_pad_x_mm + via_x_offset_mm
-    via_y_mm = max(anode_pad_y_mm, 0.525)
+    via_y_mm = max(anode_pad_y_mm, minimum_via_y_mm)
 
     add_track(
         board,
@@ -422,28 +477,24 @@ def generate_probe(
     repository_root: Path,
     variant: ProbeVariant,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     output_path = (
         repository_root
         / "hardware"
         / "analysis"
         / f"{variant.board_name}_edge_routing_probe.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
-    first_row_center_y_mm = 0.9
-    second_row_center_y_mm = first_row_center_y_mm + variant.led_pitch_mm
-    second_column_center_x_mm = 0.9 + variant.led_pitch_mm
+    first_row_center_y_mm = get_row_center(variant, 1)
+    second_row_center_y_mm = get_row_center(variant, 2)
+    first_column_center_x_mm = get_column_center(variant, 1)
+    second_column_center_x_mm = get_column_center(variant, 2)
+    top_row_bus_y_mm = get_outer_row_bus_y(variant, top=True)
     second_row_first_reference = f"D{variant.matrix_size + 1}"
     second_row_second_reference = f"D{variant.matrix_size + 2}"
     routed_leds = (
-        ("D1", first_row_center_y_mm, 0.525, OUTER_ROW_WIDTH_MM),
-        ("D2", first_row_center_y_mm, 0.525, OUTER_ROW_WIDTH_MM),
+        ("D1", first_row_center_y_mm, top_row_bus_y_mm, OUTER_ROW_WIDTH_MM),
+        ("D2", first_row_center_y_mm, top_row_bus_y_mm, OUTER_ROW_WIDTH_MM),
         (
             second_row_first_reference,
             second_row_center_y_mm,
@@ -473,7 +524,12 @@ def generate_probe(
         row_via_extents.setdefault(row_key, []).append(via_x_mm)
 
     for row_center_y_mm, row_bus_y_mm, row_bus_width_mm, row_reference in (
-        (first_row_center_y_mm, 0.525, OUTER_ROW_WIDTH_MM, "D1"),
+        (
+            first_row_center_y_mm,
+            top_row_bus_y_mm,
+            OUTER_ROW_WIDTH_MM,
+            "D1",
+        ),
         (
             second_row_center_y_mm,
             second_row_center_y_mm,
@@ -495,7 +551,7 @@ def generate_probe(
         )
 
     for column_number, column_center_x_mm in (
-        (1, 0.9),
+        (1, first_column_center_x_mm),
         (2, second_column_center_x_mm),
     ):
         for color_name, x_offset_mm, y_offset_mm in (
@@ -516,7 +572,7 @@ def generate_probe(
                 end_y_mm,
             )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 
@@ -524,36 +580,32 @@ def generate_bottom_right_probe(
     repository_root: Path,
     variant: ProbeVariant,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     output_path = (
         repository_root
         / "hardware"
         / "analysis"
         / f"{variant.board_name}_bottom_right_routing_probe.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
     second_last_row_number = variant.matrix_size - 1
     last_row_number = variant.matrix_size
     second_last_column_number = variant.matrix_size - 1
     last_column_number = variant.matrix_size
-    second_last_row_center_y_mm = (
-        0.9 + (second_last_row_number - 1) * variant.led_pitch_mm
+    second_last_row_center_y_mm = get_row_center(
+        variant,
+        second_last_row_number,
     )
-    last_row_center_y_mm = (
-        0.9 + (last_row_number - 1) * variant.led_pitch_mm
+    last_row_center_y_mm = get_row_center(variant, last_row_number)
+    second_last_column_center_x_mm = get_column_center(
+        variant,
+        second_last_column_number,
     )
-    second_last_column_center_x_mm = (
-        0.9 + (second_last_column_number - 1) * variant.led_pitch_mm
+    last_column_center_x_mm = get_column_center(
+        variant,
+        last_column_number,
     )
-    last_column_center_x_mm = (
-        0.9 + (last_column_number - 1) * variant.led_pitch_mm
-    )
+    bottom_row_bus_y_mm = get_outer_row_bus_y(variant, top=False)
 
     routed_leds: list[tuple[str, float, float, float]] = []
     for row_number, row_center_y_mm, row_bus_y_mm, row_bus_width_mm in (
@@ -566,7 +618,7 @@ def generate_bottom_right_probe(
         (
             last_row_number,
             last_row_center_y_mm,
-            variant.board_size_mm - 0.525,
+            bottom_row_bus_y_mm,
             OUTER_ROW_WIDTH_MM,
         ),
     ):
@@ -596,7 +648,7 @@ def generate_bottom_right_probe(
             footprint,
             row_bus_y_mm,
             row_bus_width_mm,
-            variant.board_size_mm - 0.525,
+            bottom_row_bus_y_mm,
         )
         row_key = str(row_center_y_mm)
         row_via_extents.setdefault(row_key, []).append(via_x_mm)
@@ -611,7 +663,7 @@ def generate_bottom_right_probe(
         (
             last_row_number,
             last_row_center_y_mm,
-            variant.board_size_mm - 0.525,
+            bottom_row_bus_y_mm,
             OUTER_ROW_WIDTH_MM,
         ),
     ):
@@ -657,7 +709,7 @@ def generate_bottom_right_probe(
                 end_y_mm,
             )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 
@@ -666,12 +718,6 @@ def generate_mirrored_corner_probe(
     variant: ProbeVariant,
     top_right: bool,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     corner_name = "top_right" if top_right else "bottom_left"
     output_path = (
         repository_root
@@ -679,14 +725,14 @@ def generate_mirrored_corner_probe(
         / "analysis"
         / f"{variant.board_name}_{corner_name}_routing_probe.kicad_pcb"
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
     if top_right:
         row_numbers = (1, 2)
         column_numbers = (variant.matrix_size - 1, variant.matrix_size)
         row_bus_specs = (
-            (0.525, OUTER_ROW_WIDTH_MM),
-            (0.9 + variant.led_pitch_mm, INNER_ROW_WIDTH_MM),
+            (get_outer_row_bus_y(variant, top=True), OUTER_ROW_WIDTH_MM),
+            (get_row_center(variant, 2), INNER_ROW_WIDTH_MM),
         )
         orientation_degrees = 90
         anode_via_x_offset_mm = -0.54
@@ -701,12 +747,13 @@ def generate_mirrored_corner_probe(
     else:
         row_numbers = (variant.matrix_size - 1, variant.matrix_size)
         column_numbers = (1, 2)
-        second_last_row_center_y_mm = (
-            0.9 + (row_numbers[0] - 1) * variant.led_pitch_mm
+        second_last_row_center_y_mm = get_row_center(
+            variant,
+            row_numbers[0],
         )
         row_bus_specs = (
             (second_last_row_center_y_mm, INNER_ROW_WIDTH_MM),
-            (variant.board_size_mm - 0.525, OUTER_ROW_WIDTH_MM),
+            (get_outer_row_bus_y(variant, top=False), OUTER_ROW_WIDTH_MM),
         )
         orientation_degrees = 270
         anode_via_x_offset_mm = 0.54
@@ -720,7 +767,7 @@ def generate_mirrored_corner_probe(
         )
 
     row_center_y_values = tuple(
-        0.9 + (row_number - 1) * variant.led_pitch_mm
+        get_row_center(variant, row_number)
         for row_number in row_numbers
     )
     row_via_extents: dict[int, list[float]] = {}
@@ -759,7 +806,7 @@ def generate_mirrored_corner_probe(
                     footprint,
                     row_bus_y_mm,
                     row_bus_width_mm,
-                    variant.board_size_mm - 0.525,
+                    get_outer_row_bus_y(variant, top=False),
                     anode_via_x_offset_mm,
                 )
             row_via_extents.setdefault(row_number, []).append(via_x_mm)
@@ -791,9 +838,7 @@ def generate_mirrored_corner_probe(
         )
 
     for column_number in column_numbers:
-        column_center_x_mm = (
-            0.9 + (column_number - 1) * variant.led_pitch_mm
-        )
+        column_center_x_mm = get_column_center(variant, column_number)
         for color_name, x_offset_mm, y_offset_mm in rgb_trunk_offsets:
             trunk_x_mm = column_center_x_mm + x_offset_mm
             add_track(
@@ -806,7 +851,7 @@ def generate_mirrored_corner_probe(
                 row_center_y_values[1] + y_offset_mm,
             )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 
@@ -814,12 +859,6 @@ def generate_orientation_transition_probe(
     repository_root: Path,
     variant: ProbeVariant,
 ) -> Path:
-    source_path = (
-        repository_root
-        / "hardware"
-        / variant.board_name
-        / f"{variant.board_name}.kicad_pcb"
-    )
     output_path = (
         repository_root
         / "hardware"
@@ -829,17 +868,13 @@ def generate_orientation_transition_probe(
             "_orientation_transition_routing_probe.kicad_pcb"
         )
     )
-    board = pcbnew.LoadBoard(str(source_path))
+    board = create_probe_board(repository_root, variant)
 
     normal_row_number = variant.matrix_size // 2
     rotated_row_number = normal_row_number + 1
     column_numbers = (2, 3)
-    normal_row_center_y_mm = (
-        0.9 + (normal_row_number - 1) * variant.led_pitch_mm
-    )
-    rotated_row_center_y_mm = (
-        0.9 + (rotated_row_number - 1) * variant.led_pitch_mm
-    )
+    normal_row_center_y_mm = get_row_center(variant, normal_row_number)
+    rotated_row_center_y_mm = get_row_center(variant, rotated_row_number)
     normal_row_via_x_values: list[float] = []
     rotated_row_via_x_values: list[float] = []
 
@@ -873,7 +908,7 @@ def generate_orientation_transition_probe(
                 rotated_footprint,
                 rotated_row_center_y_mm,
                 TRANSITION_ROW_WIDTH_MM,
-                variant.board_size_mm - 0.525,
+                get_outer_row_bus_y(variant, top=False),
             )
         )
 
@@ -907,7 +942,7 @@ def generate_orientation_transition_probe(
             TRANSITION_ROW_WIDTH_MM,
         )
 
-    pcbnew.SaveBoard(str(output_path), board)
+    save_probe_board(output_path, board)
     return output_path
 
 
