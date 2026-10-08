@@ -887,8 +887,8 @@ def electronics_parts() -> list[PlacedPart]:
             42.0,
             48.0,
             0.0,
-            42.0,
-            43.0,
+            47.0,
+            41.2,
             {"1": "SW_L2", "2": "SW_L1"},
         ),
         PlacedPart(
@@ -950,8 +950,8 @@ def electronics_parts() -> list[PlacedPart]:
             18.0,
             50.0,
             0.0,
-            26.0,
-            55.5,
+            18.0,
+            54.2,
             {},
         ),
         PlacedPart(
@@ -1161,15 +1161,59 @@ def electronics_parts() -> list[PlacedPart]:
             {},
         ),
         PlacedPart(
+            "C_SYS",
+            "10u",
+            "C_0805_2012Metric",
+            39.2,
+            43.6,
+            0.0,
+            39.2,
+            43.6,
+            {"1": "SYS", "2": "GND"},
+        ),
+        PlacedPart(
             "C_LED1",
             "22u",
             "C_0805_2012Metric",
-            42.0,
-            40.0,
+            30.2,
+            55.0,
             0.0,
-            42.0,
-            35.5,
-            {},
+            30.2,
+            55.0,
+            {"1": "LED_4V1", "2": "GND"},
+        ),
+        PlacedPart(
+            "C_LED2",
+            "22u",
+            "C_0805_2012Metric",
+            30.2,
+            57.5,
+            0.0,
+            30.2,
+            57.5,
+            {"1": "LED_4V1", "2": "GND"},
+        ),
+        PlacedPart(
+            "C_LDO_IN",
+            "1u",
+            "C_0603_1608Metric",
+            28.2,
+            59.6,
+            0.0,
+            28.2,
+            59.6,
+            {"1": "GND", "2": "SYS"},
+        ),
+        PlacedPart(
+            "C_LDO_OUT",
+            "1u",
+            "C_0603_1608Metric",
+            38.6,
+            64.3,
+            0.0,
+            38.6,
+            64.3,
+            {"1": "AON_3V3", "2": "GND"},
         ),
         PlacedPart(
             "TH_PCB",
@@ -1414,6 +1458,9 @@ def add_electronics_components(
                 "R_LOGIC",
                 "R_QOD",
                 "R_AUD",
+                "C_LED",
+                "C_SYS",
+                "C_LDO",
             )
         )
         footprint.Reference().SetLayer(
@@ -2364,6 +2411,72 @@ def route_converter_rails(board: pcbnew.BOARD) -> None:
         [(18.8625, 70.95), (14.60, 70.95), (14.60, 72.50)],
         0.15,
     )
+    route_converter_caps(board)
+
+
+def route_converter_caps(board: pcbnew.BOARD) -> None:
+    # Local ceramics for the buck and the always-on LDO. Charge current stays
+    # unset: the pack may be larger than the 300 mA assumption.
+    route_net_polyline(
+        board,
+        "SYS",
+        pcbnew.F_Cu,
+        [(38.25, 43.60), (38.25, 45.70), (35.0125, 45.70), (35.0125, 46.10)],
+        0.25,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(40.15, 43.60), (44.30, 43.60), (44.30, 51.60), (41.00, 51.60)],
+        0.25,
+    )
+    add_through_via(board, board.FindNet("GND"), 41.00, 51.60, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "LED_4V1",
+        pcbnew.F_Cu,
+        [(29.25, 53.20), (29.25, 57.50)],
+        0.30,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(31.15, 57.50), (31.15, 55.00), (41.00, 55.00)],
+        0.25,
+    )
+    add_through_via(board, board.FindNet("GND"), 41.00, 55.00, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "SYS",
+        pcbnew.F_Cu,
+        [(28.975, 59.60), (28.975, 61.05), (32.8625, 61.05)],
+        0.20,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(27.425, 59.60), (27.425, 56.20), (13.20, 56.20)],
+        0.20,
+    )
+    add_through_via(board, board.FindNet("GND"), 13.20, 56.20, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(37.825, 64.30), (37.825, 61.05), (36.40, 61.05)],
+        0.20,
+    )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(39.375, 64.30), (41.00, 64.30)],
+        0.20,
+    )
+    add_through_via(board, board.FindNet("GND"), 41.00, 64.30, diameter_mm=0.40)
 
 
 def route_led_buffer(board: pcbnew.BOARD) -> None:

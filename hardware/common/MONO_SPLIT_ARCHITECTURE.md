@@ -60,7 +60,7 @@ LEDs are rotated 180° so the anode faces −X and the cathode faces +X. Anode r
 
 RGB wearable architecture uses 4.099 V. A white LED at maximum `VF` 3.6 V plus MBI5124 `VDS` 0.4 V plus row/FFC/PMOS drop of about 0.13 A × paths leaves negative margin at 4.10 V.
 
-Preliminary mono rail: 4.24 V from `TPS63802` with 681 kΩ / 91 kΩ 0.1% (`EVT`, measure the farthest blue-white pixel and driver temperature). Do not copy the RGB 655/91 kΩ divider onto this board. `TPS63802` VOUT is `LED_4V1`, VIN is `SYS`, and MODE is tied to `GND`. `LED_EN` has a 100 kΩ pulldown. `TPS7A2033` takes `SYS` and holds `AON_3V3` on by tying EN to IN. The LED `TPS22917` switches `AON_3V3` to `LED_LOGIC_3V3`, with `LED_LOGIC_EN` pulled down by 100 kΩ and a 1 kΩ QOD resistor. The audio switch has the same default-off pulldown; its QOD pin stays open. The 10 µF input and 2×22 µF output capacitors are not placed yet.
+Preliminary mono rail: 4.24 V from `TPS63802` with 681 kΩ / 91 kΩ 0.1% (`EVT`, measure the farthest blue-white pixel and driver temperature). Do not copy the RGB 655/91 kΩ divider onto this board. `TPS63802` VOUT is `LED_4V1`, VIN is `SYS`, and MODE is tied to `GND`. `LED_EN` has a 100 kΩ pulldown. `TPS7A2033` takes `SYS` and holds `AON_3V3` on by tying EN to IN. The LED `TPS22917` switches `AON_3V3` to `LED_LOGIC_3V3`, with `LED_LOGIC_EN` pulled down by 100 kΩ and a 1 kΩ QOD resistor. The audio switch has the same default-off pulldown; its QOD pin stays open. `C_SYS` is 10 µF on the buck input. `C_LED1` and `C_LED2` are 22 µF on `LED_4V1`. `C_LDO_IN` and `C_LDO_OUT` are 1 µF. Charge current is not set: the cell may be larger than the earlier 300 mA assumption, so `ISET` stays off the board. The USB input limit before enumeration remains 100 mA.
 
 ## Electronics zones
 
