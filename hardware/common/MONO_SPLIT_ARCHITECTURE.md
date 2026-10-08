@@ -71,7 +71,7 @@ Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets s
 The electronics board is 160 × 110 mm so the matrix fan-in, the `LED_4V1` trunk, and that signal reserve have room without stacking parts. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
-2. ESP32-S3FN8 and 40 MHz crystal, with BMI270 nearby and away from the inductor.
+2. ESP32-S3FN8 on the top edge, crystal directly under it, BMI270 on that same edge and away from the inductor. The open strip to the right of the MCU is the pin-escape field.
 3. `BQ25185`, battery connector, `TPS63802`, inductor, AON LDO, and both `TPS22917` switches.
 4. Microphone and `TLV9001` on the far right, opposite the switcher.
 5. Row translator, both 74HC154 devices, and the 32 × `AO3403` farm with gate and pull-up resistors.
