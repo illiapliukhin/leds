@@ -1274,6 +1274,30 @@ def electronics_parts() -> list[PlacedPart]:
                 {"1": net_name},
             )
         )
+    # Safe-reset pulls for the translator. Centers sit above the address
+    # escapes; pad 1 faces the signal coming from the left.
+    for reference, value, signal_net, rail_net, center_x, center_y in (
+        ("R_ADDR0", "100k", "ROW_A0_4V", "GND", 78.0, 1.40),
+        ("R_ADDR1", "100k", "ROW_A1_4V", "GND", 80.6, 2.10),
+        ("R_ADDR2", "100k", "ROW_A2_4V", "GND", 83.2, 2.80),
+        ("R_ADDR3", "100k", "ROW_A3_4V", "GND", 85.8, 3.50),
+        ("R_ENA", "47k", "DEC_A_EN_N_4V", "LED_4V1", 88.6, 4.20),
+        ("R_ENB", "47k", "DEC_B_EN_N_4V", "LED_4V1", 91.2, 4.90),
+        ("R_XOE", "10k", "AON_3V3", "ROW_XLAT_OE_N", 66.2, 2.30),
+    ):
+        parts.append(
+            PlacedPart(
+                reference,
+                value,
+                "R_0402_1005Metric",
+                center_x,
+                center_y,
+                0.0,
+                center_x,
+                center_y,
+                {"1": signal_net, "2": rail_net},
+            )
+        )
     return parts
 
 
@@ -1299,7 +1323,7 @@ def add_electronics_components(
         footprint.SetOrientationDegrees(part.rotation_degrees)
         footprint.Value().SetVisible(False)
         reference_is_dense_farm_passive = part.reference.startswith(
-            ("R_G", "R_PU")
+            ("R_G", "R_PU", "R_ADDR", "R_EN", "R_XOE")
         )
         footprint.Reference().SetLayer(
             pcbnew.F_Fab if reference_is_dense_farm_passive else pcbnew.F_SilkS
@@ -2261,6 +2285,121 @@ def route_translator_power(board: pcbnew.BOARD) -> None:
     )
 
 
+def route_translator_bias(board: pcbnew.BOARD) -> None:
+    # Each address vertical stops at its own height. The upper stub is the
+    # leftmost net, so the stubs below it never cross that vertical.
+    address_pulls = (
+        ("ROW_A0_4V", 70.25, 6.20, 78.0, 1.40),
+        ("ROW_A1_4V", 70.75, 6.60, 80.6, 2.10),
+        ("ROW_A2_4V", 71.25, 7.00, 83.2, 2.80),
+        ("ROW_A3_4V", 72.70, 7.40, 85.8, 3.50),
+    )
+    for net_name, reach_x, entry_y, center_x, center_y in address_pulls:
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [
+                (reach_x, entry_y),
+                (reach_x, center_y),
+                (center_x - 0.51, center_y),
+            ],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+    ground_x = 87.20
+    ground_ys = []
+    for _, _, _, center_x, center_y in address_pulls:
+        ground_ys.append(center_y)
+        route_net_polyline(
+            board,
+            "GND",
+            pcbnew.F_Cu,
+            [(center_x + 0.51, center_y), (ground_x, center_y)],
+            0.15,
+        )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(ground_x, min(ground_ys)), (ground_x, max(ground_ys)), (ground_x, 1.15)],
+        0.15,
+    )
+    ground = board.FindNet("GND")
+    add_through_via(board, ground, ground_x, 1.15, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.In1_Cu,
+        [(ground_x, 1.15), (39.40, 1.15)],
+        0.20,
+    )
+    add_through_via(board, ground, 39.40, 1.15, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.In2_Cu,
+        [(39.40, 1.15), (39.40, 11.20)],
+        0.20,
+    )
+    add_through_via(board, ground, 39.40, 11.20, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(39.40, 11.20), (41.00, 11.20)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "DEC_A_EN_N_4V",
+        pcbnew.F_Cu,
+        [(73.35, 7.80), (73.35, 4.20), (88.6 - 0.51, 4.20)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    route_net_polyline(
+        board,
+        "DEC_B_EN_N_4V",
+        pcbnew.F_Cu,
+        [(74.00, 8.25), (74.00, 4.90), (91.2 - 0.51, 4.90)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    led_drop_x = 93.80
+    route_net_polyline(
+        board,
+        "LED_4V1",
+        pcbnew.F_Cu,
+        [
+            (88.6 + 0.51, 4.20),
+            (88.6 + 0.51, 0.80),
+            (led_drop_x, 0.80),
+            (led_drop_x, 8.80),
+            (89.50, 8.80),
+        ],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "LED_4V1",
+        pcbnew.F_Cu,
+        [(91.2 + 0.51, 4.90), (led_drop_x, 4.90)],
+        0.15,
+    )
+    route_net_polyline(
+        board,
+        "ROW_XLAT_OE_N",
+        pcbnew.F_Cu,
+        [(69.75, 3.55), (69.75, 2.30), (66.2 + 0.51, 2.30)],
+        FAN_IN_TRACK_WIDTH_MM,
+    )
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(66.2 - 0.51, 2.30), (64.20, 2.30), (64.20, 10.15)],
+        0.15,
+    )
+
+
 def route_decoder_address(board: pcbnew.BOARD) -> None:
     # B pins reach the decoder on the 4 V net above the row-select field.
     # Right-hand B pins step outward; the upper pin stays closest to the body.
@@ -2561,6 +2700,7 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     route_decoder_address(board)
     route_decoder_rails(board)
     route_translator_power(board)
+    route_translator_bias(board)
     route_rext_return(board)
     add_text(
         board,
