@@ -112,7 +112,11 @@
   land 0.05 mm inside the clearance rule.
 - Do not move all six MBI5124 packages into the low-Y border to create escape
   channels. That strip already holds about 474 mm² of other envelopes, and the
-  side columns freed by the move are narrower than the displaced parts. The
-  90° drivers still have eight outputs on a short edge whose neighbor gap
-  fits one track.
+  side columns freed by the move are narrower than the displaced parts.
+- The visible face stays LED-only. Do not grow the LED board into a wide
+  component rim so that 400 pixels become a larger product than 784. Put
+  the remaining circuits on the back, and when the through-via field blocks
+  that side, stack a rear board and join the pair with a mating
+  board-to-board connector. Do not freeze that connector from a pin count
+  alone; LED supply current has to cross it too.
 

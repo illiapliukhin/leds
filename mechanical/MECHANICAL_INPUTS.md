@@ -8,7 +8,7 @@ listed evidence is received.
 
 | Input | 20×20 | 28×28 | Status |
 |---|---:|---:|---|
-| PCB outline | 69.0 × 69.0 mm | 61.2 × 61.2 mm | 20×20 STUDY BASELINE; NOT FROZEN |
+| LED face | tight to the 20×20 field | tight to the 28×28 field | FRONT IS LEDS ONLY; NOT FROZEN |
 | PCB thickness | 1.0 mm | 1.0 mm | EVT BASELINE |
 | LED pitch | 2.50 mm | 2.20 mm | ROUTING-PROVEN |
 | Battery plan envelope | 32 × 40 mm | 40 × 50 mm | PROVISIONAL |
@@ -42,11 +42,15 @@ The LED through-via field is 48.7 mm square and its minimum via-edge gap is
 0.10 mm, so SMT pads cannot occupy the matrix back side. Area outside the
 battery rectangle is therefore not placement area when it still lies inside
 that via field. The 172 non-LED envelopes total approximately 1673.2 mm².
-A 69.0 mm outline leaves a 9.85 mm via-free border and approximately 2307 mm²
-of placeable area, or 72.5% envelope utilization. This is the current
-single-board study size, not a frozen production dimension. HDI blind vias
-remain the alternative if the product envelope must shrink back over the LED
-field. The battery projection stays component-free.
+The visible panel is only the LED matrix. Other parts go on the back of that
+board. The through-via field leaves a 0.10 mm gap, so those parts cannot sit
+on the matrix. The 172 non-LED envelopes total approximately 1673.2 mm² and
+do not fit on the back of a board cut to the LED field. The overflow is a
+stacked rear board, mated by a board-to-board connector that joins the two
+PCBs into one assembly. The connector must carry LED current as well as the
+row and RGB nets. Its part number is not frozen. HDI blind vias remain an
+alternative only if a single board must be recovered later. The battery
+projection stays component-free on the rear board.
 
 ## Stack budget
 
@@ -57,6 +61,8 @@ field. The battery projection stays component-free.
 | Black pixel grid | 1.0–1.5 mm | Optical EVT |
 | LED package | 0.6 mm | Manufacturer drawing |
 | PCB | 1.0 mm | Fabricator stackup |
+| Rear logic PCB | 1.0 mm, behind the LED board | Required when the via field blocks backside parts |
+| Board-to-board connector | height not frozen | Must carry LED current plus row and RGB nets |
 | Battery | approximately 6 mm | Supplier drawing |
 | Rear cover and attachment | 1.0–1.5 mm | Enclosure prototype |
 
