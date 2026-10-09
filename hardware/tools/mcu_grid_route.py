@@ -444,7 +444,7 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
             for key, value in os.environ.items()
             if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
         }
-        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,aon_zone,gnd,grid_one")
+        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,aon_zone,aon,gnd,grid_one")
         subprocess.run(
             [str(kicad_python), str(post_script), str(board_path)],
             check=True,

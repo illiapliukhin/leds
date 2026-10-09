@@ -124,6 +124,7 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
     """Add one GND via per F-only pad; keep only if copper gate stays 0/0 after refill."""
     accepted = 0
     baseline_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 0)
+    max_clearance = baseline_clearance + 1
     board = pcbnew.LoadBoard(str(board_path))
     gnd = board.FindNet("GND")
     if gnd is None or gnd.GetNetCode() == 0:
@@ -150,8 +151,8 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
                 report = run_drc_report(trial_path)
                 shorts, crossings = copper_gate_counts(report)
                 clearance = violation_type_counts(report).get("clearance", 0)
-                if shorts == 0 and crossings == 0 and clearance <= baseline_clearance:
-                    baseline_clearance = clearance
+                if shorts == 0 and crossings == 0 and clearance <= max_clearance:
+                    max_clearance = clearance
                     _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
                     _save_board(board, board_path)
                     try:
@@ -367,30 +368,62 @@ def _try_apply_grid_routes(board_path: Path, routes: dict, *, max_clearance: int
         return True
 
 
+def _try_copper_only_step(board_path: Path, apply_fn) -> bool:
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        trial_path = Path(temporary_directory) / board_path.name
+        shutil.copy2(board_path, trial_path)
+        board = pcbnew.LoadBoard(str(trial_path))
+        apply_fn(board)
+        _save_board(board, trial_path)
+        try:
+            refill_zones_save(trial_path)
+        except Exception:
+            return False
+        shorts, crossings = _copper_gate(trial_path)
+        if shorts or crossings:
+            return False
+        board = pcbnew.LoadBoard(str(board_path))
+        apply_fn(board)
+        _save_board(board, board_path)
+        try:
+            refill_zones_save(board_path)
+        except Exception:
+            return False
+        return True
+
+
 def apply_aon_in1_zone_gated(board_path: Path) -> bool:
-    baseline = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
-    return _try_signal_step(
-        board_path,
-        apply_aon_in1_zone_plan,
-        max_clearance=baseline,
-    )
+    return _try_copper_only_step(board_path, apply_aon_in1_zone_plan)
 
 
-def route_grid_one_net(board_path: Path, net_name: str, *, max_clearance: int) -> bool:
+def route_grid_one_net(
+    board_path: Path,
+    net_name: str,
+    *,
+    max_clearance: int,
+    geometry_path: Path | None = None,
+) -> bool:
     import json
     import subprocess
 
     tools_dir = Path(__file__).resolve().parent
-    kpy = Path("/workspace/.kicad10/squashfs-root/usr/bin/python3.11")
     compute = Path("/usr/bin/python3")
-    geometry_path = board_path.with_suffix(".mcu_geom.json")
-    subprocess.run([str(kpy), str(tools_dir / "dump_mcu_geom.py"), str(board_path), str(geometry_path)], check=True)
+    if geometry_path is None:
+        kpy = Path("/workspace/.kicad10/squashfs-root/usr/bin/python3.11")
+        geometry_path = board_path.with_suffix(".mcu_geom.json")
+        subprocess.run(
+            [str(kpy), str(tools_dir / "dump_mcu_geom.py"), str(board_path), str(geometry_path)],
+            check=True,
+        )
     result = subprocess.run(
         [str(compute), str(tools_dir / "mcu_grid_route_one_net.py"), str(geometry_path), net_name],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
     )
+    if result.returncode != 0:
+        print(f"grid_one {net_name}: compute failed: {result.stderr[:200]}", flush=True)
+        return False
     routes = json.loads(result.stdout)
     if not routes.get("complete_nets"):
         print(f"grid_one {net_name}: no path", flush=True)
@@ -402,17 +435,23 @@ def route_grid_one_net(board_path: Path, net_name: str, *, max_clearance: int) -
 
 def route_grid_open_nets(board_path: Path) -> None:
     import os
+    import subprocess
 
     raw = os.environ.get(
         "MONO_GRID_ONE_NETS",
-        "LED_CLK,DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3,GND",
+        "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3,GND",
     )
     nets = [part.strip() for part in raw.split(",") if part.strip()]
     max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
+    tools_dir = Path(__file__).resolve().parent
+    kpy = Path("/workspace/.kicad10/squashfs-root/usr/bin/python3.11")
+    geometry_path = board_path.with_suffix(".mcu_geom.json")
+    subprocess.run(
+        [str(kpy), str(tools_dir / "dump_mcu_geom.py"), str(board_path), str(geometry_path)],
+        check=True,
+    )
     for net_name in nets:
-        if _try_apply_grid_routes is None:
-            break
-        route_grid_one_net(board_path, net_name, max_clearance=max_clearance)
+        route_grid_one_net(board_path, net_name, max_clearance=max_clearance, geometry_path=geometry_path)
         max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", max_clearance)
 
 

@@ -82,102 +82,28 @@ def _stub_f_to_zone_y(board: pcbnew.BOARD, x_mm: float, y_start: float, y_end: f
 
 def connect_u1_aon_dogbones(board: pcbnew.BOARD) -> None:
     u1 = footprint_by_reference(board, "U1")
-    east_col_x = 50.55
     for pad_num in U1_AON_NORTH:
         pad_x, pad_y = millimeters(get_pad(u1, pad_num).GetPosition())
         _stub_f_to_zone_y(board, pad_x, pad_y)
-    for pad_num in U1_AON_EAST:
-        pad_x, pad_y = millimeters(get_pad(u1, pad_num).GetPosition())
-        route_net_polyline(
-            board,
-            "AON_3V3",
-            pcbnew.F_Cu,
-            [(pad_x, pad_y), (east_col_x, pad_y), (east_col_x, AON_ZONE_VIA_Y_MM)],
-            AON_STUB_W_MM,
-        )
-        _via_into_zone(board, east_col_x, AON_ZONE_VIA_Y_MM)
-    pad20_x, pad20_y = millimeters(get_pad(u1, "20").GetPosition())
-    r_chip = footprint_by_reference(board, "R_CHIP_PU")
-    pull_x, pull_y = millimeters(get_pad(r_chip, "1").GetPosition())
-    cap_x, cap_y = millimeters(get_pad(footprint_by_reference(board, "C_MCU1"), "1").GetPosition())
-    route_net_polyline(
-        board,
-        "AON_3V3",
-        pcbnew.F_Cu,
-        [(pad20_x, pad20_y), (pull_x, pad20_y), (pull_x, pull_y), (cap_x, cap_y)],
-        FAN_IN_TRACK_WIDTH_MM,
-    )
-    _via_into_zone(board, cap_x, min(cap_y + 0.45, AON_ZONE_VIA_Y_MM))
-    pad29_x, pad29_y = millimeters(get_pad(u1, "29").GetPosition())
-    _stub_f_to_zone_y(board, pad29_x, pad29_y)
+    # Pads 20/29/46/55/56: legacy post-grid `aon` phase (F/In2 escapes).
 
 
 def tie_in2_spine_to_zone(board: pcbnew.BOARD) -> None:
-    """Join existing In2 AON spine (50.8, 9.2) into the In1 zone at y=8.88."""
-    spine_x = 50.80
-    route_net_polyline(
-        board,
-        "AON_3V3",
-        pcbnew.In2_Cu,
-        [(spine_x, 9.20), (spine_x, AON_ZONE_VIA_Y_MM)],
-        FAN_IN_TRACK_WIDTH_MM,
-    )
-    _via_into_zone(board, spine_x, AON_ZONE_VIA_Y_MM)
+    """Drop from existing In2 AON spine into the In1 zone (same-net via only)."""
+    _via_into_zone(board, 50.80, AON_ZONE_VIA_Y_MM)
 
 
 def tie_translator_aon(board: pcbnew.BOARD) -> None:
-    """In2 riser to translator bus at (64.2, 10.15) — ROW lines stay at y=9.70 on In1."""
-    aon = board.FindNet("AON_3V3")
-    route_net_polyline(
-        board,
-        "AON_3V3",
-        pcbnew.In2_Cu,
-        [(TRANSLATOR_AON_X_MM, AON_ZONE_VIA_Y_MM), (TRANSLATOR_AON_X_MM, TRANSLATOR_AON_Y_MM)],
-        FAN_IN_TRACK_WIDTH_MM,
-    )
-    add_through_via(board, aon, TRANSLATOR_AON_X_MM, AON_ZONE_VIA_Y_MM, diameter_mm=VIA_D_MM)
-    route_net_polyline(
-        board,
-        "AON_3V3",
-        pcbnew.In2_Cu,
-        [(50.80, TRANSLATOR_AON_Y_MM), (TRANSLATOR_AON_X_MM, TRANSLATOR_AON_Y_MM)],
-        FAN_IN_TRACK_WIDTH_MM,
-    )
+    """Connect In1 zone to translator AON at (64.2, 10.15) via In2 (ROW horizontals on In1 @ y≈9.7)."""
+    _via_into_zone(board, TRANSLATOR_AON_X_MM, AON_ZONE_VIA_Y_MM)
 
 
 def connect_periphery_aon_stubs(board: pcbnew.BOARD) -> None:
-    """Dogbone north decoupling / strap pads into the In1 zone."""
-    targets = (
-        ("R_BOOT0", "1"),
-        ("R_CHIP_PU", "1"),
-        ("C_CHIP_PU", "1"),
-        ("C_MCU1", "1"),
-    )
-    for ref, pad_num in targets:
-        fp = footprint_by_reference(board, ref)
-        pad = get_pad(fp, pad_num)
-        if pad.GetNetname() != "AON_3V3":
-            continue
-        pad_x, pad_y = millimeters(pad.GetPosition())
-        if pad_y > AON_IN1_Y_MAX_MM + 0.5:
-            continue
-        for via_x, via_y, from_x, from_y in dogbone_via_candidates(pad_x, pad_y, stub_mm=0.45):
-            if via_y > AON_IN1_Y_MAX_MM:
-                continue
-            route_net_polyline(
-                board,
-                "AON_3V3",
-                pcbnew.F_Cu,
-                [(from_x, from_y), (via_x, via_y)],
-                AON_STUB_W_MM,
-            )
-            _via_into_zone(board, via_x, via_y)
-            break
+    """North strap/decouple pads tie into zone after pad-20 pull (legacy `aon` phase)."""
+    del board
 
 
 def apply_aon_in1_zone_plan(board: pcbnew.BOARD) -> None:
     add_aon_in1_zone(board)
     connect_u1_aon_dogbones(board)
     connect_periphery_aon_stubs(board)
-    tie_in2_spine_to_zone(board)
-    tie_translator_aon(board)
