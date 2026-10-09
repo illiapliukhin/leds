@@ -23,6 +23,7 @@ sys.path.insert(0, str(TOOLS_DIR))
 import pcbnew  # noqa: E402
 from generate_mono_split_boards import generate_boards  # noqa: E402
 from mono_split_esp32 import (  # noqa: E402
+    route_mcu_boot_switch,
     route_mcu_enable_joins,
     route_mcu_imu_links,
     route_mcu_led_reserves,
@@ -166,6 +167,7 @@ def finish_mcu_from_script(board: pcbnew.BOARD) -> None:
     route_mcu_power_stitch(board)
     route_mcu_strap_passives(board)
     route_mcu_strap_power_gnd(board)
+    route_mcu_boot_switch(board)
     route_mcu_row_address_joins(board)
     route_mcu_row_xlat_oe(board)
     route_mcu_led_reserves(board)
@@ -254,12 +256,19 @@ def autoroute(
     threads: int,
     skip_freerouting: bool,
     strip_mcu_nets: bool,
+    script_finish: bool,
 ) -> None:
     if regenerate:
         generate_boards(REPO_ROOT)
 
     board = pcbnew.LoadBoard(str(BOARD_PATH))
     route_mcu_hand_paired_nets(board)
+    if script_finish:
+        finish_mcu_from_script(board)
+        refill_copper_zones(board)
+        pcbnew.SaveBoard(str(BOARD_PATH), board)
+        print(f"Saved {BOARD_PATH} after scripted MCU finish (no Freerouting)")
+        return
     if strip_mcu_nets:
         stripped = strip_mcu_autoroute_copper(board)
         print(f"Stripped {stripped} MCU-net items (--strip-mcu-nets)")
@@ -319,6 +328,11 @@ def main() -> None:
         help="Remove generator MCU-net copper before export (experimental)",
     )
     parser.add_argument(
+        "--script-finish",
+        action="store_true",
+        help="Route MCU corner from mono_split_esp32 (no Freerouting)",
+    )
+    parser.add_argument(
         "--max-passes",
         type=int,
         default=80,
@@ -337,6 +351,7 @@ def main() -> None:
         threads=args.threads,
         skip_freerouting=args.export_only,
         strip_mcu_nets=args.strip_mcu_nets,
+        script_finish=args.script_finish,
     )
 
 

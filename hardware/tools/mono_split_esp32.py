@@ -326,15 +326,15 @@ def route_usb_connector_to_esd(board: pcbnew.BOARD) -> None:
     )
     usb = footprint_by_reference(board, "J_USB")
     esd = footprint_by_reference(board, "U_ESD")
-    for bus_net, usb_pads, esd_pad, merge_y in (
-        ("USB_D_P", ("A6", "B6"), "1", 19.10),
-        ("USB_D_N", ("A7", "B7"), "3", 16.85),
+    for bus_net, usb_pads, esd_pad, merge_y, merge_x_offset in (
+        ("USB_D_P", ("A6", "B6"), "1", 19.10, 0.80),
+        ("USB_D_N", ("A7", "B7"), "3", 16.85, 1.35),
     ):
         esd_x, esd_y = millimeters(get_pad(esd, esd_pad).GetPosition())
         usb_points = [
             millimeters(get_pad(usb, pad_name).GetPosition()) for pad_name in usb_pads
         ]
-        merge_x = min(point[0] for point in usb_points) - 0.80
+        merge_x = min(point[0] for point in usb_points) - merge_x_offset
         for usb_x, usb_y in usb_points:
             route_polyline(
                 board,
@@ -356,7 +356,7 @@ def route_usb_connector_to_esd(board: pcbnew.BOARD) -> None:
 
 
 def route_mcu_usb(board: pcbnew.BOARD) -> None:
-    track_width, _, footprint_by_reference, get_pad, millimeters, route_polyline = (
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
         _helpers()
     )
     u1 = footprint_by_reference(board, "U1")
@@ -384,13 +384,16 @@ def route_mcu_usb(board: pcbnew.BOARD) -> None:
             ],
             track_width,
         )
+        net = board.FindNet(bus_net)
+        add_via(board, net, series_in_x, series_in_y, diameter_mm=0.40)
         route_polyline(
             board,
             bus_net,
-            pcbnew.F_Cu,
+            pcbnew.In2_Cu,
             [(series_in_x, series_in_y), (esd_x, esd_y)],
             track_width,
         )
+        add_via(board, net, esd_x, esd_y, diameter_mm=0.40)
 
 
 def route_mcu_strap_passives(board: pcbnew.BOARD) -> None:
@@ -506,7 +509,7 @@ def route_mcu_xtal_only(board: pcbnew.BOARD) -> None:
     )
 
 
-def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
+def route_mcu_boot_switch(board: pcbnew.BOARD) -> None:
     track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
         _helpers()
     )
@@ -538,6 +541,10 @@ def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
         [(MCU_BOOT_IN2_X_MM, 82.00), (sw_x, 82.00), (sw_x, sw_y)],
         track_width,
     )
+
+
+def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
+    route_mcu_boot_switch(board)
     route_mcu_xtal_only(board)
 
 
@@ -591,25 +598,47 @@ def route_mcu_power_stitch(board: pcbnew.BOARD) -> None:
     decouple = footprint_by_reference(board, "C_MCU1")
     cap_x, cap_y = millimeters(get_pad(decouple, "1").GetPosition())
     aon_bus_y = cap_y - 0.55
-    aon_spine_x = 50.80
-    for pad_number in ("2", "3"):
+    aon_tap_x = 43.50
+    aon_tap_y = 9.20
+    aon = board.FindNet("AON_3V3")
+    for pad_number in ("2", "3", "20", "29", "46", "55", "56"):
         pad_x, pad_y = millimeters(get_pad(u1, pad_number).GetPosition())
         route_polyline(
             board,
             "AON_3V3",
             pcbnew.F_Cu,
-            [
-                (pad_x, pad_y),
-                (aon_spine_x, pad_y),
-                (aon_spine_x, aon_bus_y),
-                (cap_x, aon_bus_y),
-                (cap_x, cap_y),
-            ],
+            [(pad_x, pad_y), (pad_x, aon_tap_y), (aon_tap_x, aon_tap_y)],
             track_width,
         )
+    add_via(board, aon, aon_tap_x, aon_tap_y, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.In1_Cu,
+        [(aon_tap_x, aon_tap_y), (50.80, aon_tap_y)],
+        track_width,
+    )
+    add_via(board, aon, 50.80, aon_tap_y, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(50.80, aon_tap_y), (50.80, aon_bus_y), (cap_x, aon_bus_y), (cap_x, cap_y)],
+        track_width,
+    )
     gnd = board.FindNet("GND")
     ep_x, ep_y = millimeters(get_pad(u1, "57").GetPosition())
     add_via(board, gnd, ep_x - 0.55, ep_y, diameter_mm=0.40)
+    for pad_number in ("11", "32", "44", "45"):
+        pad_x, pad_y = millimeters(get_pad(u1, pad_number).GetPosition())
+        route_polyline(
+            board,
+            "GND",
+            pcbnew.F_Cu,
+            [(pad_x, pad_y), (41.00, pad_y)],
+            track_width,
+        )
+        add_via(board, gnd, 41.00, pad_y, diameter_mm=0.40)
 
 
 def route_mcu_strap_power_gnd(board: pcbnew.BOARD) -> None:

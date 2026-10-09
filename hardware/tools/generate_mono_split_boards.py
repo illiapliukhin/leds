@@ -1888,7 +1888,7 @@ def route_imu_sense(board: pcbnew.BOARD) -> None:
             reserve[pad.GetNetname()] = pad
     routes = (
         ("14", "IMU_SDA", 157.4, 4.2, 100.2, False),
-        ("13", "IMU_SCL", 158.2, 4.9, 100.9, False),
+        ("13", "IMU_SCL", 158.45, 4.52, 100.9, False),
         ("4", "IMU_INT1", 159.0, 5.6, 101.6, True),
     )
     for pad_number, net_name, lane_x_mm, top_y_mm, bottom_y_mm, escape_left in routes:
