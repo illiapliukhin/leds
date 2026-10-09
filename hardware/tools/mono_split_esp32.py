@@ -437,7 +437,7 @@ def route_mcu_strap_passives(board: pcbnew.BOARD) -> None:
 
 def route_mcu_xtal_only(board: pcbnew.BOARD) -> None:
     """40 MHz crystal + load caps on F.Cu (keep foreign signals off Y1)."""
-    track_width, _, footprint_by_reference, get_pad, millimeters, route_polyline = (
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
         _helpers()
     )
     u1 = footprint_by_reference(board, "U1")
@@ -446,67 +446,48 @@ def route_mcu_xtal_only(board: pcbnew.BOARD) -> None:
     xtal_n_x, xtal_n_y = millimeters(get_pad(u1, "53").GetPosition())
     cry_p_x, cry_p_y = millimeters(get_pad(y1, "1").GetPosition())
     cry_n_x, cry_n_y = millimeters(get_pad(y1, "3").GetPosition())
-    route_polyline(
-        board,
-        "XTAL_P",
-        pcbnew.F_Cu,
-        [(xtal_p_x, xtal_p_y), (cry_p_x, xtal_p_y), (cry_p_x, cry_p_y)],
-        track_width,
+    cap_p_x, cap_p_y = millimeters(
+        get_pad(footprint_by_reference(board, "C_XTAL1"), "1").GetPosition()
     )
-    route_polyline(
-        board,
-        "XTAL_N",
-        pcbnew.F_Cu,
-        [
+    cap_n_x, cap_n_y = millimeters(
+        get_pad(footprint_by_reference(board, "C_XTAL2"), "1").GetPosition()
+    )
+    for net_name, u1_xy, cap_xy, cry_xy, u1_escape_x in (
+        (
+            "XTAL_P",
+            (xtal_p_x, xtal_p_y),
+            (cap_p_x, cap_p_y),
+            (cry_p_x, cry_p_y),
+            xtal_p_x + 1.05,
+        ),
+        (
+            "XTAL_N",
             (xtal_n_x, xtal_n_y),
-            (50.20, xtal_n_y),
-            (50.20, cry_n_y),
+            (cap_n_x, cap_n_y),
             (cry_n_x, cry_n_y),
-        ],
-        track_width,
-    )
-    y1 = footprint_by_reference(board, "Y1")
-    gnd_pad_x, gnd_pad_y = millimeters(get_pad(y1, "2").GetPosition())
-    gnd_pad4_x, gnd_pad4_y = millimeters(get_pad(y1, "4").GetPosition())
-    cap1_gnd_x, cap1_gnd_y = millimeters(
-        get_pad(footprint_by_reference(board, "C_XTAL1"), "2").GetPosition()
-    )
-    cap2_gnd_x, cap2_gnd_y = millimeters(
-        get_pad(footprint_by_reference(board, "C_XTAL2"), "2").GetPosition()
-    )
-    for net_name, cap_ref, cry_pad in (
-        ("XTAL_P", "C_XTAL1", "1"),
-        ("XTAL_N", "C_XTAL2", "3"),
+            xtal_n_x - 1.05,
+        ),
     ):
-        cap = footprint_by_reference(board, cap_ref)
-        cap_signal_x, cap_signal_y = millimeters(get_pad(cap, "1").GetPosition())
-        cry_x, cry_y = millimeters(get_pad(y1, cry_pad).GetPosition())
+        net = board.FindNet(net_name)
+        add_via(board, net, u1_xy[0], u1_xy[1], diameter_mm=0.40)
+        add_via(board, net, cap_xy[0], cap_xy[1], diameter_mm=0.40)
+        add_via(board, net, cry_xy[0], cry_xy[1], diameter_mm=0.40)
+        route_polyline(
+            board,
+            net_name,
+            pcbnew.B_Cu,
+            [(u1_escape_x, u1_xy[1]), cap_xy, cry_xy],
+            track_width,
+        )
+        add_via(board, net, u1_escape_x, u1_xy[1], diameter_mm=0.40)
         route_polyline(
             board,
             net_name,
             pcbnew.F_Cu,
-            [(cry_x, cry_y), (cap_signal_x, cap_signal_y)],
+            [u1_xy, (u1_escape_x, u1_xy[1])],
             track_width,
         )
-    route_polyline(
-        board,
-        "GND",
-        pcbnew.F_Cu,
-        [
-            (cap1_gnd_x, cap1_gnd_y),
-            (gnd_pad4_x, cap1_gnd_y),
-            (gnd_pad4_x, gnd_pad4_y),
-            (gnd_pad_x, gnd_pad_y),
-        ],
-        track_width,
-    )
-    route_polyline(
-        board,
-        "GND",
-        pcbnew.F_Cu,
-        [(cap2_gnd_x, cap2_gnd_y), (gnd_pad4_x, cap2_gnd_y)],
-        track_width,
-    )
+    # Crystal GND (caps + Y1 case) is completed by copper zone fill after routing.
 
 
 def route_mcu_boot_switch(board: pcbnew.BOARD) -> None:

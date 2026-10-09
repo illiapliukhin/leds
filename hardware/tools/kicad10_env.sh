@@ -3,3 +3,4 @@
 KICAD10_ROOT="${KICAD10_ROOT:-/workspace/.kicad10/squashfs-root}"
 export PATH="${KICAD10_ROOT}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${KICAD10_ROOT}/usr/lib/x86_64-linux-gnu:${KICAD10_ROOT}/usr/lib:${LD_LIBRARY_PATH:-}"
+# Generators must use AppImage python3.11 (distro python3 loads the wrong pcbnew).

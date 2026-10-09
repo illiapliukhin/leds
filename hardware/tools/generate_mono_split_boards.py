@@ -3774,8 +3774,6 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     route_translator_power(board)
     route_translator_bias(board)
     route_rext_return(board)
-    # MCU corner (U1, USB, XTAL, boot/strap, enables, IMU↔U1, LED↔U1) is autorouted
-    # via hardware/tools/autoroute_mcu.py (Freerouting DSN/SES). Pad nets stay assigned.
     add_text(
         board,
         "SCAN AND IMU SIGNAL RESERVE",
