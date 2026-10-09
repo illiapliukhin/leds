@@ -25,10 +25,6 @@ RIP_PROTECT = frozenset(
         "ROW_A2",
         "ROW_A3",
         "ROW_XLAT_OE_N",
-        "LED_CLK",
-        "LED_SDI",
-        "LED_LE",
-        "LED_OE_N",
     }
 )
 

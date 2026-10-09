@@ -304,7 +304,16 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     import os
     import subprocess
 
-    from mcu_grid_drc import copper_gate_counts, drc_gate_routes, refill_zones_save, run_drc_report
+    import shutil
+
+    from mcu_grid_drc import (
+        board_metrics,
+        copper_gate_counts,
+        drc_gate_routes,
+        monotonic_gate_allows,
+        refill_zones_save,
+        run_drc_report,
+    )
 
     tools_dir = Path(__file__).resolve().parent
     if os.environ.get("MONO_PRE_GRID_FANOUT", "0") == "1":
@@ -357,7 +366,7 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     greedy_ok, greedy_shorts, greedy_cross = drc_gate_routes(
         board_path, greedy_routes, kicad_python=kicad_python, apply_script=apply_script
     )
-    from mcu_grid_merge import merge_routes
+    from mcu_grid_merge import merge_greedy_one_at_a_time
 
     pf_complete = len(pf_routes.get("complete_nets") or [])
     greedy_complete = len(greedy_routes.get("complete_nets") or [])
@@ -365,28 +374,28 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     greedy_nets = set(greedy_routes.get("complete_nets") or [])
     borrow_nets = greedy_nets - pf_nets
     pf_candidate = pf_routes
-    if pf_ok and borrow_nets and greedy_ok:
-        merged = merge_routes(pf_routes, greedy_routes, borrow_nets)
-        merge_ok, merge_shorts, merge_cross = drc_gate_routes(
-            board_path, merged, kicad_python=kicad_python, apply_script=apply_script
+
+    def _gate_routes(routes: dict) -> tuple[bool, int, int]:
+        return drc_gate_routes(
+            board_path,
+            routes,
+            kicad_python=kicad_python,
+            apply_script=apply_script,
         )
-        if merge_ok:
-            pf_candidate = merged
-            pf_complete = len(merged.get("complete_nets") or [])
-            print(
-                f"grid merge pf+greedy nets {sorted(borrow_nets)} "
-                f"DRC {merge_shorts}/{merge_cross}",
-                flush=True,
+
+    if pf_ok and greedy_ok and borrow_nets:
+        pf_candidate = merge_greedy_one_at_a_time(
+            pf_routes,
+            greedy_routes,
+            borrow_nets,
+            drc_gate=_gate_routes,
+        )
+        pf_complete = len(pf_candidate.get("complete_nets") or [])
+        if pf_complete > len(pf_routes.get("complete_nets") or []):
+            borrowed = sorted(set(pf_candidate.get("complete_nets") or []) - pf_nets)
+            pf_candidate["route_engine"] = (
+                f"pathfinder+greedy({','.join(borrowed)})"
             )
-    merge_led = greedy_ok and "LED_CLK" in greedy_nets and "LED_CLK" not in pf_nets
-    if merge_led and pf_ok:
-        merged_led = merge_routes(pf_routes, greedy_routes, {"LED_CLK"})
-        led_ok, _, _ = drc_gate_routes(
-            board_path, merged_led, kicad_python=kicad_python, apply_script=apply_script
-        )
-        if led_ok:
-            pf_candidate = merged_led
-            pf_complete = len(merged_led.get("complete_nets") or [])
     if pf_ok and pf_complete >= greedy_complete:
         chosen = pf_candidate
         chosen_label = pf_candidate.get("route_engine", "pathfinder")
@@ -441,11 +450,9 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
         link_test_point_footprints(board)
     pcbnew.SaveBoard(str(board_path), board)
     post_grid_backup: Path | None = None
+    before_post_grid = board_metrics(board_path)
     if os.environ.get("MONO_POST_GRID", "1") == "1":
-        import shutil
-        import tempfile
-
-        post_grid_backup = Path(tempfile.mkdtemp()) / board_path.name
+        post_grid_backup = board_path.parent / f"{board_path.name}.postgrid_bak"
         shutil.copy2(board_path, post_grid_backup)
         post_script = tools_dir / "mono_split_post_grid_finish.py"
         post_env = {
@@ -453,14 +460,25 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
             for key, value in os.environ.items()
             if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
         }
-        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,aon_zone,gnd,grid_one")
-        # grid_one runs last; post-grid backup reverts all phases if copper gate fails.
-        post_env.setdefault("MONO_GRID_ONE_NETS", "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3,GND")
+        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,gnd,aon")
         subprocess.run(
             [str(kicad_python), str(post_script), str(board_path)],
-            check=True,
+            check=False,
             env=post_env,
         )
+        after_post_grid = board_metrics(board_path)
+        if not monotonic_gate_allows(before_post_grid, after_post_grid):
+            if post_grid_backup is not None:
+                shutil.copy2(post_grid_backup, board_path)
+            print(
+                "post-grid reverted (monotonic gate): "
+                f"unconnected {before_post_grid.unconnected}->{after_post_grid.unconnected} "
+                f"clearance {before_post_grid.clearance}->{after_post_grid.clearance} "
+                f"shorts={after_post_grid.shorts} crossings={after_post_grid.crossings}",
+                flush=True,
+            )
+        elif post_grid_backup is not None:
+            post_grid_backup.unlink(missing_ok=True)
     else:
         print(
             f"post-grid skipped ({len(incomplete)} incomplete nets); MONO_POST_GRID=0",
@@ -474,17 +492,6 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     report = run_drc_report(board_path)
     shorts, crossings = copper_gate_counts(report)
     print(f"post-finish DRC gate: shorts={shorts} crossings={crossings}", flush=True)
-    if (shorts > 0 or crossings > 0) and post_grid_backup is not None:
-        import shutil
-
-        shutil.copy2(post_grid_backup, board_path)
-        print(
-            "post-grid reverted: copper gate failed after finish (backup restored)",
-            flush=True,
-        )
-        report = run_drc_report(board_path)
-        shorts, crossings = copper_gate_counts(report)
-        print(f"post-finish DRC gate (restored): shorts={shorts} crossings={crossings}", flush=True)
 
 
 def route_mcu_with_grid(

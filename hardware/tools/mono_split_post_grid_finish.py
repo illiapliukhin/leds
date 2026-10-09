@@ -18,7 +18,14 @@ from generate_mono_split_boards import (
     millimeters,
     route_net_polyline,
 )
-from mcu_grid_drc import copper_gate_counts, refill_zones_save, run_drc_report, violation_type_counts
+from mcu_grid_drc import (
+    board_metrics,
+    copper_gate_counts,
+    monotonic_gate_allows,
+    refill_zones_save,
+    run_drc_report,
+    violation_type_counts,
+)
 from mono_split_aon_in1_zone import apply_aon_in1_zone_plan
 from mono_split_copper_utils import GND_STITCH_TARGETS, dogbone_via_candidates, remove_dangling_track_stubs
 
@@ -35,6 +42,46 @@ def _save_board(board: pcbnew.BOARD, path: Path) -> None:
 def _copper_gate(path: Path) -> tuple[int, int]:
     report = run_drc_report(path)
     return copper_gate_counts(report)
+
+
+def _with_monotonic_commit(board_path: Path, phase_name: str, apply_fn) -> bool:
+    """Apply phase to board_path; keep changes only if monotonic DRC gate passes."""
+    backup_path = board_path.parent / f"{board_path.name}.monobak"
+    shutil.copy2(board_path, backup_path)
+    before = board_metrics(board_path)
+    try:
+        apply_fn(board_path)
+        try:
+            refill_zones_save(board_path)
+        except Exception as error:
+            print(f"monotonic gate {phase_name}: refill failed ({error})", flush=True)
+            shutil.copy2(backup_path, board_path)
+            backup_path.unlink(missing_ok=True)
+            return False
+        after = board_metrics(board_path)
+        if monotonic_gate_allows(before, after):
+            print(
+                f"monotonic gate {phase_name}: accepted "
+                f"unconnected {before.unconnected}->{after.unconnected} "
+                f"clearance {before.clearance}->{after.clearance}",
+                flush=True,
+            )
+            backup_path.unlink(missing_ok=True)
+            return True
+        print(
+            f"monotonic gate {phase_name}: rejected "
+            f"unconnected {before.unconnected}->{after.unconnected} "
+            f"clearance {before.clearance}->{after.clearance} "
+            f"shorts={after.shorts} crossings={after.crossings}",
+            flush=True,
+        )
+        shutil.copy2(backup_path, board_path)
+        backup_path.unlink(missing_ok=True)
+        return False
+    except Exception:
+        shutil.copy2(backup_path, board_path)
+        backup_path.unlink(missing_ok=True)
+        raise
 
 
 def _near_mm(ax: float, ay: float, bx: float, by: float, tol: float) -> bool:
@@ -121,10 +168,8 @@ def _add_gnd_stitch(board: pcbnew.BOARD, pad_x: float, pad_y: float, via_x: floa
 
 
 def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
-    """Add one GND via per F-only pad; keep only if copper gate stays 0/0 after refill."""
+    """Add GND dogbone vias one at a time; each must pass the monotonic DRC gate."""
     accepted = 0
-    baseline_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 0)
-    max_clearance = baseline_clearance + 1
     board = pcbnew.LoadBoard(str(board_path))
     gnd = board.FindNet("GND")
     if gnd is None or gnd.GetNetCode() == 0:
@@ -138,6 +183,7 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
         pad_x, pad_y = millimeters(pad.GetPosition())
         placed = False
         for via_x, via_y, from_x, from_y in dogbone_via_candidates(pad_x, pad_y):
+            before = board_metrics(board_path)
             with tempfile.TemporaryDirectory() as temporary_directory:
                 trial_path = Path(temporary_directory) / board_path.name
                 shutil.copy2(board_path, trial_path)
@@ -148,20 +194,27 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
                     refill_zones_save(trial_path)
                 except Exception:
                     continue
-                report = run_drc_report(trial_path)
-                shorts, crossings = copper_gate_counts(report)
-                clearance = violation_type_counts(report).get("clearance", 0)
-                if shorts == 0 and crossings == 0 and clearance <= max_clearance:
-                    max_clearance = clearance
-                    _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
-                    _save_board(board, board_path)
-                    try:
-                        refill_zones_save(board_path)
-                    except Exception:
-                        pass
-                    accepted += 1
-                    placed = True
-                    break
+                after = board_metrics(trial_path)
+                if after.shorts or after.crossings:
+                    continue
+                if after.unconnected >= before.unconnected:
+                    continue
+                if after.clearance > before.clearance:
+                    continue
+            _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
+            _save_board(board, board_path)
+            try:
+                refill_zones_save(board_path)
+            except Exception:
+                pass
+            accepted += 1
+            placed = True
+            print(
+                f"gnd stitch {ref}:{pad_num} ok "
+                f"unconnected {before.unconnected}->{after.unconnected}",
+                flush=True,
+            )
+            break
         if not placed:
             print(f"gnd stitch: no legal via for {ref}:{pad_num} @ ({pad_x:.2f},{pad_y:.2f})", flush=True)
     return accepted
@@ -499,35 +552,63 @@ def _trial_copper_gate(board_path: Path, apply_fn) -> tuple[int, int]:
         return _copper_gate(trial_path)
 
 
+def _apply_cleanup_phase(board_path: Path) -> None:
+    board = pcbnew.LoadBoard(str(board_path))
+    cleanup_danglers_and_move_oe(board)
+    _save_board(board, board_path)
+
+
+def _apply_aon_phase(board_path: Path) -> None:
+    apply_aon_steps_gated(board_path)
+    if _try_signal_step(board_path, join_dec_a_en_to_stubs):
+        print("dec_a join: ok", flush=True)
+    else:
+        print("dec_a join: skipped (DRC gate)", flush=True)
+
+
+def _apply_aon_zone_phase(board_path: Path) -> None:
+    if not apply_aon_in1_zone_gated(board_path):
+        print("aon_zone: trial gate failed (board unchanged)", flush=True)
+
+
+def _apply_grid_one_phase(board_path: Path) -> None:
+    route_grid_open_nets(board_path)
+
+
 def run_phase(board_path: Path, phase: str) -> dict[str, int]:
     """Run one post-grid phase in a single pcbnew session (KiCad SWIG safe)."""
     stats: dict[str, int] = {"gnd_stitches": 0, "shorts": 0, "crossings": 0}
     if phase == "cleanup":
-        board = pcbnew.LoadBoard(str(board_path))
-        cleanup_danglers_and_move_oe(board)
-        _save_board(board, board_path)
-        refill_zones_save(board_path)
+        _with_monotonic_commit(board_path, "cleanup", _apply_cleanup_phase)
         return stats
     if phase == "gnd":
-        stats["gnd_stitches"] = stitch_gnd_pads_with_drc_gate(board_path)
+        stitch_count: list[int] = [0]
+
+        def _gnd_apply(path: Path) -> None:
+            stitch_count[0] = stitch_gnd_pads_with_drc_gate(path)
+
+        if _with_monotonic_commit(board_path, "gnd", _gnd_apply):
+            stats["gnd_stitches"] = stitch_count[0]
         return stats
     if phase == "aon_zone":
-        if apply_aon_in1_zone_gated(board_path):
+        if _with_monotonic_commit(board_path, "aon_zone", _apply_aon_zone_phase):
             print("aon_zone: ok", flush=True)
         else:
-            print("aon_zone: skipped (DRC gate)", flush=True)
+            print("aon_zone: skipped (monotonic gate)", flush=True)
         stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "aon":
-        apply_aon_steps_gated(board_path)
-        if _try_signal_step(board_path, join_dec_a_en_to_stubs):
-            print("dec_a join: ok", flush=True)
+        if _with_monotonic_commit(board_path, "aon", _apply_aon_phase):
+            print("aon: ok", flush=True)
         else:
-            print("dec_a join: skipped (DRC gate)", flush=True)
+            print("aon: skipped (monotonic gate)", flush=True)
         stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "grid_one":
-        route_grid_open_nets(board_path)
+        if _with_monotonic_commit(board_path, "grid_one", _apply_grid_one_phase):
+            print("grid_one: ok", flush=True)
+        else:
+            print("grid_one: skipped (monotonic gate)", flush=True)
         stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "signals":
@@ -557,7 +638,7 @@ def run_post_grid_finish(board_path: Path) -> dict[str, int]:
 def _default_phases() -> tuple[str, ...]:
     import os
 
-    raw = os.environ.get("MONO_POST_GRID_PHASES", "cleanup,gnd,aon,signals")
+    raw = os.environ.get("MONO_POST_GRID_PHASES", "cleanup,gnd,aon")
     return tuple(part.strip() for part in raw.split(",") if part.strip())
 
 
@@ -572,12 +653,10 @@ def main() -> None:
         if not kpy.is_file():
             kpy = Path(sys.executable)
         for step in _default_phases():
-            result = subprocess.run(
+            subprocess.run(
                 [str(kpy), str(Path(__file__).resolve()), str(board_path), step],
                 check=False,
             )
-            if result.returncode != 0:
-                raise SystemExit(result.returncode)
         shorts, crossings = _copper_gate(board_path)
         print(
             f"post-grid finish: shorts={shorts}, crossings={crossings}",

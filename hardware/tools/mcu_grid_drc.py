@@ -49,6 +49,34 @@ def violation_type_counts(report: dict) -> Counter:
     return counts
 
 
+class BoardMetrics:
+    __slots__ = ("unconnected", "clearance", "shorts", "crossings")
+
+    def __init__(self, unconnected: int, clearance: int, shorts: int, crossings: int) -> None:
+        self.unconnected = unconnected
+        self.clearance = clearance
+        self.shorts = shorts
+        self.crossings = crossings
+
+
+def board_metrics(board_path: Path) -> BoardMetrics:
+    report = run_drc_report(board_path)
+    shorts, crossings = copper_gate_counts(report)
+    clearance = violation_type_counts(report).get("clearance", 0)
+    unconnected = len(report.get("unconnected_items") or [])
+    return BoardMetrics(unconnected, clearance, shorts, crossings)
+
+
+def monotonic_gate_allows(before: BoardMetrics, after: BoardMetrics) -> bool:
+    if after.shorts > 0 or after.crossings > 0:
+        return False
+    if after.unconnected > before.unconnected:
+        return False
+    if after.clearance > before.clearance:
+        return False
+    return True
+
+
 def copper_gate_counts(report: dict) -> tuple[int, int]:
     shorts = 0
     crossings = 0

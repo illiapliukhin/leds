@@ -24,3 +24,25 @@ def merge_routes(primary: dict, supplement: dict, borrow_nets: set[str]) -> dict
     merged["incomplete_nets"] = incomplete
     merged["route_engine"] = f"{primary.get('route_engine', 'primary')}+greedy({','.join(sorted(borrow_nets))})"
     return merged
+
+
+def merge_greedy_one_at_a_time(
+    primary: dict,
+    supplement: dict,
+    borrow_nets: set[str],
+    *,
+    drc_gate,
+) -> dict:
+    """Merge greedy-only nets individually; keep each net only if DRC gate passes."""
+    candidate = primary
+    for net_name in sorted(borrow_nets):
+        trial = merge_routes(candidate, supplement, {net_name})
+        merge_ok, merge_shorts, merge_cross = drc_gate(trial)
+        if merge_ok:
+            candidate = trial
+            print(
+                f"grid merge +{net_name} DRC {merge_shorts}/{merge_cross} "
+                f"complete={len(candidate.get('complete_nets') or [])}",
+                flush=True,
+            )
+    return candidate
