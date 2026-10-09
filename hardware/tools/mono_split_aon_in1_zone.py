@@ -64,20 +64,47 @@ def add_aon_in1_zone(board: pcbnew.BOARD) -> bool:
     return True
 
 
+def _via_exists(board: pcbnew.BOARD, x_mm: float, y_mm: float, net_name: str, *, tol: float = 0.05) -> bool:
+    for item in board.GetTracks():
+        if item.GetClass() != "PCB_VIA" or item.GetNetname() != net_name:
+            continue
+        pos = item.GetPosition()
+        vx = pcbnew.ToMM(pos.x)
+        vy = pcbnew.ToMM(pos.y)
+        if abs(vx - x_mm) <= tol and abs(vy - y_mm) <= tol:
+            return True
+    return False
+
+
 def _via_into_zone(board: pcbnew.BOARD, x_mm: float, y_mm: float) -> None:
+    if _via_exists(board, x_mm, y_mm, "AON_3V3"):
+        return
     aon = board.FindNet("AON_3V3")
     add_through_via(board, aon, x_mm, y_mm, diameter_mm=VIA_D_MM)
 
 
 def _stub_f_to_zone_y(board: pcbnew.BOARD, x_mm: float, y_start: float, y_end: float = AON_ZONE_VIA_Y_MM) -> None:
+    """Eastbound F escape then In2 drop (avoids U1 EP GND on F.Cu)."""
+    bus_x = 51.55
+    if _via_exists(board, bus_x, y_end, "AON_3V3"):
+        return
+    aon = board.FindNet("AON_3V3")
     route_net_polyline(
         board,
         "AON_3V3",
         pcbnew.F_Cu,
-        [(x_mm, y_start), (x_mm, y_end)],
+        [(x_mm, y_start), (bus_x, y_start)],
         AON_STUB_W_MM,
     )
-    _via_into_zone(board, x_mm, y_end)
+    add_through_via(board, aon, bus_x, y_start, diameter_mm=VIA_D_MM)
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.In2_Cu,
+        [(bus_x, y_start), (bus_x, y_end)],
+        AON_STUB_W_MM,
+    )
+    _via_into_zone(board, bus_x, y_end)
 
 
 def connect_u1_aon_dogbones(board: pcbnew.BOARD) -> None:

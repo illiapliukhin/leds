@@ -382,13 +382,7 @@ def _try_copper_only_step(board_path: Path, apply_fn) -> bool:
         shorts, crossings = _copper_gate(trial_path)
         if shorts or crossings:
             return False
-        board = pcbnew.LoadBoard(str(board_path))
-        apply_fn(board)
-        _save_board(board, board_path)
-        try:
-            refill_zones_save(board_path)
-        except Exception:
-            return False
+        shutil.copy2(trial_path, board_path)
         return True
 
 
@@ -415,11 +409,19 @@ def route_grid_one_net(
             [str(kpy), str(tools_dir / "dump_mcu_geom.py"), str(board_path), str(geometry_path)],
             check=True,
         )
+    import os
+
+    compute_env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
+    }
     result = subprocess.run(
         [str(compute), str(tools_dir / "mcu_grid_route_one_net.py"), str(geometry_path), net_name],
         check=False,
         capture_output=True,
         text=True,
+        env=compute_env,
     )
     if result.returncode != 0:
         print(f"grid_one {net_name}: compute failed: {result.stderr[:200]}", flush=True)

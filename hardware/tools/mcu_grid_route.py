@@ -378,6 +378,15 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
                 f"DRC {merge_shorts}/{merge_cross}",
                 flush=True,
             )
+    merge_led = greedy_ok and "LED_CLK" in greedy_nets and "LED_CLK" not in pf_nets
+    if merge_led and pf_ok:
+        merged_led = merge_routes(pf_routes, greedy_routes, {"LED_CLK"})
+        led_ok, _, _ = drc_gate_routes(
+            board_path, merged_led, kicad_python=kicad_python, apply_script=apply_script
+        )
+        if led_ok:
+            pf_candidate = merged_led
+            pf_complete = len(merged_led.get("complete_nets") or [])
     if pf_ok and pf_complete >= greedy_complete:
         chosen = pf_candidate
         chosen_label = pf_candidate.get("route_engine", "pathfinder")
@@ -444,7 +453,9 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
             for key, value in os.environ.items()
             if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
         }
-        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,aon_zone,aon,gnd,grid_one")
+        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,aon_zone,gnd,grid_one")
+        # grid_one runs last; post-grid backup reverts all phases if copper gate fails.
+        post_env.setdefault("MONO_GRID_ONE_NETS", "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3,GND")
         subprocess.run(
             [str(kicad_python), str(post_script), str(board_path)],
             check=True,
