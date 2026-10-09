@@ -432,40 +432,13 @@ def route_mcu_strap_passives(board: pcbnew.BOARD) -> None:
     )
 
 
-def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
-    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+def route_mcu_xtal_only(board: pcbnew.BOARD) -> None:
+    """40 MHz crystal + load caps on F.Cu (keep foreign signals off Y1)."""
+    track_width, _, footprint_by_reference, get_pad, millimeters, route_polyline = (
         _helpers()
     )
     u1 = footprint_by_reference(board, "U1")
     y1 = footprint_by_reference(board, "Y1")
-    sw = footprint_by_reference(board, "SW1")
-    r_boot = footprint_by_reference(board, "R_BOOT0")
-    r_boot_boot_x, r_boot_boot_y = millimeters(get_pad(r_boot, "2").GetPosition())
-    sw_x, sw_y = millimeters(get_pad(sw, "1").GetPosition())
-    boot_net = board.FindNet("GPIO0_BOOT")
-    route_polyline(
-        board,
-        "GPIO0_BOOT",
-        pcbnew.F_Cu,
-        [(r_boot_boot_x, r_boot_boot_y), (MCU_BOOT_IN2_X_MM, r_boot_boot_y)],
-        track_width,
-    )
-    add_via(board, boot_net, MCU_BOOT_IN2_X_MM, r_boot_boot_y, diameter_mm=0.40)
-    route_polyline(
-        board,
-        "GPIO0_BOOT",
-        pcbnew.In2_Cu,
-        [(MCU_BOOT_IN2_X_MM, r_boot_boot_y), (MCU_BOOT_IN2_X_MM, 82.00)],
-        track_width,
-    )
-    add_via(board, boot_net, MCU_BOOT_IN2_X_MM, 82.00, diameter_mm=0.40)
-    route_polyline(
-        board,
-        "GPIO0_BOOT",
-        pcbnew.F_Cu,
-        [(MCU_BOOT_IN2_X_MM, 82.00), (sw_x, 82.00), (sw_x, sw_y)],
-        track_width,
-    )
     xtal_p_x, xtal_p_y = millimeters(get_pad(u1, "54").GetPosition())
     xtal_n_x, xtal_n_y = millimeters(get_pad(u1, "53").GetPosition())
     cry_p_x, cry_p_y = millimeters(get_pad(y1, "1").GetPosition())
@@ -531,6 +504,41 @@ def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
         [(cap2_gnd_x, cap2_gnd_y), (gnd_pad4_x, cap2_gnd_y)],
         track_width,
     )
+
+
+def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+        _helpers()
+    )
+    sw = footprint_by_reference(board, "SW1")
+    r_boot = footprint_by_reference(board, "R_BOOT0")
+    r_boot_boot_x, r_boot_boot_y = millimeters(get_pad(r_boot, "2").GetPosition())
+    sw_x, sw_y = millimeters(get_pad(sw, "1").GetPosition())
+    boot_net = board.FindNet("GPIO0_BOOT")
+    route_polyline(
+        board,
+        "GPIO0_BOOT",
+        pcbnew.F_Cu,
+        [(r_boot_boot_x, r_boot_boot_y), (MCU_BOOT_IN2_X_MM, r_boot_boot_y)],
+        track_width,
+    )
+    add_via(board, boot_net, MCU_BOOT_IN2_X_MM, r_boot_boot_y, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "GPIO0_BOOT",
+        pcbnew.In2_Cu,
+        [(MCU_BOOT_IN2_X_MM, r_boot_boot_y), (MCU_BOOT_IN2_X_MM, 82.00)],
+        track_width,
+    )
+    add_via(board, boot_net, MCU_BOOT_IN2_X_MM, 82.00, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "GPIO0_BOOT",
+        pcbnew.F_Cu,
+        [(MCU_BOOT_IN2_X_MM, 82.00), (sw_x, 82.00), (sw_x, sw_y)],
+        track_width,
+    )
+    route_mcu_xtal_only(board)
 
 
 def route_mcu_imu_links(board: pcbnew.BOARD) -> None:

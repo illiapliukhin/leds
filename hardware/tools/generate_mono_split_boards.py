@@ -7,7 +7,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import pcbnew
-from mono_split_esp32 import esp32_s3_fn8_pad_nets, route_esp32_mcu
+from mono_split_esp32 import esp32_s3_fn8_pad_nets
 from mono_split_spec import (
     BRANDING_STRIP_HEIGHT_MM,
     COLUMN_CONNECTOR_FOOTPRINT_NAME,
@@ -1214,21 +1214,21 @@ def electronics_parts() -> list[PlacedPart]:
             "10k",
             "R_0402_1005Metric",
             38.0,
-            12.5,
+            11.5,
             0.0,
             38.0,
-            12.5,
+            11.5,
             {"1": "AON_3V3", "2": "CHIP_PU"},
         ),
         PlacedPart(
             "C_CHIP_PU",
             "1u",
             "C_0603_1608Metric",
-            36.0,
-            12.5,
+            33.5,
+            13.5,
             0.0,
-            36.0,
-            12.5,
+            33.5,
+            13.5,
             {"1": "CHIP_PU", "2": "GND"},
         ),
         PlacedPart(
@@ -1356,12 +1356,12 @@ def electronics_parts() -> list[PlacedPart]:
             "TP1",
             "AON_3V3",
             "R_0402_1005Metric",
-            50.0,
+            28.0,
             76.0,
             0.0,
-            50.0,
-            72.5,
-            {"1": "AON_3V3"},
+            28.0,
+            76.0,
+            {"1": "AON_3V3", "2": "AON_3V3"},
         ),
         PlacedPart(
             "TP2",
@@ -2080,28 +2080,17 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
         board, "GND", pcbnew.In1_Cu, [(13.20, 68.20), (103.40, 68.20)], 0.25
     )
 
-    # AON stays off the GND pads: down from VDDIO, around the right side to VDD.
-    route_net_polyline(
-        board, "AON_3V3", pcbnew.F_Cu, [(43.50, 9.012), (43.50, 10.15)], 0.15
-    )
+    # AON spine east of U1 (46,10): inner layers only so Freerouting can tie MCU pads.
     aon = board.FindNet("AON_3V3")
-    add_through_via(board, aon, 43.50, 10.15, diameter_mm=0.40)
+    add_through_via(board, aon, 43.50, 9.20, diameter_mm=0.40)
     route_net_polyline(
-        board,
-        "AON_3V3",
-        pcbnew.F_Cu,
-        [(45.263, 8.75), (46.80, 8.75), (46.80, 10.15)],
-        0.15,
+        board, "AON_3V3", pcbnew.In1_Cu, [(43.50, 9.20), (50.80, 9.20)], 0.20
     )
-    add_through_via(board, aon, 46.80, 10.15, diameter_mm=0.40)
+    add_through_via(board, aon, 50.80, 9.20, diameter_mm=0.40)
     route_net_polyline(
-        board, "AON_3V3", pcbnew.In1_Cu, [(43.50, 10.15), (49.49, 10.15)], 0.20
+        board, "AON_3V3", pcbnew.In2_Cu, [(50.80, 9.20), (50.80, 76.00)], 0.20
     )
-    add_through_via(board, aon, 49.49, 10.15, diameter_mm=0.40)
-    route_net_polyline(
-        board, "AON_3V3", pcbnew.In2_Cu, [(49.49, 10.15), (49.49, 76.00)], 0.20
-    )
-    add_through_via(board, aon, 49.49, 76.00, diameter_mm=0.40)
+    add_through_via(board, aon, 50.80, 76.00, diameter_mm=0.40)
 
     # MBI5124GP pin configuration: 2 SDI, 3 CLK, 4 LE, 21 OE, 22 SDO,
     # 23 R-EXT, 24 VDD. A lower pin escapes farther from the body so its
@@ -3790,7 +3779,8 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
     route_translator_power(board)
     route_translator_bias(board)
     route_rext_return(board)
-    route_esp32_mcu(board)
+    # MCU corner (U1, USB, XTAL, boot/strap, enables, IMU↔U1, LED↔U1) is autorouted
+    # via hardware/tools/autoroute_mcu.py (Freerouting DSN/SES). Pad nets stay assigned.
     add_text(
         board,
         "SCAN AND IMU SIGNAL RESERVE",

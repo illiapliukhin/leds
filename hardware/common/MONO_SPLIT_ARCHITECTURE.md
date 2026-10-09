@@ -84,18 +84,21 @@ The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one 
 | **`route_mcu_side_to_drop`** through the grid | Long F/In1 columns from **`x≈28–40`** through the row farm. |
 | Fixed **decoder spines** at **`x≈63–70`** | Every MCU move still needs a clean **In2 corridor** at **`x≈44–50`**, not ad-hoc F columns. |
 
-**Routing (generator, 270°):** Legacy **F-column** MCU escapes are **removed**. Constants in `mono_split_esp32.py`:
+**MCU copper (2026-10-08, Freerouting path):** The generator **no longer** calls `route_esp32_mcu()`. Matrix, FFC fan-in, power, decoders, buffers, and reserve rails stay in **`generate_mono_split_boards.py`**. The MCU corner is filled by **`hardware/tools/autoroute_mcu.py`**:
 
-| Corridor | Role |
-|---|---|
-| **`WEST_SOUTH_ESCAPE_Y_BY_PAD`** | Separate south-escape **`y`** for each west-column pad (shared **`x≈42.56`**) |
-| **`x≈49.0–50.1`** | Per-net **row-address stub** on F, then **In2 at spine `y`** (63.8/18.7 … 65.2/25.35) |
-| **`x≈52` + `y≈20.5–22.15`** | South-face **ROW_A3**, **DEC_***, **`ROW_XLAT_OE_N`** In2 buses |
-| **`MCU_LED_STUB_X≈51.5`** | **LED_CLK/SDI/LE/OE_N** → eastern **In2** rail to reserves (clears **`x≈37`** fan-in) |
-| **`MCU_BOOT_IN2_X≈31`** | **`GPIO0_BOOT`** to **`SW1`** |
-| USB | **`R_USB_*`** via staggered south escape; **J_USB** **split `merge_y` + In2** to **`U_ESD`** |
+1. **`generate_mono_split_boards.py`** (optional `--no-regenerate` to reuse `.kicad_pcb`).
+2. Lock all existing tracks/vias → **`ExportSpecctraDSN`** → patch DSN net classes: **`matrix_and_fixed`** (173 nets, Freerouting **`-inc`**) vs **`mcu_autoroute`** (27 nets).
+3. **Freerouting 2.5.0** (JAR + OpenJDK 25, headless): `-mp60`, `-mt3`, fanout off, routable **F / In1 / In2 / B**, preferred directions **H / V / H / V**.
+4. **Do not use `ImportSpecctraSES`** for this flow — KiCad replaces the whole board routing. Append only new SES `(network_out …)` wires/vias via **`specctra_ses_append.py`**.
+5. Zone refill and save. Commit **`mono_electronics.ses`** when reproducible.
 
-**Not done yet:** Copper **0/0/0**, full geometric verify (silk/mask). **`verify_mono_split_boards.py`** still checks electronics **shorts + crossings only** until copper is clean.
+Run: **`hardware/tools/run_autoroute_mcu.sh`** (sources **`kicad10_env.sh`** for KiCad **10.0.5** `python3.11` / `kicad-cli`). Download the router JAR with **`hardware/tools/download_freerouting.sh`**.
+
+**Placement tweaks for autoroute (same PR):** **`C_CHIP_PU`** → **(33.5, 13.5) mm**; **`TP1`** → **(28, 76) mm** (both pads on **`AON_3V3`**); **`AON_3V3`** spine east of **`U1`** on **In1/In2** only (no F.Cu hooks through the EP).
+
+Legacy scripted helpers remain in **`mono_split_esp32.py`** (`route_mcu_xtal_only`, full **`route_esp32_mcu()`**) for hand touch-up or regression.
+
+**Not done yet:** Copper **0/0/0** on **`mono_electronics`** (Freerouting leaves **~90+** unconnected MCU groups; **`ROW_A*`** / **`DEC_*`** stubs often miss **`U1`** pads). Full geometric verify (silk/mask). Panels stay **0/0**.
 3. `BQ25185`, battery connector, `TPS63802`, inductor, AON LDO, and both `TPS22917` switches.
 4. Microphone and `TLV9001` on the far right, opposite the switcher.
 5. Row translator, both 74HC154 devices, and the 32 × `AO3403` farm with gate and pull-up resistors.

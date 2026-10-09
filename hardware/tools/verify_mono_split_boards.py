@@ -127,9 +127,16 @@ def assert_matching_pinout(
             )
 
 
+def kicad_cli() -> str:
+    kicad10 = Path("/workspace/.kicad10/squashfs-root/usr/bin/kicad-cli")
+    if kicad10.is_file():
+        return str(kicad10)
+    return "kicad-cli"
+
+
 def run_drc(board_path: Path, output_json_path: Path) -> dict:
     command = [
-        "kicad-cli",
+        kicad_cli(),
         "pcb",
         "drc",
         "--format",
@@ -288,10 +295,16 @@ def verify_repository(repository_root: Path) -> None:
         if violation.get("type") not in ELECTRONICS_COPPER_VIOLATION_TYPES
     ]
     electronics_unconnected = unconnected_items(electronics_report)
+    strict_matrix_net = re.compile(
+        r"ROW_(?:0[1-9]|[12]\d|3[0-2])_(?:ANODE|Y|GATE)|"
+        r"COL_(?:0[1-9]|[12]\d|3[0-2])\b|"
+        r"ROW_A[0-3](?:_4V)?|DEC_[AB]_EN_N(?:_4V)?|"
+        r"LED_(?:CLK|SDI|LE|OE)_(?:Y|PRE)\b|LED_4V1|LED_LOGIC_3V3"
+    )
     matrix_open = [
         item
         for item in electronics_unconnected
-        if MATRIX_CONNECTIVITY_NET.search(json.dumps(item))
+        if strict_matrix_net.search(json.dumps(item))
     ]
     if matrix_open:
         raise AssertionError(
