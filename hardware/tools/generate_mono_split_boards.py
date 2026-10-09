@@ -1030,11 +1030,11 @@ def electronics_parts() -> list[PlacedPart]:
             "SW1",
             "KMR2",
             "SW_Push_1P1T_NO_CK_KMR2",
-            20.0,
-            82.0,
+            22.0,
+            76.0,
             0.0,
-            28.0,
-            82.0,
+            30.0,
+            76.0,
             {"1": "GPIO0_BOOT", "2": "GND"},
         ),
         PlacedPart(
@@ -1247,44 +1247,44 @@ def electronics_parts() -> list[PlacedPart]:
             "R_USB_P",
             "22R",
             "R_0402_1005Metric",
-            37.0,
-            9.2,
+            32.0,
+            7.6,
             0.0,
-            37.0,
-            9.2,
+            32.0,
+            7.6,
             {"1": "USB_D_P", "2": "USB_D_P_MCU"},
         ),
         PlacedPart(
             "R_USB_N",
             "22R",
             "R_0402_1005Metric",
-            39.0,
-            10.0,
+            35.8,
+            9.4,
             0.0,
-            39.0,
-            10.0,
+            35.8,
+            9.4,
             {"1": "USB_D_N", "2": "USB_D_N_MCU"},
         ),
         PlacedPart(
             "C_XTAL1",
             "10p",
             "C_0402_1005Metric",
-            51.0,
-            2.5,
+            50.2,
+            1.9,
             0.0,
-            51.0,
-            2.5,
+            50.2,
+            1.9,
             {"1": "XTAL_P", "2": "GND"},
         ),
         PlacedPart(
             "C_XTAL2",
             "10p",
             "C_0402_1005Metric",
-            57.0,
-            2.5,
+            57.8,
+            1.9,
             0.0,
-            57.0,
-            2.5,
+            57.8,
+            1.9,
             {"1": "XTAL_N", "2": "GND"},
         ),
         PlacedPart(
@@ -1888,8 +1888,8 @@ def route_imu_sense(board: pcbnew.BOARD) -> None:
             pad = get_pad(footprint, "1")
             reserve[pad.GetNetname()] = pad
     routes = (
-        ("14", "IMU_SDA", 157.4, 4.2, 100.2, False),
-        ("13", "IMU_SCL", 158.45, 4.52, 100.9, False),
+        ("14", "IMU_SDA", 157.4, 4.15, 100.2, False),
+        ("13", "IMU_SCL", 158.45, 4.85, 100.9, False),
         ("4", "IMU_INT1", 159.0, 5.6, 101.6, True),
     )
     for pad_number, net_name, lane_x_mm, top_y_mm, bottom_y_mm, escape_left in routes:
@@ -3343,17 +3343,17 @@ def route_translator_power(board: pcbnew.BOARD) -> None:
         board,
         "ROW_XLAT_OE_N",
         pcbnew.F_Cu,
-        [(oe_x, oe_y), (oe_x, 3.55)],
+        [(oe_x, oe_y), (oe_x, 3.35)],
         FAN_IN_TRACK_WIDTH_MM,
     )
     oe_drop_x = 116.40
     oe = board.FindNet("ROW_XLAT_OE_N")
-    add_through_via(board, oe, oe_x, 3.55, diameter_mm=0.40)
+    add_through_via(board, oe, oe_x, 3.35, diameter_mm=0.40)
     route_net_polyline(
         board,
         "ROW_XLAT_OE_N",
         pcbnew.In1_Cu,
-        [(oe_x, 3.55), (oe_drop_x, 3.55)],
+        [(oe_x, 3.35), (oe_drop_x, 3.35)],
         FAN_IN_TRACK_WIDTH_MM,
     )
     add_through_via(board, oe, oe_drop_x, 3.55, diameter_mm=0.40)
@@ -3361,7 +3361,7 @@ def route_translator_power(board: pcbnew.BOARD) -> None:
         board,
         "ROW_XLAT_OE_N",
         pcbnew.In2_Cu,
-        [(oe_drop_x, 3.55), (oe_drop_x, 97.35)],
+        [(oe_drop_x, 3.35), (oe_drop_x, 97.35)],
         FAN_IN_TRACK_WIDTH_MM,
     )
     add_through_via(board, oe, oe_drop_x, 97.35, diameter_mm=0.40)

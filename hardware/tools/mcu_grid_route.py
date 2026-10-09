@@ -211,6 +211,43 @@ def add_gnd_stitch_vias(board: pcbnew.BOARD) -> None:
         board.Add(via)
 
 
+def ensure_gnd_copper_zones(board: pcbnew.BOARD) -> int:
+    """Add solid GND pours on In2 + B if missing (filled via kicad-cli --refill-zones)."""
+    gnd = board.FindNet("GND")
+    if gnd is None or gnd.GetNetCode() == 0:
+        return 0
+    existing = [
+        zone
+        for zone in board.Zones()
+        if zone.GetNetname() == "GND" and zone.GetLayer() in (pcbnew.In2_Cu, pcbnew.B_Cu)
+    ]
+    if existing:
+        return 0
+    added = 0
+    margin_mm = 1.0
+    width_mm = 152.0
+    height_mm = 138.0
+    corners_mm = [
+        (margin_mm, margin_mm),
+        (width_mm - margin_mm, margin_mm),
+        (width_mm - margin_mm, height_mm - margin_mm),
+        (margin_mm, height_mm - margin_mm),
+    ]
+    for layer_id in (pcbnew.In2_Cu, pcbnew.B_Cu):
+        zone = pcbnew.ZONE(board)
+        zone.SetLayer(layer_id)
+        zone.SetNet(gnd)
+        zone.SetIsRuleArea(False)
+        outline = zone.Outline()
+        outline.NewOutline()
+        for x_mm, y_mm in corners_mm:
+            outline.Append(pcbnew.VECTOR2I_MM(x_mm, y_mm))
+        zone.SetMinThickness(pcbnew.FromMM(0.25))
+        board.Add(zone)
+        added += 1
+    return added
+
+
 def add_mcu_gnd_pour_b_cu(board: pcbnew.BOARD) -> None:
     """B.Cu GND bus mesh (zone fill is unstable in headless pcbnew — use 0.30 mm tracks)."""
     gnd = board.FindNet("GND")
@@ -244,8 +281,12 @@ def _prefer_u1_pad(net_name: str) -> tuple[str, str] | None:
 
 
 def run_mcu_grid_pipeline(board_path: Path) -> None:
-    """Dump geometry → grid route (system Python) → apply routes (KiCad Python)."""
+    """Dump geometry → greedy + PathFinder → DRC-gated apply → GND zone refill."""
+    import json
+    import os
     import subprocess
+
+    from mcu_grid_drc import drc_gate_routes, refill_zones_save
 
     tools_dir = Path(__file__).resolve().parent
     kicad_root = Path("/workspace/.kicad10/squashfs-root/usr/bin")
@@ -254,6 +295,8 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
         kicad_python = Path("python3.11")
     geometry_path = board_path.with_suffix(".mcu_geom.json")
     routes_path = board_path.with_suffix(".mcu_routes.json")
+    greedy_path = board_path.with_suffix(".mcu_routes.greedy.json")
+    pathfinder_path = board_path.with_suffix(".mcu_routes.pf.json")
     subprocess.run(
         [str(kicad_python), str(tools_dir / "dump_mcu_geom.py"), str(board_path), str(geometry_path)],
         check=True,
@@ -263,29 +306,79 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
         compute_python = Path(sys.executable)
     compute_env = {
         key: value
-        for key, value in __import__("os").environ.items()
+        for key, value in os.environ.items()
         if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
     }
+    compute_script = str(tools_dir / "mcu_grid_compute.py")
+    greedy_env = {**compute_env, "MONO_PATHFINDER": "0"}
     subprocess.run(
-        [
-            str(compute_python),
-            str(tools_dir / "mcu_grid_compute.py"),
-            str(geometry_path),
-            str(routes_path),
-            "15",
-            "8",
-        ],
+        [str(compute_python), compute_script, str(geometry_path), str(greedy_path), "15", "8"],
         check=True,
-        env=compute_env,
+        env=greedy_env,
+    )
+    pf_env = {**compute_env, "MONO_PATHFINDER": "1"}
+    pf_rounds = os.environ.get("MONO_PF_ROUNDS", "12")
+    subprocess.run(
+        [str(compute_python), compute_script, str(geometry_path), str(pathfinder_path), "15", pf_rounds],
+        check=True,
+        env=pf_env,
+    )
+    greedy_routes = json.loads(greedy_path.read_text())
+    pf_routes = json.loads(pathfinder_path.read_text())
+    apply_script = tools_dir / "apply_mcu_grid_routes.py"
+    pf_ok, pf_shorts, pf_cross = drc_gate_routes(
+        board_path, pf_routes, kicad_python=kicad_python, apply_script=apply_script
+    )
+    greedy_ok, greedy_shorts, greedy_cross = drc_gate_routes(
+        board_path, greedy_routes, kicad_python=kicad_python, apply_script=apply_script
+    )
+    pf_complete = len(pf_routes.get("complete_nets") or [])
+    greedy_complete = len(greedy_routes.get("complete_nets") or [])
+    if pf_ok and pf_complete >= greedy_complete:
+        chosen = pf_routes
+        chosen_label = "pathfinder"
+    elif greedy_ok and greedy_complete >= pf_complete:
+        chosen = greedy_routes
+        chosen_label = "greedy"
+    elif pf_ok:
+        chosen = pf_routes
+        chosen_label = "pathfinder"
+    elif greedy_ok:
+        chosen = greedy_routes
+        chosen_label = "greedy"
+    else:
+        chosen = pf_routes if pf_complete >= greedy_complete else greedy_routes
+        chosen_label = "best_effort_no_drc_gate"
+        print(
+            "warning: neither engine passed 0-short/0-crossing gate; "
+            f"applying {chosen_label} ({len(chosen.get('complete_nets', []))} nets)",
+            flush=True,
+        )
+    chosen["route_engine"] = chosen_label
+    routes_path.write_text(json.dumps(chosen, indent=2))
+    print(
+        f"grid select {chosen_label}: pf {len(pf_routes.get('complete_nets', []))} nets "
+        f"DRC {pf_shorts}/{pf_cross}, greedy {len(greedy_routes.get('complete_nets', []))} "
+        f"DRC {greedy_shorts}/{greedy_cross}",
+        flush=True,
     )
     apply_result = subprocess.run(
-        [str(kicad_python), str(tools_dir / "apply_mcu_grid_routes.py"), str(board_path), str(routes_path)],
+        [str(kicad_python), str(apply_script), str(board_path), str(routes_path)],
         check=True,
         capture_output=True,
         text=True,
     )
     if apply_result.stdout:
         print(apply_result.stdout.strip())
+    board = pcbnew.LoadBoard(str(board_path))
+    if ensure_gnd_copper_zones(board):
+        pcbnew.SaveBoard(str(board_path), board)
+        print("added GND zones on In2/B for CLI refill", flush=True)
+    try:
+        refill_zones_save(board_path)
+        print("refilled copper zones via kicad-cli", flush=True)
+    except subprocess.CalledProcessError as error:
+        print(f"zone refill skipped: {error.stderr}", flush=True)
 
 
 def route_mcu_with_grid(

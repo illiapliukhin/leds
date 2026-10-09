@@ -15,8 +15,11 @@ from mcu_grid_route import add_gnd_stitch_vias, add_mcu_gnd_pour_b_cu, apply_gri
 
 def main() -> None:
     board_path = Path(sys.argv[1])
-    routes_path = Path(sys.argv[2])
-    routes = json.load(routes_path.open())
+    routes_arg = sys.argv[2]
+    if routes_arg == "-":
+        routes = json.load(sys.stdin)
+    else:
+        routes = json.load(Path(routes_arg).open())
     board = pcbnew.LoadBoard(str(board_path))
     complete_nets = set(routes.get("complete_nets") or [])
     segments = [

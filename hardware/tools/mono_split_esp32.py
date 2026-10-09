@@ -43,16 +43,16 @@ def esp32_s3_fn8_pad_nets() -> dict[str, str]:
         "20": "AON_3V3",
         "21": "LED_LE",
         "22": "LED_OE_N",
-        "23": "AUDIO_EN",
+        "11": "AUDIO_EN",
         "25": "USB_D_N_MCU",
         "26": "USB_D_P_MCU",
         "29": "AON_3V3",
         "37": "ROW_XLAT_OE_N",
         "38": "ROW_A3",
-        "39": "DEC_A_EN_N",
-        "40": "DEC_B_EN_N",
-        "41": "LED_EN",
-        "42": "LED_LOGIC_EN",
+        "24": "LED_EN",
+        "27": "LED_LOGIC_EN",
+        "47": "DEC_A_EN_N",
+        "48": "DEC_B_EN_N",
         "43": "ROW_A2",
         "44": "ROW_A0",
         "45": "ROW_A1",
@@ -77,15 +77,15 @@ def esp32_s3_fn8_pad_to_gpio() -> dict[str, int | None]:
         "19": 14,
         "21": 15,
         "22": 16,
-        "23": 17,
+        "11": 6,
+        "24": 18,
         "25": 19,
         "26": 20,
+        "27": 21,
         "37": 47,
         "38": 33,
-        "39": 34,
-        "40": 35,
-        "41": 36,
-        "42": 37,
+        "47": 41,
+        "48": 42,
         "43": 38,
         "44": 39,
         "45": 40,
@@ -101,21 +101,21 @@ def esp32_gpio_pin_map_markdown() -> str:
 | 9 | 14 | `IMU_SCL` | BMI270 I²C |
 | 10 | 15 | `IMU_INT1` | BMI270 interrupt |
 | 13–16 | 18,19,21,22 | `LED_CLK` … `LED_OE_N` | MBI5124 control (via reserve) |
-| 17 | 23 | `AUDIO_EN` | Audio switch |
+| 6 | 11 | `AUDIO_EN` | Audio switch (west face, away from USB) |
 | 33 | 38 | `ROW_A3` | Row address |
 | 38 | 43 | `ROW_A2` | Row address |
 | 39 | 44 | `ROW_A0` | Row address |
 | 40 | 45 | `ROW_A1` | Row address |
-| 34 | 39 | `DEC_A_EN_N` | 74HC154 A enable |
-| 35 | 40 | `DEC_B_EN_N` | 74HC154 B enable |
-| 36 | 41 | `LED_EN` | `TPS63802` enable |
-| 37 | 42 | `LED_LOGIC_EN` | LED logic switch |
+| 41 | 47 | `DEC_A_EN_N` | 74HC154 A enable (east face) |
+| 42 | 48 | `DEC_B_EN_N` | 74HC154 B enable (east face) |
+| 18 | 24 | `LED_EN` | `TPS63802` enable (west face) |
+| 21 | 27 | `LED_LOGIC_EN` | LED logic switch (west face) |
 | 19 | 25 | `USB_D_N_MCU` | Native USB D− (22 Ω) |
 | 20 | 26 | `USB_D_P_MCU` | Native USB D+ (22 Ω) |
 | 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
 | — | 53–54 | `XTAL_N` / `XTAL_P` | 40 MHz crystal |
 
-**Part:** `ESP32-S3FN8` (in-package **quad** flash). `GPIO19`/`GPIO20` are USB only. Row address uses **`GPIO39`/`40`/`38`** on the east face plus **`GPIO33`** on pad 38; **`GPIO17`** is `AUDIO_EN`. **`SPICS0` (pad 32)** and **`GPIO6` (pad 11)** stay **NC** on this PCB — do not tie to `GND`. Straps `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` stay off functional outputs.
+**Part:** `ESP32-S3FN8` (in-package **quad** flash). `GPIO19`/`GPIO20` are USB only (pads 25/26). Row address uses **`GPIO39`/`40`/`38`** on the east face plus **`GPIO33`** on pad 38. Enables use west/east escapes: **`GPIO18`/`GPIO21`** (`LED_EN`/`LED_LOGIC_EN`), **`GPIO41`/`GPIO42`** (`DEC_*`), **`GPIO6`** (`AUDIO_EN` on pad 11). **`SPICS0` (pad 32)** stays **NC** — do not tie to `GND`. Straps `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` stay off functional outputs.
 """
 
 

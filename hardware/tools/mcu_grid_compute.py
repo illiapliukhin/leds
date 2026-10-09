@@ -81,7 +81,7 @@ def main() -> None:
     geometry = json.load(geometry_path.open())
     via_cost = float(sys.argv[3]) if len(sys.argv) > 3 else 15.0
     max_iterations = int(sys.argv[4]) if len(sys.argv) > 4 else 8
-    use_pathfinder = os.environ.get("MONO_PATHFINDER", "0") == "1"
+    use_pathfinder = os.environ.get("MONO_PATHFINDER", "1") != "0"
 
     if use_pathfinder:
         all_paths, complete, incomplete = run_pathfinder(
@@ -94,6 +94,7 @@ def main() -> None:
 
     routed_paths = {net_name: paths for net_name, paths in all_paths.items() if net_name in complete}
     segments, vias = paths_to_segments(routed_paths)
+    engine = "pathfinder" if use_pathfinder else "greedy"
     json.dump(
         {
             "segs": segments,
@@ -101,6 +102,7 @@ def main() -> None:
             "complete_nets": sorted(complete),
             "incomplete_nets": sorted(incomplete),
             "add_gnd_mesh": False,
+            "route_engine": engine,
         },
         routes_path.open("w"),
     )
