@@ -2018,6 +2018,16 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     route_net_polyline(
         board, "VBUS", pcbnew.In2_Cu, [(2.05, 15.55), (2.05, 20.45)], 0.20
     )
+    usb_cap = footprint_by_reference(board, "C_USB1")
+    cap_vbus_x, cap_vbus_y = millimeters(get_pad(usb_cap, "1").GetPosition())
+    add_through_via(board, vbus, cap_vbus_x, cap_vbus_y, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "VBUS",
+        pcbnew.In2_Cu,
+        [(cap_vbus_x, cap_vbus_y), (22.65, cap_vbus_y), (22.65, 23.20)],
+        0.20,
+    )
 
     gnd = board.FindNet("GND")
     add_through_via(board, gnd, 2.70, 21.25, diameter_mm=0.40)
@@ -3266,6 +3276,15 @@ def route_translator_power(board: pcbnew.BOARD) -> None:
         [(aon_spine_x, 10.15), (49.49, 10.15)],
         0.20,
     )
+    # Join the east MCU spine into the translator AON bus on In2 (In1 crosses ROW_01_Y @ y≈9.7).
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.In2_Cu,
+        [(50.80, 9.20), (50.80, 10.15)],
+        0.20,
+    )
+    add_through_via(board, aon, 50.80, 10.15, diameter_mm=0.40)
     route_net_polyline(
         board,
         "LED_4V1",
