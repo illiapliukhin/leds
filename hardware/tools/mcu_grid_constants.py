@@ -22,6 +22,11 @@ MCU_ROUTE_ORDER: tuple[str, ...] = (
     "LED_OE_N",
     "LED_EN",
     "LED_LOGIC_EN",
+    "AUDIO_EN",
+    "CHIP_PU",
+    "GPIO0_BOOT",
+    "AON_3V3",
+    "GND",
 )
 
 

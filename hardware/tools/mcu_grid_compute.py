@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -15,25 +16,29 @@ from grid import Board  # noqa: E402
 from mcu_grid_constants import MCU_ROUTE_ORDER, paths_to_segments  # noqa: E402
 
 
-def main() -> None:
-    geometry_path = Path(sys.argv[1])
-    routes_path = Path(sys.argv[2])
-    geometry = json.load(geometry_path.open())
-    grid_board = Board(geometry)
-    grid_board.newvias = {}
-    all_paths: dict[str, list] = {}
-    order = list(MCU_ROUTE_ORDER)
-    via_cost = float(sys.argv[3]) if len(sys.argv) > 3 else 15.0
-    layer_cost = (1.0, 1.0, 1.0, 0.85)
+def _prefer_pad(net_name: str) -> tuple[str, str] | None:
+    if net_name == "AON_3V3":
+        return ("U1", "46")
+    return None
 
-    max_iterations = int(sys.argv[4]) if len(sys.argv) > 4 else 8
+
+def run_greedy(
+    geometry: dict,
+    *,
+    max_iterations: int,
+    via_cost: float,
+) -> tuple[dict[str, list], set[str], set[str]]:
+    layer_cost = (1.0, 1.0, 1.0, 0.82)
+    grid_board = Board(geometry)
+    all_paths: dict[str, list] = {}
     complete: set[str] = set()
+    order = [n for n in MCU_ROUTE_ORDER if n != "GND"]
     for pass_index in range(max_iterations):
         failed: list[str] = []
         for net_name in order:
             if net_name in complete:
                 continue
-            prefer = ("U1", "57") if net_name == "GND" else ("U1", "46") if net_name == "AON_3V3" else None
+            prefer = _prefer_pad(net_name)
             prefer_source = prefer if prefer and prefer in grid_board.padcells else None
             _joins_ok, joins_fail, paths = grid_board.route_net(
                 net_name,
@@ -49,28 +54,59 @@ def main() -> None:
             else:
                 failed.append(net_name)
         print(
-            f"pass {pass_index}: complete {len(complete)}, incomplete {failed}",
+            f"greedy pass {pass_index}: complete {len(complete)}, incomplete {failed}",
             flush=True,
         )
         if not failed:
             break
-        order = list(
-            dict.fromkeys(failed + [n for n in MCU_ROUTE_ORDER if n not in complete])
+        order = list(dict.fromkeys(failed + [n for n in MCU_ROUTE_ORDER if n not in complete and n != "GND"]))
+    incomplete = {n for n in MCU_ROUTE_ORDER if n not in complete and n != "GND"}
+    return all_paths, complete, incomplete
+
+
+def run_pathfinder(
+    geometry: dict,
+    *,
+    max_rounds: int,
+    via_cost: float,
+) -> tuple[dict[str, list], set[str], set[str]]:
+    from pathfinder import negotiate
+
+    return negotiate(geometry, list(MCU_ROUTE_ORDER), max_rounds=max_rounds, via_cost=via_cost)
+
+
+def main() -> None:
+    geometry_path = Path(sys.argv[1])
+    routes_path = Path(sys.argv[2])
+    geometry = json.load(geometry_path.open())
+    via_cost = float(sys.argv[3]) if len(sys.argv) > 3 else 15.0
+    max_iterations = int(sys.argv[4]) if len(sys.argv) > 4 else 8
+    use_pathfinder = os.environ.get("MONO_PATHFINDER", "0") == "1"
+
+    if use_pathfinder:
+        all_paths, complete, incomplete = run_pathfinder(
+            geometry, max_rounds=max_iterations, via_cost=via_cost
+        )
+    else:
+        all_paths, complete, incomplete = run_greedy(
+            geometry, max_iterations=max_iterations, via_cost=via_cost
         )
 
-    segments, vias = paths_to_segments(all_paths)
+    routed_paths = {net_name: paths for net_name, paths in all_paths.items() if net_name in complete}
+    segments, vias = paths_to_segments(routed_paths)
     json.dump(
         {
             "segs": segments,
             "vias": vias,
             "complete_nets": sorted(complete),
-            "incomplete_nets": sorted(set(all_paths) - complete),
+            "incomplete_nets": sorted(incomplete),
+            "add_gnd_mesh": False,
         },
         routes_path.open("w"),
     )
     print(
         f"routes: {len(segments)} segs, {len(vias)} vias, "
-        f"complete {len(complete)} / touched {len(all_paths)}",
+        f"complete {len(complete)} / order {len(MCU_ROUTE_ORDER)}",
         flush=True,
     )
 

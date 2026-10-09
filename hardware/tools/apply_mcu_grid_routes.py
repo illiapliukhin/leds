@@ -10,7 +10,7 @@ from pathlib import Path
 import pcbnew
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from mcu_grid_route import apply_grid_routes  # noqa: E402
+from mcu_grid_route import add_gnd_stitch_vias, add_mcu_gnd_pour_b_cu, apply_grid_routes  # noqa: E402
 
 
 def main() -> None:
@@ -30,6 +30,9 @@ def main() -> None:
         if not complete_nets or via["net"] in complete_nets
     ]
     apply_grid_routes(board, segments, vias)
+    if routes.get("add_gnd_mesh", True):
+        add_gnd_stitch_vias(board)
+        add_mcu_gnd_pour_b_cu(board)
     pcbnew.SaveBoard(str(board_path), board)
     print(f"applied to {board_path}")
 

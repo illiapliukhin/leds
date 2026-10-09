@@ -2,12 +2,10 @@
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
-// grid L x H x W; legal[l*H*W + y*W + x] (1=track center allowed); via[y*W+x]; start/goal masks per layer
 typedef struct {float f; int32_t id;} node;
 static node *heap; static int hn;
 static void push(float f,int id){int i=hn++;heap[i].f=f;heap[i].id=id;while(i>0){int p=(i-1)/2;if(heap[p].f<=heap[i].f)break;node t=heap[p];heap[p]=heap[i];heap[i]=t;i=p;}}
 static node pop(){node r=heap[0];heap[0]=heap[--hn];int i=0;for(;;){int l=2*i+1,rr=l+1,m=i;if(l<hn&&heap[l].f<heap[m].f)m=l;if(rr<hn&&heap[rr].f<heap[m].f)m=rr;if(m==i)break;node t=heap[m];heap[m]=heap[i];heap[i]=t;i=m;}return r;}
-// returns path length (cells) written into out (ids), or -1
 int route(int L,int H,int W,const uint8_t*legal,const uint8_t*via,const uint8_t*start,const uint8_t*goal,float viacost,const float*layercost,int32_t*out,int maxout){
   long N=(long)L*H*W; float*g=malloc(N*sizeof(float)); int32_t*par=malloc(N*sizeof(int32_t));
   heap=malloc(sizeof(node)*N*2); hn=0;
