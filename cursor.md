@@ -34,4 +34,6 @@
 - USB-C stacked A/B pads DRC-short unless they share a net. Assign GND/VBUS to the coincident pairs before treating the receptacle as placement-clean.
 - A mono pixel is one row net crossed with one column net. Do not tie those nets together. Leave a corridor for BMI270 `IMU_SDA`, `IMU_SCL`, and `IMU_INT1` plus `LED_OE_N`, so motion can blank or rewrite every LED.
 - On `mono_electronics`, route ESP32 GPIOs by joining existing row/LED reserve spines (`route_mcu_side_to_drop` / decoder spines), not by a second In1 hop through `U_ROW_XLAT` A-pins; that duplicates geometry and DRC-shorts row fan-in.
+- On `mono_electronics`, the In1 AON stub at `(43.5–50.8, 9.2)` must join the translator AON bus through **connected** copper; an isolated stub is reassigned to `GND` on `BuildConnectivity`/`SaveBoard`. Join via **In2** at `(50.8, 9.2)→(50.8, 10.15)` — not In1, which crosses `ROW_01_Y` at `y≈9.7`.
+- Do not place MCU **through vias** on In1 in the `y≈9.7–13.5` band west of `x≈52`; `ROW_*_Y` horizontals on In1 short/cross the annular ring. Use F-only escapes in that band or move the MCU to the south-west keep-in (`MONO_SPLIT_ARCHITECTURE.md`).
 
