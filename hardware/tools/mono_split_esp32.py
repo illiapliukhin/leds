@@ -16,6 +16,11 @@ WEST_SOUTH_ESCAPE_Y_BY_PAD: dict[str, float] = {
     "25": 14.05,
     "26": 14.25,
 }
+EAST_ESCAPE_Y_BY_PAD: dict[str, float] = {
+    "43": 12.75,
+    "44": 12.95,
+    "45": 13.15,
+}
 MCU_IN2_SOUTH_X_MM = 52.00
 MCU_BOOT_IN2_X_MM = 31.00
 MCU_AON_IN1_BUS_X_MM = 49.25
@@ -30,7 +35,6 @@ def esp32_s3_fn8_pad_nets() -> dict[str, str]:
         "3": "AON_3V3",
         "4": "CHIP_PU",
         "5": "GPIO0_BOOT",
-        "11": "GND",
         "13": "IMU_SDA",
         "14": "IMU_SCL",
         "15": "IMU_INT1",
@@ -39,23 +43,20 @@ def esp32_s3_fn8_pad_nets() -> dict[str, str]:
         "20": "AON_3V3",
         "21": "LED_LE",
         "22": "LED_OE_N",
-        "23": "ROW_A0",
-        "24": "ROW_A1",
+        "23": "AUDIO_EN",
         "25": "USB_D_N_MCU",
         "26": "USB_D_P_MCU",
-        "27": "ROW_A2",
         "29": "AON_3V3",
-        "32": "GND",
         "37": "ROW_XLAT_OE_N",
         "38": "ROW_A3",
         "39": "DEC_A_EN_N",
         "40": "DEC_B_EN_N",
         "41": "LED_EN",
         "42": "LED_LOGIC_EN",
-        "44": "GND",
-        "45": "GND",
+        "43": "ROW_A2",
+        "44": "ROW_A0",
+        "45": "ROW_A1",
         "46": "AON_3V3",
-        "48": "AUDIO_EN",
         "53": "XTAL_N",
         "54": "XTAL_P",
         "55": "AON_3V3",
@@ -77,17 +78,17 @@ def esp32_s3_fn8_pad_to_gpio() -> dict[str, int | None]:
         "21": 15,
         "22": 16,
         "23": 17,
-        "24": 18,
         "25": 19,
         "26": 20,
-        "27": 21,
         "37": 47,
         "38": 33,
         "39": 34,
         "40": 35,
         "41": 36,
         "42": 37,
-        "48": 42,
+        "43": 38,
+        "44": 39,
+        "45": 40,
     }
 
 
@@ -100,21 +101,21 @@ def esp32_gpio_pin_map_markdown() -> str:
 | 9 | 14 | `IMU_SCL` | BMI270 I²C |
 | 10 | 15 | `IMU_INT1` | BMI270 interrupt |
 | 13–16 | 18,19,21,22 | `LED_CLK` … `LED_OE_N` | MBI5124 control (via reserve) |
-| 17 | 23 | `ROW_A0` | Row address |
-| 18 | 24 | `ROW_A1` | Row address |
-| 21 | 27 | `ROW_A2` | Row address |
+| 17 | 23 | `AUDIO_EN` | Audio switch |
 | 33 | 38 | `ROW_A3` | Row address |
+| 38 | 43 | `ROW_A2` | Row address |
+| 39 | 44 | `ROW_A0` | Row address |
+| 40 | 45 | `ROW_A1` | Row address |
 | 34 | 39 | `DEC_A_EN_N` | 74HC154 A enable |
 | 35 | 40 | `DEC_B_EN_N` | 74HC154 B enable |
 | 36 | 41 | `LED_EN` | `TPS63802` enable |
 | 37 | 42 | `LED_LOGIC_EN` | LED logic switch |
 | 19 | 25 | `USB_D_N_MCU` | Native USB D− (22 Ω) |
 | 20 | 26 | `USB_D_P_MCU` | Native USB D+ (22 Ω) |
-| 42 | 48 | `AUDIO_EN` | Audio switch |
 | 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
 | — | 53–54 | `XTAL_N` / `XTAL_P` | 40 MHz crystal |
 
-**Part:** `ESP32-S3FN8` (in-package **quad** flash). `GPIO19`/`GPIO20` are USB only; row address uses `GPIO17`/`18`/`21`/`33` — no GPIO overlap. `GPIO33`–`GPIO37` are wired on FN8 but are **not** free on octal `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin/firmware remap. Straps `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` stay off functional outputs.
+**Part:** `ESP32-S3FN8` (in-package **quad** flash). `GPIO19`/`GPIO20` are USB only. Row address uses **`GPIO39`/`40`/`38`** on the east face plus **`GPIO33`** on pad 38; **`GPIO17`** is `AUDIO_EN`. **`SPICS0` (pad 32)** and **`GPIO6` (pad 11)** stay **NC** on this PCB — do not tie to `GND`. Straps `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` stay off functional outputs.
 """
 
 
@@ -180,7 +181,9 @@ def _route_in2_to_decoder_spine(
         stub_x = west_stub_x_mm if west_stub_x_mm is not None else MCU_F_EAST_STUB_X_MM
         spine_y = join_y_mm
         if pad_y >= 9.50:
-            escape_y = WEST_SOUTH_ESCAPE_Y_BY_PAD.get(u1_pad, 13.05)
+            escape_y = EAST_ESCAPE_Y_BY_PAD.get(u1_pad)
+            if escape_y is None:
+                escape_y = WEST_SOUTH_ESCAPE_Y_BY_PAD.get(u1_pad, 13.05)
             f_points = [
                 (pad_x, pad_y),
                 (pad_x, escape_y),
@@ -236,14 +239,80 @@ def _route_in2_power_spine(
     )
 
 
+def _route_east_face_in2_spine(
+    board: pcbnew.BOARD,
+    net_name: str,
+    u1_pad: str,
+    join_x_mm: float,
+    join_y_mm: float,
+    via_row_y_mm: float,
+    in2_column_x_mm: float,
+) -> None:
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+        _helpers()
+    )
+    u1 = footprint_by_reference(board, "U1")
+    pad_x, pad_y = millimeters(get_pad(u1, u1_pad).GetPosition())
+    net = board.FindNet(net_name)
+    route_polyline(
+        board,
+        net_name,
+        pcbnew.F_Cu,
+        [
+            (pad_x, pad_y),
+            (pad_x, via_row_y_mm),
+            (in2_column_x_mm, via_row_y_mm),
+        ],
+        track_width,
+    )
+    add_via(board, net, in2_column_x_mm, via_row_y_mm, diameter_mm=0.40)
+    route_polyline(
+        board,
+        net_name,
+        pcbnew.In2_Cu,
+        [
+            (in2_column_x_mm, via_row_y_mm),
+            (in2_column_x_mm, join_y_mm),
+            (join_x_mm, join_y_mm),
+        ],
+        track_width,
+    )
+    add_via(board, net, join_x_mm, join_y_mm, diameter_mm=0.40)
+
+
+def route_mcu_decoder_enables(board: pcbnew.BOARD) -> None:
+    _, _, footprint_by_reference, get_pad, millimeters, _ = _helpers()
+    translator = footprint_by_reference(board, "U_ROW_XLAT")
+    dec_a_x, _dec_a_y = millimeters(get_pad(translator, "7").GetPosition())
+    for net_name, u1_pad, join_x, join_y, south_y in (
+        ("DEC_A_EN_N", "39", dec_a_x, 20.80, 21.60),
+        ("DEC_B_EN_N", "40", 65.20, 25.35, 22.15),
+    ):
+        _route_in2_to_decoder_spine(
+            board,
+            net_name,
+            u1_pad,
+            join_x,
+            join_y,
+            west_stub_x_mm=None,
+            south_bus_y_mm=south_y,
+        )
+
+
 def route_mcu_row_address_joins(board: pcbnew.BOARD) -> None:
     _, _, footprint_by_reference, get_pad, millimeters, _ = _helpers()
     translator = footprint_by_reference(board, "U_ROW_XLAT")
     dec_a_x, _dec_a_y = millimeters(get_pad(translator, "7").GetPosition())
+    via_row_y_mm = 10.63
+    for net_name, u1_pad, join_x, join_y, column_x in (
+        ("ROW_A0", "44", 63.80, 18.70, 50.40),
+        ("ROW_A1", "45", 64.40, 19.20, 50.55),
+        ("ROW_A2", "43", 65.00, 19.70, 50.70),
+    ):
+        _route_east_face_in2_spine(
+            board, net_name, u1_pad, join_x, join_y, via_row_y_mm, column_x
+        )
     row_joins = (
-        ("ROW_A0", "23", 63.80, 18.70, 49.00, None),
-        ("ROW_A1", "24", 64.40, 19.20, 49.55, None),
-        ("ROW_A2", "27", 65.00, 19.70, 50.10, None),
         ("ROW_A3", "38", 65.60, 20.20, None, 21.05),
         ("DEC_A_EN_N", "39", dec_a_x, 20.80, None, 21.60),
         ("DEC_B_EN_N", "40", 65.20, 25.35, None, 22.15),
@@ -613,7 +682,7 @@ def route_mcu_power_stitch(board: pcbnew.BOARD) -> None:
     route_polyline(
         board,
         "AON_3V3",
-        pcbnew.In1_Cu,
+        pcbnew.In2_Cu,
         [
             (aon_in1_drop_x_mm, aon_north_bus_y_mm),
             (aon_in1_drop_x_mm, aon_spine_y_mm),
@@ -637,7 +706,8 @@ def route_mcu_power_stitch(board: pcbnew.BOARD) -> None:
         track_width,
     )
 
-    aon_east_f_column_x_mm = 51.50
+    aon_via_row_y_mm = 10.63
+    aon_east_f_column_x_mm = 50.55
     for pad_number in ("29", "46", "55", "56"):
         pad_x, pad_y = millimeters(get_pad(u1, pad_number).GetPosition())
         route_polyline(
@@ -647,16 +717,20 @@ def route_mcu_power_stitch(board: pcbnew.BOARD) -> None:
             [
                 (pad_x, pad_y),
                 (aon_east_f_column_x_mm, pad_y),
-                (aon_east_f_column_x_mm, aon_translator_bus_y_mm),
+                (aon_east_f_column_x_mm, aon_via_row_y_mm),
             ],
             track_width,
         )
-    add_via(board, aon, aon_east_f_column_x_mm, aon_translator_bus_y_mm, diameter_mm=0.40)
+    add_via(board, aon, aon_east_f_column_x_mm, aon_via_row_y_mm, diameter_mm=0.40)
     route_polyline(
         board,
         "AON_3V3",
-        pcbnew.In1_Cu,
-        [(aon_east_f_column_x_mm, aon_translator_bus_y_mm), (49.49, aon_translator_bus_y_mm)],
+        pcbnew.In2_Cu,
+        [
+            (aon_east_f_column_x_mm, aon_via_row_y_mm),
+            (50.80, aon_via_row_y_mm),
+            (50.80, aon_spine_y_mm),
+        ],
         track_width,
     )
 
@@ -664,8 +738,8 @@ def route_mcu_power_stitch(board: pcbnew.BOARD) -> None:
     route_polyline(
         board,
         "AON_3V3",
-        pcbnew.In1_Cu,
-        [(49.49, aon_translator_bus_y_mm), (cap_x, aon_translator_bus_y_mm), (cap_x, cap_y)],
+        pcbnew.In2_Cu,
+        [(50.80, aon_spine_y_mm), (cap_x, aon_spine_y_mm), (cap_x, cap_y)],
         track_width,
     )
 
@@ -687,15 +761,6 @@ def route_mcu_power_stitch(board: pcbnew.BOARD) -> None:
         ],
         track_width,
     )
-    for pad_number in ("11", "32", "44", "45"):
-        pad_x, pad_y = millimeters(get_pad(u1, pad_number).GetPosition())
-        route_polyline(
-            board,
-            "GND",
-            pcbnew.F_Cu,
-            [(pad_x, pad_y), (gnd_shoulder_x_mm, pad_y)],
-            track_width,
-        )
     route_polyline(
         board,
         "GND",
@@ -787,13 +852,20 @@ def route_mcu_enable_joins(board: pcbnew.BOARD) -> None:
         _helpers()
     )
     u1 = footprint_by_reference(board, "U1")
-    pad_x, pad_y = millimeters(get_pad(u1, "48").GetPosition())
+    pad_x, pad_y = millimeters(get_pad(u1, "23").GetPosition())
     tap_y = 23.80
+    west_stub_x_mm = 39.50
     route_polyline(
         board,
         "AUDIO_EN",
         pcbnew.F_Cu,
-        [(pad_x, pad_y), (pad_x, tap_y), (12.85, tap_y)],
+        [
+            (pad_x, pad_y),
+            (pad_x, 12.85),
+            (west_stub_x_mm, 12.85),
+            (west_stub_x_mm, tap_y),
+            (12.85, tap_y),
+        ],
         track_width,
     )
     net = board.FindNet("AUDIO_EN")
@@ -803,6 +875,75 @@ def route_mcu_enable_joins(board: pcbnew.BOARD) -> None:
         "AUDIO_EN",
         pcbnew.In2_Cu,
         [(12.85, tap_y), (12.85, 72.50)],
+        track_width,
+    )
+
+
+def route_mcu_audio_enable(board: pcbnew.BOARD) -> None:
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+        _helpers()
+    )
+    u1 = footprint_by_reference(board, "U1")
+    pad_x, pad_y = millimeters(get_pad(u1, "23").GetPosition())
+    tap_y = 23.80
+    west_stub_x_mm = 39.50
+    route_polyline(
+        board,
+        "AUDIO_EN",
+        pcbnew.F_Cu,
+        [
+            (pad_x, pad_y),
+            (pad_x, 12.85),
+            (west_stub_x_mm, 12.85),
+            (west_stub_x_mm, tap_y),
+            (12.85, tap_y),
+        ],
+        track_width,
+    )
+    net = board.FindNet("AUDIO_EN")
+    add_via(board, net, 12.85, tap_y, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "AUDIO_EN",
+        pcbnew.In2_Cu,
+        [(12.85, tap_y), (12.85, 72.50)],
+        track_width,
+    )
+
+
+def route_mcu_aon_east_face(board: pcbnew.BOARD) -> None:
+    """Tie U1 east AON pads into the existing In2 spine at x=50.8 mm (no EP vias)."""
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+        _helpers()
+    )
+    u1 = footprint_by_reference(board, "U1")
+    aon = board.FindNet("AON_3V3")
+    aon_spine_y_mm = 9.20
+    aon_via_row_y_mm = 10.45
+    aon_east_f_column_x_mm = 51.20
+    for pad_number in ("29", "46", "55", "56"):
+        pad_x, pad_y = millimeters(get_pad(u1, pad_number).GetPosition())
+        route_polyline(
+            board,
+            "AON_3V3",
+            pcbnew.F_Cu,
+            [
+                (pad_x, pad_y),
+                (pad_x, aon_via_row_y_mm),
+                (aon_east_f_column_x_mm, aon_via_row_y_mm),
+            ],
+            track_width,
+        )
+    add_via(board, aon, aon_east_f_column_x_mm, aon_via_row_y_mm, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.In2_Cu,
+        [
+            (aon_east_f_column_x_mm, aon_via_row_y_mm),
+            (50.80, aon_via_row_y_mm),
+            (50.80, aon_spine_y_mm),
+        ],
         track_width,
     )
 

@@ -2,6 +2,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 import math
+import subprocess
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -828,11 +829,11 @@ def electronics_parts() -> list[PlacedPart]:
             "Y1",
             "L327S400H11L",
             "Crystal_SMD_3225-4Pin_3.2x2.5mm",
-            53.0,
-            3.6,
+            54.0,
+            4.2,
             0.0,
-            53.0,
-            3.6,
+            54.0,
+            4.2,
             {
                 "1": "XTAL_P",
                 "2": "GND",
@@ -1246,10 +1247,10 @@ def electronics_parts() -> list[PlacedPart]:
             "R_USB_P",
             "22R",
             "R_0402_1005Metric",
-            38.0,
+            37.0,
             9.2,
             0.0,
-            38.0,
+            37.0,
             9.2,
             {"1": "USB_D_P", "2": "USB_D_P_MCU"},
         ),
@@ -1257,10 +1258,10 @@ def electronics_parts() -> list[PlacedPart]:
             "R_USB_N",
             "22R",
             "R_0402_1005Metric",
-            38.0,
+            39.0,
             10.0,
             0.0,
-            38.0,
+            39.0,
             10.0,
             {"1": "USB_D_N", "2": "USB_D_N_MCU"},
         ),
@@ -1269,21 +1270,21 @@ def electronics_parts() -> list[PlacedPart]:
             "10p",
             "C_0402_1005Metric",
             51.0,
-            3.0,
+            2.5,
             0.0,
             51.0,
-            3.0,
+            2.5,
             {"1": "XTAL_P", "2": "GND"},
         ),
         PlacedPart(
             "C_XTAL2",
             "10p",
             "C_0402_1005Metric",
-            55.0,
-            3.0,
+            57.0,
+            2.5,
             0.0,
-            55.0,
-            3.0,
+            57.0,
+            2.5,
             {"1": "XTAL_N", "2": "GND"},
         ),
         PlacedPart(
@@ -2090,10 +2091,6 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
 
     # AON spine east of U1 (46,10): inner layers only so Freerouting can tie MCU pads.
     aon = board.FindNet("AON_3V3")
-    add_through_via(board, aon, 43.50, 9.20, diameter_mm=0.40)
-    route_net_polyline(
-        board, "AON_3V3", pcbnew.In1_Cu, [(43.50, 9.20), (50.80, 9.20)], 0.20
-    )
     add_through_via(board, aon, 50.80, 9.20, diameter_mm=0.40)
     route_net_polyline(
         board, "AON_3V3", pcbnew.In2_Cu, [(50.80, 9.20), (50.80, 76.00)], 0.20
@@ -3875,7 +3872,21 @@ def generate_boards(repository_root: Path) -> None:
         template_path,
         False,
     )
-    print(f"Generated {electronics_directory / 'mono_electronics.kicad_pcb'}")
+    electronics_pcb_path = electronics_directory / "mono_electronics.kicad_pcb"
+    print(f"Generated {electronics_pcb_path}")
+    if __import__("os").environ.get("MONO_APPLY_MCU_GRID", "1") == "1":
+        from mcu_grid_route import run_mcu_grid_pipeline
+
+        run_mcu_grid_pipeline(electronics_pcb_path)
+        print(f"MCU grid routes applied to {electronics_pcb_path}")
+
+    for variant in PANEL_VARIANTS:
+        panel_path = repository_root / "hardware" / variant.name / f"{variant.name}.kicad_pcb"
+        subprocess.run(
+            ["git", "checkout", "--", str(panel_path.relative_to(repository_root))],
+            cwd=repository_root,
+            check=False,
+        )
 
 
 if __name__ == "__main__":

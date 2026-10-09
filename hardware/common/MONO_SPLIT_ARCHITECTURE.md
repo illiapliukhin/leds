@@ -172,23 +172,23 @@ Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as function
 | 9 | 14 | `IMU_SCL` | BMI270 I²C |
 | 10 | 15 | `IMU_INT1` | BMI270 interrupt |
 | 13–16 | 18,19,21,22 | `LED_CLK` … `LED_OE_N` | MBI5124 control (reserve → buffer) |
-| 17 | 23 | `ROW_A0` | Row address |
-| 18 | 24 | `ROW_A1` | Row address |
-| 21 | 27 | `ROW_A2` | Row address |
+| 17 | 23 | `AUDIO_EN` | Audio switch |
 | 33 | 38 | `ROW_A3` | Row address |
+| 38 | 43 | `ROW_A2` | Row address (east face) |
+| 39 | 44 | `ROW_A0` | Row address (east face) |
+| 40 | 45 | `ROW_A1` | Row address (east face) |
 | 34 | 39 | `DEC_A_EN_N` | 74HC154 A enable |
 | 35 | 40 | `DEC_B_EN_N` | 74HC154 B enable |
 | 36 | 41 | `LED_EN` | `TPS63802` enable |
 | 37 | 42 | `LED_LOGIC_EN` | LED logic switch |
 | 19 | 25 | `USB_D_N_MCU` | Native USB D− |
 | 20 | 26 | `USB_D_P_MCU` | Native USB D+ |
-| 42 | 48 | `AUDIO_EN` | Audio switch |
 | 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
 | — | 53–54 | `XTAL_N` / `XTAL_P` | 40 MHz crystal |
 
-**Part choice:** BOM targets **ESP32-S3FN8** (in-package **quad** flash). Row address uses `GPIO17`/`18`/`21`/`33`; USB uses `GPIO19`/`20` only — no GPIO overlap. `GPIO33`–`GPIO37` are valid on FN8 but conflict with **octal** `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin or firmware remap.
+**Part choice:** BOM targets **ESP32-S3FN8** (in-package **quad** flash). Row address uses **`GPIO39`/`40`/`38`** (pads 44/45/43) plus **`GPIO33`** (pad 38); **`GPIO17`** is `AUDIO_EN` (pad 23). USB uses `GPIO19`/`GPIO20` only. **Pads 11 (`GPIO6`) and 32 (`SPICS0`) stay NC** — never tie `SPICS0` to `GND`. `GPIO33`–`GPIO37` are wired on FN8 but conflict with **octal** `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin or firmware remap.
 
-Copper is generated in `hardware/tools/mono_split_esp32.py` and called from `generate_mono_split_boards.py`.
+MCU copper is grid-routed in `hardware/tools/mcu_grid_route.py` (F/In1/In2/**B**, via-legal pockets) after matrix generation in `generate_mono_split_boards.py`.
 
 ## DRC scope
 
