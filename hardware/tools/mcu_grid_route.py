@@ -357,17 +357,36 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     greedy_ok, greedy_shorts, greedy_cross = drc_gate_routes(
         board_path, greedy_routes, kicad_python=kicad_python, apply_script=apply_script
     )
+    from mcu_grid_merge import merge_routes
+
     pf_complete = len(pf_routes.get("complete_nets") or [])
     greedy_complete = len(greedy_routes.get("complete_nets") or [])
+    pf_nets = set(pf_routes.get("complete_nets") or [])
+    greedy_nets = set(greedy_routes.get("complete_nets") or [])
+    borrow_nets = greedy_nets - pf_nets
+    pf_candidate = pf_routes
+    if pf_ok and borrow_nets and greedy_ok:
+        merged = merge_routes(pf_routes, greedy_routes, borrow_nets)
+        merge_ok, merge_shorts, merge_cross = drc_gate_routes(
+            board_path, merged, kicad_python=kicad_python, apply_script=apply_script
+        )
+        if merge_ok:
+            pf_candidate = merged
+            pf_complete = len(merged.get("complete_nets") or [])
+            print(
+                f"grid merge pf+greedy nets {sorted(borrow_nets)} "
+                f"DRC {merge_shorts}/{merge_cross}",
+                flush=True,
+            )
     if pf_ok and pf_complete >= greedy_complete:
-        chosen = pf_routes
-        chosen_label = "pathfinder"
+        chosen = pf_candidate
+        chosen_label = pf_candidate.get("route_engine", "pathfinder")
     elif greedy_ok and greedy_complete >= pf_complete:
         chosen = greedy_routes
         chosen_label = "greedy"
     elif pf_ok:
-        chosen = pf_routes
-        chosen_label = "pathfinder"
+        chosen = pf_candidate
+        chosen_label = pf_candidate.get("route_engine", "pathfinder")
     elif greedy_ok:
         chosen = greedy_routes
         chosen_label = "greedy"
@@ -425,7 +444,7 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
             for key, value in os.environ.items()
             if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
         }
-        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,gnd,aon")
+        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,aon_zone,gnd,grid_one")
         subprocess.run(
             [str(kicad_python), str(post_script), str(board_path)],
             check=True,

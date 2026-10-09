@@ -6,6 +6,7 @@ import json
 import shutil
 import subprocess
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 COPPER_GATE_TYPES = frozenset({"shorting_items", "tracks_crossing"})
@@ -39,6 +40,13 @@ def run_drc_report(board_path: Path, *, refill_zones: bool = False, save_board: 
         command.append(str(board_path))
         subprocess.run(command, check=True, capture_output=True, text=True)
         return json.loads(output_path.read_text())
+
+
+def violation_type_counts(report: dict) -> Counter:
+    counts: Counter = Counter()
+    for violation in report.get("violations", []):
+        counts[violation.get("type", "unknown")] += 1
+    return counts
 
 
 def copper_gate_counts(report: dict) -> tuple[int, int]:

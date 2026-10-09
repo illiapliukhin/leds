@@ -18,7 +18,8 @@ from generate_mono_split_boards import (
     millimeters,
     route_net_polyline,
 )
-from mcu_grid_drc import copper_gate_counts, refill_zones_save, run_drc_report
+from mcu_grid_drc import copper_gate_counts, refill_zones_save, run_drc_report, violation_type_counts
+from mono_split_aon_in1_zone import apply_aon_in1_zone_plan
 from mono_split_copper_utils import GND_STITCH_TARGETS, dogbone_via_candidates, remove_dangling_track_stubs
 
 MM = 1e-6
@@ -122,6 +123,7 @@ def _add_gnd_stitch(board: pcbnew.BOARD, pad_x: float, pad_y: float, via_x: floa
 def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
     """Add one GND via per F-only pad; keep only if copper gate stays 0/0 after refill."""
     accepted = 0
+    baseline_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 0)
     board = pcbnew.LoadBoard(str(board_path))
     gnd = board.FindNet("GND")
     if gnd is None or gnd.GetNetCode() == 0:
@@ -145,8 +147,11 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
                     refill_zones_save(trial_path)
                 except Exception:
                     continue
-                shorts, crossings = _copper_gate(trial_path)
-                if shorts == 0 and crossings == 0:
+                report = run_drc_report(trial_path)
+                shorts, crossings = copper_gate_counts(report)
+                clearance = violation_type_counts(report).get("clearance", 0)
+                if shorts == 0 and crossings == 0 and clearance <= baseline_clearance:
+                    baseline_clearance = clearance
                     _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
                     _save_board(board, board_path)
                     try:
@@ -299,7 +304,14 @@ def join_dec_a_en_to_stubs(board: pcbnew.BOARD) -> None:
     )
 
 
-def _try_signal_step(board_path: Path, apply_fn) -> bool:
+def _try_signal_step(
+    board_path: Path,
+    apply_fn,
+    *,
+    max_clearance: int | None = None,
+) -> bool:
+    if max_clearance is None:
+        max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
     with tempfile.TemporaryDirectory() as temporary_directory:
         trial_path = Path(temporary_directory) / board_path.name
         shutil.copy2(board_path, trial_path)
@@ -310,8 +322,10 @@ def _try_signal_step(board_path: Path, apply_fn) -> bool:
             refill_zones_save(trial_path)
         except Exception:
             return False
-        shorts, crossings = _copper_gate(trial_path)
-        if shorts or crossings:
+        report = run_drc_report(trial_path)
+        shorts, crossings = copper_gate_counts(report)
+        clearance = violation_type_counts(report).get("clearance", 0)
+        if shorts or crossings or clearance > max_clearance:
             return False
         board = pcbnew.LoadBoard(str(board_path))
         apply_fn(board)
@@ -321,6 +335,85 @@ def _try_signal_step(board_path: Path, apply_fn) -> bool:
         except Exception:
             return False
         return True
+
+
+def _try_apply_grid_routes(board_path: Path, routes: dict, *, max_clearance: int) -> bool:
+    from mcu_grid_route import apply_grid_routes
+
+    if not routes.get("complete_nets"):
+        return False
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        trial_path = Path(temporary_directory) / board_path.name
+        shutil.copy2(board_path, trial_path)
+        board = pcbnew.LoadBoard(str(trial_path))
+        apply_grid_routes(board, routes.get("segs", []), routes.get("vias", []))
+        _save_board(board, trial_path)
+        try:
+            refill_zones_save(trial_path)
+        except Exception:
+            return False
+        report = run_drc_report(trial_path)
+        shorts, crossings = copper_gate_counts(report)
+        clearance = violation_type_counts(report).get("clearance", 0)
+        if shorts or crossings or clearance > max_clearance:
+            return False
+        board = pcbnew.LoadBoard(str(board_path))
+        apply_grid_routes(board, routes.get("segs", []), routes.get("vias", []))
+        _save_board(board, board_path)
+        try:
+            refill_zones_save(board_path)
+        except Exception:
+            return False
+        return True
+
+
+def apply_aon_in1_zone_gated(board_path: Path) -> bool:
+    baseline = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
+    return _try_signal_step(
+        board_path,
+        apply_aon_in1_zone_plan,
+        max_clearance=baseline,
+    )
+
+
+def route_grid_one_net(board_path: Path, net_name: str, *, max_clearance: int) -> bool:
+    import json
+    import subprocess
+
+    tools_dir = Path(__file__).resolve().parent
+    kpy = Path("/workspace/.kicad10/squashfs-root/usr/bin/python3.11")
+    compute = Path("/usr/bin/python3")
+    geometry_path = board_path.with_suffix(".mcu_geom.json")
+    subprocess.run([str(kpy), str(tools_dir / "dump_mcu_geom.py"), str(board_path), str(geometry_path)], check=True)
+    result = subprocess.run(
+        [str(compute), str(tools_dir / "mcu_grid_route_one_net.py"), str(geometry_path), net_name],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    routes = json.loads(result.stdout)
+    if not routes.get("complete_nets"):
+        print(f"grid_one {net_name}: no path", flush=True)
+        return False
+    ok = _try_apply_grid_routes(board_path, routes, max_clearance=max_clearance)
+    print(f"grid_one {net_name}: {'ok' if ok else 'skipped (gate)'}", flush=True)
+    return ok
+
+
+def route_grid_open_nets(board_path: Path) -> None:
+    import os
+
+    raw = os.environ.get(
+        "MONO_GRID_ONE_NETS",
+        "LED_CLK,DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3,GND",
+    )
+    nets = [part.strip() for part in raw.split(",") if part.strip()]
+    max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
+    for net_name in nets:
+        if _try_apply_grid_routes is None:
+            break
+        route_grid_one_net(board_path, net_name, max_clearance=max_clearance)
+        max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", max_clearance)
 
 
 def route_open_mcu_signals(board_path: Path) -> None:
@@ -377,12 +470,23 @@ def run_phase(board_path: Path, phase: str) -> dict[str, int]:
     if phase == "gnd":
         stats["gnd_stitches"] = stitch_gnd_pads_with_drc_gate(board_path)
         return stats
+    if phase == "aon_zone":
+        if apply_aon_in1_zone_gated(board_path):
+            print("aon_zone: ok", flush=True)
+        else:
+            print("aon_zone: skipped (DRC gate)", flush=True)
+        stats["shorts"], stats["crossings"] = _copper_gate(board_path)
+        return stats
     if phase == "aon":
         apply_aon_steps_gated(board_path)
         if _try_signal_step(board_path, join_dec_a_en_to_stubs):
             print("dec_a join: ok", flush=True)
         else:
             print("dec_a join: skipped (DRC gate)", flush=True)
+        stats["shorts"], stats["crossings"] = _copper_gate(board_path)
+        return stats
+    if phase == "grid_one":
+        route_grid_open_nets(board_path)
         stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "signals":
