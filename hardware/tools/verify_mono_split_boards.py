@@ -289,33 +289,19 @@ def verify_repository(repository_root: Path) -> None:
             f"{electronics_geometry[0]['type']} "
             f"{electronics_geometry[0].get('description')}"
         )
-    electronics_silk_mask = [
+    electronics_unconnected = unconnected_items(electronics_report)
+    electronics_other = [
         violation
         for violation in geometric_violations(electronics_report)
         if violation.get("type") not in ELECTRONICS_COPPER_VIOLATION_TYPES
     ]
-    electronics_unconnected = unconnected_items(electronics_report)
-    strict_matrix_net = re.compile(
-        r"ROW_(?:0[1-9]|[12]\d|3[0-2])_(?:ANODE|Y|GATE)|"
-        r"COL_(?:0[1-9]|[12]\d|3[0-2])\b|"
-        r"ROW_A[0-3](?:_4V)?|DEC_[AB]_EN_N(?:_4V)?|"
-        r"LED_(?:CLK|SDI|LE|OE)_(?:Y|PRE)\b|LED_4V1|LED_LOGIC_3V3"
-    )
-    matrix_open = [
-        item
-        for item in electronics_unconnected
-        if strict_matrix_net.search(json.dumps(item))
-    ]
-    if matrix_open:
+    if electronics_unconnected or electronics_other:
         raise AssertionError(
-            "mono_electronics matrix net still open: "
-            f"{matrix_open[0].get('description')}"
+            "mono_electronics DRC not clean: "
+            f"{len(electronics_unconnected)} unconnected, "
+            f"{len(electronics_other)} other geometry items"
         )
-    print(
-        "mono_electronics: pinout match, shorts/crossings clean, "
-        f"{len(electronics_silk_mask)} silk/mask items deferred, "
-        f"{len(electronics_unconnected)} non-matrix unconnected groups"
-    )
+    print("mono_electronics: pinout match, DRC clean")
 
 
 if __name__ == "__main__":

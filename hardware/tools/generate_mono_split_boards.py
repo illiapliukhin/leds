@@ -844,10 +844,10 @@ def electronics_parts() -> list[PlacedPart]:
             "U_IMU",
             "BMI270",
             "Bosch_LGA-14_3x2.5mm_P0.5mm",
-            62.0,
+            62.35,
             4.5,
             0.0,
-            70.0,
+            70.35,
             4.5,
             {
                 "4": "IMU_INT1",
@@ -1224,11 +1224,11 @@ def electronics_parts() -> list[PlacedPart]:
             "C_CHIP_PU",
             "1u",
             "C_0603_1608Metric",
-            33.5,
-            13.5,
+            31.5,
+            14.8,
             0.0,
-            33.5,
-            13.5,
+            31.5,
+            14.8,
             {"1": "CHIP_PU", "2": "GND"},
         ),
         PlacedPart(
@@ -2051,14 +2051,12 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     )
     add_through_via(board, gnd, 49.49, 80.00, diameter_mm=0.40)
 
-    route_net_polyline(
-        board, "GND", pcbnew.F_Cu, [(44.00, 9.012), (44.50, 9.012)], 0.15
-    )
+    add_through_via(board, gnd, 39.50, 9.012, diameter_mm=0.40)
     route_net_polyline(
         board,
         "GND",
-        pcbnew.F_Cu,
-        [(44.50, 9.012), (44.50, 11.20), (41.00, 11.20)],
+        pcbnew.In2_Cu,
+        [(39.50, 9.012), (39.50, 11.20), (41.00, 11.20)],
         0.15,
     )
     add_through_via(board, gnd, 41.00, 11.20, diameter_mm=0.40)
@@ -3226,7 +3224,6 @@ def route_mcu_side_to_drop(
     )
     if abs(spine_x_mm - drop_x_mm) > 0.01:
         net = board.FindNet(net_name)
-        add_through_via(board, net, spine_x_mm, via_y_mm, diameter_mm=0.40)
         route_net_polyline(
             board,
             net_name,
@@ -3564,8 +3561,6 @@ def route_decoder_address(board: pcbnew.BOARD) -> None:
         a_x, a_y = millimeters(get_pad(translator, a_pins[logical_name]).GetPosition())
         spine_x, via_y = mcu_spines[logical_name]
         if logical_name == "DEC_B_EN_N":
-            # Straight down crosses ROW_03_GATE. Step west above that stub,
-            # clear of the ROW_A0 drop at x=66.30.
             route_net_polyline(
                 board,
                 logical_name,
