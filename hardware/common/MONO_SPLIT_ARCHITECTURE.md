@@ -73,7 +73,40 @@ Every white LED is one intersection of `ROW_nn_ANODE` and `COL_nn`. Those nets s
 The electronics board is 190 × 148 mm. Each `ROW_nn_ANODE` and `COL_nn` is one copper path from the driver pad to the matching FFC pin. `LED_4V1` is one rail across the transistor sources, the gate pull-ups, and `TPS63802` VOUT. USB `VBUS` is one net across the stacked receptacle pads. `GND` joins the USB shells and ground pins, BMI270 pads 6–7, both MBI5124 pad 1 pins, `TP2`, and the converter returns. `AON_3V3` joins BMI270 VDDIO and VDD, `TP1`, and `TPS7A2033` OUT. Each `REXT` reaches its 1.82 kΩ resistor, and `LED_LOGIC_3V3` ties the two driver logic pins. Zones from left to right:
 
 1. USB-C, ESD, CC on the left edge.
-2. **MCU corner (2026-10-08 rework):** `U1` at **(46, 10) mm**, **270°** so row/decoder/LED GPIOs leave the **west face** already **east of the row fan-in** (`x≈37`). Crystal **`Y1`** sits **north** of the chip (short XTAL, no routing under the resonator). **`U_IMU`** moves to **(62, 4.5) mm** (east of the MCU, clear of the switcher). Strap/USB passives sit in a **west cluster** near **x≈36–40**. GPIO map unchanged.
+2. **MCU (committed baseline):** `U1` at **(46, 10) mm**, **270°** — functional GPIOs on the west face, still overlapping the row fan-in field in Y. **`Y1`** north of `U1`; **`U_IMU`** at **(62.35, 4.5) mm**. Strap/USB passives west of `U1`. **GPIO map unchanged.**
+
+### Planned MCU island relocation (2026-10-09, not yet committed)
+
+Goal: move **`U1` + Y1, IMU, USB series, straps, `C_MCU1`, `SW1`** out of the **`x≈13–42`, `y≈4–70`** row fan-in / **`ROW_nn_Y`** corridor into a **south-west keep-in** that is empty on **F / In1 / In2** in the layout database.
+
+**Free-area map (190 × 148 mm, branding strip `y > 142` excluded):**
+
+| Region | Approx. bounds | Fixed copper / parts | Suitability |
+|---|---|---|---|
+| Row fan-in + `ROW_nn_Y` | `x≈13–42`, `y≈4–72` | F + In1/In2 matrix stubs | **Avoid** (locked) |
+| Power / charger | `x≈6–44`, `y≈38–76` | `SYS`, `BAT`, buck/LDO | Keep MCU out |
+| Translator + decoders | `x≈57–110`, `y≈4–28` | Address spines to reserves | Targets to the **north** |
+| Reserve strip | `y≈98`, `x≈8–127` | Drops from buffer/translator | **Short north** taps if MCU sits **`y≈90–112`** |
+| MBI + column field | `x≈62–120`, `y≈60–90` | Driver + `COL_nn` | Avoid |
+| **South-west keep-in** | **`x≈22–58`, `y≈88–125`** | Mostly open; **`GND` In2 spine `x=41`** | **Preferred island** |
+| USB edge | `x≈0–12`, `y≈12–28` | `J_USB`, ESD | Keep connector; **In2/USB bus west** |
+
+**Recommended placement (next implementation pass):**
+
+- **`U1`:** **(52, 94) mm**, **0°** — GPIO row faces **+Y** toward reserves **`y=98`** and **+X** toward **`U_ROW_XLAT`** A-side (**~68 mm, 14 mm**). Package **west** edge toward the **left board edge** (RF keep-out along the edge per Espressif guidance).
+- **`Y1`:** **(52, 88) mm** (north, no tracks under crystal).
+- **`U_IMU`:** **(62, 94) mm** (local I²C on F.Cu).
+- **Straps / `C_MCU1` / `SW1`:** cluster **`x≈24–40`, `y≈112–120`** (above island, still below branding).
+- **`J_USB`:** **unchanged** on the **left edge**; MCU USB uses **In2** west bus **`y≈108`** to **`U_ESD`** (mechanical USB stays put).
+
+**Routing plan:**
+
+- **Do not** run long eastbound buses at a single **`y`** on In2 — they cross the locked **`GND` spine at `x=41`** and matrix In1/In2 trunks.
+- **Do** pre-route or reserve **per-net In1 lanes** in the generator **`y=105.5…109.5`**, **`x=52→reserve_x`**, then **F** up to **`y=98`**, **or** extend existing reserve vias at **`(reserve_x, 97.35)`** south with **staggered In1** stubs before locking matrix copper.
+- **Freerouting** only inside a **DSN keep-in** rectangle **`(20, 86)–(66, 126)`** for cleanup after scripted buses.
+- **Electrical join:** MCU signal nets should meet the **existing reserve/translator graph** at **`y=98`** (same net already routed to decoders/MBI) — not a second path through **`y≈15`** translator pads unless stubs are unlocked.
+
+**Status:** Relocation was attempted on PR #4 pass 3; scripted buses from **`(34–40, 107–112)`** produced **60+ shorts / 40+ crossings** against locked matrix/`GND` geometry. **Committed PCB remains baseline `0 / 0 / 74`** until collision-aware tunnels or the **`(52, 94)`** plan above is implemented in the generator first.
 
 ### Why the old corner was congested
 
