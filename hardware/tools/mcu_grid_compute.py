@@ -19,6 +19,12 @@ from mcu_grid_constants import MCU_ROUTE_ORDER, paths_to_segments  # noqa: E402
 def _prefer_pad(net_name: str) -> tuple[str, str] | None:
     if net_name == "AON_3V3":
         return ("U1", "46")
+    if net_name == "DEC_A_EN_N":
+        return ("U1", "47")
+    if net_name == "GPIO0_BOOT":
+        return ("U1", "5")
+    if net_name == "USB_D_N_MCU":
+        return ("U1", "25")
     return None
 
 

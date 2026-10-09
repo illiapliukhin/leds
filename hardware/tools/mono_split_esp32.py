@@ -115,7 +115,7 @@ def esp32_gpio_pin_map_markdown() -> str:
 | 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
 | — | 53–54 | `XTAL_N` / `XTAL_P` | 40 MHz crystal |
 
-**Part:** `ESP32-S3FN8` (in-package **quad** flash). `GPIO19`/`GPIO20` are USB only (pads 25/26). Row address uses **`GPIO39`/`40`/`38`** on the east face plus **`GPIO33`** on pad 38. Enables use west/east escapes: **`GPIO18`/`GPIO21`** (`LED_EN`/`LED_LOGIC_EN`), **`GPIO41`/`GPIO42`** (`DEC_*`), **`GPIO6`** (`AUDIO_EN` on pad 11). **`SPICS0` (pad 32)** stays **NC** — do not tie to `GND`. Straps `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` stay off functional outputs.
+**Part:** `ESP32-S3FN8` (in-package **quad** flash). `GPIO19`/`GPIO20` are USB only (pads 25/26). Row address uses **`GPIO39`/`40`/`38`** on the east face plus **`GPIO33`** on pad 38. Enables use west/east escapes: **`GPIO18`/`GPIO21`** (`LED_EN`/`LED_LOGIC_EN`), **`GPIO41`/`GPIO42`** (`DEC_*` on pads 47/48 — datasheet **MTDI/MTMS**, safe here because firmware uses **USB Serial/JTAG**, not external JTAG), **`GPIO6`** (`AUDIO_EN` on pad 11). **`SPICS0` (pad 32)** stays **NC** — do not tie to `GND`. Straps `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` stay off functional outputs.
 """
 
 
@@ -280,14 +280,20 @@ def _route_east_face_in2_spine(
     add_via(board, net, join_x_mm, join_y_mm, diameter_mm=0.40)
 
 
-def route_mcu_decoder_enables(board: pcbnew.BOARD) -> None:
+def route_mcu_decoder_enables(
+    board: pcbnew.BOARD,
+    *,
+    only_nets: set[str] | None = None,
+) -> None:
     _, _, footprint_by_reference, get_pad, millimeters, _ = _helpers()
     translator = footprint_by_reference(board, "U_ROW_XLAT")
     dec_a_x, _dec_a_y = millimeters(get_pad(translator, "7").GetPosition())
     for net_name, u1_pad, join_x, join_y, south_y in (
-        ("DEC_A_EN_N", "39", dec_a_x, 20.80, 21.60),
-        ("DEC_B_EN_N", "40", 65.20, 25.35, 22.15),
+        ("DEC_A_EN_N", "47", dec_a_x, 20.80, 21.60),
+        ("DEC_B_EN_N", "48", 65.20, 25.35, 22.15),
     ):
+        if only_nets is not None and net_name not in only_nets:
+            continue
         _route_in2_to_decoder_spine(
             board,
             net_name,
@@ -314,8 +320,8 @@ def route_mcu_row_address_joins(board: pcbnew.BOARD) -> None:
         )
     row_joins = (
         ("ROW_A3", "38", 65.60, 20.20, None, 21.05),
-        ("DEC_A_EN_N", "39", dec_a_x, 20.80, None, 21.60),
-        ("DEC_B_EN_N", "40", 65.20, 25.35, None, 22.15),
+        ("DEC_A_EN_N", "47", dec_a_x, 20.80, None, 21.60),
+        ("DEC_B_EN_N", "48", 65.20, 25.35, None, 22.15),
     )
     for net_name, u1_pad, join_x, join_y, west_stub_x, south_y in row_joins:
         _route_in2_to_decoder_spine(
@@ -427,7 +433,11 @@ def route_usb_connector_to_esd(board: pcbnew.BOARD) -> None:
         add_via(board, net, esd_x, esd_y, diameter_mm=0.40)
 
 
-def route_mcu_usb(board: pcbnew.BOARD) -> None:
+def route_mcu_usb(
+    board: pcbnew.BOARD,
+    *,
+    only_mcu_nets: set[str] | None = None,
+) -> None:
     track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
         _helpers()
     )
@@ -439,6 +449,8 @@ def route_mcu_usb(board: pcbnew.BOARD) -> None:
     ):
         mcu_x, mcu_y = millimeters(get_pad(u1, mcu_pad).GetPosition())
         mcu_net = "USB_D_P_MCU" if mcu_pad == "26" else "USB_D_N_MCU"
+        if only_mcu_nets is not None and mcu_net not in only_mcu_nets:
+            continue
         esd_x, esd_y = millimeters(get_pad(esd, esd_pad).GetPosition())
         series = footprint_by_reference(board, series_ref)
         series_in_x, series_in_y = millimeters(get_pad(series, "1").GetPosition())
@@ -570,30 +582,45 @@ def route_mcu_boot_switch(board: pcbnew.BOARD) -> None:
     r_boot = footprint_by_reference(board, "R_BOOT0")
     r_boot_boot_x, r_boot_boot_y = millimeters(get_pad(r_boot, "2").GetPosition())
     sw_x, sw_y = millimeters(get_pad(sw, "1").GetPosition())
+    sw_gnd_x, sw_gnd_y = millimeters(get_pad(sw, "2").GetPosition())
     boot_net = board.FindNet("GPIO0_BOOT")
+    gnd = board.FindNet("GND")
+    stub_x = 38.00
     route_polyline(
         board,
         "GPIO0_BOOT",
         pcbnew.F_Cu,
-        [(r_boot_boot_x, r_boot_boot_y), (MCU_BOOT_IN2_X_MM, r_boot_boot_y)],
+        [(r_boot_boot_x, r_boot_boot_y), (stub_x, r_boot_boot_y)],
         track_width,
     )
-    add_via(board, boot_net, MCU_BOOT_IN2_X_MM, r_boot_boot_y, diameter_mm=0.40)
+    add_via(board, boot_net, stub_x, r_boot_boot_y, diameter_mm=0.40)
     route_polyline(
         board,
         "GPIO0_BOOT",
         pcbnew.In2_Cu,
-        [(MCU_BOOT_IN2_X_MM, r_boot_boot_y), (MCU_BOOT_IN2_X_MM, 82.00)],
+        [
+            (stub_x, r_boot_boot_y),
+            (stub_x, 10.50),
+            (sw_x, 10.50),
+        ],
         track_width,
     )
-    add_via(board, boot_net, MCU_BOOT_IN2_X_MM, 82.00, diameter_mm=0.40)
+    add_via(board, boot_net, sw_x, 10.50, diameter_mm=0.40)
     route_polyline(
         board,
         "GPIO0_BOOT",
         pcbnew.F_Cu,
-        [(MCU_BOOT_IN2_X_MM, 82.00), (sw_x, 82.00), (sw_x, sw_y)],
+        [(sw_x, 10.50), (sw_x, sw_y)],
         track_width,
     )
+    route_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(sw_gnd_x, sw_gnd_y), (sw_gnd_x, 12.50), (13.20, 12.50)],
+        track_width,
+    )
+    add_via(board, gnd, 13.20, 12.50, diameter_mm=0.40)
 
 
 def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
@@ -602,43 +629,44 @@ def route_mcu_reset_and_clock(board: pcbnew.BOARD) -> None:
 
 
 def route_mcu_imu_links(board: pcbnew.BOARD) -> None:
-    track_width, _, footprint_by_reference, get_pad, millimeters, route_polyline = (
+    """U1 ↔ BMI270 via In2 south bus (y=18.0 mm), clear of XTAL and LED grid on F/B north."""
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
         _helpers()
     )
     u1 = footprint_by_reference(board, "U1")
     imu = footprint_by_reference(board, "U_IMU")
-    for u1_pad, imu_pad, net_name, lane_y_mm in (
-        ("13", "14", "IMU_SDA", 5.20),
-        ("14", "13", "IMU_SCL", 4.95),
-        ("15", "4", "IMU_INT1", 4.70),
+    bus_y_mm = 18.00
+    lane_x_by_net = {"IMU_SDA": 58.0, "IMU_SCL": 58.5, "IMU_INT1": 59.0}
+    for u1_pad, imu_pad, net_name in (
+        ("13", "14", "IMU_SDA"),
+        ("14", "13", "IMU_SCL"),
+        ("15", "4", "IMU_INT1"),
     ):
         start_x, start_y = millimeters(get_pad(u1, u1_pad).GetPosition())
         end_x, end_y = millimeters(get_pad(imu, imu_pad).GetPosition())
-        if u1_pad == "15":
-            route_polyline(
-                board,
-                net_name,
-                pcbnew.F_Cu,
-                [
-                    (start_x, start_y),
-                    (47.20, start_y),
-                    (47.20, lane_y_mm),
-                    (end_x, lane_y_mm),
-                    (end_x, end_y),
-                ],
-                track_width,
-            )
-            continue
+        lane_x = lane_x_by_net[net_name]
+        net = board.FindNet(net_name)
         route_polyline(
             board,
             net_name,
             pcbnew.F_Cu,
-            [
-                (start_x, start_y),
-                (start_x, lane_y_mm),
-                (end_x, lane_y_mm),
-                (end_x, end_y),
-            ],
+            [(start_x, start_y), (start_x, bus_y_mm)],
+            track_width,
+        )
+        add_via(board, net, start_x, bus_y_mm, diameter_mm=0.40)
+        route_polyline(
+            board,
+            net_name,
+            pcbnew.In2_Cu,
+            [(start_x, bus_y_mm), (lane_x, bus_y_mm), (lane_x, end_y)],
+            track_width,
+        )
+        add_via(board, net, lane_x, end_y, diameter_mm=0.40)
+        route_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [(lane_x, end_y), (end_x, end_y)],
             track_width,
         )
 
@@ -846,13 +874,13 @@ def route_mcu_vbus_decouple(board: pcbnew.BOARD) -> None:
 
 
 def route_mcu_enable_joins(board: pcbnew.BOARD) -> None:
-    _route_in2_power_spine(board, "LED_EN", "41", 25.70, 45.15, 22.70)
-    _route_in2_power_spine(board, "LED_LOGIC_EN", "42", 14.20, 64.60, 23.25)
+    _route_in2_power_spine(board, "LED_EN", "24", 25.70, 45.15, 22.70)
+    _route_in2_power_spine(board, "LED_LOGIC_EN", "27", 14.20, 64.60, 23.25)
     track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
         _helpers()
     )
     u1 = footprint_by_reference(board, "U1")
-    pad_x, pad_y = millimeters(get_pad(u1, "23").GetPosition())
+    pad_x, pad_y = millimeters(get_pad(u1, "11").GetPosition())
     tap_y = 23.80
     west_stub_x_mm = 39.50
     route_polyline(
@@ -884,7 +912,7 @@ def route_mcu_audio_enable(board: pcbnew.BOARD) -> None:
         _helpers()
     )
     u1 = footprint_by_reference(board, "U1")
-    pad_x, pad_y = millimeters(get_pad(u1, "23").GetPosition())
+    pad_x, pad_y = millimeters(get_pad(u1, "11").GetPosition())
     tap_y = 23.80
     west_stub_x_mm = 39.50
     route_polyline(
@@ -909,6 +937,152 @@ def route_mcu_audio_enable(board: pcbnew.BOARD) -> None:
         [(12.85, tap_y), (12.85, 72.50)],
         track_width,
     )
+
+
+def route_mcu_aon_north_and_cap(board: pcbnew.BOARD) -> None:
+    """North/south AON pads + C_MCU1 into In2 spine (no duplicate east column if grid ran)."""
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+        _helpers()
+    )
+    u1 = footprint_by_reference(board, "U1")
+    cap = footprint_by_reference(board, "C_MCU1")
+    cap_x, cap_y = millimeters(get_pad(cap, "1").GetPosition())
+    aon = board.FindNet("AON_3V3")
+    spine_x, spine_y = 50.80, 9.20
+    north_bus_y = 6.25
+    drop_x = 48.00
+    for pad_number in ("2", "3"):
+        pad_x, pad_y = millimeters(get_pad(u1, pad_number).GetPosition())
+        route_polyline(
+            board,
+            "AON_3V3",
+            pcbnew.F_Cu,
+            [(pad_x, pad_y), (pad_x, north_bus_y), (drop_x, north_bus_y)],
+            track_width,
+        )
+    pad20_x, pad20_y = millimeters(get_pad(u1, "20").GetPosition())
+    route_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [
+            (pad20_x, pad20_y),
+            (41.90, pad20_y),
+            (41.90, north_bus_y),
+            (drop_x, north_bus_y),
+        ],
+        track_width,
+    )
+    add_via(board, aon, drop_x, north_bus_y, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.In2_Cu,
+        [(drop_x, north_bus_y), (drop_x, spine_y), (spine_x, spine_y), (cap_x, spine_y)],
+        track_width,
+    )
+    add_via(board, aon, cap_x, cap_y, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.In2_Cu,
+        [(cap_x, spine_y), (cap_x, cap_y)],
+        track_width,
+    )
+    r_chip = footprint_by_reference(board, "R_CHIP_PU")
+    r_boot = footprint_by_reference(board, "R_BOOT0")
+    pull_x, pull_y = millimeters(get_pad(r_chip, "1").GetPosition())
+    boot_pull_x, boot_pull_y = millimeters(get_pad(r_boot, "1").GetPosition())
+    route_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(pull_x, pull_y), (pull_x, boot_pull_y), (boot_pull_x, boot_pull_y)],
+        track_width,
+    )
+
+
+def route_mcu_aon_u1_in2_tie(board: pcbnew.BOARD) -> None:
+    """Post-grid: short F vias from U1 AON pads into the existing In2 spine at (50.8, 9.2) mm."""
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+        _helpers()
+    )
+    u1 = footprint_by_reference(board, "U1")
+    aon = board.FindNet("AON_3V3")
+    spine_x_mm, spine_y_mm = 50.80, 9.20
+    for pad_number in ("2", "3", "20", "29", "46", "55", "56"):
+        pad_x, pad_y = millimeters(get_pad(u1, pad_number).GetPosition())
+        via_y_mm = 8.85 if pad_y < 8.0 else pad_y + 1.05
+        route_polyline(
+            board,
+            "AON_3V3",
+            pcbnew.F_Cu,
+            [(pad_x, pad_y), (pad_x, via_y_mm)],
+            track_width,
+        )
+        add_via(board, aon, pad_x, via_y_mm, diameter_mm=0.40)
+        route_polyline(
+            board,
+            "AON_3V3",
+            pcbnew.In2_Cu,
+            [(pad_x, via_y_mm), (spine_x_mm, via_y_mm), (spine_x_mm, spine_y_mm)],
+            track_width,
+        )
+
+
+def route_mcu_gnd_pocket_ties(board: pcbnew.BOARD) -> None:
+    """Post-grid GND ties into In2/B pours (no B.Cu mesh — zone fill only)."""
+    track_width, add_via, footprint_by_reference, get_pad, millimeters, route_polyline = (
+        _helpers()
+    )
+    gnd = board.FindNet("GND")
+    spine_x_mm = MCU_GND_IN2_SPINE_X_MM
+    sw = footprint_by_reference(board, "SW1")
+    sw_gnd_x, sw_gnd_y = millimeters(get_pad(sw, "2").GetPosition())
+    route_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(sw_gnd_x, sw_gnd_y), (sw_gnd_x, 12.50), (13.20, 12.50)],
+        track_width,
+    )
+    add_via(board, gnd, 13.20, 12.50, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "GND",
+        pcbnew.In2_Cu,
+        [(13.20, 12.50), (spine_x_mm, 12.50), (spine_x_mm, MCU_GND_IN2_SPINE_TOP_Y_MM)],
+        track_width,
+    )
+    u1 = footprint_by_reference(board, "U1")
+    ep_x, ep_y = millimeters(get_pad(u1, "57").GetPosition())
+    shoulder_x_mm = 41.85
+    south_y_mm = 13.70
+    route_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(ep_x, ep_y), (shoulder_x_mm, ep_y), (shoulder_x_mm, south_y_mm)],
+        track_width,
+    )
+    add_via(board, gnd, shoulder_x_mm, south_y_mm, diameter_mm=0.40)
+    route_polyline(
+        board,
+        "GND",
+        pcbnew.In2_Cu,
+        [(shoulder_x_mm, south_y_mm), (spine_x_mm, south_y_mm), (spine_x_mm, MCU_GND_IN2_SPINE_TOP_Y_MM)],
+        track_width,
+    )
+    c_chip = footprint_by_reference(board, "C_CHIP_PU")
+    gnd_x, gnd_y = millimeters(get_pad(c_chip, "2").GetPosition())
+    route_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(gnd_x, gnd_y), (gnd_x, 23.80), (24.71, 23.80)],
+        track_width,
+    )
+    add_via(board, gnd, 24.71, 23.80, diameter_mm=0.40)
 
 
 def route_mcu_aon_east_face(board: pcbnew.BOARD) -> None:

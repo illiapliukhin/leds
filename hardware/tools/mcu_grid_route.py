@@ -160,24 +160,51 @@ def apply_grid_routes(
         board.Add(via)
 
 
-def post_grid_hand_finish(board: pcbnew.BOARD, incomplete_nets: set[str]) -> None:
-    """Scripted escape for nets the grid could not close (no overlap with grid copper)."""
-    from mono_split_esp32 import (
-        route_mcu_aon_east_face,
-        route_mcu_audio_enable,
-        route_mcu_decoder_enables,
-        route_mcu_enable_joins,
+def link_test_point_footprints(board: pcbnew.BOARD) -> None:
+    """Join both pads of 0402 test-point footprints (same net, DRC otherwise flags open)."""
+    from generate_mono_split_boards import (
+        FAN_IN_TRACK_WIDTH_MM,
+        footprint_by_reference,
+        get_pad,
+        millimeters,
+        route_net_polyline,
     )
 
-    need = set(incomplete_nets)
-    if need & {"DEC_A_EN_N", "DEC_B_EN_N"}:
-        route_mcu_decoder_enables(board)
-    if need & {"LED_EN", "LED_LOGIC_EN", "AUDIO_EN"}:
-        route_mcu_enable_joins(board)
-    if need & {"AUDIO_EN"}:
-        route_mcu_audio_enable(board)
-    if need & {"AON_3V3"}:
-        route_mcu_aon_east_face(board)
+    for reference in ("TP1", "TP2"):
+        footprint = footprint_by_reference(board, reference)
+        pad_one = get_pad(footprint, "1")
+        pad_two = get_pad(footprint, "2")
+        net_name = pad_one.GetNetname()
+        if not net_name or net_name != pad_two.GetNetname():
+            continue
+        start = millimeters(pad_one.GetPosition())
+        end = millimeters(pad_two.GetPosition())
+        route_net_polyline(
+            board,
+            net_name,
+            pcbnew.F_Cu,
+            [start, end],
+            FAN_IN_TRACK_WIDTH_MM,
+        )
+
+
+def post_grid_hand_finish(board: pcbnew.BOARD, incomplete_nets: set[str]) -> None:
+    """Optional post-grid joins (IMU south bus only — enable when DRC gate stays 0/0)."""
+    from mono_split_esp32 import route_mcu_imu_links
+
+    route_mcu_imu_links(board)
+
+
+def _existing_via_near(board: pcbnew.BOARD, x_mm: float, y_mm: float, *, tol_mm: float = 0.12) -> bool:
+    for item in board.GetTracks():
+        if item.GetClass() != "PCB_VIA":
+            continue
+        pos = item.GetPosition()
+        via_x = pcbnew.ToMM(pos.x)
+        via_y = pcbnew.ToMM(pos.y)
+        if abs(via_x - x_mm) <= tol_mm and abs(via_y - y_mm) <= tol_mm:
+            return True
+    return False
 
 
 def add_gnd_stitch_vias(board: pcbnew.BOARD) -> None:
@@ -186,22 +213,15 @@ def add_gnd_stitch_vias(board: pcbnew.BOARD) -> None:
     if gnd is None or gnd.GetNetCode() == 0:
         return
     stitch_points_mm = [
-        (13.20, 14.08),
-        (13.20, 40.0),
-        (13.20, 68.20),
-        (13.20, 100.0),
-        (31.0, 23.80),
-        (41.0, 11.20),
-        (41.0, 40.0),
-        (41.0, 80.0),
-        (50.80, 76.0),
-        (39.50, 9.01),
-        (22.0, 14.0),
-        (22.0, 50.0),
-        (55.0, 120.0),
-        (65.0, 120.0),
+        (13.20, 22.35),
+        (13.20, 81.30),
+        (73.40, 22.35),
+        (109.20, 22.35),
+        (50.80, 9.20),
     ]
     for x_mm, y_mm in stitch_points_mm:
+        if _existing_via_near(board, x_mm, y_mm):
+            continue
         via = pcbnew.PCB_VIA(board)
         via.SetNet(gnd)
         via.SetPosition(pcbnew.VECTOR2I_MM(x_mm, y_mm))
@@ -286,7 +306,7 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     import os
     import subprocess
 
-    from mcu_grid_drc import drc_gate_routes, refill_zones_save
+    from mcu_grid_drc import copper_gate_counts, drc_gate_routes, refill_zones_save, run_drc_report
 
     tools_dir = Path(__file__).resolve().parent
     kicad_root = Path("/workspace/.kicad10/squashfs-root/usr/bin")
@@ -347,12 +367,12 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
         chosen = greedy_routes
         chosen_label = "greedy"
     else:
-        chosen = pf_routes if pf_complete >= greedy_complete else greedy_routes
-        chosen_label = "best_effort_no_drc_gate"
-        print(
-            "warning: neither engine passed 0-short/0-crossing gate; "
-            f"applying {chosen_label} ({len(chosen.get('complete_nets', []))} nets)",
-            flush=True,
+        raise RuntimeError(
+            "MCU grid DRC gate failed: "
+            f"pathfinder shorts={pf_shorts} crossings={pf_cross} "
+            f"({pf_complete} nets), greedy shorts={greedy_shorts} "
+            f"crossings={greedy_cross} ({greedy_complete} nets). "
+            "Fix geometry or routing order; refusing to apply copper."
         )
     chosen["route_engine"] = chosen_label
     routes_path.write_text(json.dumps(chosen, indent=2))
@@ -379,6 +399,34 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
         print("refilled copper zones via kicad-cli", flush=True)
     except subprocess.CalledProcessError as error:
         print(f"zone refill skipped: {error.stderr}", flush=True)
+
+    board = pcbnew.LoadBoard(str(board_path))
+    incomplete = set(chosen.get("incomplete_nets") or [])
+    if os.environ.get("MONO_GND_STITCH", "0") == "1":
+        add_gnd_stitch_vias(board)
+    if os.environ.get("MONO_LINK_TP", "1") == "1":
+        link_test_point_footprints(board)
+    if os.environ.get("MONO_POST_GRID", "0") == "1":
+        post_grid_hand_finish(board, incomplete)
+    pcbnew.SaveBoard(str(board_path), board)
+    print(
+        f"post-grid finish for {len(incomplete)} incomplete nets + GND stitch",
+        flush=True,
+    )
+    try:
+        refill_zones_save(board_path)
+    except subprocess.CalledProcessError as error:
+        print(f"post-finish zone refill skipped: {error.stderr}", flush=True)
+
+    report = run_drc_report(board_path)
+    shorts, crossings = copper_gate_counts(report)
+    print(f"post-finish DRC gate: shorts={shorts} crossings={crossings}", flush=True)
+    if shorts > 0 or crossings > 0:
+        print(
+            "warning: post-finish copper gate failed; re-run with MONO_POST_GRID=0 "
+            "to keep grid-only copper",
+            flush=True,
+        )
 
 
 def route_mcu_with_grid(

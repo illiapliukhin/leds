@@ -1030,11 +1030,11 @@ def electronics_parts() -> list[PlacedPart]:
             "SW1",
             "KMR2",
             "SW_Push_1P1T_NO_CK_KMR2",
-            22.0,
-            76.0,
+            6.5,
+            10.5,
             0.0,
-            30.0,
-            76.0,
+            14.5,
+            10.5,
             {"1": "GPIO0_BOOT", "2": "GND"},
         ),
         PlacedPart(
@@ -3803,7 +3803,7 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
         "PCB CREATED BY ILLIA PLIUKHIN",
         ELECTRONICS_WIDTH_MM / 2,
         ELECTRONICS_HEIGHT_MM - 3.4,
-        pcbnew.F_SilkS,
+        pcbnew.Cmts_User,
         text_size_mm=MINIMUM_SILK_TEXT_HEIGHT_MM,
     )
     add_star(
@@ -3812,7 +3812,7 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
         ELECTRONICS_HEIGHT_MM - 1.3,
         outer_radius_mm=0.7,
         inner_radius_mm=0.3,
-        layer=pcbnew.F_SilkS,
+        layer=pcbnew.Cmts_User,
     )
     add_text(
         board,
@@ -3822,6 +3822,11 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
         pcbnew.Cmts_User,
         text_size_mm=0.8,
     )
+    if __import__("os").environ.get("MONO_BOOT_PREGRID", "0") == "1":
+        from mono_split_esp32 import route_mcu_boot_switch, route_mcu_strap_passives
+
+        route_mcu_strap_passives(board)
+        route_mcu_boot_switch(board)
     return board
 
 

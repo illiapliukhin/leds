@@ -15,6 +15,8 @@ RIP_PROTECT = frozenset({"XTAL_P", "XTAL_N", "USB_D_P_MCU", "USB_D_N_MCU", "IMU_
 def _prefer_pad(net_name: str) -> tuple[str, str] | None:
     if net_name == "AON_3V3":
         return ("U1", "46")
+    if net_name == "DEC_A_EN_N":
+        return ("U1", "47")
     return None
 
 

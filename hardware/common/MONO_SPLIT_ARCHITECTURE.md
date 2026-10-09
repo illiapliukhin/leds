@@ -186,7 +186,7 @@ Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as function
 | 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
 | — | 53–54 | `XTAL_N` / `XTAL_P` | 40 MHz crystal |
 
-**Part choice:** BOM targets **ESP32-S3FN8** (in-package **quad** flash). Row address uses **`GPIO39`/`40`/`38`** (pads 44/45/43) plus **`GPIO33`** (pad 38). Enables and audio use remapped west/east pads (`GPIO18`/`GPIO21`/`GPIO41`/`GPIO42`/`GPIO6` on pads 24/27/47/48/11). USB stays on **`GPIO19`/`GPIO20`** (pads 25/26). **Pad 32 (`SPICS0`) stays NC** — never tie to `GND`. `GPIO33`–`GPIO37` on FN8 conflict with **octal** `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin or firmware remap.
+**Part choice:** BOM targets **ESP32-S3FN8** (in-package **quad** flash). Row address uses **`GPIO39`/`40`/`38`** (pads 44/45/43) plus **`GPIO33`** (pad 38). Enables and audio use remapped west/east pads: **`GPIO18`/`GPIO21`** (pads 24/27), **`GPIO41`/`GPIO42`** (pads 47/48 — datasheet **MTDI/MTMS**; acceptable here because bring-up uses **USB Serial/JTAG**, not a header on those balls), **`GPIO6`** (pad 11). USB stays on **`GPIO19`/`GPIO20`** (pads 25/26). **Pad 32 (`SPICS0`) stays NC** — never tie to `GND`. `GPIO33`–`GPIO37` on FN8 conflict with **octal** `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin or firmware remap.
 
 MCU copper is **PathFinder-first** grid-routed in `hardware/tools/mcu_grid_route.py` (F/In1/In2/**B**, via-legal pockets): compute runs greedy + PathFinder, applies the larger complete set that passes DRC (**0 shorts / 0 crossings**), then **`kicad-cli pcb drc --refill-zones --save-board`** fills GND pours on In2/B.
 
