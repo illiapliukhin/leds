@@ -17,6 +17,10 @@ def _prefer_pad(net_name: str) -> tuple[str, str] | None:
         return ("U1", "46")
     if net_name == "DEC_A_EN_N":
         return ("U1", "47")
+    if net_name == "GPIO0_BOOT":
+        return ("U1", "5")
+    if net_name == "USB_D_N_MCU":
+        return ("U1", "25")
     return None
 
 
