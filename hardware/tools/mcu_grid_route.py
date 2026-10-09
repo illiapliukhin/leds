@@ -299,7 +299,7 @@ def _prefer_u1_pad(net_name: str) -> tuple[str, str] | None:
 
 
 def run_mcu_grid_pipeline(board_path: Path) -> None:
-    """Dump geometry → greedy + PathFinder → DRC-gated apply → GND zone refill."""
+    """Pre-grid power fanout → dump geometry → greedy + PathFinder → DRC-gated apply."""
     import json
     import os
     import subprocess
@@ -307,6 +307,13 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     from mcu_grid_drc import copper_gate_counts, drc_gate_routes, refill_zones_save, run_drc_report
 
     tools_dir = Path(__file__).resolve().parent
+    if os.environ.get("MONO_PRE_GRID_FANOUT", "0") == "1":
+        from mono_split_pre_grid_fanout import apply_pre_grid_power_fanout
+
+        board = pcbnew.LoadBoard(str(board_path))
+        apply_pre_grid_power_fanout(board)
+        pcbnew.SaveBoard(str(board_path), board)
+        print("pre-grid power fanout applied (locked stubs)", flush=True)
     kicad_root = Path("/workspace/.kicad10/squashfs-root/usr/bin")
     kicad_python = kicad_root / "python3.11"
     if not kicad_python.is_file():

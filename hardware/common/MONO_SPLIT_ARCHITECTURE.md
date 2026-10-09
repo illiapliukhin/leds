@@ -131,7 +131,7 @@ Run: **`hardware/tools/run_autoroute_mcu.sh`** (sources **`kicad10_env.sh`** for
 
 Legacy scripted helpers remain in **`mono_split_esp32.py`** (`route_mcu_xtal_only`, full **`route_esp32_mcu()`**) for hand touch-up or regression.
 
-**Not done yet:** Copper **0/0/0** on **`mono_electronics`** (Freerouting leaves **~90+** unconnected MCU groups; **`ROW_A*`** / **`DEC_*`** stubs often miss **`U1`** pads). Full geometric verify (silk/mask). Panels stay **0/0**.
+**Not done yet:** After grid apply, copper gate is **0 shorts / 0 crossings**, but KiCad still reports **39 unconnected groups** (mostly **`AON_3V3`** / **`GND`** islands and four open signal nets: **`GPIO0_BOOT`**, **`USB_D_N_MCU`**, **`DEC_A_EN_N`**, plus three **IMU** links). Post-grid hand routes on **F.Cu** through the MCU field collide with grid copper; **In2-only** ties and blind stitch vias still need pocket validation. **`verify_mono_split_boards.py`** remains red on electronics until unconnected and silk/dangling cleanup reach zero. Panels stay **0/0/0**.
 3. `BQ25185`, battery connector, `TPS63802`, inductor, AON LDO, and both `TPS22917` switches.
 4. Microphone and `TLV9001` on the far right, opposite the switcher.
 5. Row translator, both 74HC154 devices, and the 32 × `AO3403` farm with gate and pull-up resistors.

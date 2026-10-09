@@ -8,11 +8,30 @@ import numpy as np
 
 from grid import Board, H, W, bump_hist_from_paths, track_radius  # noqa: E402
 
-GRID_SKIP_NETS = frozenset({"GND"})
-RIP_PROTECT = frozenset({"XTAL_P", "XTAL_N", "USB_D_P_MCU", "USB_D_N_MCU", "IMU_SDA", "IMU_SCL"})
+# GND/AON: pre-grid fanout + post-grid gated ties (grid power routes DRC-short vs matrix).
+GRID_SKIP_NETS: frozenset[str] = frozenset({"GND", "AON_3V3"})
+RIP_PROTECT = frozenset(
+    {
+        "XTAL_P",
+        "XTAL_N",
+        "USB_D_P_MCU",
+        "USB_D_N_MCU",
+        "IMU_SDA",
+        "IMU_SCL",
+        "AON_3V3",
+        "GND",
+        "ROW_A0",
+        "ROW_A1",
+        "ROW_A2",
+        "ROW_A3",
+        "ROW_XLAT_OE_N",
+    }
+)
 
 
 def _prefer_pad(net_name: str) -> tuple[str, str] | None:
+    if net_name == "GND":
+        return ("U1", "57")
     if net_name == "AON_3V3":
         return ("U1", "46")
     if net_name == "DEC_A_EN_N":
@@ -27,12 +46,16 @@ def _prefer_pad(net_name: str) -> tuple[str, str] | None:
 def _via_cost(net_name: str, base: float) -> float:
     if net_name == "AON_3V3":
         return base * 0.50
+    if net_name == "GND":
+        return base * 0.45
     return base
 
 
 def _max_joins(net_name: str) -> int:
     if net_name == "AON_3V3":
-        return 28
+        return 32
+    if net_name == "GND":
+        return 36
     return 20
 
 

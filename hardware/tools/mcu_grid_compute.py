@@ -17,6 +17,8 @@ from mcu_grid_constants import MCU_ROUTE_ORDER, paths_to_segments  # noqa: E402
 
 
 def _prefer_pad(net_name: str) -> tuple[str, str] | None:
+    if net_name == "GND":
+        return ("U1", "57")
     if net_name == "AON_3V3":
         return ("U1", "46")
     if net_name == "DEC_A_EN_N":
@@ -38,7 +40,7 @@ def run_greedy(
     grid_board = Board(geometry)
     all_paths: dict[str, list] = {}
     complete: set[str] = set()
-    order = [n for n in MCU_ROUTE_ORDER if n != "GND"]
+    order = [n for n in MCU_ROUTE_ORDER if n not in ("GND", "AON_3V3")]
     for pass_index in range(max_iterations):
         failed: list[str] = []
         for net_name in order:
@@ -65,8 +67,13 @@ def run_greedy(
         )
         if not failed:
             break
-        order = list(dict.fromkeys(failed + [n for n in MCU_ROUTE_ORDER if n not in complete and n != "GND"]))
-    incomplete = {n for n in MCU_ROUTE_ORDER if n not in complete and n != "GND"}
+        skip_power = ("GND", "AON_3V3")
+        order = list(
+            dict.fromkeys(
+                failed + [n for n in MCU_ROUTE_ORDER if n not in complete and n not in skip_power]
+            )
+        )
+    incomplete = {n for n in MCU_ROUTE_ORDER if n not in complete and n not in ("GND", "AON_3V3")}
     return all_paths, complete, incomplete
 
 

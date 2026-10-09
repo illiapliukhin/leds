@@ -19,28 +19,12 @@ from generate_mono_split_boards import (
     route_net_polyline,
 )
 from mcu_grid_drc import copper_gate_counts, refill_zones_save, run_drc_report
+from mono_split_copper_utils import GND_STITCH_TARGETS, dogbone_via_candidates, remove_dangling_track_stubs
 
 MM = 1e-6
 VIA_D_MM = 0.45
 STUB_W_MM = 0.25
 GND_STUB_W_MM = 0.25
-
-# F-only GND pads that need a stitch into In2/B pours (ref, pad number).
-GND_STITCH_TARGETS: tuple[tuple[str, str], ...] = (
-    ("SW1", "2"),
-    ("U_ESD", "2"),
-    ("U_ESD", "4"),
-    ("U_ESD", "5"),
-    ("C_USB1", "2"),
-    ("C_CHIP_PU", "2"),
-    ("C_MCU1", "2"),
-    ("C_XTAL1", "2"),
-    ("C_XTAL2", "2"),
-    ("Y1", "2"),
-    ("Y1", "4"),
-    ("U_IMU", "6"),
-    ("U_IMU", "7"),
-)
 
 
 def _save_board(board: pcbnew.BOARD, path: Path) -> None:
@@ -123,34 +107,15 @@ def move_row_xlat_oe_drop_via(board: pcbnew.BOARD, tracks: list | None = None) -
     _move_net_anchor(board, "ROW_XLAT_OE_N", 46.65, 18.45, 46.65, 18.52)
 
 
-def _gnd_via_candidates(pad_x: float, pad_y: float) -> list[tuple[float, float]]:
-    candidates: list[tuple[float, float]] = [(pad_x, pad_y)]
-    if pad_x < 33.0:
-        for y_mm in (10.60, 10.75, 10.45, 9.85):
-            candidates.append((pad_x, y_mm))
-    else:
-        for y_mm in (10.60, 10.85, 10.35):
-            candidates.append((pad_x, y_mm))
-    seen: set[tuple[float, float]] = set()
-    ordered: list[tuple[float, float]] = []
-    for point in candidates:
-        key = (round(point[0], 2), round(point[1], 2))
-        if key not in seen:
-            seen.add(key)
-            ordered.append(point)
-    return ordered
-
-
 def _add_gnd_stitch(board: pcbnew.BOARD, pad_x: float, pad_y: float, via_x: float, via_y: float) -> None:
     gnd = board.FindNet("GND")
-    if abs(via_x - pad_x) > 0.06 or abs(via_y - pad_y) > 0.06:
-        route_net_polyline(
-            board,
-            "GND",
-            pcbnew.F_Cu,
-            [(pad_x, pad_y), (via_x, via_y)],
-            GND_STUB_W_MM,
-        )
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.F_Cu,
+        [(pad_x, pad_y), (via_x, via_y)],
+        GND_STUB_W_MM,
+    )
     add_through_via(board, gnd, via_x, via_y, diameter_mm=VIA_D_MM)
 
 
@@ -169,12 +134,12 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
             continue
         pad_x, pad_y = millimeters(pad.GetPosition())
         placed = False
-        for via_x, via_y in _gnd_via_candidates(pad_x, pad_y):
+        for via_x, via_y, from_x, from_y in dogbone_via_candidates(pad_x, pad_y):
             with tempfile.TemporaryDirectory() as temporary_directory:
                 trial_path = Path(temporary_directory) / board_path.name
                 shutil.copy2(board_path, trial_path)
                 trial = pcbnew.LoadBoard(str(trial_path))
-                _add_gnd_stitch(trial, pad_x, pad_y, via_x, via_y)
+                _add_gnd_stitch(trial, from_x, from_y, via_x, via_y)
                 _save_board(trial, trial_path)
                 try:
                     refill_zones_save(trial_path)
@@ -182,7 +147,7 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
                     continue
                 shorts, crossings = _copper_gate(trial_path)
                 if shorts == 0 and crossings == 0:
-                    _add_gnd_stitch(board, pad_x, pad_y, via_x, via_y)
+                    _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
                     _save_board(board, board_path)
                     try:
                         refill_zones_save(board_path)
@@ -379,27 +344,11 @@ def route_open_mcu_signals(board_path: Path) -> None:
 
 
 def cleanup_danglers_and_move_oe(board: pcbnew.BOARD) -> None:
-    """One GetTracks() pass: move OE via, then remove listed stubs (pcbnew Remove-safe)."""
-    tracks = board.GetTracks()
-    move_row_xlat_oe_drop_via(board, tracks)
-    targets = (
-        (39.5, 9.01, "GND", 0.12),
-        (50.8, 76.0, "AON_3V3", 0.12),
-        (49.49, 73.2, "AON_3V3", 0.12),
-        (65.6, 15.75, "ROW_A3", 0.12),
-        (59.2, 20.2, "ROW_A3", 0.12),
-        (49.49, 56.8, "AON_3V3", 0.15),
-    )
-    to_remove: list = []
-    seen_ids: set[int] = set()
-    for x_mm, y_mm, net, tol in targets:
-        for item in _collect_copper_near(tracks, x_mm, y_mm, tol_mm=tol, net_name=net):
-            item_id = id(item)
-            if item_id not in seen_ids:
-                seen_ids.add(item_id)
-                to_remove.append(item)
-    for item in to_remove:
-        board.Remove(item)
+    """Nudge ROW_XLAT clearance via; delete only tracks with a floating endpoint."""
+    move_row_xlat_oe_drop_via(board, None)
+    removed = remove_dangling_track_stubs(board)
+    if removed:
+        print(f"cleanup: removed {removed} dangling track stub(s)", flush=True)
 
 
 def _trial_copper_gate(board_path: Path, apply_fn) -> tuple[int, int]:

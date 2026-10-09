@@ -9,6 +9,8 @@ MCU_ROUTE_ORDER: tuple[str, ...] = (
     "USB_D_N_MCU",
     "USB_D_P",
     "USB_D_N",
+    "AON_3V3",
+    "GND",
     "ROW_A0",
     "ROW_A1",
     "ROW_A2",
@@ -25,8 +27,6 @@ MCU_ROUTE_ORDER: tuple[str, ...] = (
     "AUDIO_EN",
     "CHIP_PU",
     "GPIO0_BOOT",
-    "AON_3V3",
-    "GND",
 )
 
 
