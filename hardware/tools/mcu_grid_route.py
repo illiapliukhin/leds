@@ -189,10 +189,8 @@ def link_test_point_footprints(board: pcbnew.BOARD) -> None:
 
 
 def post_grid_hand_finish(board: pcbnew.BOARD, incomplete_nets: set[str]) -> None:
-    """Optional post-grid joins (IMU south bus only — enable when DRC gate stays 0/0)."""
-    from mono_split_esp32 import route_mcu_imu_links
-
-    route_mcu_imu_links(board)
+    """Legacy hook — use mono_split_post_grid_finish.run_post_grid_finish on board path."""
+    del board, incomplete_nets
 
 
 def _existing_via_near(board: pcbnew.BOARD, x_mm: float, y_mm: float, *, tol_mm: float = 0.12) -> bool:
@@ -406,27 +404,50 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
         add_gnd_stitch_vias(board)
     if os.environ.get("MONO_LINK_TP", "1") == "1":
         link_test_point_footprints(board)
-    if os.environ.get("MONO_POST_GRID", "0") == "1":
-        post_grid_hand_finish(board, incomplete)
     pcbnew.SaveBoard(str(board_path), board)
-    print(
-        f"post-grid finish for {len(incomplete)} incomplete nets + GND stitch",
-        flush=True,
-    )
-    try:
-        refill_zones_save(board_path)
-    except subprocess.CalledProcessError as error:
-        print(f"post-finish zone refill skipped: {error.stderr}", flush=True)
+    post_grid_backup: Path | None = None
+    if os.environ.get("MONO_POST_GRID", "1") == "1":
+        import shutil
+        import tempfile
+
+        post_grid_backup = Path(tempfile.mkdtemp()) / board_path.name
+        shutil.copy2(board_path, post_grid_backup)
+        post_script = tools_dir / "mono_split_post_grid_finish.py"
+        post_env = {
+            key: value
+            for key, value in os.environ.items()
+            if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
+        }
+        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,gnd,aon")
+        subprocess.run(
+            [str(kicad_python), str(post_script), str(board_path)],
+            check=True,
+            env=post_env,
+        )
+    else:
+        print(
+            f"post-grid skipped ({len(incomplete)} incomplete nets); MONO_POST_GRID=0",
+            flush=True,
+        )
+        try:
+            refill_zones_save(board_path)
+        except subprocess.CalledProcessError as error:
+            print(f"post-finish zone refill skipped: {error.stderr}", flush=True)
 
     report = run_drc_report(board_path)
     shorts, crossings = copper_gate_counts(report)
     print(f"post-finish DRC gate: shorts={shorts} crossings={crossings}", flush=True)
-    if shorts > 0 or crossings > 0:
+    if (shorts > 0 or crossings > 0) and post_grid_backup is not None:
+        import shutil
+
+        shutil.copy2(post_grid_backup, board_path)
         print(
-            "warning: post-finish copper gate failed; re-run with MONO_POST_GRID=0 "
-            "to keep grid-only copper",
+            "post-grid reverted: copper gate failed after finish (backup restored)",
             flush=True,
         )
+        report = run_drc_report(board_path)
+        shorts, crossings = copper_gate_counts(report)
+        print(f"post-finish DRC gate (restored): shorts={shorts} crossings={crossings}", flush=True)
 
 
 def route_mcu_with_grid(
