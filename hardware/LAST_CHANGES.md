@@ -4,7 +4,7 @@
 
 - Every signal/power chain rebuilt from v8's pre-arc state. Collinear segments merged; chopped corners, tiny jogs and non-45° bend segments replaced with straight/45° runs where every change kept ≥0.115 mm to other-net copper. Then all arcs were regenerated (r = 3×w where room, smaller where tight). GND and the USB pair untouched.
 - AON_3V3 F escape under U1 pad 29 shifted 0.35 mm off the B LED_SDI line it used to sit on top of (stacked length 6.1 → 1.2 mm; the remainder is the pad itself).
-- Segments 1901 → 1841, arcs 550 → 501 (fewer corners after merging). Before arcs, chopped corners 48 → 0 after cleanup, short interior segments 19 → 0.
+- Segments 1901 → 1841, arcs 550 → 501 (fewer corners after merging). Before arcs: chopped corners 48 → 22, short interior segments 19 → 8, non-45° bend segments 35 → 15. After arcs, 9 unrounded bends remain (signal nets), all pinned between a via, a pad and a neighbour track.
 - Gates: DRC 0 errors / 0 unconnected / 14 silk warnings; independent copper-geometry check 0 violations; no copper renames; no parts on B; LED worst drop 92.2 mV; B GND stitched.
 
 ## mono_electronics v8: four stacking ports + RS-485, staircases removed, arc corners (148.0 × 99.5 mm, 4 layers)
