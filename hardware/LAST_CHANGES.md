@@ -1,5 +1,15 @@
 # Latest changes
 
+## Mono electronics: board outline shrunk to 187 x 99.5 mm (PR #4, 2026-10-10)
+
+- Edge.Cuts 190 x 148 mm -> **187 x 99.5 mm** (-9,514 mm2, ~34 %). The south band y 97-148 and the strip x 185-190 were empty; no blocks moved, routing unchanged.
+- J_USB stays on the west edge; J_ROW/J_COL end 2 mm from the east edge. No mounting holes on the board.
+- GND In2/B pours clipped to the new outline and refilled; 118 stitch vias outside it removed; every B GND piece still has >= 2 vias to In2.
+- Obsolete Dwgs.User note "SCAN AND IMU SIGNAL RESERVE" removed.
+- KiCad 10 DRC: 0 errors, 0 unconnected, 0 parts on B; warnings silk_over_copper 7, silk_overlap 6. Worst LED anode drop 117.6 mV.
+- Image: `hardware/mono_electronics/img/v2_F.png`.
+
+
 ## Mono electronics: hand-routed board is now the source of truth (PR #4, 2026-10-10)
 
 `hardware/mono_electronics/mono_electronics.kicad_pcb` was reworked by hand (pcbnew API, one gated change at a time: 0 shorts / 0 crossings / 0 clearance / 0 unconnected, no net relabels, dangling count not increasing, no parts on B.Cu). **The generator output no longer matches this board**; update the generator/schematic from `hardware/mono_electronics/REWORK_LOG.md` before regenerating.

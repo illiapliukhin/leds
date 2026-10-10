@@ -137,3 +137,9 @@ Step 5 (TPS63802 hot loop) not done.
 ## Step 9 / final (2026-10-10)
 - U_ESD rotation NOT done: the D+/D- crossing is topological on a single layer. J_USB pin order (B6 D+ top, B7 D- bottom, A/B rows interleaved) forces D+ to exit north; ESP32 pins 25 (D-) / 26 (D+) put D- north. Any one-layer route needs one crossing; rotating U_ESD only moves it between J_USB and U_ESD. Kept the crossing between R_USB_P's pads (0402 bridge), pair all on F, matched to 0.1/0.4 mm.
 - Final DRC (KiCad 10, all severities): 0 errors, 0 unconnected; warnings: silk_over_copper 7, silk_overlap 6. R_CC1/R_CC2 5.1k to GND on CC1/CC2 present. 0 footprints on B.Cu (184 total).
+
+## Step 10: outline shrink (2026-10-10, not committed)
+- Content bbox (courtyards, pads, tracks, vias; excluding pours and free GND stitch vias): x 1.23-185.0, y 0.47-97.15. Only empty area: y 97-148 (just stitch vias) and x 185-190.
+- No block moves (no clean empty bands inside the content). Edge.Cuts 190x148 -> 187x99.5 mm (square corners, no mounting holes on the board). J_USB stays on the west edge, J_ROW/J_COL 2 mm from the east edge.
+- GND In2/B zone outlines clipped to 0.5..186.5 x 0.5..99.0; 118 stitch vias outside removed; LED_4V1/AON already inside.
+- Removed obsolete Dwgs.User note "SCAN AND IMU SIGNAL RESERVE" (reserve pads deleted in step 8).
