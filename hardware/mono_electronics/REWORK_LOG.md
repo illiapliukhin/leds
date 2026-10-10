@@ -163,3 +163,10 @@ Step 5 (TPS63802 hot loop) not done.
 - Chunk A, cell rebuild (all 32 cells): R_G/R_PU moved 1.0 mm toward the transistor (R center x+4.2 -> x+3.2), drain via x+2.6 -> x+1.9, Y via x+5.55 -> x+4.45, R_PU rail via x+4.71 -> x+3.71. Cell width 7.7 -> 6.6 mm. Column-1 fixes: LED_SDI rerouted (B 43.45 -> 45° -> B x=46.5 -> via -> F y=66.53); AON_3V3 B vertical moved 49.49 -> 48.9; one stray ROW_17_ANODE via deleted.
 - Chunk B: columns 5-8 (Q_ROW05-08, 13-16, 21-24, 29-32) moved to 6.8 mm pitch, rigid per column. East block (gate verticals, anode/COL risers, J_ROW, J_COL; for y>=69 only x>=119) moved 6.0 mm west. 9 duplicate or colliding GND stitching vias removed. Q_ROW refs for columns 4-8 hidden on silk.
 - Outline 158.9 -> 152.9 x 99.5 mm. DRC: 0 errors, 0 unconnected, 0 dangling; 13 silk warnings. Worst LED drop 100.6 -> 95.9 mV. Track length 14.66 -> 14.04 m. In2 signal copper 27.6 mm. B GND pieces all >=2 vias.
+
+## Step 14 (v6): band compaction, outline 148.0 x 99.5 mm
+- Backup: mono_electronics.v5.d9894c2.kicad_pcb.
+- Feed band (ROW_13..32_Y verticals and their staircase vias, y<69) pitch 0.5 -> 0.375 mm (x 110.5-122.1 scaled by 0.75); everything east moved 2.9 mm west.
+- Riser band (anode + COL risers, J_ROW/J_COL fan, COL bottom staircase; x 122.6-142.2) scaled by 0.9; everything east moved 1.96 mm west.
+- Not done: COL risers to In1. The COL bottom bus is on In1 and runs east past the risers, so In1 risers would cross it. Columns 1-3 at 6.8 mm: no length gain unless the decoders and feed band also move, and with the decoders moved 5 mm, 13-19 conflicts remain in the translator/decoder pocket (DEC_B_EN_N, ROW_02/04/05/07_Y, ROW_A1, DEC_A_EN_N). That pocket needs a full reroute.
+- DRC: 0 errors, 0 unconnected, 0 dangling; 13 silk warnings. Worst LED drop 95.9 -> 92.3 mV. Track length 14.04 -> 13.65 m. In2 signal copper 27.6 mm. B GND pieces all >=2 vias. 0 parts on B, no relabels.

@@ -1,5 +1,12 @@
 # Latest changes
 
+## Mono electronics v6: feed/riser band compaction, board 148.0 x 99.5 mm (PR #4, 2026-10-10)
+
+- ROW_Y feed band tightened to 0.375 mm pitch; anode/COL riser band and FFC fan scaled to 90 %. J_ROW/J_COL pinout and right-edge exit unchanged.
+- Outline 152.9 x 99.5 -> **148.0 x 99.5 mm**. Track length 14.04 -> 13.65 m; worst LED anode drop 95.9 -> **92.3 mV**; In2 signal copper 27.6 mm; B GND pieces all stitched.
+- KiCad 10 DRC: 0 errors, 0 unconnected, 0 dangling, 0 parts on B; 13 silk warnings. Image: `hardware/mono_electronics/img/v6_F.png`.
+
+
 ## Mono electronics v5: Q_ROW cell rebuild, board 152.9 x 99.5 mm (PR #4, 2026-10-10)
 
 - All 32 Q_ROW cells rebuilt: R_G/R_PU 1 mm closer to the AO3403, drain/Y/R_PU vias moved in; cell width 7.7 -> 6.6 mm. LED_SDI and AON_3V3 locally rerouted in column 1.
