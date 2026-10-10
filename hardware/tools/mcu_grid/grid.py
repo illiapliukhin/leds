@@ -1,4 +1,6 @@
 import json, re, numpy as np, ctypes, collections
+
+_ROW_IN2_NET = re.compile(r"^ROW_\d+_Y$")
 from matplotlib.path import Path
 from scipy import ndimage
 RES=0.1; W=1900; H=1480; LAY=['F','In1','In2','B']
@@ -17,14 +19,34 @@ xs=(np.arange(W)+0.5)*RES; ys=(np.arange(H)+0.5)*RES
 def track_radius(net_name: str) -> float:
     return POWER_TRACK_R.get(net_name, DEFAULT_TRACK_R)
 
+def _track_paint_radius(track: dict) -> float:
+    """Paint radius for existing copper; ROW_*_Y on In2 is a hard corridor under U1."""
+    radius = track["w"] / 2
+    if track.get("layer") == "In2" and _ROW_IN2_NET.match(track.get("net", "")):
+        return max(radius + 0.125, TRACK_CLR)
+    if track.get("hard_obstacle"):
+        return max(radius + 0.125, TRACK_CLR)
+    return radius
+
 class Board:
     def __init__(s,D,skip=lambda kind,o:False):
         s.D=D; nets=sorted({t['net'] for t in D['tracks']}|{v['net'] for v in D['vias']}|{p['net'] for p in D['pads']})
         s.nid={n:i for i,n in enumerate(nets)}; s.names=nets
         s.lab=np.full((4,H,W),-1,np.int16)
+        s.hard=np.zeros((4,H,W),bool)
         for t in D['tracks']:
             if skip('track',t): continue
-            s.seg(LAY.index(t['layer']),t['x1'],t['y1'],t['x2'],t['y2'],t['w']/2,s.nid[t['net']])
+            layer_index=LAY.index(t['layer'])
+            paint_r=_track_paint_radius(t)
+            s.seg(layer_index,t['x1'],t['y1'],t['x2'],t['y2'],paint_r,s.nid[t['net']])
+            if t.get("hard_obstacle") or (
+                t.get("layer") == "In2" and _ROW_IN2_NET.match(t.get("net", ""))
+            ):
+                i0=max(int((min(t['x1'],t['x2'])-paint_r)/RES)-1,0)
+                i1=min(int((max(t['x1'],t['x2'])+paint_r)/RES)+2,W)
+                j0=max(int((min(t['y1'],t['y2'])-paint_r)/RES)-1,0)
+                j1=min(int((max(t['y1'],t['y2'])+paint_r)/RES)+2,H)
+                s.hard[layer_index,j0:j1,i0:i1]=True
         for v in D['vias']:
             if skip('via',v): continue
             for l in range(4): s.seg(l,v['x'],v['y'],v['x'],v['y'],v['d']/2,s.nid[v['net']])
@@ -89,6 +111,8 @@ class Board:
         need=max(TRACK_CLR, tr+0.1+0.05)
         for l in range(4):
             obs=(s.lab[l]>=0)&(s.lab[l]!=n)
+            if getattr(s, "hard", None) is not None:
+                obs=obs|s.hard[l]
             obs[:int(EDGE/RES)+1,:]=obs[-int(EDGE/RES)-1:,:]=True; obs[:,:int(EDGE/RES)+1]=obs[:,-int(EDGE/RES)-1:]=True
             out[l]=ndimage.distance_transform_edt(~obs)*RES
         return out, need

@@ -309,7 +309,7 @@ def _aon_in2_spine(board: pcbnew.BOARD) -> None:
     aon = board.FindNet("AON_3V3")
     east_col_x = 50.55
     drop_y = 10.15
-    spine_x, spine_y = 50.80, 9.20
+    spine_x, spine_y = 32.5, 9.20
     add_through_via(board, aon, east_col_x, drop_y, diameter_mm=VIA_D_MM)
     route_net_polyline(
         board,

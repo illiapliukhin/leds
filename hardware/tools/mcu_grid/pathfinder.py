@@ -65,7 +65,7 @@ def negotiate(
     *,
     max_rounds: int = 32,
     via_cost: float = 15.0,
-    layer_cost: tuple[float, float, float, float] = (1.0, 1.0, 1.0, 0.80),
+    layer_cost: tuple[float, float, float, float] = (1.0, 0.52, 1.05, 0.80),
     alpha_present: float = 10.0,
     beta_history: float = 14.0,
     rng: random.Random | None = None,

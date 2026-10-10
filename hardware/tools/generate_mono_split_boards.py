@@ -76,6 +76,9 @@ MCU_Y_MM = 10.0
 MCU_ROTATION_DEGREES = 270.0
 MCU_REFERENCE_X_MM = 54.0
 MCU_REFERENCE_Y_MM = 3.0
+MCU_GND_IN2_SPINE_X_MM = 26.5
+MCU_AON_IN2_SPINE_X_MM = 32.5
+MCU_GND_IN2_HOOK_Y_MM = 8.55
 
 
 @dataclass(frozen=True)
@@ -2066,15 +2069,28 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
     route_net_polyline(
         board,
         "GND",
-        pcbnew.In2_Cu,
-        [(39.50, 9.012), (39.50, 11.20), (41.00, 11.20)],
+        pcbnew.F_Cu,
+        [
+            (39.50, 9.012),
+            (39.50, MCU_GND_IN2_HOOK_Y_MM),
+            (MCU_GND_IN2_SPINE_X_MM, MCU_GND_IN2_HOOK_Y_MM),
+        ],
         0.15,
     )
-    add_through_via(board, gnd, 41.00, 11.20, diameter_mm=0.40)
-    route_net_polyline(
-        board, "GND", pcbnew.In2_Cu, [(41.00, 11.20), (41.00, 80.00)], 0.20
+    add_through_via(
+        board, gnd, MCU_GND_IN2_SPINE_X_MM, MCU_GND_IN2_HOOK_Y_MM, diameter_mm=0.40
     )
-    add_through_via(board, gnd, 41.00, 80.00, diameter_mm=0.40)
+    route_net_polyline(
+        board,
+        "GND",
+        pcbnew.In2_Cu,
+        [
+            (MCU_GND_IN2_SPINE_X_MM, MCU_GND_IN2_HOOK_Y_MM),
+            (MCU_GND_IN2_SPINE_X_MM, 80.00),
+        ],
+        0.20,
+    )
+    add_through_via(board, gnd, MCU_GND_IN2_SPINE_X_MM, 80.00, diameter_mm=0.40)
 
     for pin_x_mm in (83.40, 103.40):
         route_net_polyline(
@@ -2091,11 +2107,15 @@ def route_power_and_blank(board: pcbnew.BOARD) -> None:
 
     # AON spine east of U1 (46,10): inner layers only so Freerouting can tie MCU pads.
     aon = board.FindNet("AON_3V3")
-    add_through_via(board, aon, 50.80, 9.20, diameter_mm=0.40)
+    add_through_via(board, aon, MCU_AON_IN2_SPINE_X_MM, 9.20, diameter_mm=0.40)
     route_net_polyline(
-        board, "AON_3V3", pcbnew.In2_Cu, [(50.80, 9.20), (50.80, 76.00)], 0.20
+        board,
+        "AON_3V3",
+        pcbnew.In2_Cu,
+        [(MCU_AON_IN2_SPINE_X_MM, 9.20), (MCU_AON_IN2_SPINE_X_MM, 76.00)],
+        0.20,
     )
-    add_through_via(board, aon, 50.80, 76.00, diameter_mm=0.40)
+    add_through_via(board, aon, MCU_AON_IN2_SPINE_X_MM, 76.00, diameter_mm=0.40)
 
     # MBI5124GP pin configuration: 2 SDI, 3 CLK, 4 LE, 21 OE, 22 SDO,
     # 23 R-EXT, 24 VDD. A lower pin escapes farther from the body so its
@@ -3051,11 +3071,19 @@ def assign_select_escapes(outputs: list[dict]) -> None:
         output["entry_y"] = round(18.55 + (3 - rank) * 0.42, 2)
 
 
+def row_select_fan_layer(row_number: int) -> int:
+    # ROW_02..12 decoder→comb on In2 frees In1 under U1; ROW_01 jog stays on In1.
+    if 2 <= row_number <= 11:
+        return pcbnew.In2_Cu
+    return pcbnew.In1_Cu
+
+
 def park_select_output(board: pcbnew.BOARD, output: dict) -> None:
     net_name = output["net"]
     pad_x = output["pad_x"]
     pad_y = output["pad_y"]
     escape_x = output["escape_x"]
+    fan_layer = row_select_fan_layer(output["row"])
     if output["jog"]:
         entry_y = output["entry_y"]
         route_net_polyline(
@@ -3080,7 +3108,7 @@ def park_select_output(board: pcbnew.BOARD, output: dict) -> None:
     route_net_polyline(
         board,
         net_name,
-        pcbnew.In1_Cu,
+        fan_layer,
         [(escape_x, entry_y), (output["comb_x"], entry_y)],
         FAN_IN_TRACK_WIDTH_MM,
     )
@@ -3278,10 +3306,10 @@ def route_translator_power(board: pcbnew.BOARD) -> None:
         board,
         "AON_3V3",
         pcbnew.In2_Cu,
-        [(50.80, 9.20), (50.80, 10.15)],
+        [(MCU_AON_IN2_SPINE_X_MM, 9.20), (MCU_AON_IN2_SPINE_X_MM, 10.15)],
         0.20,
     )
-    add_through_via(board, aon, 50.80, 10.15, diameter_mm=0.40)
+    add_through_via(board, aon, MCU_AON_IN2_SPINE_X_MM, 10.15, diameter_mm=0.40)
     route_net_polyline(
         board,
         "LED_4V1",
@@ -3436,7 +3464,11 @@ def route_translator_bias(board: pcbnew.BOARD) -> None:
         board,
         "GND",
         pcbnew.F_Cu,
-        [(39.40, 11.20), (41.00, 11.20)],
+        [
+            (39.35, 11.20),
+            (39.35, MCU_GND_IN2_HOOK_Y_MM),
+            (MCU_GND_IN2_SPINE_X_MM, MCU_GND_IN2_HOOK_Y_MM),
+        ],
         0.15,
     )
     route_net_polyline(

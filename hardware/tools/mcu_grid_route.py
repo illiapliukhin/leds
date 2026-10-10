@@ -69,6 +69,8 @@ def dump_board_geometry(board: pcbnew.BOARD) -> dict:
             layer_name = LAYER_NAME.get(track_item.GetLayer())
             if layer_name is None:
                 continue
+            net_name = track_item.GetNetname()
+            row_in2 = layer_name == "In2" and bool(re.match(r"^ROW_\d+_Y$", net_name))
             geometry["tracks"].append(
                 {
                     "x1": track_item.GetStart().x * MM,
@@ -77,8 +79,9 @@ def dump_board_geometry(board: pcbnew.BOARD) -> dict:
                     "y2": track_item.GetEnd().y * MM,
                     "w": track_item.GetWidth() * MM,
                     "layer": layer_name,
-                    "net": track_item.GetNetname(),
+                    "net": net_name,
                     "locked": track_item.IsLocked(),
+                    "hard_obstacle": row_in2,
                 }
             )
     for footprint in board.GetFootprints():
@@ -331,6 +334,9 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     routes_path = board_path.with_suffix(".mcu_routes.json")
     greedy_path = board_path.with_suffix(".mcu_routes.greedy.json")
     pathfinder_path = board_path.with_suffix(".mcu_routes.pf.json")
+    for stale_path in (geometry_path, routes_path, greedy_path, pathfinder_path):
+        if stale_path.is_file():
+            stale_path.unlink()
     subprocess.run(
         [str(kicad_python), str(tools_dir / "dump_mcu_geom.py"), str(board_path), str(geometry_path)],
         check=True,

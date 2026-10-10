@@ -36,7 +36,8 @@ def run_greedy(
     max_iterations: int,
     via_cost: float,
 ) -> tuple[dict[str, list], set[str], set[str]]:
-    layer_cost = (1.0, 1.0, 1.0, 0.82)
+    # F, In1, In2, B — favor In1 under U1 once ROW fan legs moved to In2.
+    layer_cost = (1.0, 0.52, 1.05, 0.82)
     grid_board = Board(geometry)
     all_paths: dict[str, list] = {}
     complete: set[str] = set()
