@@ -157,3 +157,9 @@ Step 5 (TPS63802 hot loop) not done.
 - LED_4V1 B feed at x=89.5: bottom via moved from y 31.69 to 31.2, clear of the shortened ROW_05_ANODE lane.
 - Outline 167.4 x 99.5 -> 158.9 x 99.5 mm. DRC: 0 errors, 0 unconnected, 0 dangling, 13 silk warnings. Worst LED drop 107.3 -> 100.6 mV.
 - v4 accepted. Branding (text + 10-line star) moved from Cmts.User to F.SilkS so it is printed; no new silk warnings (clear of pads). DRC: 0 errors, 0 unconnected, 0 dangling, 13 silk warnings (7 silk_over_copper, 6 silk_overlap, pre-existing). 0 parts on B.
+
+## Step 13 (not committed): farm cell rebuild + compaction (v5 candidate)
+- Backup: mono_electronics.v4.f546b57.kicad_pcb. Result: mono_electronics_v5.kicad_pcb.
+- Chunk A, cell rebuild (all 32 cells): R_G/R_PU moved 1.0 mm toward the transistor (R center x+4.2 -> x+3.2), drain via x+2.6 -> x+1.9, Y via x+5.55 -> x+4.45, R_PU rail via x+4.71 -> x+3.71. Cell width 7.7 -> 6.6 mm. Column-1 fixes: LED_SDI rerouted (B 43.45 -> 45° -> B x=46.5 -> via -> F y=66.53); AON_3V3 B vertical moved 49.49 -> 48.9; one stray ROW_17_ANODE via deleted.
+- Chunk B: columns 5-8 (Q_ROW05-08, 13-16, 21-24, 29-32) moved to 6.8 mm pitch, rigid per column. East block (gate verticals, anode/COL risers, J_ROW, J_COL; for y>=69 only x>=119) moved 6.0 mm west. 9 duplicate or colliding GND stitching vias removed. Q_ROW refs for columns 4-8 hidden on silk.
+- Outline 158.9 -> 152.9 x 99.5 mm. DRC: 0 errors, 0 unconnected, 0 dangling; 13 silk warnings. Worst LED drop 100.6 -> 95.9 mV. Track length 14.66 -> 14.04 m. In2 signal copper 27.6 mm. B GND pieces all >=2 vias.

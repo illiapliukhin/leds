@@ -1,5 +1,13 @@
 # Latest changes
 
+## Mono electronics v5: Q_ROW cell rebuild, board 152.9 x 99.5 mm (PR #4, 2026-10-10)
+
+- All 32 Q_ROW cells rebuilt: R_G/R_PU 1 mm closer to the AO3403, drain/Y/R_PU vias moved in; cell width 7.7 -> 6.6 mm. LED_SDI and AON_3V3 locally rerouted in column 1.
+- Columns 5-8 moved to 6.8 mm pitch; the east block (gate lines, anode/COL risers, J_ROW, J_COL) moved 6 mm west. J_ROW/J_COL pinout unchanged, still on the right edge.
+- Outline 158.9 x 99.5 -> **152.9 x 99.5 mm**. Track length 14.66 -> 14.04 m; worst LED anode drop 100.6 -> **95.9 mV**; In2 signal copper 27.6 mm; B GND pieces all stitched.
+- KiCad 10 DRC: 0 errors, 0 unconnected, 0 dangling, 0 parts on B; 13 silk warnings. Image: `hardware/mono_electronics/img/v5_F.png`.
+
+
 ## Mono electronics v4: farm compaction, board 158.9 x 99.5 mm (PR #4, 2026-10-10)
 
 - Q_ROW columns 4-8 (with R_G/R_PU) moved to 8.3 mm pitch (was 10 mm) as rigid per-column moves; the east block (gate lines, anode staircase, J_ROW, COL fan, J_COL) moved 8.5 mm west as one piece. J_ROW/J_COL pinout unchanged, still on the right edge.
