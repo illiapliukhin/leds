@@ -172,6 +172,9 @@ Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as function
 | 9 | 14 | `IMU_SCL` | BMI270 I²C |
 | 10 | 15 | `IMU_INT1` | BMI270 interrupt |
 | 13–16 | 18,19,21,22 | `LED_CLK` … `LED_OE_N` | MBI5124 control (reserve → buffer) |
+| 1 | 6 | `GAUGE_ALRT_N` | MAX17048 ALRT (open-drain, active low, 10 k pull-up) |
+| 2 | 7 | `TH_ADC` | Board NTC divider (ADC1_CH1) |
+| 4 | 9 | `AUDIO_ADC` | Mic preamp output (ADC1_CH3) |
 | 6 | 11 | `AUDIO_EN` | Audio switch |
 | 33 | 38 | `ROW_A3` | Row address |
 | 38 | 43 | `ROW_A2` | Row address (east face) |

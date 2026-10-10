@@ -1,5 +1,15 @@
 # Latest changes
 
+## mono_electronics v7: all deferred parts placed, continuity check, corner cleanup (148.0 × 99.5 mm, 4 layers)
+
+- **Parts added (top side only):** MAX17048 fuel gauge U_GAUGE + C_GAUGE + R_ALRT (BAT_RAW cell/VDD, shared I2C IMU_SDA/SCL at 0x36, ALRT → GPIO1); MEMS mic MIC1 (Gettop MA-HFA381, custom footprint) + TLV9001 preamp U_AUDIO with bias/gain network (C_AUD, C_MIC, C_AC, R_INB, R_B1, R_B2, C_B, R_F, R_GN, C_GN) on the switched AUDIO_3V3 rail (U_AUDIO_SW moved next to it, C_AUD_SW), output → GPIO4 (ADC1_CH3); board NTC TH_PCB + R_TH divider → GPIO2 (ADC1_CH1); 1 µF VIN caps C_ASW_IN / C_LL_IN at both TPS22917s.
+- **Footprint fix:** U_ROW_XLAT (SN74LVC8T245**RHL**R) was on a 4×4 mm VQFN-24; replaced with the correct 3.5×5.5 mm RHL0024A land pattern and rerouted.
+- **GPIO changes:** GPIO1 = GAUGE_ALRT_N, GPIO2 = TH_ADC, GPIO4 = AUDIO_ADC (GPIO0_BOOT escape rerouted to free them). Architecture doc GPIO map updated; firmware board_pins.h is not on this branch (patch is in the report).
+- **Continuity check:** see PROZVONKA.md: 204/204 parts PASS, every IC powered/grounded/decoupled, 0 unconnected; only single-pad nets are the 16 FFC spares.
+- **Track cleanup:** collinear segments merged, stair-stepped/chopped corners replaced with single 45° chamfers (segments 1851 → 1739; interior stair joints 99 → 41, the rest sit on via-limited ROW_04/05_Y In1 runs).
+- DRC: 0 errors, 0 unconnected, 14 warnings (silk only). No parts on B; LED worst drop 92 mV (unchanged); In2 signal copper 27.6 mm (unchanged); B GND pieces stitched ≥2 vias.
+
+
 ## Mono electronics v6: feed/riser band compaction, board 148.0 x 99.5 mm (PR #4, 2026-10-10)
 
 - ROW_Y feed band tightened to 0.375 mm pitch; anode/COL riser band and FFC fan scaled to 90 %. J_ROW/J_COL pinout and right-edge exit unchanged.
