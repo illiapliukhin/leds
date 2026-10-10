@@ -1,8 +1,8 @@
-# mono_electronics v8 — continuity check (прозвонка)
+# mono_electronics v10 — continuity check (прозвонка)
 
 Method: every pad's board net compared with the intended net (net manifest from hardware/mono_schematic + documented rework deltas + specs for parts added in rework, including the v8 stacking-port parts). Copper connectivity from the KiCad connectivity engine (each pad with copper attached when its net has >1 pad). KiCad DRC: 0 errors, 0 unconnected.
 
-**Result: 220 parts, 220 PASS, 0 FAIL.**
+**Result: 224 parts, 224 PASS, 0 FAIL** (v10 adds H1–H4 mounting holes, plated pad on GND; MIC1 relocated, same nets).
 
 Single-pad nets: only the 16 unused FFC spare pins (COL_SPARE_33..40, ROW_SPARE_33..40), expected (32×32 matrix on 40-pin FFCs).
 

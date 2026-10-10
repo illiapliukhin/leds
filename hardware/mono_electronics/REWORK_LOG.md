@@ -197,3 +197,11 @@ Step 5 (TPS63802 hot loop) not done.
 - Ran simplify.py (chain window replacement scored by turns, short and non-45° segments; clearance ≥0.115 mm vs all other-net copper). Rounds were gated by DRC, copper renames and total error count, and failing chains were dropped. Then colmerge.py (16 collinear merges).
 - Rerouted the AON_3V3 F escape off the B LED_SDI line. Regenerated tangent arcs (arcplan.py/arcapply.py).
 - Ran copcheck.py (shapely, all nets) after every change: 0 violations.
+
+## v10 — clearance widening, last bends rounded, M2.5 mounting holes
+
+- Mounting holes H1–H4: MountingHole_2.7mm_M2.5_Pad (2.7 mm plated hole, 5.4 mm pad on GND) at (3.8,3.8), (144.24,3.8), (3.8,96.0), (144.24,95.7); each with an all-copper-layer rule area r=3.0 mm (no tracks/vias) and r≈3 mm courtyard (component keepout). Outline unchanged (148.0 × 99.5).
+  - NW: MIC1 moved (6.0,4.0 r0) → (2.1,8.8 r180), rerouted MIC_OUT (F, straight to C_AC), VDD via + In1 to AUDIO_3V3, GND pads tied + via. Removed GND stitch vias (2,2), (6,1.9), (6,6.1), (142.64,2.0), (2,98) and the via at (2,10) that would sit in a MIC pad.
+  - SW hole placed 3.5 mm from the bottom edge so its courtyard clears J_PORT_W; N/E ports not affected.
+- Clearance: 118 vias next to other-net copper 0.45 → 0.40 mm (board minimum, already used by 428 vias); ROW_13..32_Y F feed band re-pitched 0.375 → 0.43 mm (vias + In1 feeds moved with it); COL_01..32 B fan re-pitched 0.405 → 0.43 mm (east-anchored); B anode verticals 0.40 → 0.39 mm (ROW_32 0.38) to reach 0.15; USB_D_N_MCU horizontal moved 0.03 mm off R_USB_P pad; LED_EN and IMU_SDA re-drawn at U1; 11 via moves along their own stub; 31 local neck-downs of signal tracks to 0.145 mm (and 4 to 0.125–0.13 on long AUDIO_ADC/PRES_E/LED_EN runs; SYS arc 0.30→0.26, GND In1 0.25→0.245).
+- Bends: remaining 9 unrounded + 2 chopped corners → arcs (stale key rounding in arcapply fixed); 0 unrounded signal bends.

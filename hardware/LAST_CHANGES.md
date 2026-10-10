@@ -1,5 +1,12 @@
 # Latest changes
 
+## mono_electronics v10 (clearances, last arcs, mounting holes)
+
+- 4 × M2.5 plated mounting holes (GND ring, 5.4 mm pad) in the corners, 3.8 mm from both edges (SW: 3.8/3.5 mm), each with a 3 mm copper keepout rule area and courtyard. Board stays 148.0 × 99.5 mm. MIC1 moved to make room in the NW corner.
+- Clearance: every other-net track spacing now ≥ 0.127 mm (was 166 spots < 0.127, min 0.100); spots < 0.15 mm 254 → 113. Done by shrinking crowded vias to the 0.40 mm board minimum, re-pitching the ROW_Y feed band (0.43) and the COL fan (0.43), small track/via moves and local neck-downs (mostly 0.15→0.145).
+- 0 unrounded signal bends, 0 chopped corners (arcs 499 → 507).
+- Gates: DRC 0 errors / 0 unconnected (14 silk warnings, unchanged), copcheck 0, no renames, no B parts, worst LED drop 92.5 mV, continuity 224/224 PASS.
+
 ## mono_electronics v9: track cleanup pass (148.0 × 99.5 mm, 4 layers)
 
 - Every signal/power chain rebuilt from v8's pre-arc state. Collinear segments merged; chopped corners, tiny jogs and non-45° bend segments replaced with straight/45° runs where every change kept ≥0.115 mm to other-net copper. Then all arcs were regenerated (r = 3×w where room, smaller where tight). GND and the USB pair untouched.
