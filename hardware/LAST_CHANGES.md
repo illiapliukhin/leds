@@ -1,5 +1,9 @@
 # Latest changes
 
+## mono_electronics v11b
+
+- AON LDO → TLV75733P (1 A), 22 µF bulk at ESP32, RC filter on LED_EN, J_USB value fixed, refs renamed to end in a digit (REF_RENAME_v11b.json). DRC 0/0/0, ERC 0, sch-vs-PCB 0 diffs.
+
 ## mono_schematic synced to PCB v11
 
 - Regenerated hardware/mono_schematic from the PR #4 PCB (224 parts, 9 sheets incl. stacking and mechanical); generator fixed (pin Y mirror, global labels, lib tables, footprint lib). ERC 0, schematic netlist vs PCB 0 differences.

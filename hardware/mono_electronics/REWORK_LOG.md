@@ -213,3 +213,11 @@ Step 5 (TPS63802 hot loop) not done.
 - B.Cu GND sliver (2.6 mm², 56.6–61.7 × 2.35–2.90, one via) removed with a B-only rule area "KO_B_SLIVER" (no zone fill). Every B GND piece now has ≥2 stitching vias.
 - Silkscreen: refs of U_LED_BUF, U_LED_PWR, Y1, U1, SW1 hidden (same policy as the small labels); U1 pin-1 marker moved 0.5/0.2 mm off copper (kept); one overlapping silk segment each removed from C_LL_IN, U_AUDIO, R_F. KiCad DRC now 0 errors, 0 warnings, 0 unconnected.
 - 3D models (KiCad library, kicad-packages3D): U_GAUGE → DFN-8-1EP_2x2mm_P0.5mm_EP0.6x1.2mm; U_LED_PWR → DFN-10-1EP_2x3mm_P0.5mm_EP0.64x2.4mm; J_ROW/J_COL → Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal (the footprint is FH12 geometry); J_USB → USB_C_Receptacle_GCT_USB4105-xx-A_16P (stand-in: no HRO TYPE-C-31-M-12 model in the KiCad library; same class/size, visual only).
+
+## v11b — AON headroom, LED_EN glitch filter, J_USB value, reference renames
+- U_LDO1: TPS7A2033 (300 mA) → **TI TLV75733PDBVR** (1 A, SOT-23-5, same DBV pinout IN/GND/EN/NC/OUT — drop-in on the existing pads; LCSC C485517, 87k in stock). Dropout 300 mV typ / 425 mV max at 1 A (≈180/255 mV at 600 mA) → full regulation at 600 mA down to VBAT ≈ 3.56 V, at 150 mA average down to ≈ 3.36 V; below that AON tracks VBAT−VDO (ESP32-S3 runs to 3.0 V). Ground current ≤ 33 µA (vs ~6.5 µA for TPS7A20) — +27 µA in sleep. Thermal: RθJA 100.8 °C/W (TI EVM) – 231 °C/W (JEDEC); worst case on USB (SYS 4.5 V), 250 mA average radio load: (4.5−3.3)·0.25 ≈ 0.3 W → +30…70 °C; 600 mA bursts are ms-long. Foldback current limit 1.2 A min.
+- C_MCU11 (was C_MCU1) bulk at the ESP32: 10 µF → **22 µF** 0805 (CL21A226MQQNNNE) for radio bursts.
+- LED_EN glitch filter at U_LED_PWR1: series **R_EN_SER1 100 k** + **C_EN1 10 nF** to GND (τ = 1 ms). The S3's 60 µs GPIO18 power-up pulse reaches 0.19 V at EN (VIL 0.4 V); a real enable reaches VIH 1.2 V after ≈ 0.45 ms. R_EN_PD1 stays on the GPIO side. New net LED_EN_RC.
+- J_USB1 value → TYPE-C-31-M-12 (matches the HRO footprint).
+- All 93 references without a trailing number got a "1" (map in REF_RENAME_v11b.json) so the schematic annotates cleanly.
+- Gates: DRC 0 errors / 0 warnings / 0 unconnected, copcheck 0 < 0.127 mm, no copper renames, no parts on B, dangling 0. Schematic: ERC 0, netlist vs PCB 226/226, 0 pin differences, no annotation notice.

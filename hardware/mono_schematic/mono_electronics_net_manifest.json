@@ -9,7 +9,7 @@
     }
   },
   {
-    "reference": "C_AC",
+    "reference": "C_AC1",
     "value": "1u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -18,7 +18,7 @@
     }
   },
   {
-    "reference": "C_ASW_IN",
+    "reference": "C_ASW_IN1",
     "value": "1u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -27,7 +27,7 @@
     }
   },
   {
-    "reference": "C_AUD",
+    "reference": "C_AUD1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -36,7 +36,7 @@
     }
   },
   {
-    "reference": "C_AUD_SW",
+    "reference": "C_AUD_SW1",
     "value": "1u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -45,7 +45,7 @@
     }
   },
   {
-    "reference": "C_B",
+    "reference": "C_B1",
     "value": "4.7u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -54,7 +54,7 @@
     }
   },
   {
-    "reference": "C_BUF_V",
+    "reference": "C_BUF_V1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -63,7 +63,7 @@
     }
   },
   {
-    "reference": "C_CHG_BAT",
+    "reference": "C_CHG_BAT1",
     "value": "10u",
     "footprint": "C_0805_2012Metric",
     "pad_nets": {
@@ -72,7 +72,7 @@
     }
   },
   {
-    "reference": "C_CHG_IN",
+    "reference": "C_CHG_IN1",
     "value": "10u",
     "footprint": "C_0805_2012Metric",
     "pad_nets": {
@@ -81,7 +81,7 @@
     }
   },
   {
-    "reference": "C_CHG_SYS",
+    "reference": "C_CHG_SYS1",
     "value": "10u",
     "footprint": "C_0805_2012Metric",
     "pad_nets": {
@@ -90,7 +90,7 @@
     }
   },
   {
-    "reference": "C_CHIP_PU",
+    "reference": "C_CHIP_PU1",
     "value": "1u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -99,7 +99,7 @@
     }
   },
   {
-    "reference": "C_DECA_V",
+    "reference": "C_DECA_V1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -108,7 +108,7 @@
     }
   },
   {
-    "reference": "C_DECB_V",
+    "reference": "C_DECB_V1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -117,7 +117,16 @@
     }
   },
   {
-    "reference": "C_GAUGE",
+    "reference": "C_EN1",
+    "value": "10n",
+    "footprint": "C_0402_1005Metric",
+    "pad_nets": {
+      "1": "LED_EN_RC",
+      "2": "GND"
+    }
+  },
+  {
+    "reference": "C_GAUGE1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -126,7 +135,7 @@
     }
   },
   {
-    "reference": "C_GN",
+    "reference": "C_GN1",
     "value": "4.7u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -135,7 +144,7 @@
     }
   },
   {
-    "reference": "C_IMU_VDD",
+    "reference": "C_IMU_VDD1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -144,7 +153,7 @@
     }
   },
   {
-    "reference": "C_IMU_VIO",
+    "reference": "C_IMU_VIO1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -153,7 +162,7 @@
     }
   },
   {
-    "reference": "C_LDO_IN",
+    "reference": "C_LDO_IN1",
     "value": "1u",
     "footprint": "C_0603_1608Metric",
     "pad_nets": {
@@ -162,7 +171,7 @@
     }
   },
   {
-    "reference": "C_LDO_OUT",
+    "reference": "C_LDO_OUT1",
     "value": "1u",
     "footprint": "C_0603_1608Metric",
     "pad_nets": {
@@ -180,7 +189,7 @@
     }
   },
   {
-    "reference": "C_LED1_V",
+    "reference": "C_LED1_V1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -198,7 +207,7 @@
     }
   },
   {
-    "reference": "C_LED2_V",
+    "reference": "C_LED2_V1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -225,7 +234,7 @@
     }
   },
   {
-    "reference": "C_LL_IN",
+    "reference": "C_LL_IN1",
     "value": "1u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -235,7 +244,7 @@
   },
   {
     "reference": "C_MCU1",
-    "value": "10u",
+    "value": "22u",
     "footprint": "C_0805_2012Metric",
     "pad_nets": {
       "1": "AON_3V3",
@@ -261,7 +270,7 @@
     }
   },
   {
-    "reference": "C_MCU_CPU",
+    "reference": "C_MCU_CPU1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -288,7 +297,7 @@
     }
   },
   {
-    "reference": "C_MCU_RTC",
+    "reference": "C_MCU_RTC1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -297,7 +306,7 @@
     }
   },
   {
-    "reference": "C_MCU_SPI",
+    "reference": "C_MCU_SPI1",
     "value": "1u",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -306,7 +315,7 @@
     }
   },
   {
-    "reference": "C_MIC",
+    "reference": "C_MIC1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -315,7 +324,7 @@
     }
   },
   {
-    "reference": "C_SYS",
+    "reference": "C_SYS1",
     "value": "10u",
     "footprint": "C_0805_2012Metric",
     "pad_nets": {
@@ -333,7 +342,7 @@
     }
   },
   {
-    "reference": "C_XLAT_A",
+    "reference": "C_XLAT_A1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -342,7 +351,7 @@
     }
   },
   {
-    "reference": "C_XLAT_B",
+    "reference": "C_XLAT_B1",
     "value": "100n",
     "footprint": "C_0402_1005Metric",
     "pad_nets": {
@@ -369,7 +378,7 @@
     }
   },
   {
-    "reference": "D_E_AB",
+    "reference": "D_E_AB1",
     "value": "SM712",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -379,7 +388,7 @@
     }
   },
   {
-    "reference": "D_E_SP",
+    "reference": "D_E_SP1",
     "value": "PESD3V3S2UT",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -389,7 +398,7 @@
     }
   },
   {
-    "reference": "D_N_AB",
+    "reference": "D_N_AB1",
     "value": "SM712",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -399,7 +408,7 @@
     }
   },
   {
-    "reference": "D_N_SP",
+    "reference": "D_N_SP1",
     "value": "PESD3V3S2UT",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -409,7 +418,7 @@
     }
   },
   {
-    "reference": "D_S_AB",
+    "reference": "D_S_AB1",
     "value": "SM712",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -419,7 +428,7 @@
     }
   },
   {
-    "reference": "D_S_SP",
+    "reference": "D_S_SP1",
     "value": "PESD3V3S2UT",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -429,7 +438,7 @@
     }
   },
   {
-    "reference": "D_W_AB",
+    "reference": "D_W_AB1",
     "value": "SM712",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -439,7 +448,7 @@
     }
   },
   {
-    "reference": "D_W_SP",
+    "reference": "D_W_SP1",
     "value": "PESD3V3S2UT",
     "footprint": "SOT-23",
     "pad_nets": {
@@ -481,7 +490,7 @@
     }
   },
   {
-    "reference": "JP_TERM",
+    "reference": "JP_TERM1",
     "value": "TERM",
     "footprint": "SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm",
     "pad_nets": {
@@ -490,7 +499,7 @@
     }
   },
   {
-    "reference": "J_BAT",
+    "reference": "J_BAT1",
     "value": "53398-0371",
     "footprint": "Molex_PicoBlade_53398-0371_1x03-1MP_P1.25mm_Vertical",
     "pad_nets": {
@@ -500,7 +509,7 @@
     }
   },
   {
-    "reference": "J_COL",
+    "reference": "J_COL1",
     "value": "FFC_40P_050_COL",
     "footprint": "FFC_40P_050_COL",
     "pad_nets": {
@@ -547,7 +556,7 @@
     }
   },
   {
-    "reference": "J_PORT_E",
+    "reference": "J_PORT_E1",
     "value": "SM06B-SRSS-TB",
     "footprint": "JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal",
     "pad_nets": {
@@ -561,7 +570,7 @@
     }
   },
   {
-    "reference": "J_PORT_N",
+    "reference": "J_PORT_N1",
     "value": "SM06B-SRSS-TB",
     "footprint": "JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal",
     "pad_nets": {
@@ -575,7 +584,7 @@
     }
   },
   {
-    "reference": "J_PORT_S",
+    "reference": "J_PORT_S1",
     "value": "SM06B-SRSS-TB",
     "footprint": "JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal",
     "pad_nets": {
@@ -589,7 +598,7 @@
     }
   },
   {
-    "reference": "J_PORT_W",
+    "reference": "J_PORT_W1",
     "value": "SM06B-SRSS-TB",
     "footprint": "JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal",
     "pad_nets": {
@@ -603,7 +612,7 @@
     }
   },
   {
-    "reference": "J_ROW",
+    "reference": "J_ROW1",
     "value": "FFC_40P_050_ROW",
     "footprint": "FFC_40P_050_ROW",
     "pad_nets": {
@@ -650,8 +659,8 @@
     }
   },
   {
-    "reference": "J_USB",
-    "value": "USB4105",
+    "reference": "J_USB1",
+    "value": "TYPE-C-31-M-12",
     "footprint": "USB_C_Receptacle_HRO_TYPE-C-31-M-12",
     "pad_nets": {
       "A1": "GND",
@@ -672,7 +681,7 @@
     }
   },
   {
-    "reference": "L_LED",
+    "reference": "L_LED1",
     "value": "DFE201612E-R47M",
     "footprint": "L_Murata_DFE201610P",
     "pad_nets": {
@@ -681,7 +690,7 @@
     }
   },
   {
-    "reference": "L_XTAL",
+    "reference": "L_XTAL1",
     "value": "24nH",
     "footprint": "L_0402_1005Metric",
     "pad_nets": {
@@ -1059,7 +1068,7 @@
     }
   },
   {
-    "reference": "R_ALRT",
+    "reference": "R_ALRT1",
     "value": "10k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1068,7 +1077,7 @@
     }
   },
   {
-    "reference": "R_AUD_PD",
+    "reference": "R_AUD_PD1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1122,7 +1131,7 @@
     }
   },
   {
-    "reference": "R_CHIP_PU",
+    "reference": "R_CHIP_PU1",
     "value": "10k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1131,7 +1140,7 @@
     }
   },
   {
-    "reference": "R_CLK_PD",
+    "reference": "R_CLK_PD1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1140,7 +1149,7 @@
     }
   },
   {
-    "reference": "R_CLK_SER",
+    "reference": "R_CLK_SER1",
     "value": "22R",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1149,7 +1158,7 @@
     }
   },
   {
-    "reference": "R_ENA",
+    "reference": "R_ENA1",
     "value": "47k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1158,7 +1167,7 @@
     }
   },
   {
-    "reference": "R_ENB",
+    "reference": "R_ENB1",
     "value": "47k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1167,12 +1176,21 @@
     }
   },
   {
-    "reference": "R_EN_PD",
+    "reference": "R_EN_PD1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
       "1": "LED_EN",
       "2": "GND"
+    }
+  },
+  {
+    "reference": "R_EN_SER1",
+    "value": "100k",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "LED_EN",
+      "2": "LED_EN_RC"
     }
   },
   {
@@ -1194,7 +1212,7 @@
     }
   },
   {
-    "reference": "R_F",
+    "reference": "R_F1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1203,7 +1221,7 @@
     }
   },
   {
-    "reference": "R_FB_BOT",
+    "reference": "R_FB_BOT1",
     "value": "91k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1212,7 +1230,7 @@
     }
   },
   {
-    "reference": "R_FB_TOP",
+    "reference": "R_FB_TOP1",
     "value": "681k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1509,7 +1527,7 @@
     }
   },
   {
-    "reference": "R_GN",
+    "reference": "R_GN1",
     "value": "2.2k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1518,7 +1536,7 @@
     }
   },
   {
-    "reference": "R_ILIM",
+    "reference": "R_ILIM1",
     "value": "18k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1527,7 +1545,7 @@
     }
   },
   {
-    "reference": "R_INB",
+    "reference": "R_INB1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1536,7 +1554,7 @@
     }
   },
   {
-    "reference": "R_ISET",
+    "reference": "R_ISET1",
     "value": "600R",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1545,7 +1563,7 @@
     }
   },
   {
-    "reference": "R_LE_PD",
+    "reference": "R_LE_PD1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1554,7 +1572,7 @@
     }
   },
   {
-    "reference": "R_LE_SER",
+    "reference": "R_LE_SER1",
     "value": "22R",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1563,7 +1581,7 @@
     }
   },
   {
-    "reference": "R_LOGIC_PD",
+    "reference": "R_LOGIC_PD1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1572,7 +1590,7 @@
     }
   },
   {
-    "reference": "R_OE_PU",
+    "reference": "R_OE_PU1",
     "value": "47k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1581,7 +1599,7 @@
     }
   },
   {
-    "reference": "R_OE_YPU",
+    "reference": "R_OE_YPU1",
     "value": "47k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1878,7 +1896,7 @@
     }
   },
   {
-    "reference": "R_QOD",
+    "reference": "R_QOD1",
     "value": "1k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1887,7 +1905,7 @@
     }
   },
   {
-    "reference": "R_SCL",
+    "reference": "R_SCL1",
     "value": "4.7k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1896,7 +1914,7 @@
     }
   },
   {
-    "reference": "R_SDA",
+    "reference": "R_SDA1",
     "value": "4.7k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1905,7 +1923,7 @@
     }
   },
   {
-    "reference": "R_SDI_PD",
+    "reference": "R_SDI_PD1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1914,7 +1932,7 @@
     }
   },
   {
-    "reference": "R_SDI_SER",
+    "reference": "R_SDI_SER1",
     "value": "22R",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1923,7 +1941,7 @@
     }
   },
   {
-    "reference": "R_TERM",
+    "reference": "R_TERM1",
     "value": "120R",
     "footprint": "R_0603_1608Metric",
     "pad_nets": {
@@ -1932,7 +1950,7 @@
     }
   },
   {
-    "reference": "R_TH",
+    "reference": "R_TH1",
     "value": "10k 1%",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1941,7 +1959,7 @@
     }
   },
   {
-    "reference": "R_USB_N",
+    "reference": "R_USB_N1",
     "value": "22R",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1950,7 +1968,7 @@
     }
   },
   {
-    "reference": "R_USB_P",
+    "reference": "R_USB_P1",
     "value": "22R",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1959,7 +1977,7 @@
     }
   },
   {
-    "reference": "R_XOE",
+    "reference": "R_XOE1",
     "value": "10k",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -1977,7 +1995,7 @@
     }
   },
   {
-    "reference": "TH_PCB",
+    "reference": "TH_PCB1",
     "value": "NTC 10k B3435",
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
@@ -2066,7 +2084,7 @@
     }
   },
   {
-    "reference": "U_AUDIO",
+    "reference": "U_AUDIO1",
     "value": "TLV9001IDCKR",
     "footprint": "SOT-353_SC-70-5",
     "pad_nets": {
@@ -2078,7 +2096,7 @@
     }
   },
   {
-    "reference": "U_AUDIO_SW",
+    "reference": "U_AUDIO_SW1",
     "value": "TPS22917",
     "footprint": "SOT-23-6",
     "pad_nets": {
@@ -2089,7 +2107,7 @@
     }
   },
   {
-    "reference": "U_CHG",
+    "reference": "U_CHG1",
     "value": "BQ25185",
     "footprint": "Texas_DLH0010A_WSON-10-1EP_2x2mm_P0.4mm_EP0.9x1.5mm",
     "pad_nets": {
@@ -2105,7 +2123,7 @@
     }
   },
   {
-    "reference": "U_DEC_A",
+    "reference": "U_DEC_A1",
     "value": "74HC154",
     "footprint": "TSSOP-24_4.4x7.8mm_P0.65mm",
     "pad_nets": {
@@ -2136,7 +2154,7 @@
     }
   },
   {
-    "reference": "U_DEC_B",
+    "reference": "U_DEC_B1",
     "value": "74HC154",
     "footprint": "TSSOP-24_4.4x7.8mm_P0.65mm",
     "pad_nets": {
@@ -2167,7 +2185,7 @@
     }
   },
   {
-    "reference": "U_ESD",
+    "reference": "U_ESD1",
     "value": "USBLC6-2SC6",
     "footprint": "SOT-23-6",
     "pad_nets": {
@@ -2180,7 +2198,7 @@
     }
   },
   {
-    "reference": "U_GAUGE",
+    "reference": "U_GAUGE1",
     "value": "MAX17048G+T10",
     "footprint": "TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm",
     "pad_nets": {
@@ -2196,7 +2214,7 @@
     }
   },
   {
-    "reference": "U_IMU",
+    "reference": "U_IMU1",
     "value": "BMI270",
     "footprint": "Bosch_LGA-14_3x2.5mm_P0.5mm",
     "pad_nets": {
@@ -2212,8 +2230,8 @@
     }
   },
   {
-    "reference": "U_LDO",
-    "value": "TPS7A2033",
+    "reference": "U_LDO1",
+    "value": "TLV75733PDBVR",
     "footprint": "SOT-23-5",
     "pad_nets": {
       "1": "SYS",
@@ -2284,7 +2302,7 @@
     }
   },
   {
-    "reference": "U_LED_BUF",
+    "reference": "U_LED_BUF1",
     "value": "SN74LV125A",
     "footprint": "TSSOP-14_4.4x5mm_P0.65mm",
     "pad_nets": {
@@ -2305,7 +2323,7 @@
     }
   },
   {
-    "reference": "U_LED_LOGIC",
+    "reference": "U_LED_LOGIC1",
     "value": "TPS22917",
     "footprint": "SOT-23-6",
     "pad_nets": {
@@ -2317,11 +2335,11 @@
     }
   },
   {
-    "reference": "U_LED_PWR",
+    "reference": "U_LED_PWR1",
     "value": "TPS63802DLAR",
     "footprint": "TDFN-10-1EP_2x3mm_P0.5mm_EP0.9x2mm",
     "pad_nets": {
-      "1": "LED_EN",
+      "1": "LED_EN_RC",
       "2": "GND",
       "3": "GND",
       "4": "LED_FB",
@@ -2334,7 +2352,7 @@
     }
   },
   {
-    "reference": "U_ROW_XLAT",
+    "reference": "U_ROW_XLAT1",
     "value": "SN74LVC8T245RHLR",
     "footprint": "Texas_RHL0024A_VQFN-24-1EP_3.5x5.5mm_P0.5mm_EP2.05x4.05mm",
     "pad_nets": {

@@ -5,7 +5,7 @@
 	(at 0 0)
 	(descr "USB Type-C receptacle for USB 2.0 and PD, http://www.krhro.com/uploads/soft/180320/1-1P320120243.pdf")
 	(tags "usb usb-c 2.0 pd")
-	(property "Reference" "J_USB"
+	(property "Reference" "J_USB1"
 		(at -11.5 0 90)
 		(layer "F.SilkS")
 		(uuid "69e7395f-2f87-4d5a-816b-31c9b6ee9046")
@@ -16,7 +16,7 @@
 			)
 		)
 	)
-	(property "Value" "USB4105"
+	(property "Value" "TYPE-C-31-M-12"
 		(at 0 5.1 90)
 		(layer "F.Fab")
 		(hide yes)

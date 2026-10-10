@@ -86,6 +86,8 @@ SHEET_SPECS: list[SheetSpec] = [
                 "R_ISET",
                 "TH_PCB",
                 "R_TH",
+                "R_EN_SER",
+                "C_EN",
                 "C_GAUGE",
                 "R_ALRT",
                 "C_ASW_IN",
@@ -172,6 +174,16 @@ SHEET_SPECS: list[SheetSpec] = [
 
 
 def assign_sheet(reference: str) -> str:
+    # v11b: references got a trailing "1" for KiCad annotation (J_ROW -> J_ROW1); match both forms
+    candidates = [reference] + ([reference[:-1]] if reference.endswith("1") else [])
+    for candidate in candidates:
+        sheet_name = _assign_sheet(candidate)
+        if sheet_name:
+            return sheet_name
+    return "led_drive"
+
+
+def _assign_sheet(reference: str) -> str | None:
     for sheet in SHEET_SPECS:
         if sheet.name == "root":
             continue
@@ -179,7 +191,7 @@ def assign_sheet(reference: str) -> str:
             return sheet.name
         if any(reference.startswith(prefix) for prefix in sheet.reference_prefixes):
             return sheet.name
-    return "led_drive"
+    return None
 
 
 def symbol_key(footprint: str, value: str, pad_numbers: tuple[str, ...]) -> str:

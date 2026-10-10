@@ -5,7 +5,7 @@
 	(at 0 0)
 	(descr "SOT, 5 Pin (JEDEC MO-178 Var AA https://www.jedec.org/document_search?search_api_views_fulltext=MO-178)")
 	(tags "SOT TO_SOT_SMD")
-	(property "Reference" "U_LDO"
+	(property "Reference" "U_LDO1"
 		(at 0 -4.5 0)
 		(layer "F.SilkS")
 		(uuid "cf926c12-6872-49ab-9d7a-73d7c43e1c55")
@@ -16,7 +16,7 @@
 			)
 		)
 	)
-	(property "Value" "TPS7A2033"
+	(property "Value" "TLV75733PDBVR"
 		(at 0 2.4 0)
 		(layer "F.Fab")
 		(hide yes)
