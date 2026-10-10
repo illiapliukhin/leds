@@ -1,5 +1,13 @@
 # Latest changes
 
+## Mono electronics v4: farm compaction, board 158.9 x 99.5 mm (PR #4, 2026-10-10)
+
+- Q_ROW columns 4-8 (with R_G/R_PU) moved to 8.3 mm pitch (was 10 mm) as rigid per-column moves; the east block (gate lines, anode staircase, J_ROW, COL fan, J_COL) moved 8.5 mm west as one piece. J_ROW/J_COL pinout unchanged, still on the right edge.
+- Outline 167.4 x 99.5 -> **158.9 x 99.5 mm**. Track length 15.47 -> 14.66 m; worst LED anode drop 107.3 -> **100.6 mV**; In2 signal copper 27.6 mm; B GND pieces all stitched.
+- Branding text + star moved to F.SilkS (printed), in the bottom strip, clear of pads.
+- KiCad 10 DRC: 0 errors, 0 unconnected, 0 dangling, 0 parts on B; 13 silk warnings. Image: `hardware/mono_electronics/img/v4_F.png`.
+
+
 ## Mono electronics: connectors moved west, board 167.4 x 99.5 mm (PR #4, 2026-10-10)
 
 - J_ROW -> (162.4, 22) and J_COL -> (162.4, 68.6): still on the right edge, cable exit right, pinout unchanged. Row fan-in shortened 19.6 mm per net; the COL fan was moved with J_COL as one block.

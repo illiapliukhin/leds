@@ -150,3 +150,10 @@ Step 5 (TPS63802 hot loop) not done.
 - Edge.Cuts 187 x 99.5 -> 167.4 x 99.5 mm; GND In2/B clipped; 21 + 27 stitch vias in moved/cut areas removed; B GND pieces all still >= 2 vias.
 - Branding (Cmts.User text "PCB CREATED BY ILLIA PLIUKHIN" + star) moved into the free bottom strip at x=40, y=96-98.7 (no parts or pads below y=93.5, board not grown). Stale Dwgs.User boxes and notes removed (12 lines, "BRANDING KEEPOUT", "MCU PIN ESCAPE").
 - Full DRC: 0 errors, 0 unconnected, 13 warnings (silk_over_copper 7, silk_overlap 6), 0 parts on B.
+
+## Step 12 (not committed): farm compaction, chunk 1 (v4 candidate)
+- Backup: mono_electronics.8f7db55.kicad_pcb (committed v3). Result: mono_electronics_v4.kicad_pcb (= cur.kicad_pcb).
+- Q_ROW farm columns 3..7 (Q_ROW04..08, 12..16, 20..24, 28..32 with their R_G/R_PU) brought to 8.3 mm pitch (was 10 mm). Done as a rigid per-column translate (elastic_apply.py: every cell keeps its own copper; In1 feeds and B anode lanes are horizontal, so they only get shorter). Everything east of x=125 (gate verticals, anode staircase, J_ROW, COL fan, J_COL, east edge) moved 8.5 mm west as one block.
+- LED_4V1 B feed at x=89.5: bottom via moved from y 31.69 to 31.2, clear of the shortened ROW_05_ANODE lane.
+- Outline 167.4 x 99.5 -> 158.9 x 99.5 mm. DRC: 0 errors, 0 unconnected, 0 dangling, 13 silk warnings. Worst LED drop 107.3 -> 100.6 mV.
+- v4 accepted. Branding (text + 10-line star) moved from Cmts.User to F.SilkS so it is printed; no new silk warnings (clear of pads). DRC: 0 errors, 0 unconnected, 0 dangling, 13 silk warnings (7 silk_over_copper, 6 silk_overlap, pre-existing). 0 parts on B.
