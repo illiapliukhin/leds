@@ -1,0 +1,5 @@
+(fp-lib-table
+  (version 7)
+  (lib (name "electronics")(type "KiCad")(uri "${KIPROJECT}/../libraries/electronics.pretty")(options "")(descr "Mono electronics footprints"))
+  (lib (name "connectors")(type "KiCad")(uri "${KIPROJECT}/../libraries/connectors.pretty")(options "")(descr "FFC connectors"))
+)

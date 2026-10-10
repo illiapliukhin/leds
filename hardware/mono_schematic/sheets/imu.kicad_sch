@@ -1,0 +1,645 @@
+(kicad_sch
+  (version 20260306)
+  (generator "mono_schematic")
+  (generator_version "1.0")
+  (uuid "b585d8fd-eb52-48b6-a1b5-cd3f8806c01e")
+  (paper "A3")
+  (title_block
+    (title "IMU - BMI270")
+    (date "2026-10-10")
+    (rev "EVT")
+    (comment 1 "Generated from mono_electronics.kicad_pcb pad nets")
+    (comment 2 "Cross-check: hardware/mono_schematic/tools/compare_sch_pcb_nets.py")
+  )
+  (lib_symbols
+    (symbol
+      "mono_parts:BMI270_Bosch_LGA-14_3x2.5mm_P0.5mm_7"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "IMU_INT1")
+        (number "4")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "AON_3V3")
+        (number "5")
+      )
+      (pin
+        power_in
+        line
+        (at -5.08 -2.54 0)
+        (length 0)
+        (name "GND")
+        (number "6")
+      )
+      (pin
+        power_in
+        line
+        (at 5.08 -2.54 180)
+        (length 0)
+        (name "GND")
+        (number "7")
+      )
+      (pin
+        passive
+        line
+        (at -5.08 -5.08 0)
+        (length 0)
+        (name "AON_3V3")
+        (number "8")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 -5.08 180)
+        (length 0)
+        (name "IMU_SCL")
+        (number "13")
+      )
+      (pin
+        passive
+        line
+        (at -5.08 -7.62 0)
+        (length 0)
+        (name "IMU_SDA")
+        (number "14")
+      )
+    )
+    (symbol
+      "power:GND"
+      (pin
+        power_in
+        line
+        (at -5.08 0.0 180)
+        (length 0)
+        (name "GND")
+        (number "1")
+      )
+    )
+    (symbol
+      "power:PWR_FLAG"
+      (pin
+        power_out
+        line
+        (at 0 0 0)
+        (length 0)
+        (hide yes)
+        (name "pwr")
+        (number "1")
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:GND")
+    (at 15.24 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "3e7c0e17-1766-4150-b3a3-b318bbed3d35")
+    (property
+      "Reference"
+      "#PWR01"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "GND"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/8927468c-70ee-4772-b585-b7b5498d54c7"
+          (reference "#PWR01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 21.59 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "24cf1998-4cd8-47ab-8dcd-1e9ee7a816ae")
+    (property
+      "Reference"
+      "#FLG01"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/8927468c-70ee-4772-b585-b7b5498d54c7"
+          (reference "#FLG01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 29.21 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "3bf0ecc8-d789-4ecc-a486-44f836959059")
+    (property
+      "Reference"
+      "#FLG02"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/8927468c-70ee-4772-b585-b7b5498d54c7"
+          (reference "#FLG02")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:BMI270_Bosch_LGA-14_3x2.5mm_P0.5mm_7")
+    (at 35.56 35.56 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "322d9878-3b80-4176-a035-3c512abd22a4")
+    (property
+      "Reference"
+      "U_IMU"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "BMI270"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "Bosch_LGA-14_3x2.5mm_P0.5mm"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "4" (uuid "cb35b763-7c18-42ed-a5c9-3c4d805ce40e"))
+    (pin "5" (uuid "90248662-ad92-433b-85fc-b854a1e6b5ec"))
+    (pin "6" (uuid "1e38b145-2e32-4b5f-bc60-70d12b47e6f9"))
+    (pin "7" (uuid "dc7a5894-eb1f-4045-b396-a626540f0795"))
+    (pin "8" (uuid "2a0aba5b-d0da-489e-b71a-2f783e9ce2f5"))
+    (pin "13" (uuid "b60e4999-a6af-4ca5-b300-15144fdc0004"))
+    (pin "14" (uuid "684d2deb-7a9b-4867-8d58-0f33d30dcbf7"))
+    (instances
+      (project "mono_electronics"
+        (path "/8927468c-70ee-4772-b585-b7b5498d54c7"
+          (reference "U_IMU")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (wire
+    (pts
+      (xy 10.16 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "3921f425-522a-4ebd-8cbd-dc3b82812a74")
+  )
+  (wire
+    (pts
+      (xy 21.59 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "8e368bd2-2192-414f-b073-a9402e088a80")
+  )
+  (wire
+    (pts
+      (xy 29.21 15.24)
+      (xy 35.56 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "cdd92492-c2ba-4a50-abc8-9d9d2c773771")
+  )
+  (wire
+    (pts
+      (xy 30.48 35.56)
+      (xy 24.13 35.56)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "e2613eee-9a70-4b84-a338-1aadd575daea")
+  )
+  (wire
+    (pts
+      (xy 40.64 35.56)
+      (xy 46.99 35.56)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "dee5692a-08c6-49ed-acca-9213088cefa0")
+  )
+  (wire
+    (pts
+      (xy 30.48 33.02)
+      (xy 24.13 33.02)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "4530158f-5bf2-4c14-956e-d4ea91a8d5b3")
+  )
+  (wire
+    (pts
+      (xy 40.64 33.02)
+      (xy 46.99 33.02)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "51cf4193-0b49-465d-9f8a-55a46601eb6b")
+  )
+  (wire
+    (pts
+      (xy 30.48 30.48)
+      (xy 24.13 30.48)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "451afe67-2df2-4dd8-84bc-feae9decdb3a")
+  )
+  (wire
+    (pts
+      (xy 40.64 30.48)
+      (xy 46.99 30.48)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "e0e6768d-7732-4db9-93ba-c1560bfa05bf")
+  )
+  (wire
+    (pts
+      (xy 30.48 27.94)
+      (xy 24.13 27.94)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "a3ca59ca-25ca-4cd5-a1a1-018f1a74d6b5")
+  )
+  (label "GND"
+    (at 3.81 15.24 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "5f05cf1b-114f-454b-afc4-78416c540dbe")
+  )
+  (label "VBUS"
+    (at 35.56 15.24 0)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "cedf5c16-d28c-43cd-be95-2ccfab650490")
+  )
+  (label "IMU_INT1"
+    (at 24.13 35.56 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "1de6ce18-3829-4120-918a-50340af35826")
+  )
+  (label "AON_3V3"
+    (at 46.99 35.56 0)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "5d67ba5e-4df0-4a01-87f2-2c9f48b6f564")
+  )
+  (label "GND"
+    (at 24.13 33.02 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "6fe14fe9-ff8b-4258-a287-d9355bdc8465")
+  )
+  (label "GND"
+    (at 46.99 33.02 0)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "8dfdf882-5f78-48c7-8add-7d4760b88ac8")
+  )
+  (label "AON_3V3"
+    (at 24.13 30.48 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "9754f571-2619-4c7a-9a4d-63469e0af2a2")
+  )
+  (label "IMU_SCL"
+    (at 46.99 30.48 0)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "de538d92-6cad-40c3-bc31-caf499a13f93")
+  )
+  (label "IMU_SDA"
+    (at 24.13 27.94 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "f3fbcba3-efc6-40a3-8e73-35b519d3160d")
+  )
+  (junction
+    (at 30.48 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "6c38ec14-6f2c-4388-9214-a81bf0e81e91")
+  )
+  (junction
+    (at 24.13 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "ddb297d8-1e66-4c14-b9ba-1f0493c05aae")
+  )
+  (junction
+    (at 40.64 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "90b3593d-cb1a-49ec-bcd5-6cc9ba7226e4")
+  )
+  (junction
+    (at 46.99 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "c74b2f2a-9b6c-433b-be0c-e68200824c6d")
+  )
+  (junction
+    (at 30.48 33.02)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "ae1c0648-8892-4b2b-aece-2eeefc8046f3")
+  )
+  (junction
+    (at 24.13 33.02)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "9b3f2982-4868-4d0b-83ec-d988f4f125f9")
+  )
+  (junction
+    (at 40.64 33.02)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "2d9e4509-8388-4fbd-883c-b24ea829e78b")
+  )
+  (junction
+    (at 46.99 33.02)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "633fbfb0-bd9f-4174-80b7-f40f75d79887")
+  )
+  (junction
+    (at 30.48 30.48)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "9f9b5d65-281a-435b-ad04-644b7cc3f254")
+  )
+  (junction
+    (at 24.13 30.48)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "6f1ac61d-22f5-426c-aa4c-3a4db31b1a92")
+  )
+  (junction
+    (at 40.64 30.48)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "d1cdea05-4c50-4562-b782-90b36916353d")
+  )
+  (junction
+    (at 46.99 30.48)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "3fc071a1-7573-4c24-8292-dd90ab9b73e8")
+  )
+  (junction
+    (at 30.48 27.94)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "b261c1aa-54ba-4f67-aa77-953430f13593")
+  )
+  (junction
+    (at 24.13 27.94)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "151ba1e6-bf56-49bc-a4cf-032791de2535")
+  )
+  (sheet_instances
+    (path "/8927468c-70ee-4772-b585-b7b5498d54c7"
+      (page "1")
+    )
+  )
+)

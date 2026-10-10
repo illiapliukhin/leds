@@ -1,0 +1,442 @@
+(kicad_sch
+  (version 20260306)
+  (generator "mono_schematic")
+  (generator_version "1.0")
+  (uuid "0b9956f7-b662-40d5-8ac4-2120eeac3129")
+  (paper "A3")
+  (title_block
+    (title "Audio - microphone and op-amp")
+    (date "2026-10-10")
+    (rev "EVT")
+    (comment 1 "Generated from mono_electronics.kicad_pcb pad nets")
+    (comment 2 "Cross-check: hardware/mono_schematic/tools/compare_sch_pcb_nets.py")
+  )
+  (lib_symbols
+    (symbol
+      "mono_parts:MA-HFA381_Knowles_LGA-5_3.5x2.65mm_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:TLV9001_SOT-353_SC-70-5_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+    )
+    (symbol
+      "power:GND"
+      (pin
+        power_in
+        line
+        (at -5.08 0.0 180)
+        (length 0)
+        (name "GND")
+        (number "1")
+      )
+    )
+    (symbol
+      "power:PWR_FLAG"
+      (pin
+        power_out
+        line
+        (at 0 0 0)
+        (length 0)
+        (hide yes)
+        (name "pwr")
+        (number "1")
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:GND")
+    (at 15.24 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "a517de9c-83cb-484f-84e8-e6a9b915e9eb")
+    (property
+      "Reference"
+      "#PWR01"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "GND"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/94de6847-65e6-4e09-beea-141be1f86588"
+          (reference "#PWR01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 21.59 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "5187b0b4-9b86-41ed-ba3d-b7479a167a16")
+    (property
+      "Reference"
+      "#FLG01"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/94de6847-65e6-4e09-beea-141be1f86588"
+          (reference "#FLG01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 29.21 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "f7fd6892-e6be-4869-9e28-0ecf6af3f0d3")
+    (property
+      "Reference"
+      "#FLG02"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/94de6847-65e6-4e09-beea-141be1f86588"
+          (reference "#FLG02")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:MA-HFA381_Knowles_LGA-5_3.5x2.65mm_1")
+    (at 35.56 35.56 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "be5d9a90-ae25-4ddf-ba7b-357cff55066a")
+    (property
+      "Reference"
+      "MIC1"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "MA-HFA381"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "Knowles_LGA-5_3.5x2.65mm"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "0dc9137d-048e-4df8-9ac3-083fc20fc3ae"))
+    (instances
+      (project "mono_electronics"
+        (path "/94de6847-65e6-4e09-beea-141be1f86588"
+          (reference "MIC1")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:TLV9001_SOT-353_SC-70-5_1")
+    (at 81.28 35.56 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "7ac3551d-2af0-4f7a-9f05-a86d2dbb9c97")
+    (property
+      "Reference"
+      "U_AUDIO"
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "TLV9001"
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "SOT-353_SC-70-5"
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "9f46aafc-10f5-48e7-b22a-a3c80a2126f5"))
+    (instances
+      (project "mono_electronics"
+        (path "/94de6847-65e6-4e09-beea-141be1f86588"
+          (reference "U_AUDIO")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (wire
+    (pts
+      (xy 10.16 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "d84926f9-9cd4-4b37-a678-4d2d3e8bcd26")
+  )
+  (wire
+    (pts
+      (xy 21.59 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "69405a96-6f12-4d29-b7b5-1c0a1e185990")
+  )
+  (wire
+    (pts
+      (xy 29.21 15.24)
+      (xy 35.56 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "a7665f70-6473-4c2b-8a7d-7714715e439d")
+  )
+  (label "GND"
+    (at 3.81 15.24 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "54cfa3c8-4057-4e1b-9c7c-b715aff74a4f")
+  )
+  (label "VBUS"
+    (at 35.56 15.24 0)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "28d34c7a-0c48-4546-8b9f-9a1dae31fb48")
+  )
+  (no_connect
+    (at 30.48 35.56)
+    (uuid "91dfccb2-5496-4248-a9ab-91a0b47cde0a")
+  )
+  (no_connect
+    (at 76.2 35.56)
+    (uuid "20df164b-315a-4dc7-a641-17fa0c92f778")
+  )
+  (sheet_instances
+    (path "/94de6847-65e6-4e09-beea-141be1f86588"
+      (page "1")
+    )
+  )
+)

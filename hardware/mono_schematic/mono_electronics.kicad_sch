@@ -1,0 +1,503 @@
+(kicad_sch
+  (version 20260306)
+  (generator "mono_schematic")
+  (generator_version "1.0")
+  (uuid "98578317-307a-46fd-b38f-f98e17f6bd02")
+  (paper "A4")
+  (title_block
+    (title "Mono electronics - sheet index")
+    (date "2026-10-10")
+    (rev "EVT")
+    (comment 1 "Generated from mono_electronics.kicad_pcb pad nets")
+    (comment 2 "Cross-check: hardware/mono_schematic/tools/compare_sch_pcb_nets.py")
+  )
+  (lib_symbols
+    (symbol
+      "power:GND"
+      (pin
+        power_in
+        line
+        (at -5.08 0.0 180)
+        (length 0)
+        (name "GND")
+        (number "1")
+      )
+    )
+    (symbol
+      "power:PWR_FLAG"
+      (pin
+        power_out
+        line
+        (at 0 0 0)
+        (length 0)
+        (hide yes)
+        (name "pwr")
+        (number "1")
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:GND")
+    (at 15.24 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "f8af83e4-e23f-4bd0-b2fa-a74c7df4eb02")
+    (property
+      "Reference"
+      "#PWR01"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "GND"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/"
+          (reference "#PWR01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 21.59 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "d21f060b-509e-4eac-9ef7-3b530b6b1dc5")
+    (property
+      "Reference"
+      "#FLG01"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/"
+          (reference "#FLG01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 29.21 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "bcb883ce-cac3-4047-b5a2-6826346cafd6")
+    (property
+      "Reference"
+      "#FLG02"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/"
+          (reference "#FLG02")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (wire
+    (pts
+      (xy 10.16 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "a3a5302a-950b-450a-a0b8-854198cbd416")
+  )
+  (wire
+    (pts
+      (xy 21.59 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "cf967d18-b461-4c8e-bfa6-241cac01db6e")
+  )
+  (wire
+    (pts
+      (xy 29.21 15.24)
+      (xy 35.56 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "720eb79c-4cb3-453e-b058-35f7d9547696")
+  )
+  (label "GND"
+    (at 3.81 15.24 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "6a497ca3-a4cd-46ba-b5f8-3aced62327a0")
+  )
+  (label "VBUS"
+    (at 35.56 15.24 0)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "48de2ff0-b97b-4986-ab52-c3cbbedcd9bc")
+  )
+  (sheet
+    (at 74.93 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "51b2ae85-8613-49ac-a0ae-6237f199a70c")
+    (property "Sheetname" "power"
+      (at 74.93 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/power.kicad_sch"
+      (at 74.93 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet
+    (at 119.38 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "9ad8277f-b170-4e56-bf76-d03fb4ce69a3")
+    (property "Sheetname" "mcu"
+      (at 119.38 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/mcu.kicad_sch"
+      (at 119.38 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet
+    (at 165.1 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "83b4d842-69e6-41e7-af09-c2cdcdbee039")
+    (property "Sheetname" "imu"
+      (at 165.1 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/imu.kicad_sch"
+      (at 165.1 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet
+    (at 209.55 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "de311123-9075-43c3-925e-9902afc3c12b")
+    (property "Sheetname" "led_drive"
+      (at 209.55 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/led_drive.kicad_sch"
+      (at 209.55 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet
+    (at 255.27 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "f4444b12-cd69-4afb-a583-a33558ffe252")
+    (property "Sheetname" "row_farm"
+      (at 255.27 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/row_farm.kicad_sch"
+      (at 255.27 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet
+    (at 299.72 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "b5b6a51b-6153-41ae-818d-d633e7ded1b0")
+    (property "Sheetname" "reserves"
+      (at 299.72 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/reserves.kicad_sch"
+      (at 299.72 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet
+    (at 345.44 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "d796d949-6c5d-43d3-8560-48fc944ffce4")
+    (property "Sheetname" "audio"
+      (at 345.44 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/audio.kicad_sch"
+      (at 345.44 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet_instances
+    (path "/"
+      (page "1")
+    )
+  )
+)

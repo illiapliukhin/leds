@@ -1,0 +1,863 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-10T13:59:28",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.5",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/e790a4f6-2313-4304-b0d6-2421c82f7785",
+            "violations": [
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR01 [GND]",
+                            "pos": {
+                                "x": 0.1524,
+                                "y": 0.1524
+                            },
+                            "uuid": "d2591098-91bd-4689-9b17-23b50ba4268f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR01 [GND]",
+                            "pos": {
+                                "x": 0.1524,
+                                "y": 0.1524
+                            },
+                            "uuid": "d2591098-91bd-4689-9b17-23b50ba4268f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG01 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2159,
+                                "y": 0.1524
+                            },
+                            "uuid": "6c2fd300-6b5d-4e3e-861d-aec6456811d8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG01 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2159,
+                                "y": 0.1524
+                            },
+                            "uuid": "6c2fd300-6b5d-4e3e-861d-aec6456811d8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'IMU_SDA'",
+                            "pos": {
+                                "x": 0.2413,
+                                "y": 0.3556
+                            },
+                            "uuid": "ee1350e7-70a2-44cd-b6b7-fbc6e7ef053f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'LED_SDI'",
+                            "pos": {
+                                "x": 0.2413,
+                                "y": 0.9144
+                            },
+                            "uuid": "0287fcde-2d76-47e8-ac2a-408ba082477e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'ROW_A1'",
+                            "pos": {
+                                "x": 0.2413,
+                                "y": 1.4732
+                            },
+                            "uuid": "4743bb2e-ff15-4340-873a-eadc26479c25"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'DEC_B_EN_N'",
+                            "pos": {
+                                "x": 0.2413,
+                                "y": 2.032
+                            },
+                            "uuid": "f3611d76-3afa-4179-b657-0103b38ab47d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG02 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2921,
+                                "y": 0.1524
+                            },
+                            "uuid": "2ca21eff-6eb4-4bac-b067-9ac5076cddc4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG02 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2921,
+                                "y": 0.1524
+                            },
+                            "uuid": "2ca21eff-6eb4-4bac-b067-9ac5076cddc4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'VBUS'",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.1524
+                            },
+                            "uuid": "ea03fcc3-f85f-4c1d-b235-7decf8cfa74e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP01 [IMU_SDA_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.3556
+                            },
+                            "uuid": "6776e6b8-66c4-442c-b77f-ebe838b2f3dc"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP01 [IMU_SDA_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.3556
+                            },
+                            "uuid": "6776e6b8-66c4-442c-b77f-ebe838b2f3dc"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP05 [LED_SDI_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.9144
+                            },
+                            "uuid": "488e0d66-ba0b-4987-860e-3ea72384c58f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP05 [LED_SDI_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.9144
+                            },
+                            "uuid": "488e0d66-ba0b-4987-860e-3ea72384c58f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP09 [ROW_A1_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 1.4732
+                            },
+                            "uuid": "7d532337-a451-4f69-af8a-8a95238d2d17"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP09 [ROW_A1_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 1.4732
+                            },
+                            "uuid": "7d532337-a451-4f69-af8a-8a95238d2d17"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP13 [DEC_B_EN_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 2.032
+                            },
+                            "uuid": "122ded52-cf04-4366-85d7-8c91395f973a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP13 [DEC_B_EN_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 2.032
+                            },
+                            "uuid": "122ded52-cf04-4366-85d7-8c91395f973a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'IMU_SCL'",
+                            "pos": {
+                                "x": 0.6985,
+                                "y": 0.3556
+                            },
+                            "uuid": "c670d521-a3ff-42c0-b65c-aa758f9356db"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'LED_LE'",
+                            "pos": {
+                                "x": 0.6985,
+                                "y": 0.9144
+                            },
+                            "uuid": "dd5739dc-76fa-4b18-86c6-d86532a6cd98"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'ROW_A2'",
+                            "pos": {
+                                "x": 0.6985,
+                                "y": 1.4732
+                            },
+                            "uuid": "d25fceb9-1e2d-48ae-b91c-b759100d74e4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'ROW_XLAT_OE_N'",
+                            "pos": {
+                                "x": 0.6985,
+                                "y": 2.032
+                            },
+                            "uuid": "0db699dc-d65c-44d6-92d3-fde8b8585614"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP02 [IMU_SCL_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 0.3556
+                            },
+                            "uuid": "740e2bdf-c274-4e5e-b3d8-60910232e696"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP02 [IMU_SCL_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 0.3556
+                            },
+                            "uuid": "740e2bdf-c274-4e5e-b3d8-60910232e696"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP06 [LED_LE_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 0.9144
+                            },
+                            "uuid": "011e7d13-456c-47ef-a5ca-f1bc5bad207c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP06 [LED_LE_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 0.9144
+                            },
+                            "uuid": "011e7d13-456c-47ef-a5ca-f1bc5bad207c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP10 [ROW_A2_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 1.4732
+                            },
+                            "uuid": "80e2bb19-1bc7-40dc-bec2-d48892378c75"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP10 [ROW_A2_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 1.4732
+                            },
+                            "uuid": "80e2bb19-1bc7-40dc-bec2-d48892378c75"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP14 [ROW_XLAT_OE_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 2.032
+                            },
+                            "uuid": "7bd6787e-ba62-4a6a-b481-faa1c2545abb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP14 [ROW_XLAT_OE_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 2.032
+                            },
+                            "uuid": "7bd6787e-ba62-4a6a-b481-faa1c2545abb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'IMU_INT1'",
+                            "pos": {
+                                "x": 1.1557,
+                                "y": 0.3556
+                            },
+                            "uuid": "28297730-efc0-4af3-978b-2fbac8f2a9ee"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'LED_OE_N'",
+                            "pos": {
+                                "x": 1.1557,
+                                "y": 0.9144
+                            },
+                            "uuid": "537a6a46-45b6-401c-9e18-87aa793a1adc"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'ROW_A3'",
+                            "pos": {
+                                "x": 1.1557,
+                                "y": 1.4732
+                            },
+                            "uuid": "5696a04f-c83b-40bc-bfed-c0cba9759798"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'LED_EN'",
+                            "pos": {
+                                "x": 1.1557,
+                                "y": 2.032
+                            },
+                            "uuid": "909723b5-3ceb-40a1-a3b5-beca74bd3df2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP03 [IMU_INT1_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 0.3556
+                            },
+                            "uuid": "34c7623d-a440-4ee9-b495-cc710a93e1a8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP03 [IMU_INT1_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 0.3556
+                            },
+                            "uuid": "34c7623d-a440-4ee9-b495-cc710a93e1a8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP07 [LED_OE_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 0.9144
+                            },
+                            "uuid": "0379939c-ab0d-45b7-9388-ace53e6bbd73"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP07 [LED_OE_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 0.9144
+                            },
+                            "uuid": "0379939c-ab0d-45b7-9388-ace53e6bbd73"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP11 [ROW_A3_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.4732
+                            },
+                            "uuid": "3fc7c358-b909-4f23-93ae-c7650308000a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP11 [ROW_A3_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 1.4732
+                            },
+                            "uuid": "3fc7c358-b909-4f23-93ae-c7650308000a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP15 [LED_EN_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 2.032
+                            },
+                            "uuid": "45c483f4-8537-4be3-8f96-1276f5d2aa63"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP15 [LED_EN_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.27,
+                                "y": 2.032
+                            },
+                            "uuid": "45c483f4-8537-4be3-8f96-1276f5d2aa63"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'LED_CLK'",
+                            "pos": {
+                                "x": 1.6129,
+                                "y": 0.3556
+                            },
+                            "uuid": "c96248a4-197c-430c-b482-3ab4998d4191"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'ROW_A0'",
+                            "pos": {
+                                "x": 1.6129,
+                                "y": 0.9144
+                            },
+                            "uuid": "2ae870a7-6a71-4c2e-83e4-9ec48ad511be"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'DEC_A_EN_N'",
+                            "pos": {
+                                "x": 1.6129,
+                                "y": 1.4732
+                            },
+                            "uuid": "69b9f8f0-c70a-44a7-9478-89d7950d9e67"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'LED_LOGIC_EN'",
+                            "pos": {
+                                "x": 1.6129,
+                                "y": 2.032
+                            },
+                            "uuid": "9855e6d8-bde2-4dcf-9bde-8059b361b98b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP04 [LED_CLK_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 0.3556
+                            },
+                            "uuid": "7c3e4d3f-a601-43fc-a7fc-0be3f9c4acb8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP04 [LED_CLK_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 0.3556
+                            },
+                            "uuid": "7c3e4d3f-a601-43fc-a7fc-0be3f9c4acb8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP08 [ROW_A0_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 0.9144
+                            },
+                            "uuid": "35907cbf-23f1-47ba-96f1-a7ef028748a8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP08 [ROW_A0_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 0.9144
+                            },
+                            "uuid": "35907cbf-23f1-47ba-96f1-a7ef028748a8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP12 [DEC_A_EN_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 1.4732
+                            },
+                            "uuid": "6f670c1d-30a8-4092-bec8-acb474e0426f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP12 [DEC_A_EN_N_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 1.4732
+                            },
+                            "uuid": "6f670c1d-30a8-4092-bec8-acb474e0426f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol RP16 [LED_LOGIC_EN_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 2.032
+                            },
+                            "uuid": "58b7dc2c-2776-4f08-a63e-d693506db835"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol RP16 [LED_LOGIC_EN_R_0402_1005Metric_1]",
+                            "pos": {
+                                "x": 1.7272,
+                                "y": 2.032
+                            },
+                            "uuid": "58b7dc2c-2776-4f08-a63e-d693506db835"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                }
+            ]
+        }
+    ],
+    "source": "reserves.kicad_sch"
+}

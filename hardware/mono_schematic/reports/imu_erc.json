@@ -1,0 +1,353 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-10T13:59:26",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.5",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/b585d8fd-eb52-48b6-a1b5-cd3f8806c01e",
+            "violations": [
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Label 'IMU_SDA'",
+                            "pos": {
+                                "x": 0.2413,
+                                "y": 0.2794
+                            },
+                            "uuid": "f3fbcba3-efc6-40a3-8e73-35b519d3160d"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU Pin 6 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 0.3048,
+                                "y": 0.381
+                            },
+                            "uuid": "1e38b145-2e32-4b5f-bc60-70d12b47e6f9"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU Pin 6 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 0.3048,
+                                "y": 0.381
+                            },
+                            "uuid": "1e38b145-2e32-4b5f-bc60-70d12b47e6f9"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU Pin 8 [AON_3V3, Passive, Line]",
+                            "pos": {
+                                "x": 0.3048,
+                                "y": 0.4064
+                            },
+                            "uuid": "2a0aba5b-d0da-489e-b71a-2f783e9ce2f5"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU Pin 14 [IMU_SDA, Passive, Line]",
+                            "pos": {
+                                "x": 0.3048,
+                                "y": 0.4318
+                            },
+                            "uuid": "684d2deb-7a9b-4867-8d58-0f33d30dcbf7"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU Pin 7 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 0.4064,
+                                "y": 0.381
+                            },
+                            "uuid": "dc7a5894-eb1f-4045-b396-a626540f0795"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Input Power pin not driven by any Output Power pins",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU Pin 7 [GND, Power input, Line]",
+                            "pos": {
+                                "x": 0.4064,
+                                "y": 0.381
+                            },
+                            "uuid": "dc7a5894-eb1f-4045-b396-a626540f0795"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "power_pin_not_driven"
+                },
+                {
+                    "description": "Pin not connected",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU Pin 13 [IMU_SCL, Passive, Line]",
+                            "pos": {
+                                "x": 0.4064,
+                                "y": 0.4064
+                            },
+                            "uuid": "b60e4999-a6af-4ca5-b300-15144fdc0004"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Label 'IMU_SCL'",
+                            "pos": {
+                                "x": 0.4699,
+                                "y": 0.3048
+                            },
+                            "uuid": "de538d92-6cad-40c3-bc31-caf499a13f93"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR01 [GND]",
+                            "pos": {
+                                "x": 0.1524,
+                                "y": 0.1524
+                            },
+                            "uuid": "3e7c0e17-1766-4150-b3a3-b318bbed3d35"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR01 [GND]",
+                            "pos": {
+                                "x": 0.1524,
+                                "y": 0.1524
+                            },
+                            "uuid": "3e7c0e17-1766-4150-b3a3-b318bbed3d35"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG01 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2159,
+                                "y": 0.1524
+                            },
+                            "uuid": "24cf1998-4cd8-47ab-8dcd-1e9ee7a816ae"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG01 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2159,
+                                "y": 0.1524
+                            },
+                            "uuid": "24cf1998-4cd8-47ab-8dcd-1e9ee7a816ae"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'AON_3V3'",
+                            "pos": {
+                                "x": 0.2413,
+                                "y": 0.3048
+                            },
+                            "uuid": "9754f571-2619-4c7a-9a4d-63469e0af2a2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'IMU_INT1'",
+                            "pos": {
+                                "x": 0.2413,
+                                "y": 0.3556
+                            },
+                            "uuid": "1de6ce18-3829-4120-918a-50340af35826"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG02 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2921,
+                                "y": 0.1524
+                            },
+                            "uuid": "3bf0ecc8-d789-4ecc-a486-44f836959059"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG02 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2921,
+                                "y": 0.1524
+                            },
+                            "uuid": "3bf0ecc8-d789-4ecc-a486-44f836959059"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'VBUS'",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.1524
+                            },
+                            "uuid": "cedf5c16-d28c-43cd-be95-2ccfab650490"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU [BMI270_Bosch_LGA-14_3x2.5mm_P0.5mm_7]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.3556
+                            },
+                            "uuid": "322d9878-3b80-4176-a035-3c512abd22a4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol U_IMU [BMI270_Bosch_LGA-14_3x2.5mm_P0.5mm_7]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.3556
+                            },
+                            "uuid": "322d9878-3b80-4176-a035-3c512abd22a4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'AON_3V3'",
+                            "pos": {
+                                "x": 0.4699,
+                                "y": 0.3556
+                            },
+                            "uuid": "5d67ba5e-4df0-4a01-87f2-2c9f48b6f564"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                }
+            ]
+        }
+    ],
+    "source": "imu.kicad_sch"
+}

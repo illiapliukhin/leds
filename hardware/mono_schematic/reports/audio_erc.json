@@ -1,0 +1,203 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-10T13:59:26",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.5",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/0b9956f7-b662-40d5-8ac4-2120eeac3129",
+            "violations": [
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR01 [GND]",
+                            "pos": {
+                                "x": 0.1524,
+                                "y": 0.1524
+                            },
+                            "uuid": "a517de9c-83cb-484f-84e8-e6a9b915e9eb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #PWR01 [GND]",
+                            "pos": {
+                                "x": 0.1524,
+                                "y": 0.1524
+                            },
+                            "uuid": "a517de9c-83cb-484f-84e8-e6a9b915e9eb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG01 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2159,
+                                "y": 0.1524
+                            },
+                            "uuid": "5187b0b4-9b86-41ed-ba3d-b7479a167a16"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG01 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2159,
+                                "y": 0.1524
+                            },
+                            "uuid": "5187b0b4-9b86-41ed-ba3d-b7479a167a16"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG02 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2921,
+                                "y": 0.1524
+                            },
+                            "uuid": "f7fd6892-e6be-4869-9e28-0ecf6af3f0d3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'power'",
+                    "items": [
+                        {
+                            "description": "Symbol #FLG02 [PWR_FLAG]",
+                            "pos": {
+                                "x": 0.2921,
+                                "y": 0.1524
+                            },
+                            "uuid": "f7fd6892-e6be-4869-9e28-0ecf6af3f0d3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'VBUS'",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.1524
+                            },
+                            "uuid": "28d34c7a-0c48-4546-8b9f-9a1dae31fb48"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol MIC1 [MA-HFA381_Knowles_LGA-5_3.5x2.65mm_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.3556
+                            },
+                            "uuid": "be5d9a90-ae25-4ddf-ba7b-357cff55066a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol MIC1 [MA-HFA381_Knowles_LGA-5_3.5x2.65mm_1]",
+                            "pos": {
+                                "x": 0.3556,
+                                "y": 0.3556
+                            },
+                            "uuid": "be5d9a90-ae25-4ddf-ba7b-357cff55066a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library ''",
+                    "items": [
+                        {
+                            "description": "Symbol U_AUDIO [TLV9001_SOT-353_SC-70-5_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 0.3556
+                            },
+                            "uuid": "7ac3551d-2af0-4f7a-9f05-a86d2dbb9c97"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the symbol library 'mono_parts'",
+                    "items": [
+                        {
+                            "description": "Symbol U_AUDIO [TLV9001_SOT-353_SC-70-5_1]",
+                            "pos": {
+                                "x": 0.8128,
+                                "y": 0.3556
+                            },
+                            "uuid": "7ac3551d-2af0-4f7a-9f05-a86d2dbb9c97"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "lib_symbol_issues"
+                }
+            ]
+        }
+    ],
+    "source": "audio.kicad_sch"
+}
