@@ -18,7 +18,10 @@ Optional env:
 
 - `MONO_POST_GRID=0` — grid + zone refill only (debug).
 - `MONO_POST_GRID_PHASES=...` — override phase list.
-- `MONO_PRE_GRID_FANOUT=0` (default) — do not lock stubs before geometry dump.
+- `MONO_EMBED_U1_AON_FANOUT=1` (default) — locked U1 AON stubs/vias at end of `generate_electronics_board`.
+- `MONO_PRE_GRID_FANOUT=0` (default) — avoid double fanout before geometry dump.
+- `MONO_AON_IN1_KEEPOUT=1` (default) — grid avoids In1 inside AON pocket.
+- `MONO_FANOUT_GND_FIXED=0` (default) — optional pre-grid GND fallbacks (`mono_split_copper_utils.GND_STITCH_FIXED_FALLBACK`).
 
 ### DRC gate rules (restored)
 
@@ -28,11 +31,10 @@ Optional env:
 
 ### Committed board target (this pass)
 
-- One-command generate → **`mono_electronics.kicad_pcb`**: ~**25** unconnected groups, copper **0/0**, **clearance 0** after `cleanup` (baseline clearance **1** preserved through gated steps).
-- Per-net (typical): **AON_3V3 ~13**, **GND ~5**, plus open MCU signals (**DEC_A_EN_N**, **USB_D_N_MCU**, IMU, **LED_CLK**, **ROW_A3**).
-- **AON**: In1 zone **Y≤14.85 mm** (was 9.35), IMU/translator In2 ties, split distant steps (`aon_ldo` / `aon_roe` / `aon_tp`); east dogbones **2/3/46/55/56**; **pad20** still gate-blocked.
-- **ROW select**: **ROW_02..11** decoder→comb on **In2** (ROW_01 jog + ROW_12 pin13 stay **In1**). GND/AON MCU spines moved west (x≈26.5 / 32.5) on In2 with GND hook on **F** at y≈8.55 so In2 ROW legs stay **0/0** static.
-- **MCU grid**: stale `*.mcu_geom.json` / `*.mcu_routes*.json` deleted each run; **ROW_*_Y** In2 tracks are **hard obstacles** in `mcu_grid/grid.py`; PathFinder **In1 layer cost 0.52** (F/In2/B unchanged). Optional **`MONO_AON_IN1_KEEPOUT=1`**: grid cannot use In1 inside AON outline `(36,3.2)–(67,14.85)` (signals use F/In2/B); default **0** until greedy/pathfinder merge stays at **24** unconnected. Full one-command end state: **24** unconnected groups, copper **0/0**, clearance **0** after cleanup.
+- One-command generate → **`mono_electronics.kicad_pcb`**: **26** unconnected (gate **&lt;24** not met), copper **0/0**, clearance **0** after cleanup.
+- **Structural AON fix**: pre-grid U1 fanout (pads **2+3**, **55+56**, **20/29/46** dogbones + vias) embedded in generate; geometry dump logs **locked AON tracks=6**; **In1 AON fill = 1 polygon**, **0** foreign In1 slicers in pocket.
+- **ROW_01**: comb on **In2** @ **y=9.7**; west **GND** In2 stub shortened to **y=8.55** (no crossing with ROW_01).
+- Post-grid **skips** redundant U1 dogbones (fanout already locked); **`tie_*`** distant AON steps still run under monotonic gate.
 - **Diagnostics**: `hardware/tools/aon_zone_diagnostic.py` (zone refill, fill-poly index, foreign In1 slicers in pocket).
 - **`grid_one`**: default net list includes **DEC_B_EN_N** (was ROW_A3).
 

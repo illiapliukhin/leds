@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pcbnew
 
 from generate_mono_split_boards import (
@@ -175,7 +177,17 @@ def _east_pad_outward_to_zone(board: pcbnew.BOARD, pad_x: float, pad_y: float) -
 
 def connect_u1_aon_dogbone_pad(board: pcbnew.BOARD, pad_num: str) -> None:
     u1 = footprint_by_reference(board, "U1")
-    pad_x, pad_y = millimeters(get_pad(u1, pad_num).GetPosition())
+    pad = get_pad(u1, pad_num)
+    pad_x, pad_y = millimeters(pad.GetPosition())
+    if pad_num in ("2", "3", "20", "29", "46", "55", "56"):
+        for item in board.GetTracks():
+            if item.GetClass() != "PCB_VIA" or item.GetNetname() != "AON_3V3":
+                continue
+            if not item.IsLocked():
+                continue
+            via_x, via_y = millimeters(item.GetPosition())
+            if math.hypot(via_x - pad_x, via_y - pad_y) <= 2.6:
+                return
     if pad_num in U1_AON_NORTH:
         _north_pad_outward_to_zone(board, pad_x, pad_y)
     elif pad_num in U1_AON_EAST:

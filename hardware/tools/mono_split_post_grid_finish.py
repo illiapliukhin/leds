@@ -719,10 +719,8 @@ def _apply_aon_zone_phase(board_path: Path) -> None:
 
         return apply
 
-    per_pad_steps = tuple(
-        (f"dogbone_{pad_num}", _dogbone_step(pad_num))
-        for pad_num in ("2", "3", "46", "55", "56")
-    )
+    # U1 AON dogbones are locked in pre-grid fanout (MONO_EMBED_U1_AON_FANOUT).
+    per_pad_steps: tuple[tuple[str, object], ...] = ()
     zone_steps = (
         ("zone", _ensure_zone),
         *per_pad_steps,

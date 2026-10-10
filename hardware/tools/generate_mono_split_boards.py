@@ -3072,8 +3072,8 @@ def assign_select_escapes(outputs: list[dict]) -> None:
 
 
 def row_select_fan_layer(row_number: int) -> int:
-    # ROW_02..12 decoder→comb on In2 frees In1 under U1; ROW_01 jog stays on In1.
-    if 2 <= row_number <= 11:
+    # ROW_01..11 on In2 (continuous In1 AON pocket); ROW_12 pin13 on In1.
+    if 1 <= row_number <= 11:
         return pcbnew.In2_Cu
     return pcbnew.In1_Cu
 
@@ -3456,16 +3456,15 @@ def route_translator_bias(board: pcbnew.BOARD) -> None:
         board,
         "GND",
         pcbnew.In2_Cu,
-        [(39.40, 1.15), (39.40, 11.20)],
+        [(39.40, 1.15), (39.40, MCU_GND_IN2_HOOK_Y_MM)],
         0.20,
     )
-    add_through_via(board, ground, 39.40, 11.20, diameter_mm=0.40)
+    add_through_via(board, ground, 39.40, MCU_GND_IN2_HOOK_Y_MM, diameter_mm=0.40)
     route_net_polyline(
         board,
         "GND",
         pcbnew.F_Cu,
         [
-            (39.35, 11.20),
             (39.35, MCU_GND_IN2_HOOK_Y_MM),
             (MCU_GND_IN2_SPINE_X_MM, MCU_GND_IN2_HOOK_Y_MM),
         ],
@@ -3859,6 +3858,10 @@ def generate_electronics_board(repository_root: Path) -> pcbnew.BOARD:
 
         route_mcu_strap_passives(board)
         route_mcu_boot_switch(board)
+    if __import__("os").environ.get("MONO_EMBED_U1_AON_FANOUT", "1") == "1":
+        from mono_split_pre_grid_fanout import apply_pre_grid_power_fanout
+
+        apply_pre_grid_power_fanout(board)
     return board
 
 
