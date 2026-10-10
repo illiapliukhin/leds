@@ -91,7 +91,7 @@ def add_aon_in1_zone(board: pcbnew.BOARD) -> bool:
 def _set_zone_outline(zone: pcbnew.ZONE, outline_mm: list[tuple[float, float]]) -> None:
     outline = zone.Outline()
     while outline.OutlineCount() > 0:
-        outline.DeleteOutline(0)
+        outline.RemoveOutline(0)
     outline.NewOutline()
     for x_mm, y_mm in outline_mm:
         outline.Append(pcbnew.VECTOR2I_MM(x_mm, y_mm))
@@ -279,6 +279,64 @@ def dedupe_aon_hub_vias(board: pcbnew.BOARD) -> int:
             board.Remove(via)
             removed += 1
     return removed
+
+
+def tie_distant_aon_ldo(board: pcbnew.BOARD) -> None:
+    aon = board.FindNet("AON_3V3")
+    ldo = footprint_by_reference(board, "C_LDO_OUT")
+    ldo_x, ldo_y = millimeters(get_pad(ldo, "1").GetPosition())
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(ldo_x, ldo_y), (36.40, ldo_y)],
+        AON_STUB_W_MM,
+    )
+    if not _via_exists(board, 36.40, ldo_y, "AON_3V3"):
+        add_through_via(board, aon, 36.40, ldo_y, diameter_mm=VIA_D_MM)
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.In2_Cu,
+        [(36.40, ldo_y), (36.40, 56.80)],
+        AON_STUB_W_MM,
+    )
+
+
+def tie_distant_aon_roe(board: pcbnew.BOARD) -> None:
+    aon = board.FindNet("AON_3V3")
+    roe = footprint_by_reference(board, "R_OE_PU")
+    roe_x, roe_y = millimeters(get_pad(roe, "2").GetPosition())
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(roe_x, roe_y), (49.49, roe_y)],
+        AON_STUB_W_MM,
+    )
+    if not _via_exists(board, 49.49, roe_y, "AON_3V3"):
+        add_through_via(board, aon, 49.49, roe_y, diameter_mm=VIA_D_MM)
+
+
+def tie_distant_aon_tp(board: pcbnew.BOARD) -> None:
+    aon = board.FindNet("AON_3V3")
+    tp = footprint_by_reference(board, "TP1")
+    tp_x, tp_y = millimeters(get_pad(tp, "1").GetPosition())
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(tp_x, tp_y), (16.20, tp_y)],
+        AON_STUB_W_MM,
+    )
+    if not _via_exists(board, 16.20, tp_y, "AON_3V3"):
+        add_through_via(board, aon, 16.20, tp_y, diameter_mm=VIA_D_MM)
+
+
+def tie_distant_aon_loads(board: pcbnew.BOARD) -> None:
+    tie_distant_aon_ldo(board)
+    tie_distant_aon_roe(board)
+    tie_distant_aon_tp(board)
 
 
 def connect_periphery_aon_stubs(board: pcbnew.BOARD) -> None:

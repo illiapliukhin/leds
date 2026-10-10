@@ -59,8 +59,13 @@ class BoardMetrics:
         self.crossings = crossings
 
 
-def board_metrics(board_path: Path) -> BoardMetrics:
-    report = run_drc_report(board_path)
+def board_metrics(board_path: Path, *, refill: bool = True) -> BoardMetrics:
+    if refill:
+        try:
+            refill_zones_save(board_path)
+        except subprocess.CalledProcessError:
+            pass
+    report = run_drc_report(board_path, refill_zones=False)
     shorts, crossings = copper_gate_counts(report)
     clearance = violation_type_counts(report).get("clearance", 0)
     unconnected = len(report.get("unconnected_items") or [])

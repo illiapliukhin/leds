@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shutil
 import tempfile
+import uuid
 from pathlib import Path
 
 import pcbnew
@@ -44,6 +45,12 @@ def _save_board(board: pcbnew.BOARD, path: Path) -> None:
     pcbnew.SaveBoard(str(path), board)
 
 
+def _trial_board_path(board_path: Path, label: str) -> Path:
+    """Trial PCB next to the project so kicad-cli DRC keeps stackup/netclass context."""
+    token = uuid.uuid4().hex[:8]
+    return board_path.parent / f"{board_path.stem}.{label}.{token}.kicad_pcb"
+
+
 def _copper_gate(path: Path) -> tuple[int, int]:
     report = run_drc_report(path)
     return copper_gate_counts(report)
@@ -67,7 +74,7 @@ def _with_monotonic_commit(board_path: Path, phase_name: str, apply_fn) -> bool:
             shutil.copy2(backup_path, board_path)
             backup_path.unlink(missing_ok=True)
             return False
-        after = board_metrics(board_path)
+        after = board_metrics(board_path, refill=False)
         if monotonic_gate_allows(before, after):
             print(
                 f"monotonic gate {phase_name}: accepted "
@@ -194,30 +201,22 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
         if fixed is not None:
             via_x, via_y = fixed
             before = board_metrics(board_path)
-            with tempfile.TemporaryDirectory() as temporary_directory:
-                trial_path = Path(temporary_directory) / board_path.name
-                shutil.copy2(board_path, trial_path)
-                trial = pcbnew.LoadBoard(str(trial_path))
-                _add_gnd_stitch(trial, pad_x, pad_y, via_x, via_y)
-                _save_board(trial, trial_path)
+            backup_path = board_path.with_suffix(board_path.suffix + ".stitchbak")
+            shutil.copy2(board_path, backup_path)
+            try:
+                board = pcbnew.LoadBoard(str(board_path))
+                _add_gnd_stitch(board, pad_x, pad_y, via_x, via_y)
+                _save_board(board, board_path)
                 try:
-                    refill_zones_save(trial_path)
+                    refill_zones_save(board_path)
                 except Exception:
                     fixed = None
                 else:
-                    after = board_metrics(trial_path)
+                    after = board_metrics(board_path, refill=False)
                     if (
-                        not after.shorts
-                        and not after.crossings
+                        monotonic_gate_allows(before, after)
                         and after.unconnected < before.unconnected
                     ):
-                        board = pcbnew.LoadBoard(str(board_path))
-                        _add_gnd_stitch(board, pad_x, pad_y, via_x, via_y)
-                        _save_board(board, board_path)
-                        try:
-                            refill_zones_save(board_path)
-                        except Exception:
-                            pass
                         accepted += 1
                         placed = True
                         print(
@@ -225,40 +224,42 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
                             f"unconnected {before.unconnected}->{after.unconnected}",
                             flush=True,
                         )
+                    else:
+                        shutil.copy2(backup_path, board_path)
+            finally:
+                backup_path.unlink(missing_ok=True)
         if placed:
             continue
         for via_x, via_y, from_x, from_y in dogbone_via_candidates(pad_x, pad_y):
             before = board_metrics(board_path)
-            with tempfile.TemporaryDirectory() as temporary_directory:
-                trial_path = Path(temporary_directory) / board_path.name
-                shutil.copy2(board_path, trial_path)
-                trial = pcbnew.LoadBoard(str(trial_path))
-                _add_gnd_stitch(trial, from_x, from_y, via_x, via_y)
-                _save_board(trial, trial_path)
+            backup_path = board_path.with_suffix(board_path.suffix + ".stitchbak")
+            shutil.copy2(board_path, backup_path)
+            try:
+                board = pcbnew.LoadBoard(str(board_path))
+                _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
+                _save_board(board, board_path)
                 try:
-                    refill_zones_save(trial_path)
+                    refill_zones_save(board_path)
                 except Exception:
                     continue
-                after = board_metrics(trial_path)
-                if after.shorts or after.crossings:
-                    continue
-                if after.unconnected >= before.unconnected:
-                    continue
-            board = pcbnew.LoadBoard(str(board_path))
-            _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
-            _save_board(board, board_path)
-            try:
-                refill_zones_save(board_path)
-            except Exception:
-                pass
-            accepted += 1
-            placed = True
-            print(
-                f"gnd stitch {ref}:{pad_num} ok "
-                f"unconnected {before.unconnected}->{after.unconnected}",
-                flush=True,
-            )
-            break
+                after = board_metrics(board_path, refill=False)
+                if (
+                    monotonic_gate_allows(before, after)
+                    and after.unconnected < before.unconnected
+                ):
+                    accepted += 1
+                    placed = True
+                    print(
+                        f"gnd stitch {ref}:{pad_num} ok "
+                        f"unconnected {before.unconnected}->{after.unconnected}",
+                        flush=True,
+                    )
+                    break
+                shutil.copy2(backup_path, board_path)
+            finally:
+                backup_path.unlink(missing_ok=True)
+            if placed:
+                break
         if not placed:
             print(
                 f"gnd stitch: no legal via for {ref}:{pad_num} @ ({pad_x:.2f},{pad_y:.2f})",
@@ -395,7 +396,7 @@ def join_dec_a_en_to_stubs(board: pcbnew.BOARD) -> None:
     """Join U1 pad 47 to existing DEC_A_EN_N fan-in stubs."""
     u1 = footprint_by_reference(board, "U1")
     pad_x, pad_y = millimeters(get_pad(u1, "47").GetPosition())
-    stub_f = (68.75, 16.44)
+    stub_f = (66.20, 16.44)
     stub_in1 = (61.40, 20.80)
     route_net_polyline(
         board,
@@ -416,35 +417,14 @@ def join_dec_a_en_to_stubs(board: pcbnew.BOARD) -> None:
 
 
 def _try_unconnected_step(board_path: Path, apply_fn) -> bool:
-    """Commit if copper stays clean and unconnected does not increase (clearance ignored)."""
-    try:
-        refill_zones_save(board_path)
-    except Exception:
-        pass
-    before = board_metrics(board_path)
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        trial_path = Path(temporary_directory) / board_path.name
-        shutil.copy2(board_path, trial_path)
-        board = pcbnew.LoadBoard(str(trial_path))
+    """Commit if monotonic gate passes (0/0 copper, unconnected and clearance non-increasing)."""
+
+    def _apply_on_path(path: Path) -> None:
+        board = pcbnew.LoadBoard(str(path))
         apply_fn(board)
-        _save_board(board, trial_path)
-        try:
-            refill_zones_save(trial_path)
-        except Exception:
-            return False
-        after = board_metrics(trial_path)
-        if after.shorts or after.crossings:
-            return False
-        if after.unconnected > before.unconnected:
-            return False
-        board = pcbnew.LoadBoard(str(board_path))
-        apply_fn(board)
-        _save_board(board, board_path)
-        try:
-            refill_zones_save(board_path)
-        except Exception:
-            return False
-        return True
+        _save_board(board, path)
+
+    return _with_monotonic_commit(board_path, "step", _apply_on_path)
 
 
 def _try_signal_step(
@@ -458,33 +438,27 @@ def _try_signal_step(
     except Exception:
         pass
     before = board_metrics(board_path)
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        trial_path = Path(temporary_directory) / board_path.name
-        shutil.copy2(board_path, trial_path)
-        board = pcbnew.LoadBoard(str(trial_path))
-        apply_fn(board)
-        _save_board(board, trial_path)
-        try:
-            refill_zones_save(trial_path)
-        except Exception:
-            return False
-        after = board_metrics(trial_path)
-        if after.shorts or after.crossings:
-            return False
-        if not monotonic_gate_allows(before, after):
-            return False
-        if max_clearance is not None:
-            clearance = violation_type_counts(run_drc_report(trial_path)).get("clearance", 0)
-            if clearance > max_clearance:
-                return False
+    backup_path = board_path.with_suffix(board_path.suffix + ".stepbak")
+    shutil.copy2(board_path, backup_path)
+    try:
         board = pcbnew.LoadBoard(str(board_path))
         apply_fn(board)
         _save_board(board, board_path)
         try:
             refill_zones_save(board_path)
         except Exception:
+            shutil.copy2(backup_path, board_path)
+            return False
+        after = board_metrics(board_path, refill=False)
+        if not monotonic_gate_allows(before, after):
+            shutil.copy2(backup_path, board_path)
+            return False
+        if max_clearance is not None and after.clearance > max_clearance:
+            shutil.copy2(backup_path, board_path)
             return False
         return True
+    finally:
+        backup_path.unlink(missing_ok=True)
 
 
 def _try_apply_grid_routes(board_path: Path, routes: dict, *, max_clearance: int) -> bool:
@@ -492,8 +466,8 @@ def _try_apply_grid_routes(board_path: Path, routes: dict, *, max_clearance: int
 
     if not routes.get("complete_nets"):
         return False
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        trial_path = Path(temporary_directory) / board_path.name
+    trial_path = _trial_board_path(board_path, "grid")
+    try:
         shutil.copy2(board_path, trial_path)
         board = pcbnew.LoadBoard(str(trial_path))
         apply_grid_routes(board, routes.get("segs", []), routes.get("vias", []))
@@ -515,24 +489,29 @@ def _try_apply_grid_routes(board_path: Path, routes: dict, *, max_clearance: int
         except Exception:
             return False
         return True
+    finally:
+        trial_path.unlink(missing_ok=True)
 
 
 def _try_copper_only_step(board_path: Path, apply_fn) -> bool:
-    with tempfile.TemporaryDirectory() as temporary_directory:
-        trial_path = Path(temporary_directory) / board_path.name
-        shutil.copy2(board_path, trial_path)
-        board = pcbnew.LoadBoard(str(trial_path))
+    backup_path = board_path.with_suffix(board_path.suffix + ".copperbak")
+    shutil.copy2(board_path, backup_path)
+    try:
+        board = pcbnew.LoadBoard(str(board_path))
         apply_fn(board)
-        _save_board(board, trial_path)
+        _save_board(board, board_path)
         try:
-            refill_zones_save(trial_path)
+            refill_zones_save(board_path)
         except Exception:
+            shutil.copy2(backup_path, board_path)
             return False
-        shorts, crossings = _copper_gate(trial_path)
+        shorts, crossings = _copper_gate(board_path)
         if shorts or crossings:
+            shutil.copy2(backup_path, board_path)
             return False
-        shutil.copy2(trial_path, board_path)
         return True
+    finally:
+        backup_path.unlink(missing_ok=True)
 
 
 def apply_aon_in1_zone_gated(board_path: Path) -> bool:
@@ -664,7 +643,7 @@ def _remove_dangling_stubs_gated(board_path: Path) -> int:
                 refill_zones_save(trial_path)
             except Exception:
                 break
-            after = board_metrics(trial_path)
+            after = board_metrics(trial_path, refill=False)
             if not monotonic_gate_allows(before, after):
                 break
         _remove_one(board_path)
@@ -723,6 +702,9 @@ def _apply_aon_zone_phase(board_path: Path) -> None:
         connect_u1_aon_dogbone_pad,
         dedupe_aon_hub_vias,
         refresh_aon_in1_zones,
+        tie_distant_aon_ldo,
+        tie_distant_aon_roe,
+        tie_distant_aon_tp,
         tie_imu_aon_pads,
         tie_in2_spine_to_zone,
         tie_translator_aon,
@@ -748,6 +730,9 @@ def _apply_aon_zone_phase(board_path: Path) -> None:
         ("dedupe", dedupe_aon_hub_vias),
         ("in2_spine", tie_in2_spine_to_zone),
         ("translator", tie_translator_aon),
+        ("aon_ldo", tie_distant_aon_ldo),
+        ("aon_roe", tie_distant_aon_roe),
+        ("aon_tp", tie_distant_aon_tp),
         ("dedupe2", dedupe_aon_hub_vias),
     )
 
@@ -835,10 +820,34 @@ def main() -> None:
         if not kpy.is_file():
             kpy = Path(sys.executable)
         for step in _default_phases():
+            try:
+                refill_zones_save(board_path)
+            except Exception:
+                pass
+            before_step = board_metrics(board_path)
+            backup = board_path.with_suffix(board_path.suffix + f".{step}_bak")
+            shutil.copy2(board_path, backup)
             subprocess.run(
                 [str(kpy), str(Path(__file__).resolve()), str(board_path), step],
                 check=False,
             )
+            try:
+                refill_zones_save(board_path)
+            except Exception:
+                pass
+            after_step = board_metrics(board_path)
+            if after_step.shorts or after_step.crossings or not monotonic_gate_allows(
+                before_step, after_step
+            ):
+                shutil.copy2(backup, board_path)
+                print(
+                    f"post-grid phase {step} reverted: "
+                    f"unconnected {before_step.unconnected}->{after_step.unconnected} "
+                    f"clearance {before_step.clearance}->{after_step.clearance} "
+                    f"shorts={after_step.shorts} crossings={after_step.crossings}",
+                    flush=True,
+                )
+            backup.unlink(missing_ok=True)
         shorts, crossings = _copper_gate(board_path)
         print(
             f"post-grid finish: shorts={shorts}, crossings={crossings}",

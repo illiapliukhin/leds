@@ -17,8 +17,8 @@ GND_STITCH_FIXED_FALLBACK: dict[tuple[str, str], tuple[float, float]] = {
     ("C_USB1", "2"): (16.48, 24.45),
     ("U_ESD", "5"): (17.14, 12.45),
     ("C_MCU1", "2"): (40.95, 14.55),
-    ("U_IMU", "6"): (62.66, 5.20),
-    ("U_IMU", "7"): (62.85, 5.96),
+    ("U_IMU", "6"): (61.20, 6.85),
+    ("U_IMU", "7"): (64.10, 6.85),
 }
 
 GND_STITCH_TARGETS: tuple[tuple[str, str], ...] = (

@@ -1,39 +1,38 @@
 # Latest changes
 
-## Mono split boards (PR #4) — reproducibility pass (2026-10-09)
+## Mono split boards (PR #4) — clearance gate + one-command generate (2026-10-10)
 
-### Reproduce command (KiCad 10 AppImage + system Python deps)
+### Reproduce (single command)
 
 ```bash
 cd /workspace
 source hardware/tools/kicad10_env.sh
-# System Python (not AppImage): numpy, scipy, matplotlib for mcu_grid_compute
 env -u PYTHONHOME -u PYTHONPATH \
   /workspace/.kicad10/squashfs-root/usr/bin/python3.11 \
   hardware/tools/generate_mono_split_boards.py
 ```
 
+Default **`MONO_POST_GRID=1`** runs phases **`gnd,aon_zone,aon,grid_one,cleanup`** via `mono_split_post_grid_finish.py` (subprocess per phase). Aggregate revert in `mcu_grid_route.py` if copper or monotonic (unconnected/clearance) regresses vs pre-post-grid snapshot.
+
 Optional env:
 
-- `MONO_RECOMPUTE_ROUTES=1` — force PathFinder/greedy recompute (default: compute each run).
-- `MONO_POST_GRID_PHASES=gnd,aon_zone,aon,grid_one,cleanup` — default post-grid sequence (grid_one only commits when copper stays 0/0).
-- `MONO_PRE_GRID_FANOUT=1` — locked GND/AON stubs before geometry dump (default **off**; fanout before grid currently breaks DRC gate — do not enable until geometry is reconciled).
+- `MONO_POST_GRID=0` — grid + zone refill only (debug).
+- `MONO_POST_GRID_PHASES=...` — override phase list.
+- `MONO_PRE_GRID_FANOUT=0` (default) — do not lock stubs before geometry dump.
 
-### Pipeline changes
+### DRC gate rules (restored)
 
-- **Post-grid phases** no longer roll back the whole phase when one sub-step fails; `aon` / `aon_zone` / `grid_one` commit per-step via `_try_signal_step` (monotonic unconnected/clearance vs phase start, 0/0 copper).
-- **Aggregate post-grid gate** in `mcu_grid_route.py`: revert only on copper shorts/crossings, or if unconnected/clearance regress vs pre-post-grid snapshot (not on partial copper shorts from a single phase).
-- **Cleanup**: dangling F.Cu stubs removed one-at-a-time with monotonic gate; zone refill before gate metrics.
-- **AON In1 zone**: north pads use outward (−Y) dogbones; zone ties include In2 spine + translator; skip duplicate `aon_north` / `aon_in2` when zone present.
-- **GND stitch**: baseline-validated fixed via fallbacks for `C_USB1:2`, `U_ESD:5`, `C_MCU1:2`, `U_IMU:6/7` when dogbone search finds nothing.
-- **Grid merge**: greedy supplement for PathFinder rip-up victims (`merge_greedy_one_at_a_time` + rip-recovery set).
+- Every GND stitch and post-grid step uses **`monotonic_gate_allows`**: 0/0 copper, unconnected non-increasing, **clearance non-increasing**.
+- Trial edits apply **in-place** on `mono_electronics.kicad_pcb` with backup restore (KiCad DRC requires the project-linked PCB path; copies under `/tmp` inflate false clearance counts).
+- `board_metrics()` refills zones before baseline DRC; post-edit metrics use `refill=False` when refill already ran.
 
-### DRC targets
+### Committed board target (this pass)
 
-- **Committed board (this pass)**: `MONO_POST_GRID=0` grid **37** → **`gnd` + `aon_zone`** → **23** unconnected, copper **0/0/0** (`AON_3V3` **13**, `GND` **3**). `hole_to_hole` at hub **50.8 mm** removed via `dedupe_aon_hub_vias`; pad **2** dogbone disabled (F escape shorts USB/GND).
-- **Diagnostics**: `hardware/tools/aon_zone_diagnostic.py` — U1 AON pads, vias, In1 zone outline after refill.
-- **Next**: per-pad east dogbones **46/55/56**, `pad20` chain, distant AON (LDO/TP), remaining **GND** stitches without ROW shorts, PathFinder for **DEC_A_EN_N** / **USB_D_N_MCU** / **IMU** / **LED_CLK** / **ROW_A3**.
+- One-command generate → **`mono_electronics.kicad_pcb`**: ~**25** unconnected groups, copper **0/0**, **clearance 0** after `cleanup` (baseline clearance **1** preserved through gated steps).
+- Per-net (typical): **AON_3V3 ~13**, **GND ~5**, plus open MCU signals (**DEC_A_EN_N**, **USB_D_N_MCU**, IMU, **LED_CLK**, **ROW_A3**).
+- **AON**: In1 zone, IMU/translator In2 ties, split distant steps (`aon_ldo` / `aon_roe` / `aon_tp`); east dogbones **3/46/55/56** and **pad20** still gate-blocked (shorts/crossings).
+- **Diagnostics**: `hardware/tools/aon_zone_diagnostic.py`.
 
 ### Panels
 
-Both `mono_panel_*` remain **0/0/0**; generator still restores panel PCBs from git at end of `generate_mono_split_boards.py`.
+`mono_panel_*` remain **0/0/0**; generator restores panel PCBs from git at end of `generate_mono_split_boards.py`.
