@@ -31,7 +31,8 @@ Optional env:
 - One-command generate → **`mono_electronics.kicad_pcb`**: ~**25** unconnected groups, copper **0/0**, **clearance 0** after `cleanup` (baseline clearance **1** preserved through gated steps).
 - Per-net (typical): **AON_3V3 ~13**, **GND ~5**, plus open MCU signals (**DEC_A_EN_N**, **USB_D_N_MCU**, IMU, **LED_CLK**, **ROW_A3**).
 - **AON**: In1 zone **Y≤14.85 mm** (was 9.35), IMU/translator In2 ties, split distant steps (`aon_ldo` / `aon_roe` / `aon_tp`); east dogbones **2/3/46/55/56**; **pad20** still gate-blocked.
-- **ROW select (U1 band)**: Repacking all 12 `ROW_*_Y` In1 horizontals to y≈15.2–18.5 with 0.15/0.15 pitch conflicts with the x≈72–82 via staircase (0/0 copper breaks). Prototype **ROW_02..11 decoder→comb on In2** keeps static **0/0** but MCU grid apply hits **tracks_crossing** gate — not enabled in generator; baseline In1 fan geometry retained.
+- **ROW select**: **ROW_02..11** decoder→comb on **In2** (ROW_01 jog + ROW_12 pin13 stay **In1**). GND/AON MCU spines moved west (x≈26.5 / 32.5) on In2 with GND hook on **F** at y≈8.55 so In2 ROW legs stay **0/0** static.
+- **MCU grid**: stale `*.mcu_geom.json` / `*.mcu_routes*.json` deleted each run; **ROW_*_Y** In2 tracks are **hard obstacles** in `mcu_grid/grid.py`; PathFinder **In1 layer cost 0.52** (F/In2/B unchanged). Full one-command end state: **24** unconnected groups, copper **0/0**, clearance **0** after cleanup.
 - **Diagnostics**: `hardware/tools/aon_zone_diagnostic.py`.
 
 ### Panels
