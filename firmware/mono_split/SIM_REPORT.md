@@ -86,3 +86,28 @@ Command returned non-zero error code: 0x1 (ERROR)
 **Measured.** The scan runs at about 260–300 Hz in QEMU (the 400 Hz target is QEMU-paced) and the stream at about 16–20 snapshots/s. The worst row peak (plasma or a full ring row) is about 320 mA, and the average LED current is 3–100 mA depending on the demo.
 
 Run: `/workspace/sim/run_matrix_sim.sh [--record]` (copy in `sim/matrix/`).
+
+### v12b — row flicker diagnosis and fix
+
+**Causes found.**
+1. **Viewer side (the visible blink).** The old tap copied the live per-row buffer at an arbitrary moment. The row being scanned had just been cleared by `note_row`, so each snapshot had one empty or half-lit row: 63 partial rows in 120 snapshots. That row blinked dark at a random position. Brightness came from the measured OE-low time, which QEMU skews (13–71 µs for a nominal 14 µs slot), giving 23 % relative std per LED on a *static* image.
+2. **Firmware (would also show on real hardware).** The demo cleared and rewrote the shared framebuffer under the same mutex the scan took on every row. The scan therefore showed rows from two different frames (tearing). Worse, it blocked on that mutex while the previous row was still lit (OE low), so that row got extra on-time and flashed brighter. On-time also came from busy-wait delays, so the row period depended on loop speed. Both effects are real-hardware bugs: a bright-row flash whenever content updates (25 Hz), plus a mid-frame tear.
+
+**Fixes.**
+- **Double buffer.** Writers compose in the panel, and `matrix_refresh_unlock_panel()` publishes a copy to the back buffer with a generation id. The scan swaps front/back only before row 0 and never touches the mutex.
+- **Fixed row time.** Rows run on a fixed esp_timer grid (78 µs; resync only if more than 4 rows behind). The OE slots are 1/3 and 2/3 of the on-time, measured from the timer. Order per row: OE_N high → decoders off → address → shift → LE → guard → OE low.
+- **Sim tap.** It publishes only complete 32-row scans, each tagged with the framebuffer generation. Each row reports both the commanded (nominal) and the measured OE time, plus row-period min/max/mean/std. The viewer uses the nominal slot divided by the nominal 78 µs row period.
+- **Smiley contrast.** Bright rim, dim face, dark eyes with glints and a dark smile.
+
+**Measured (static smiley, 120 snapshots, `measure.py` / `measure2.py`).**
+
+| | before | after |
+|---|---|---|
+| partial or empty rows in snapshots | 63 | 0 |
+| per-LED brightness rel. std (as displayed) | 23.2 % | 0.0 % (nominal) |
+| same, from the measured OE time | 23.2 % | 50 % (QEMU stalls only, not used for display) |
+| row period mean | n/a (loop-paced, not instrumented) | 83.5 µs (nominal 78) |
+| row period std / max | n/a | 167 µs std; 40 ms single max (QEMU host stalls) |
+| scan rate | 260–300 Hz | about 390–400 Hz |
+
+The remaining row-period jitter comes from QEMU emulating both cores on one host thread. On silicon, the esp_timer spin wait is accurate to about 1 µs.

@@ -49,60 +49,94 @@ static void row_disable_all(void)
     gpio_set_level(BOARD_PIN_GPIO_DEC_B_EN_N, 1);
 }
 
+/* Double buffer: writers edit s_panel under s_panel_mutex, and unlock publishes a copy into the
+ * back buffer. The scan task swaps front/back only at a frame boundary (before row 0), so a
+ * frame is never torn and the scan loop never waits on the writers' mutex mid-frame. */
+typedef struct {
+    uint32_t plane[2][32];
+    uint32_t gen;
+} scan_frame_t;
+static scan_frame_t s_frames_buf[2];
+static volatile int s_front;
+static volatile bool s_pending;
+static volatile uint32_t s_gen;
+static portMUX_TYPE s_swap_mux = portMUX_INITIALIZER_UNLOCKED;
+
+static void publish(const matrix_panel_t *panel)
+{
+    portENTER_CRITICAL(&s_swap_mux);
+    scan_frame_t *back = &s_frames_buf[s_front ^ 1];
+    for (int r = 0; r < 32; r++) {
+        back->plane[0][r] = matrix_panel_row_plane(panel, r, 0);
+        back->plane[1][r] = matrix_panel_row_plane(panel, r, 1);
+    }
+    back->gen = ++s_gen;
+    s_pending = true;
+    portEXIT_CRITICAL(&s_swap_mux);
+}
+
+static inline void wait_until(int64_t t)
+{
+    while (esp_timer_get_time() < t) {
+    }
+}
+
 static void refresh_task(void *argument)
 {
     (void)argument;
-    const uint32_t row_period_us =
-        (1000000U / MATRIX_TARGET_REFRESH_HZ) / BOARD_MATRIX_ROWS;
-    const uint32_t blank_us = 3;
-    const uint32_t pm_off_us = 2;
+    const int64_t row_period_us = (1000000 / MATRIX_TARGET_REFRESH_HZ) / BOARD_MATRIX_ROWS;
+    const int64_t guard_us = 3; /* OE high around address change and latch (anti-ghosting) */
 
-    ESP_LOGI(
-        TAG,
-        "Refresh task: %d Hz frame, row period %lu us (core %d)",
-        MATRIX_TARGET_REFRESH_HZ,
-        (unsigned long)row_period_us,
-        xPortGetCoreID());
+    ESP_LOGI(TAG, "Refresh task: %d Hz frame, row period %lld us, timer-paced, double-buffered (core %d)",
+        MATRIX_TARGET_REFRESH_HZ, (long long)row_period_us, xPortGetCoreID());
 
     uint8_t row = 0;
+    int64_t row_t0 = esp_timer_get_time();
+    const scan_frame_t *f = &s_frames_buf[s_front];
     while (s_running) {
-        uint32_t planes[2] = {0, 0};
-        if (xSemaphoreTake(s_panel_mutex, portMAX_DELAY) == pdTRUE) {
-            planes[0] = matrix_panel_row_plane(s_panel, row, 0);
-            planes[1] = matrix_panel_row_plane(s_panel, row, 1);
-            xSemaphoreGive(s_panel_mutex);
+        if (row == 0) {
+            portENTER_CRITICAL(&s_swap_mux);
+            if (s_pending) {
+                s_front ^= 1;
+                s_pending = false;
+            }
+            f = &s_frames_buf[s_front];
+            portEXIT_CRITICAL(&s_swap_mux);
+            sim_scan_note_frame(f->gen);
         }
+        /* Fixed time grid: every row gets exactly row_period_us, independent of loop speed. */
+        int64_t now = esp_timer_get_time();
+        if (now - row_t0 > 4 * row_period_us) {
+            row_t0 = now; /* fell far behind (debugger/IRQ storm): resync, don't burst */
+        }
+        uint32_t on_us = (uint32_t)((row_period_us - 4 * guard_us) * s_brightness / 255);
+        uint32_t slot[2] = {on_us / 3, on_us - on_us / 3};
 
+        /* Order: blank (OE_N high) -> decoders off -> new address -> shift -> LE -> OE low. */
         mbi5124_set_blank(true);
         row_disable_all();
-        esp_rom_delay_us(pm_off_us);
         row_select(row);
-
-        /* Binary-code modulation: plane 0 lit for 1/3, plane 1 for 2/3 of the row's on-time. */
-        uint32_t on_us = (row_period_us * s_brightness) / 255U;
-        if (on_us > 2 * (blank_us + pm_off_us)) {
-            on_us -= 2 * (blank_us + pm_off_us);
-        }
+        int64_t t = row_t0 + guard_us;
         for (int plane = 0; plane < 2; plane++) {
-            mbi5124_set_blank(true);
-            mbi5124_shift_columns(planes[plane]);
+            mbi5124_shift_columns(f->plane[plane][row]);
             mbi5124_latch();
-            esp_rom_delay_us(blank_us);
-            uint32_t slot_us = plane == 0 ? on_us / 3 : on_us - on_us / 3;
-            if (slot_us > 0 && planes[plane]) {
+            wait_until(t);
+            sim_scan_note_slot(slot[plane]);
+            if (slot[plane] && f->plane[plane][row]) {
                 mbi5124_set_blank(false);
-                esp_rom_delay_us(slot_us);
+                wait_until(t + slot[plane]);
                 mbi5124_set_blank(true);
-            } else if (slot_us > 0) {
-                esp_rom_delay_us(slot_us);
             }
+            t += slot[plane] + guard_us;
         }
-
+        row_t0 += row_period_us;
+        wait_until(row_t0);
         row = (row + 1) % BOARD_MATRIX_ROWS;
         if (row == 0) {
             s_frames++;
         }
     }
+    mbi5124_set_blank(true);
     vTaskDelete(NULL);
 }
 
@@ -116,6 +150,7 @@ esp_err_t matrix_refresh_start(matrix_panel_t *panel)
     if (s_panel_mutex == NULL) {
         return ESP_ERR_NO_MEM;
     }
+    publish(panel);
     s_running = true;
     BaseType_t created = xTaskCreatePinnedToCore(
         refresh_task,
@@ -167,6 +202,9 @@ void matrix_refresh_lock_panel(void)
 
 void matrix_refresh_unlock_panel(void)
 {
+    if (s_panel) {
+        publish(s_panel);
+    }
     if (s_panel_mutex) {
         xSemaphoreGive(s_panel_mutex);
     }

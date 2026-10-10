@@ -13,11 +13,15 @@ void sim_scan_note_row(uint8_t row);
 void sim_scan_note_shift(uint32_t bits);
 void sim_scan_note_latch(void);
 void sim_scan_note_oe(bool lit);
+void sim_scan_note_frame(uint32_t gen);
+void sim_scan_note_slot(uint32_t us);
 void sim_scan_start(void);
 #else
 static inline void sim_scan_note_row(uint8_t row) { (void)row; }
 static inline void sim_scan_note_shift(uint32_t bits) { (void)bits; }
 static inline void sim_scan_note_latch(void) {}
 static inline void sim_scan_note_oe(bool lit) { (void)lit; }
+static inline void sim_scan_note_frame(uint32_t gen) { (void)gen; }
+static inline void sim_scan_note_slot(uint32_t us) { (void)us; }
 static inline void sim_scan_start(void) {}
 #endif

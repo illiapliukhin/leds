@@ -12,21 +12,25 @@ import argparse, math, os, socket, subprocess, sys, time
 import pygame
 
 ROWS = COLS = 32
-ROW_PERIOD_US = (1_000_000 // 400) // 32       # MATRIX_TARGET_REFRESH_HZ / rows, as in the firmware
+ROW_PERIOD_US = (1_000_000 // 400) // 32       # nominal row period (78 us), as in the firmware
 I_COL_MA = 1.24 / 1820 * 15 * 1000              # MBI5124 Iout ~ 15 * 1.24 V / Rext(1.82 k) ~ 10.2 mA (estimate)
 CELL = 22
 PANEL_W = 300
 
 def parse(line):
+    """@F seq fps_x10 cur_row gen rp_min rp_max rp_mean_x10 rp_var_x100 + 32 x b0:slot0:meas0:b1:slot1:meas1.
+    Each line is one COMPLETE scan of a single framebuffer generation (the firmware drops partial scans).
+    Brightness uses the commanded (timer-nominal) OE slot, not the QEMU-jittered measured one."""
     p = line.split()
-    if len(p) < 4 + ROWS or p[0] != '@F':
+    if len(p) < 9 + ROWS or p[0] != '@F':
         return None
-    seq, fps_x10, cur = int(p[1]), int(p[2]), int(p[3])
+    seq, fps_x10, cur, gen = int(p[1]), int(p[2]), int(p[3]), int(p[4])
+    rp = (int(p[5]), int(p[6]), int(p[7]) / 10.0, max(int(p[8]), 0) ** 0.5 / 10.0)
     rows = []
-    for tok in p[4:4 + ROWS]:
-        b0, o0, b1, o1 = tok.split(':')
-        rows.append((int(b0, 16), int(o0), int(b1, 16), int(o1)))
-    return seq, fps_x10 / 10.0, cur, rows
+    for tok in p[9:9 + ROWS]:
+        b0, s0, m0, b1, s1, m1 = tok.split(':')
+        rows.append((int(b0, 16), int(s0), int(b1, 16), int(s1)))
+    return seq, fps_x10 / 10.0, cur, gen, rp, rows
 
 def main():
     ap = argparse.ArgumentParser()
@@ -55,7 +59,7 @@ def main():
     lum = [[0.0] * COLS for _ in range(ROWS)]
     target = [[0.0] * COLS for _ in range(ROWS)]
     buf = b''; sent = False; fps = 0.0; cur_row = 0; seq = 0; last_seq_t = time.time(); stream_hz = 0.0
-    demo = '-'; row_peak = [0.0] * ROWS; avg_ma = 0.0
+    demo = '-'; gen = 0; last_gen = -1; rp = (0, 0, 0, 0); row_peak = [0.0] * ROWS; avg_ma = 0.0
     rec = None; rec_t0 = None; png_n = 0; last_png = 0
     clock = pygame.time.Clock()
     while True:
@@ -86,7 +90,10 @@ def main():
             r = parse(s)
             if not r:
                 continue
-            seq, fps, cur_row, rows = r
+            seq, fps, cur_row, gen, rp, rows = r
+            if gen == last_gen and gen != 0:
+                pass  # same image again: still a valid complete scan
+            last_gen = gen
             now = time.time(); stream_hz = 0.8 * stream_hz + 0.2 / max(now - last_seq_t, 1e-3); last_seq_t = now
             tot = 0.0
             for y, (b0, o0, b1, o1) in enumerate(rows):
@@ -102,7 +109,7 @@ def main():
         # persistence (~40 ms) and drawing
         k = 1 - math.exp(-(1 / 30) / 0.04)
         screen.fill((8, 8, 8))
-        max_duty = 64 / 255.0
+        max_duty = (ROW_PERIOD_US - 12) * 64 / 255.0 / ROW_PERIOD_US
         for y in range(ROWS):
             for x in range(COLS):
                 lum[y][x] += (target[y][x] - lum[y][x]) * k
@@ -131,7 +138,8 @@ def main():
         txt('max row I:   %.0f mA' % max(row_peak))
         txt('avg LED I:   %.1f mA' % avg_ma)
         txt('  est. %.1f mA/col (1.24V/1k82 x15)' % I_COL_MA, (130, 130, 130))
-        txt('seq %d' % seq, (110, 110, 110))
+        txt('frame gen %d  seq %d' % (gen, seq), (150, 150, 150))
+        txt('row period %.1f us (jit %.1f)' % (rp[2], rp[3]), (150, 150, 150))
         # per-row bars
         for yy in range(ROWS):
             w = int(min(1.0, row_peak[yy] / (32 * I_COL_MA)) * (PANEL_W - 40))

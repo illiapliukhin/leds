@@ -82,16 +82,18 @@ static void draw_smiley(void)
     for (int r = 0; r < 32; r++) {
         for (int c = 0; c < 32; c++) {
             int dx = 2 * c - 31, dy = 2 * r - 31, d2 = dx * dx + dy * dy;
-            if (d2 <= 30 * 30 && d2 >= 26 * 26) px(r, c, 3);        /* outline */
-            else if (d2 < 26 * 26) px(r, c, 1);                     /* dim face */
+            if (d2 <= 31 * 31 && d2 >= 26 * 26) s_fb[r][c] = 3;      /* bright rim */
+            else if (d2 < 26 * 26) s_fb[r][c] = 1;                   /* dim face */
         }
     }
-    for (int r = 9; r <= 13; r++) for (int c = 10; c <= 12; c++) px(r, c, 3), px(r, 31 - c, 3);
-    for (int c = 8; c <= 23; c++) {                                  /* mouth: parabola */
-        int x = c - 15;
-        int r = 19 + (64 - (2 * x + 1) * (2 * x + 1) / 4) / 16 * 0 + (x * x) / -12 + 4;
-        px(r, c, 3);
-        px(r - 1, c, 2);
+    for (int r = 8; r <= 13; r++) for (int c = 9; c <= 12; c++) s_fb[r][c] = s_fb[r][31 - c] = 0; /* dark eyes */
+    for (int r = 9; r <= 11; r++) s_fb[r][10] = s_fb[r][21] = 3;                                  /* glints */
+    for (int c = 7; c <= 24; c++) {                                  /* dark smile, 2 px thick */
+        int x = 2 * c - 31;
+        int r = 24 - (x * x) / 72;
+        s_fb[r][c] = 0;
+        s_fb[r - 1][c] = 0;
+        if (r + 1 < 32) s_fb[r + 1][c] = s_fb[r + 1][c] ? 2 : 0;
     }
 }
 
@@ -232,8 +234,9 @@ static void demo_task(void *arg)
             t = 0;
         }
         render(mode, t++);
+        /* compose into the panel, then unlock publishes it to the scan's back buffer (swap at frame end) */
         matrix_refresh_lock_panel();
-        matrix_panel_init(s_panel, MATRIX_PANEL_32X32);
+        if (s_panel->geometry != MATRIX_PANEL_32X32) matrix_panel_init(s_panel, MATRIX_PANEL_32X32);
         for (int r = 0; r < 32; r++) for (int c = 0; c < 32; c++) matrix_panel_set_grey(s_panel, r, c, s_fb[r][c]);
         matrix_refresh_unlock_panel();
         vTaskDelay(pdMS_TO_TICKS(40)); /* 25 fps content */
