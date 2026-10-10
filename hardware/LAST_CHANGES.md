@@ -16,7 +16,7 @@ env -u PYTHONHOME -u PYTHONPATH \
 Optional env:
 
 - `MONO_RECOMPUTE_ROUTES=1` — force PathFinder/greedy recompute (default: compute each run).
-- `MONO_POST_GRID_PHASES=gnd,aon_zone,aon` — default post-grid sequence (`cleanup` opt-in; disabled by default while stub removal is stabilized).
+- `MONO_POST_GRID_PHASES=gnd,aon_zone,aon,grid_one,cleanup` — default post-grid sequence (grid_one only commits when copper stays 0/0).
 - `MONO_PRE_GRID_FANOUT=1` — locked GND/AON stubs before geometry dump (default **off**; fanout before grid currently breaks DRC gate — do not enable until geometry is reconciled).
 
 ### Pipeline changes
@@ -30,8 +30,9 @@ Optional env:
 
 ### DRC targets
 
-- **Reproducible generate output (this pass)**: grid **37** unconnected → post-grid **`gnd,aon_zone,aon`** → **28** unconnected, copper **0/0** (committed `mono_electronics.kicad_pcb` matches this pipeline trial).
-- **Previous hand baseline (run #7)**: **24** unconnected — not yet matched by a single generate; gap is mostly **GND** (6 vs 2 groups) and **AON** (15 vs 14). Next: dogbones, fixed GND fallbacks that pass monotonic on filled zones, `aon_pad20`/`pad46`, `DEC_A_EN_N`, `ROW_A3`.
+- **Committed board (this pass)**: `MONO_POST_GRID=0` grid **37** → **`gnd` + `aon_zone`** → **23** unconnected, copper **0/0/0** (`AON_3V3` **13**, `GND` **3**). `hole_to_hole` at hub **50.8 mm** removed via `dedupe_aon_hub_vias`; pad **2** dogbone disabled (F escape shorts USB/GND).
+- **Diagnostics**: `hardware/tools/aon_zone_diagnostic.py` — U1 AON pads, vias, In1 zone outline after refill.
+- **Next**: per-pad east dogbones **46/55/56**, `pad20` chain, distant AON (LDO/TP), remaining **GND** stitches without ROW shorts, PathFinder for **DEC_A_EN_N** / **USB_D_N_MCU** / **IMU** / **LED_CLK** / **ROW_A3**.
 
 ### Panels
 

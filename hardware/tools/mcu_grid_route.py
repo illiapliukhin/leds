@@ -476,7 +476,7 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
         }
         post_env.setdefault(
             "MONO_POST_GRID_PHASES",
-            "gnd,aon_zone,aon",
+            "gnd,aon_zone,aon,grid_one,cleanup",
         )
         subprocess.run(
             [str(kicad_python), str(post_script), str(board_path)],

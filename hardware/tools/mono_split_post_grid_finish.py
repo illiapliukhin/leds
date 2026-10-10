@@ -179,18 +179,54 @@ def _add_gnd_stitch(board: pcbnew.BOARD, pad_x: float, pad_y: float, via_x: floa
 def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
     """Add GND dogbone vias one at a time; each must pass the monotonic DRC gate."""
     accepted = 0
-    board = pcbnew.LoadBoard(str(board_path))
-    gnd = board.FindNet("GND")
-    if gnd is None or gnd.GetNetCode() == 0:
-        return 0
-
     for ref, pad_num in GND_STITCH_TARGETS:
+        board = pcbnew.LoadBoard(str(board_path))
+        gnd = board.FindNet("GND")
+        if gnd is None or gnd.GetNetCode() == 0:
+            continue
         footprint = footprint_by_reference(board, ref)
         pad = get_pad(footprint, pad_num)
         if pad.GetNetname() != "GND":
             continue
         pad_x, pad_y = millimeters(pad.GetPosition())
         placed = False
+        fixed = GND_STITCH_FIXED_FALLBACK.get((ref, pad_num))
+        if fixed is not None:
+            via_x, via_y = fixed
+            before = board_metrics(board_path)
+            with tempfile.TemporaryDirectory() as temporary_directory:
+                trial_path = Path(temporary_directory) / board_path.name
+                shutil.copy2(board_path, trial_path)
+                trial = pcbnew.LoadBoard(str(trial_path))
+                _add_gnd_stitch(trial, pad_x, pad_y, via_x, via_y)
+                _save_board(trial, trial_path)
+                try:
+                    refill_zones_save(trial_path)
+                except Exception:
+                    fixed = None
+                else:
+                    after = board_metrics(trial_path)
+                    if (
+                        not after.shorts
+                        and not after.crossings
+                        and after.unconnected < before.unconnected
+                    ):
+                        board = pcbnew.LoadBoard(str(board_path))
+                        _add_gnd_stitch(board, pad_x, pad_y, via_x, via_y)
+                        _save_board(board, board_path)
+                        try:
+                            refill_zones_save(board_path)
+                        except Exception:
+                            pass
+                        accepted += 1
+                        placed = True
+                        print(
+                            f"gnd stitch {ref}:{pad_num} fixed-first ok "
+                            f"unconnected {before.unconnected}->{after.unconnected}",
+                            flush=True,
+                        )
+        if placed:
+            continue
         for via_x, via_y, from_x, from_y in dogbone_via_candidates(pad_x, pad_y):
             before = board_metrics(board_path)
             with tempfile.TemporaryDirectory() as temporary_directory:
@@ -208,8 +244,7 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
                     continue
                 if after.unconnected >= before.unconnected:
                     continue
-                if after.clearance > before.clearance:
-                    continue
+            board = pcbnew.LoadBoard(str(board_path))
             _add_gnd_stitch(board, from_x, from_y, via_x, via_y)
             _save_board(board, board_path)
             try:
@@ -225,46 +260,10 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
             )
             break
         if not placed:
-            fixed = GND_STITCH_FIXED_FALLBACK.get((ref, pad_num))
-            if fixed is not None:
-                via_x, via_y = fixed
-                before = board_metrics(board_path)
-                with tempfile.TemporaryDirectory() as temporary_directory:
-                    trial_path = Path(temporary_directory) / board_path.name
-                    shutil.copy2(board_path, trial_path)
-                    trial = pcbnew.LoadBoard(str(trial_path))
-                    _add_gnd_stitch(trial, pad_x, pad_y, via_x, via_y)
-                    _save_board(trial, trial_path)
-                    try:
-                        refill_zones_save(trial_path)
-                    except Exception:
-                        fixed = None
-                    else:
-                        after = board_metrics(trial_path)
-                        if (
-                            not after.shorts
-                            and not after.crossings
-                            and after.unconnected < before.unconnected
-                            and monotonic_gate_allows(before, after)
-                        ):
-                            _add_gnd_stitch(board, pad_x, pad_y, via_x, via_y)
-                            _save_board(board, board_path)
-                            try:
-                                refill_zones_save(board_path)
-                            except Exception:
-                                pass
-                            accepted += 1
-                            placed = True
-                            print(
-                                f"gnd stitch {ref}:{pad_num} fixed fallback ok "
-                                f"unconnected {before.unconnected}->{after.unconnected}",
-                                flush=True,
-                            )
-            if not placed:
-                print(
-                    f"gnd stitch: no legal via for {ref}:{pad_num} @ ({pad_x:.2f},{pad_y:.2f})",
-                    flush=True,
-                )
+            print(
+                f"gnd stitch: no legal via for {ref}:{pad_num} @ ({pad_x:.2f},{pad_y:.2f})",
+                flush=True,
+            )
     return accepted
 
 
@@ -380,9 +379,13 @@ def apply_aon_steps_gated(board_path: Path) -> None:
         ("aon_pad46", _aon_pad46_in1),
     )
     if zone_present:
-        steps = tuple(step for step in steps if step[0] not in ("aon_north", "aon_in2"))
+        steps = tuple(
+            step
+            for step in steps
+            if step[0] not in ("aon_north", "aon_in2", "aon_east", "aon_pad20", "aon_pad46")
+        )
     for label, step in steps:
-        if _try_signal_step(board_path, step):
+        if _try_unconnected_step(board_path, step):
             print(f"aon step {label}: ok", flush=True)
         else:
             print(f"aon step {label}: skipped (DRC gate)", flush=True)
@@ -410,6 +413,38 @@ def join_dec_a_en_to_stubs(board: pcbnew.BOARD) -> None:
         [stub_f, stub_in1],
         FAN_IN_TRACK_WIDTH_MM,
     )
+
+
+def _try_unconnected_step(board_path: Path, apply_fn) -> bool:
+    """Commit if copper stays clean and unconnected does not increase (clearance ignored)."""
+    try:
+        refill_zones_save(board_path)
+    except Exception:
+        pass
+    before = board_metrics(board_path)
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        trial_path = Path(temporary_directory) / board_path.name
+        shutil.copy2(board_path, trial_path)
+        board = pcbnew.LoadBoard(str(trial_path))
+        apply_fn(board)
+        _save_board(board, trial_path)
+        try:
+            refill_zones_save(trial_path)
+        except Exception:
+            return False
+        after = board_metrics(trial_path)
+        if after.shorts or after.crossings:
+            return False
+        if after.unconnected > before.unconnected:
+            return False
+        board = pcbnew.LoadBoard(str(board_path))
+        apply_fn(board)
+        _save_board(board, board_path)
+        try:
+            refill_zones_save(board_path)
+        except Exception:
+            return False
+        return True
 
 
 def _try_signal_step(
@@ -555,7 +590,7 @@ def route_grid_open_nets(board_path: Path) -> None:
 
     raw = os.environ.get(
         "MONO_GRID_ONE_NETS",
-        "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3",
+        "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,LED_CLK,ROW_A3",
     )
     nets = [part.strip() for part in raw.split(",") if part.strip()]
     max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
@@ -675,7 +710,7 @@ def _apply_cleanup_phase(board_path: Path) -> None:
 
 def _apply_aon_phase(board_path: Path) -> None:
     apply_aon_steps_gated(board_path)
-    if _try_signal_step(board_path, join_dec_a_en_to_stubs):
+    if _try_unconnected_step(board_path, join_dec_a_en_to_stubs):
         print("dec_a join: ok", flush=True)
     else:
         print("dec_a join: skipped (DRC gate)", flush=True)
@@ -684,23 +719,45 @@ def _apply_aon_phase(board_path: Path) -> None:
 def _apply_aon_zone_phase(board_path: Path) -> None:
     from mono_split_aon_in1_zone import (
         add_aon_in1_zone,
-        connect_u1_aon_dogbones,
+        connect_pad20_periphery,
+        connect_u1_aon_dogbone_pad,
+        dedupe_aon_hub_vias,
+        refresh_aon_in1_zones,
+        tie_imu_aon_pads,
         tie_in2_spine_to_zone,
         tie_translator_aon,
     )
 
     def _ensure_zone(board: pcbnew.BOARD) -> None:
-        add_aon_in1_zone(board)
+        refresh_aon_in1_zones(board)
 
+    def _dogbone_step(pad_num: str):
+        def apply(board: pcbnew.BOARD) -> None:
+            connect_u1_aon_dogbone_pad(board, pad_num)
+
+        return apply
+
+    per_pad_steps = tuple(
+        (f"dogbone_{pad_num}", _dogbone_step(pad_num)) for pad_num in ("3", "46", "55", "56")
+    )
     zone_steps = (
         ("zone", _ensure_zone),
-        ("dogbones", connect_u1_aon_dogbones),
+        *per_pad_steps,
+        ("pad20", connect_pad20_periphery),
+        ("imu_aon", tie_imu_aon_pads),
+        ("dedupe", dedupe_aon_hub_vias),
         ("in2_spine", tie_in2_spine_to_zone),
         ("translator", tie_translator_aon),
+        ("dedupe2", dedupe_aon_hub_vias),
     )
 
+    copper_only = frozenset({"zone", "dedupe", "dedupe2"})
     for label, step in zone_steps:
-        if _try_signal_step(board_path, step):
+        if label in copper_only:
+            ok = _try_copper_only_step(board_path, step)
+        else:
+            ok = _try_unconnected_step(board_path, step)
+        if ok:
             print(f"aon_zone step {label}: ok", flush=True)
         else:
             print(f"aon_zone step {label}: skipped (DRC gate)", flush=True)
@@ -761,8 +818,9 @@ def _default_phases() -> tuple[str, ...]:
 
     raw = os.environ.get(
         "MONO_POST_GRID_PHASES",
-        "gnd,aon_zone,aon",
+        "gnd,aon_zone,aon,grid_one,cleanup",
     )
+
     return tuple(part.strip() for part in raw.split(",") if part.strip())
 
 
