@@ -71,8 +71,7 @@ void app_main(void)
     bmi270_i2c_bus_scan();
 
     matrix_panel_init(&s_panel, MATRIX_PANEL_20X20);
-    ESP_ERROR_CHECK(power_seq_matrix_enable());
-    ESP_ERROR_CHECK(matrix_refresh_start(&s_panel));
+    /* LED rails stay OFF at boot; the console powers them on the first test/display/bright command. */
 
     /* esp_console_new_repl_*() calls esp_console_init() itself; calling it first made the
      * REPL creation fail with ESP_ERR_INVALID_STATE -> abort -> boot loop (found in QEMU). */

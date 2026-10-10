@@ -9,6 +9,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "matrix_refresh.h"
+#include "power_seq.h"
 #include "test_patterns.h"
 
 static const char *TAG = "console";
@@ -58,11 +59,71 @@ static int cmd_panel(int argc, char **argv)
     return 0;
 }
 
+static bool s_display_on;
+
+/* LED rails are powered only on demand (first test/display/bright-set command), not at boot. */
+static esp_err_t display_ensure_on(void)
+{
+    if (s_display_on) {
+        return ESP_OK;
+    }
+    ESP_LOGI(TAG, "display on demand: powering LED rails");
+    esp_err_t err = power_seq_matrix_enable();
+    if (err == ESP_OK) {
+        err = matrix_refresh_start(s_panel);
+    }
+    if (err == ESP_OK || err == ESP_ERR_INVALID_STATE) {
+        s_display_on = true;
+        return ESP_OK;
+    }
+    return err;
+}
+
+static int cmd_display(int argc, char **argv)
+{
+    if (argc < 2) {
+        printf("Display: %s\n", s_display_on ? "on" : "off");
+        return 0;
+    }
+    if (strcmp(argv[1], "on") == 0) {
+        return display_ensure_on() == ESP_OK ? 0 : 1;
+    }
+    if (strcmp(argv[1], "off") == 0) {
+        if (s_display_on) {
+            s_animator_running = false;
+            matrix_refresh_stop();
+            power_seq_matrix_disable();
+            s_display_on = false;
+        }
+        printf("Display: off (LED rails down)\n");
+        return 0;
+    }
+    printf("Usage: display [on|off]\n");
+    return 1;
+}
+
 static int cmd_test(int argc, char **argv)
 {
     if (argc < 2) {
         printf(
             "Usage: test off|all|row|col|checker|scroll|pixel <row> <col> <0|1>\n");
+        return 1;
+    }
+    if (strcmp(argv[1], "off") == 0 && !s_display_on) {
+        printf("Test pattern: off (display already off)\n");
+        return 0;
+    }
+    static const char *const modes[] = {"off", "all", "row", "col", "checker", "scroll", "pixel"};
+    bool known = false;
+    for (size_t i = 0; i < sizeof(modes) / sizeof(modes[0]); i++) {
+        known |= strcmp(argv[1], modes[i]) == 0;
+    }
+    if (!known || (strcmp(argv[1], "pixel") == 0 && argc < 5)) {
+        printf("Unknown test mode\n");
+        return 1;
+    }
+    if (display_ensure_on() != ESP_OK) {
+        printf("Display power-up failed\n");
         return 1;
     }
     if (strcmp(argv[1], "pixel") == 0 && argc >= 5) {
@@ -116,6 +177,9 @@ static int cmd_bright(int argc, char **argv)
     if (level > 255) {
         level = 255;
     }
+    if (display_ensure_on() != ESP_OK) {
+        return 1;
+    }
     matrix_refresh_set_brightness((uint8_t)level);
     printf("Brightness set to %d\n", level);
     return 0;
@@ -146,6 +210,13 @@ esp_err_t console_test_register(matrix_panel_t *panel)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&bright_cmd));
 
-    ESP_LOGI(TAG, "Console commands: panel, test, bright");
+    const esp_console_cmd_t display_cmd = {
+        .command = "display",
+        .help = "LED rails on demand: display [on|off]",
+        .func = &cmd_display,
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&display_cmd));
+
+    ESP_LOGI(TAG, "Console commands: panel, test, bright, display (LED rails off until first use)");
     return ESP_OK;
 }

@@ -9,119 +9,114 @@ load:0x403c8700,len:0x4
 load:0x403c8704,len:0xce8
 load:0x403cb700,len:0x2eb8
 entry 0x403c8918
-I (53) boot: ESP-IDF c54ee794 2nd stage bootloader
-I (54) boot: compile time Oct 11 2026 00:02:24
-I (54) boot: Multicore bootloader
-I (57) boot: chip revision: v0.3
-I (57) boot: efuse block revision: v0.0
-I (57) boot.esp32s3: Boot SPI Speed : 80MHz
-I (58) boot.esp32s3: SPI Mode       : DIO
-I (58) boot.esp32s3: SPI Flash Size : 8MB
-I (59) boot: Enabling RNG early entropy source...
-I (66) boot: Partition Table:
-I (66) boot: ## Label            Usage          Type ST Offset   Length
-I (66) boot:  0 nvs              WiFi data        01 02 00009000 00006000
-I (67) boot:  1 phy_init         RF data          01 01 0000f000 00001000
-I (67) boot:  2 factory          factory app      00 00 00010000 00100000
-I (68) boot: End of partition table
-I (69) esp_image: segment 0: paddr=00010020 vaddr=3c030020 size=0d948h ( 55624) map
-I (79) esp_image: segment 1: paddr=0001d970 vaddr=3fc94300 size=026a8h (  9896) load
-I (81) esp_image: segment 2: paddr=00020020 vaddr=42000020 size=280d8h (164056) map
-I (98) esp_image: segment 3: paddr=00048100 vaddr=3fc969a8 size=00908h (  2312) load
-I (99) esp_image: segment 4: paddr=00048a10 vaddr=40374000 size=10200h ( 66048) load
-I (105) boot: Loaded app from partition at offset 0x10000
-I (105) boot: Disabling RNG early entropy source...
-W (233) rtcinit: o_code calibration fail
+I (39) boot: ESP-IDF c54ee794 2nd stage bootloader
+I (40) boot: compile time Oct 11 2026 00:02:24
+I (40) boot: Multicore bootloader
+I (42) boot: chip revision: v0.3
+I (43) boot: efuse block revision: v0.0
+I (43) boot.esp32s3: Boot SPI Speed : 80MHz
+I (43) boot.esp32s3: SPI Mode       : DIO
+I (43) boot.esp32s3: SPI Flash Size : 8MB
+I (45) boot: Enabling RNG early entropy source...
+I (46) boot: Partition Table:
+I (47) boot: ## Label            Usage          Type ST Offset   Length
+I (47) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (47) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (47) boot:  2 factory          factory app      00 00 00010000 00100000
+I (48) boot: End of partition table
+I (49) esp_image: segment 0: paddr=00010020 vaddr=3c030020 size=0da98h ( 55960) map
+I (55) esp_image: segment 1: paddr=0001dac0 vaddr=3fc94300 size=02558h (  9560) load
+I (56) esp_image: segment 2: paddr=00020020 vaddr=42000020 size=28314h (164628) map
+I (70) esp_image: segment 3: paddr=0004833c vaddr=3fc96858 size=00a58h (  2648) load
+I (70) esp_image: segment 4: paddr=00048d9c vaddr=40374000 size=10200h ( 66048) load
+I (77) boot: Loaded app from partition at offset 0x10000
+I (77) boot: Disabling RNG early entropy source...
+W (175) rtcinit: o_code calibration fail
 
-I (118) cpu_start: Multicore app
-I (129) cpu_start: Pro cpu start user code
-I (129) cpu_start: cpu freq: 160000000 Hz
-I (129) app_init: Application information:
-I (129) app_init: Project name:     mono_split
-I (129) app_init: App version:      1
-I (129) app_init: Compile time:     Oct 11 2026 00:02:20
-I (130) app_init: ELF file SHA256:  e24947e7b...
-I (130) app_init: ESP-IDF:          c54ee794
-I (130) efuse_init: Min chip rev:     v0.0
-I (130) efuse_init: Max chip rev:     v0.99 
-I (130) efuse_init: Chip rev:         v0.3
-I (130) heap_init: Initializing. RAM available for dynamic allocation:
-I (130) heap_init: At 3FC97CA8 len 00051A68 (326 KiB): RAM
-I (130) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
-I (130) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
-I (130) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
-I (133) spi_flash: detected chip: gd
-I (134) spi_flash: flash io: dio
-I (134) sleep: Configure to isolate all GPIO pins in sleep state
-I (134) sleep: Enable automatic switching of GPIO sleep configuration
-I (139) main_task: Started on CPU0
-I (145) main_task: Calling app_main()
-I (162) mono_split: Mono split LED bring-up (ESP32-S3FN8)
-I (162) power_seq: [reset] GPIO0  GPIO0_BOOT      input/hi-Z  pad=0
-I (162) power_seq: [reset] GPIO3  PRES_N(strap3)  input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO45 GPIO45(strap)   input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO46 GPIO46(strap)   input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO18 LED_EN          input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO21 LED_LOGIC_EN    input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO44 ROW_XLAT_OE_N   input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO16 LED_OE_N        input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO41 DEC_A_EN_N      input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO42 DEC_B_EN_N      input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO6  AUDIO_EN        input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO34 RS485_TX        input/hi-Z  pad=0
-I (163) power_seq: [reset] GPIO48 FRAME_SYNC      input/hi-Z  pad=0
-I (165) gpio: GPIO[18]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (165) gpio: GPIO[21]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-W (165) power_seq: UART console build: GPIO44 (ROW_XLAT_OE_N) left as U0RXD - sim/bench only
-I (165) gpio: GPIO[13]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (165) gpio: GPIO[14]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (167) gpio: GPIO[15]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (167) gpio: GPIO[16]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (167) gpio: GPIO[39]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (167) gpio: GPIO[40]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (168) gpio: GPIO[38]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (168) gpio: GPIO[37]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (168) gpio: GPIO[41]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (168) gpio: GPIO[42]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (168) gpio: GPIO[6]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
-I (169) gpio: GPIO[34]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
-I (169) gpio: GPIO[33]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
-I (169) gpio: GPIO[48]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
-I (169) gpio: GPIO[3]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
-I (170) gpio: GPIO[47]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
-I (170) gpio: GPIO[35]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
-I (170) gpio: GPIO[26]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
-I (170) power_seq: step 1: LED_EN=0 LED_LOGIC_EN=0 XLAT_OE_N=1 AUDIO_EN=0 OE_N=1 DEC_EN_N=1; ports input+PD
-I (171) power_seq: AON assumed up (TPS7A2033); rails off, matrix blanked
-I (171) power_seq: [after init] GPIO0  GPIO0_BOOT      input/hi-Z  pad=0
-I (171) power_seq: [after init] GPIO3  PRES_N(strap3)  input/hi-Z  pad=0
-I (171) power_seq: [after init] GPIO45 GPIO45(strap)   input/hi-Z  pad=0
-I (172) power_seq: [after init] GPIO46 GPIO46(strap)   input/hi-Z  pad=0
-I (172) power_seq: [after init] GPIO18 LED_EN          input/hi-Z  pad=0
-I (172) power_seq: [after init] GPIO21 LED_LOGIC_EN    input/hi-Z  pad=0
-I (172) power_seq: [after init] GPIO44 ROW_XLAT_OE_N   input/hi-Z  pad=0
-I (172) power_seq: [after init] GPIO16 LED_OE_N        input/hi-Z  pad=0
-I (172) power_seq: [after init] GPIO41 DEC_A_EN_N      input/hi-Z  pad=0
-I (172) power_seq: [after init] GPIO42 DEC_B_EN_N      input/hi-Z  pad=0
-I (173) power_seq: [after init] GPIO6  AUDIO_EN        input/hi-Z  pad=0
-I (173) power_seq: [after init] GPIO34 RS485_TX        input/hi-Z  pad=0
-I (173) power_seq: [after init] GPIO48 FRAME_SYNC      input/hi-Z  pad=0
-W (173) mbi5124: MONO_SIM: SPI shift stubbed, LE/OE on GPIO
-I (174) gpio: GPIO[8]| InputEn: 1| OutputEn: 1| OpenDrain: 1| Pullup: 1| Pulldown: 0| Intr:0 
-I (174) gpio: GPIO[9]| InputEn: 1| OutputEn: 1| OpenDrain: 1| Pullup: 1| Pulldown: 0| Intr:0 
-W (376) mono_split: BMI270 not detected: ESP_ERR_INVALID_STATE
-W (477) mono_split: MAX17048 not detected at 0x36: ESP_ERR_INVALID_STATE
-I (477) bmi270: I2C scan (SDA=8 SCL=9):
-E (535) i2c.master: probe device timeout. Please check if xfer_timeout_ms and pull-ups are correctly set up
-E (648) i2c.master: probe device timeout. Please check if xfer_timeout_ms and pull-ups are correctly set up
+I (90) cpu_start: Multicore app
+I (101) cpu_start: Pro cpu start user code
+I (101) cpu_start: cpu freq: 160000000 Hz
+I (101) app_init: Application information:
+I (101) app_init: Project name:     mono_split
+I (101) app_init: App version:      1
+I (101) app_init: Compile time:     Oct 11 2026 00:02:20
+I (101) app_init: ELF file SHA256:  fbec6a58b...
+I (101) app_init: ESP-IDF:          c54ee794
+I (101) efuse_init: Min chip rev:     v0.0
+I (101) efuse_init: Max chip rev:     v0.99 
+I (101) efuse_init: Chip rev:         v0.3
+I (101) heap_init: Initializing. RAM available for dynamic allocation:
+I (102) heap_init: At 3FC97CB0 len 00051A60 (326 KiB): RAM
+I (102) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (102) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (102) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (105) spi_flash: detected chip: gd
+I (105) spi_flash: flash io: dio
+I (106) sleep: Configure to isolate all GPIO pins in sleep state
+I (106) sleep: Enable automatic switching of GPIO sleep configuration
+I (109) main_task: Started on CPU0
+I (114) main_task: Calling app_main()
+I (129) mono_split: Mono split LED bring-up (ESP32-S3FN8)
+I (129) power_seq: [reset] GPIO0  GPIO0_BOOT      input/hi-Z  pad=0
+I (129) power_seq: [reset] GPIO3  PRES_N(strap3)  input/hi-Z  pad=0
+I (129) power_seq: [reset] GPIO45 GPIO45(strap)   input/hi-Z  pad=0
+I (129) power_seq: [reset] GPIO46 GPIO46(strap)   input/hi-Z  pad=0
+I (129) power_seq: [reset] GPIO18 LED_EN          input/hi-Z  pad=0
+I (133) power_seq: [reset] GPIO21 LED_LOGIC_EN    input/hi-Z  pad=0
+I (133) power_seq: [reset] GPIO44 ROW_XLAT_OE_N   input/hi-Z  pad=0
+I (133) power_seq: [reset] GPIO16 LED_OE_N        input/hi-Z  pad=0
+I (133) power_seq: [reset] GPIO41 DEC_A_EN_N      input/hi-Z  pad=0
+I (133) power_seq: [reset] GPIO42 DEC_B_EN_N      input/hi-Z  pad=0
+I (135) power_seq: [reset] GPIO6  AUDIO_EN        input/hi-Z  pad=0
+I (135) power_seq: [reset] GPIO34 RS485_TX        input/hi-Z  pad=0
+I (135) power_seq: [reset] GPIO48 FRAME_SYNC      input/hi-Z  pad=0
+I (137) gpio: GPIO[18]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (138) gpio: GPIO[21]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+W (138) power_seq: UART console build: GPIO44 (ROW_XLAT_OE_N) left as U0RXD - sim/bench only
+I (138) gpio: GPIO[13]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (139) gpio: GPIO[14]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (139) gpio: GPIO[15]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (140) gpio: GPIO[16]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (140) gpio: GPIO[39]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (140) gpio: GPIO[40]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (140) gpio: GPIO[38]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (141) gpio: GPIO[37]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (141) gpio: GPIO[41]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (142) gpio: GPIO[42]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (142) gpio: GPIO[6]| InputEn: 1| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
+I (143) gpio: GPIO[34]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
+I (143) gpio: GPIO[33]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
+I (144) gpio: GPIO[48]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
+I (144) gpio: GPIO[3]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
+I (145) gpio: GPIO[47]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
+I (145) gpio: GPIO[35]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
+I (146) gpio: GPIO[26]| InputEn: 1| OutputEn: 0| OpenDrain: 0| Pullup: 0| Pulldown: 1| Intr:0 
+I (146) power_seq: step 1: LED_EN=0 LED_LOGIC_EN=0 XLAT_OE_N=1 AUDIO_EN=0 OE_N=1 DEC_EN_N=1; ports input+PD
+I (147) power_seq: AON assumed up (TPS7A2033); rails off, matrix blanked
+I (147) power_seq: [after init] GPIO0  GPIO0_BOOT      input/hi-Z  pad=0
+I (147) power_seq: [after init] GPIO3  PRES_N(strap3)  input/hi-Z  pad=0
+I (148) power_seq: [after init] GPIO45 GPIO45(strap)   input/hi-Z  pad=0
+I (148) power_seq: [after init] GPIO46 GPIO46(strap)   input/hi-Z  pad=0
+I (148) power_seq: [after init] GPIO18 LED_EN          input/hi-Z  pad=0
+I (149) power_seq: [after init] GPIO21 LED_LOGIC_EN    input/hi-Z  pad=0
+I (149) power_seq: [after init] GPIO44 ROW_XLAT_OE_N   input/hi-Z  pad=0
+I (149) power_seq: [after init] GPIO16 LED_OE_N        input/hi-Z  pad=0
+I (150) power_seq: [after init] GPIO41 DEC_A_EN_N      input/hi-Z  pad=0
+I (150) power_seq: [after init] GPIO42 DEC_B_EN_N      input/hi-Z  pad=0
+I (150) power_seq: [after init] GPIO6  AUDIO_EN        input/hi-Z  pad=0
+I (150) power_seq: [after init] GPIO34 RS485_TX        input/hi-Z  pad=0
+I (150) power_seq: [after init] GPIO48 FRAME_SYNC      input/hi-Z  pad=0
+W (151) mbi5124: MONO_SIM: SPI shift stubbed, LE/OE on GPIO
+I (152) gpio: GPIO[8]| InputEn: 1| OutputEn: 1| OpenDrain: 1| Pullup: 1| Pulldown: 0| Intr:0 
+I (153) gpio: GPIO[9]| InputEn: 1| OutputEn: 1| OpenDrain: 1| Pullup: 1| Pulldown: 0| Intr:0 
+W (358) mono_split: BMI270 not detected: ESP_ERR_INVALID_STATE
+W (458) mono_split: MAX17048 not detected at 0x36: ESP_ERR_INVALID_STATE
+I (458) bmi270: I2C scan (SDA=8 SCL=9):
+E (508) i2c.master: probe device timeout. Please check if xfer_timeout_ms and pull-ups are correctly set up
+E (558) i2c.master: probe device timeout. Please check if xfer_timeout_ms and pull-ups are correctly set up
    ... (same "probe device timeout" line repeated for every address 0x08..0x77) ...
-I (6753) bmi270: Scan complete: 0 device(s)
-I (6753) power_seq: seq t=+27 us: LED_LOGIC_EN(GPIO21)=1
-I (6759) power_seq: seq t=+5387 us: LED_EN(GPIO18)=1
-I (6769) power_seq: seq t=+15366 us: ROW_XLAT_OE_N(GPIO44)=0
-I (6770) power_seq: LED_LOGIC_3V3 and LED_4V1 enabled, row translator active
-I (6770) matrix_refresh: Refresh task: 400 Hz frame, row period 78 us (core 1)
-I (7426) console: Console commands: panel, test, bright
+I (6486) bmi270: Scan complete: 0 device(s)
+I (7240) console: Console commands: panel, test, bright, display (LED rails off until first use)
 
 
 Type 'help' to get the list of commands.
@@ -138,8 +133,8 @@ Line editing and history features are disabled.
 
 On Windows, try using Putty instead.
 
-mono>  I (7444) mono_split: Ready. Target refresh 400 Hz, row rate 12800 Hz
-I (7447) main_task: Returned from app_main()
+mono>  I (7247) mono_split: Ready. Target refresh 400 Hz, row rate 12800 Hz
+I (7254) main_task: Returned from app_main()
 help
 help  [<string>]
   Print the summary of all registered commands if no arguments are given,
@@ -155,29 +150,48 @@ test
 bright 
   Get/set brightness 0-255
 
+display 
+  LED rails on demand: display [on|off]
+
 mono>  
-mono>  test all
-Test pattern: all_on
+mono>  display
+Display: off
 mono>  
-mono>  test row
-Test pattern: row_walk
+mono>  test off
+Test pattern: off (display already off)
 mono>  
-mono>  test col
-Test pattern: col_walk
+mono>  test bogus
+Unknown test mode
+Command returned non-zero error code: 0x1 (ERROR)
 mono>  
-mono>  test checker
-Test pattern: checkerboard
-mono>  
-mono>  test pixel 3 4 1
+mono>  panel 32
+Panel geometry: 32x32
 mono>  
 mono>  bright
 Brightness: 64
 mono>  
+mono>  test all
+I (28848) console: display on demand: powering LED rails
+I (28849) power_seq: seq t=+32 us: LED_LOGIC_EN(GPIO21)=1
+I (28861) power_seq: seq t=+12072 us: LED_EN(GPIO18)=1
+I (28874) power_seq: seq t=+25071 us: ROW_XLAT_OE_N(GPIO44)=0
+I (28896) power_seq: LED_LOGIC_3V3 and LED_4V1 enabled, row translator active
+Test pattern: all_on
+mono>  
+mono>  I (28902) matrix_refresh: Refresh task: 400 Hz frame, row period 78 us (core 1)
+display
+Display: on
+mono>  
+mono>  test row
+Test pattern: row_walk
+mono>  
+mono>  test checker
+Test pattern: checkerboard
+mono>  
 mono>  bright 64
 Brightness set to 64
 mono>  
-mono>  panel 32
-Panel geometry: 32x32
+mono>  test pixel 3 4 1
 mono>  
 mono>  test scroll
 Test pattern: text_scroll
@@ -185,8 +199,23 @@ mono>
 mono>  test off
 Test pattern: off
 mono>  
-mono>  test bogus
-Unknown test mode
-Command returned non-zero error code: 0x1 (ERROR)
+mono>  display off
+I (40886) power_seq: Matrix powered down
+Display: off (LED rails down)
 mono>  
-mono>  qemu-system-xtensa: terminating on signal 15 from pid 353143 (timeout)
+mono>  display
+Display: off
+mono>  
+mono>  display on
+I (43861) console: display on demand: powering LED rails
+I (43861) power_seq: seq t=+7 us: LED_LOGIC_EN(GPIO21)=1
+I (43870) power_seq: seq t=+4195 us: LED_EN(GPIO18)=1
+I (43880) power_seq: seq t=+14116 us: ROW_XLAT_OE_N(GPIO44)=0
+I (43882) power_seq: LED_LOGIC_3V3 and LED_4V1 enabled, row translator active
+mono>  
+mono>  I (43882) matrix_refresh: Refresh task: 400 Hz frame, row period 78 us (core 1)
+display off
+I (45392) power_seq: Matrix powered down
+Display: off (LED rails down)
+mono>  
+mono>  qemu-system-xtensa: terminating on signal 15 from pid 358241 (timeout)
