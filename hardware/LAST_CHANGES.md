@@ -41,3 +41,10 @@ Optional env:
 ### Panels
 
 `mono_panel_*` remain **0/0/0**; generator restores panel PCBs from git at end of `generate_mono_split_boards.py`.
+
+### Backlog (same DRC gate)
+
+See **`hardware/MONO_ELECTRONICS_BACKLOG.md`**:
+
+1. **Full-board GND zones** on In2/B (extend past 151×137 mm; stitch at J_ROW/J_COL fan-in).
+2. **USB-C CC1/CC2** — **5.1 kΩ** pulldowns to GND (sink/UFP) for C-to-C VBUS.
