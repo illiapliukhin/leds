@@ -30,7 +30,8 @@ Optional env:
 
 - One-command generate → **`mono_electronics.kicad_pcb`**: ~**25** unconnected groups, copper **0/0**, **clearance 0** after `cleanup` (baseline clearance **1** preserved through gated steps).
 - Per-net (typical): **AON_3V3 ~13**, **GND ~5**, plus open MCU signals (**DEC_A_EN_N**, **USB_D_N_MCU**, IMU, **LED_CLK**, **ROW_A3**).
-- **AON**: In1 zone, IMU/translator In2 ties, split distant steps (`aon_ldo` / `aon_roe` / `aon_tp`); east dogbones **3/46/55/56** and **pad20** still gate-blocked (shorts/crossings).
+- **AON**: In1 zone **Y≤14.85 mm** (was 9.35), IMU/translator In2 ties, split distant steps (`aon_ldo` / `aon_roe` / `aon_tp`); east dogbones **2/3/46/55/56**; **pad20** still gate-blocked.
+- **ROW select (U1 band)**: Repacking all 12 `ROW_*_Y` In1 horizontals to y≈15.2–18.5 with 0.15/0.15 pitch conflicts with the x≈72–82 via staircase (0/0 copper breaks). Prototype **ROW_02..11 decoder→comb on In2** keeps static **0/0** but MCU grid apply hits **tracks_crossing** gate — not enabled in generator; baseline In1 fan geometry retained.
 - **Diagnostics**: `hardware/tools/aon_zone_diagnostic.py`.
 
 ### Panels
