@@ -5,7 +5,8 @@
 - Initialized as the working repository for the LEDS project.
 - The repository currently contains planning, handoff, preliminary BOM, and partial datasheet-freeze documents.
 - KiCad 10 boards with 400/784 verified LED footprints and matrix nets, common PCB architecture, generation tools, and engineering-model outputs now exist under `hardware`.
-- Schematics, non-LED footprints, driver placement/routing, firmware, mechanical, manufacturing, and test source trees are not complete.
+- **`firmware/mono_split/`** — ESP-IDF bring-up for mono split electronics (see `firmware/LAST_CHANGES.md`).
+- Schematics, non-LED footprints, mechanical, manufacturing, and full production test trees remain incomplete.
 
 ## Verification
 
