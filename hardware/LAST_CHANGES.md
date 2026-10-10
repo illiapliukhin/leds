@@ -1,5 +1,9 @@
 # Latest changes
 
+## mono_electronics v11 phase 1
+
+- Removed the last B GND sliver, DRC now 0 errors / 0 warnings / 0 unconnected (silk cleaned), 3D models for U_GAUGE, U_LED_PWR, J_ROW, J_COL, J_USB.
+
 ## mono_electronics v10 (clearances, last arcs, mounting holes)
 
 - C_MIC now 1.4 mm from the MIC1 supply pin (v10b).

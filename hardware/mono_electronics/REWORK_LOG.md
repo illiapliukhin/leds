@@ -208,3 +208,8 @@ Step 5 (TPS63802 hot loop) not done.
 
 ## v10b — C_MIC next to MIC1
 - MIC1 moved 0.8 mm south to (2.1,9.6 r180); C_MIC moved (8.3,5.1) → (0.75,6.6 r270). C_MIC VDD pad 1.43 mm centre-to-centre (0.62 mm edge gap) from MIC1 pin 6; GND pad straight to a via 0.67 mm away at (0.75,5.45). AUDIO_3V3 via moved to (1.6,7.6), feeding In1; MIC GND via moved to (2.1,11.65); MIC_OUT redrawn. Old C_MIC stubs and via removed. Gates unchanged (DRC 0/0, copcheck 0 < 0.127, 224/224 continuity).
+
+## v11 phase 1 — board leftovers
+- B.Cu GND sliver (2.6 mm², 56.6–61.7 × 2.35–2.90, one via) removed with a B-only rule area "KO_B_SLIVER" (no zone fill). Every B GND piece now has ≥2 stitching vias.
+- Silkscreen: refs of U_LED_BUF, U_LED_PWR, Y1, U1, SW1 hidden (same policy as the small labels); U1 pin-1 marker moved 0.5/0.2 mm off copper (kept); one overlapping silk segment each removed from C_LL_IN, U_AUDIO, R_F. KiCad DRC now 0 errors, 0 warnings, 0 unconnected.
+- 3D models (KiCad library, kicad-packages3D): U_GAUGE → DFN-8-1EP_2x2mm_P0.5mm_EP0.6x1.2mm; U_LED_PWR → DFN-10-1EP_2x3mm_P0.5mm_EP0.64x2.4mm; J_ROW/J_COL → Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal (the footprint is FH12 geometry); J_USB → USB_C_Receptacle_GCT_USB4105-xx-A_16P (stand-in: no HRO TYPE-C-31-M-12 model in the KiCad library; same class/size, visual only).

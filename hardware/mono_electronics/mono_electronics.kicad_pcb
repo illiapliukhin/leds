@@ -432,7 +432,7 @@
 			(uuid "cbaa0476-e286-42d1-be94-e37cc990eeb1")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm.step"
+		(model "${KICAD10_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/DFN-8-1EP_2x2mm_P0.5mm_EP0.6x1.2mm.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -1430,16 +1430,6 @@
 			)
 			(layer "F.SilkS")
 			(uuid "5186de1c-627f-4db4-9a17-9887e7aee527")
-		)
-		(fp_line
-			(start 0.735 1.085)
-			(end 0.735 1.11)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "2ee3edc7-53e0-4c97-bf21-d3b93359d4dc")
 		)
 		(fp_line
 			(start 0.735 1.11)
@@ -8862,6 +8852,7 @@
 		(property "Reference" "U_LED_BUF"
 			(at 0 -5.5 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "1629a057-8c19-409e-ac02-f8f50e672e2c")
 			(effects
 				(font
@@ -11232,6 +11223,7 @@
 		(property "Reference" "U_LED_PWR"
 			(at 0 5.5 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "f064d485-8efb-4910-aa97-ef118532c3bf")
 			(effects
 				(font
@@ -11596,7 +11588,7 @@
 			(uuid "b925c19d-88cc-4bd8-b458-ef49c4492b38")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/TDFN-10-1EP_2x3mm_P0.5mm_EP0.9x2mm.step"
+		(model "${KICAD10_3DMODEL_DIR}/Package_DFN_QFN.3dshapes/DFN-10-1EP_2x3mm_P0.5mm_EP0.64x2.4mm.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -14775,6 +14767,7 @@
 		(property "Reference" "Y1"
 			(at 0 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "92daf06a-7fd5-443f-899b-b8aed229857d")
 			(effects
 				(font
@@ -21244,6 +21237,7 @@
 		(property "Reference" "U1"
 			(at -7 -8 270)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "22c301f1-436d-4d0f-b066-d0b926421530")
 			(effects
 				(font
@@ -21382,7 +21376,7 @@
 		)
 		(fp_poly
 			(pts
-				(xy -4.14 -2.6) (xy -4.47 -2.36) (xy -4.47 -2.84)
+				(xy -3.94 -3.1) (xy -4.27 -2.86) (xy -4.27 -3.34)
 			)
 			(stroke
 				(width 0.12)
@@ -22540,16 +22534,6 @@
 		)
 		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
-		(fp_line
-			(start -0.153641 -0.38)
-			(end 0.153641 -0.38)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "a2ba77ae-58c8-4418-ae54-590370f4f1fd")
-		)
 		(fp_line
 			(start -0.153641 0.38)
 			(end 0.153641 0.38)
@@ -26627,7 +26611,7 @@
 			(uuid "b06755d9-df0c-44b7-bb2d-7e7c51d58428")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Connector_FFC-FPC.3dshapes/FFC_40P_050_COL.step"
+		(model "${KICAD10_3DMODEL_DIR}/Connector_FFC-FPC.3dshapes/Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -34343,16 +34327,6 @@
 			(layer "F.SilkS")
 			(uuid "6fe2e880-8f69-4f09-9ec4-d18fae2d3d81")
 		)
-		(fp_line
-			(start -0.107836 0.36)
-			(end 0.107836 0.36)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-			(uuid "6ed23170-b531-46e3-b63c-21419d0e4e05")
-		)
 		(fp_rect
 			(start -0.91 -0.46)
 			(end 0.91 0.46)
@@ -34866,6 +34840,7 @@
 		(property "Reference" "SW1"
 			(at 8 0 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "db3282bd-59e8-4246-8fc7-3b4b0430ce1d")
 			(effects
 				(font
@@ -42196,7 +42171,7 @@
 			(uuid "02629f80-2df7-4135-8411-76eb447d81d3")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_HRO_TYPE-C-31-M-12.step"
+		(model "${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -42975,7 +42950,7 @@
 			(uuid "419ae486-eabe-4100-9374-77b528855932")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Connector_FFC-FPC.3dshapes/FFC_40P_050_ROW.step"
+		(model "${KICAD10_3DMODEL_DIR}/Connector_FFC-FPC.3dshapes/Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -81766,6 +81741,37 @@
 				(xy 23.436467 5.537521) (xy 23.357074 5.65634) (xy 23.357069 5.656349) (xy 23.302381 5.788379) (xy 23.302379 5.788385)
 				(xy 23.2745 5.928542) (xy 23.2745 5.928545) (xy 23.2745 6.071455) (xy 23.2745 6.071457) (xy 23.274499 6.071457)
 				(xy 1 6.071457) (xy 1 1.124) (xy 1.019685 1.056961) (xy 1.072489 1.011206) (xy 1.124 1) (xy 150.876 1)
+			)
+		)
+	)
+	(zone
+		(layer "B.Cu")
+		(uuid "cfa07eb1-d816-4a33-a4f1-f3c4975d5743")
+		(name "KO_B_SLIVER")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 56.5 2.25) (xy 61.8 2.25) (xy 61.8 3) (xy 56.5 3)
 			)
 		)
 	)
