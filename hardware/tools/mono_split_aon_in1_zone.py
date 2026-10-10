@@ -13,7 +13,7 @@ from generate_mono_split_boards import (
     route_net_polyline,
 )
 
-AON_IN1_Y_MAX_MM = 9.35
+AON_IN1_Y_MAX_MM = 14.85
 AON_ZONE_VIA_Y_MM = 8.88
 AON_STUB_W_MM = 0.25
 VIA_D_MM = 0.45

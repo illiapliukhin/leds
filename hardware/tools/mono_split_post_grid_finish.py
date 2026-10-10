@@ -720,7 +720,8 @@ def _apply_aon_zone_phase(board_path: Path) -> None:
         return apply
 
     per_pad_steps = tuple(
-        (f"dogbone_{pad_num}", _dogbone_step(pad_num)) for pad_num in ("3", "46", "55", "56")
+        (f"dogbone_{pad_num}", _dogbone_step(pad_num))
+        for pad_num in ("2", "3", "46", "55", "56")
     )
     zone_steps = (
         ("zone", _ensure_zone),
