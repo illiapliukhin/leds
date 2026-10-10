@@ -569,7 +569,7 @@ def route_grid_open_nets(board_path: Path) -> None:
 
     raw = os.environ.get(
         "MONO_GRID_ONE_NETS",
-        "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,LED_CLK,ROW_A3",
+        "DEC_B_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,LED_CLK,DEC_A_EN_N",
     )
     nets = [part.strip() for part in raw.split(",") if part.strip()]
     max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)

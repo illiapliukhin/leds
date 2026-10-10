@@ -4,6 +4,8 @@ _ROW_IN2_NET = re.compile(r"^ROW_\d+_Y$")
 from matplotlib.path import Path
 from scipy import ndimage
 RES=0.1; W=1900; H=1480; LAY=['F','In1','In2','B']
+# In1 pocket reserved for AON_3V3 zone pour (matches mono_split_aon_in1_zone.MAIN_ZONE_OUTLINE_MM).
+AON_IN1_KEEPOUT_MM = [(36.0, 3.2), (67.0, 3.2), (67.0, 14.85), (36.0, 14.85)]
 TRACK_CLR = 0.075 + 0.1 + 0.05  # half 0.15 mm track + 0.1 clearance + raster slack
 VIA_CLR = 0.225 + 0.1 + 0.05
 EDGE=0.3+0.05
@@ -62,6 +64,13 @@ class Board:
         s.base_lab=s.lab.copy()
         s.newvias={}
         s.routed_paths={}
+        s.aon_in1_keepout=s._build_aon_in1_keepout()
+
+    def _build_aon_in1_keepout(s):
+        poly=Path(np.array(AON_IN1_KEEPOUT_MM))
+        i0,i1=0,W; j0,j1=0,H
+        X,Y=np.meshgrid(xs[i0:i1],ys[j0:j1])
+        return poly.contains_points(np.c_[X.ravel(),Y.ravel()]).reshape(Y.shape)
 
     def reset_lab(s):
         s.lab=s.base_lab.copy()
@@ -158,6 +167,9 @@ class Board:
         if track_r is None:
             track_r=track_radius(net)
         dist, need=s.dist(net)
+        if net != "AON_3V3" and getattr(s, "aon_in1_keepout", None) is not None:
+            dist = dist.copy()
+            dist[1][s.aon_in1_keepout] = 0.0
         if cellcost is not None:
             need_arr = need + np.clip((cellcost - 1.0) * 0.06, 0.0, 0.45).astype(np.float32)
             legal=np.ascontiguousarray((dist>=need_arr).astype(np.uint8))

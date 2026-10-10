@@ -379,6 +379,9 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
     pf_nets = set(pf_routes.get("complete_nets") or [])
     greedy_nets = set(greedy_routes.get("complete_nets") or [])
     borrow_nets = greedy_nets - pf_nets
+    if os.environ.get("MONO_AON_IN1_KEEPOUT", "0") == "1":
+        # Greedy In1 pocket routes fight AON pour; keep PathFinder-only for these.
+        borrow_nets -= {"CHIP_PU", "AUDIO_EN"}
     pf_candidate = pf_routes
 
     def _gate_routes(routes: dict) -> tuple[bool, int, int]:
