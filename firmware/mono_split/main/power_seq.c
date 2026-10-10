@@ -28,26 +28,43 @@ static void drive_safe_matrix_idle(void)
 
 esp_err_t power_seq_init(void)
 {
-    const gpio_num_t outputs[] = {
-        BOARD_PIN_GPIO_LED_EN,
-        BOARD_PIN_GPIO_LED_LOGIC_EN,
-        BOARD_PIN_GPIO_ROW_XLAT_OE_N,
-        BOARD_PIN_GPIO_LED_CLK,
-        BOARD_PIN_GPIO_LED_SDI,
-        BOARD_PIN_GPIO_LED_LE,
-        BOARD_PIN_GPIO_LED_OE_N,
-        BOARD_PIN_GPIO_ROW_A0,
-        BOARD_PIN_GPIO_ROW_A1,
-        BOARD_PIN_GPIO_ROW_A2,
-        BOARD_PIN_GPIO_ROW_A3,
-        BOARD_PIN_GPIO_DEC_A_EN_N,
-        BOARD_PIN_GPIO_DEC_B_EN_N,
-        BOARD_PIN_GPIO_AUDIO_EN,
+    /* Safe idle level per output. The level is written BEFORE the driver is enabled and no
+     * internal pull is used: gpio_reset_pin() would enable the ~45 k internal pull-up, which
+     * against the 100 k external pull-downs lifts LED_EN / LED_LOGIC_EN / AUDIO_EN to ~2.3 V
+     * for a few microseconds. */
+    const struct { gpio_num_t pin; int level; } outputs[] = {
+        {BOARD_PIN_GPIO_LED_EN, 0},
+        {BOARD_PIN_GPIO_LED_LOGIC_EN, 0},
+        {BOARD_PIN_GPIO_ROW_XLAT_OE_N, 1},
+        {BOARD_PIN_GPIO_LED_CLK, 0},
+        {BOARD_PIN_GPIO_LED_SDI, 0},
+        {BOARD_PIN_GPIO_LED_LE, 0},
+        {BOARD_PIN_GPIO_LED_OE_N, 1},
+        {BOARD_PIN_GPIO_ROW_A0, 0},
+        {BOARD_PIN_GPIO_ROW_A1, 0},
+        {BOARD_PIN_GPIO_ROW_A2, 0},
+        {BOARD_PIN_GPIO_ROW_A3, 0},
+        {BOARD_PIN_GPIO_DEC_A_EN_N, 1},
+        {BOARD_PIN_GPIO_DEC_B_EN_N, 1},
+        {BOARD_PIN_GPIO_AUDIO_EN, 0},
     };
 
     for (size_t index = 0; index < sizeof(outputs) / sizeof(outputs[0]); index++) {
-        gpio_reset_pin(outputs[index]);
-        gpio_set_direction(outputs[index], GPIO_MODE_OUTPUT);
+#if CONFIG_ESP_CONSOLE_UART
+        if (outputs[index].pin == BOARD_PIN_GPIO_ROW_XLAT_OE_N) {
+            ESP_LOGW(TAG, "UART console build: GPIO44 (ROW_XLAT_OE_N) left as U0RXD - sim/bench only");
+            continue;
+        }
+#endif
+        gpio_set_level(outputs[index].pin, outputs[index].level);
+        const gpio_config_t config = {
+            .pin_bit_mask = 1ULL << outputs[index].pin,
+            .mode = GPIO_MODE_INPUT_OUTPUT,
+            .pull_up_en = GPIO_PULLUP_DISABLE,
+            .pull_down_en = GPIO_PULLDOWN_DISABLE,
+            .intr_type = GPIO_INTR_DISABLE,
+        };
+        gpio_config(&config);
     }
 
     gpio_set_level(BOARD_PIN_GPIO_LED_EN, 0);
@@ -61,9 +78,14 @@ esp_err_t power_seq_init(void)
         BOARD_PIN_GPIO_PRES_N, BOARD_PIN_GPIO_PRES_E, BOARD_PIN_GPIO_PRES_S, BOARD_PIN_GPIO_PRES_W,
     };
     for (size_t index = 0; index < sizeof(port_inputs) / sizeof(port_inputs[0]); index++) {
-        gpio_reset_pin(port_inputs[index]);
-        gpio_set_direction(port_inputs[index], GPIO_MODE_INPUT);
-        gpio_set_pull_mode(port_inputs[index], GPIO_PULLDOWN_ONLY);
+        const gpio_config_t config = {
+            .pin_bit_mask = 1ULL << port_inputs[index],
+            .mode = GPIO_MODE_INPUT,
+            .pull_up_en = GPIO_PULLUP_DISABLE,
+            .pull_down_en = GPIO_PULLDOWN_ENABLE,
+            .intr_type = GPIO_INTR_DISABLE,
+        };
+        gpio_config(&config);
     }
     ESP_LOGI(TAG, "step 1: LED_EN=0 LED_LOGIC_EN=0 XLAT_OE_N=1 AUDIO_EN=0 OE_N=1 DEC_EN_N=1; ports input+PD");
     gpio_set_level(BOARD_PIN_GPIO_AUDIO_EN, 0);
@@ -89,8 +111,8 @@ void power_seq_log_gpio_states(const char *when)
             out_en = (REG_READ(GPIO_ENABLE1_REG) >> (pins[i] - 32)) & 1;
             out = (REG_READ(GPIO_OUT1_REG) >> (pins[i] - 32)) & 1;
         }
-        ESP_LOGI(TAG, "[%s] GPIO%-2d %-15s %s%s", when, pins[i], names[i], out_en ? "OUT=" : "input/hi-Z",
-            out_en ? (out ? "1" : "0") : "");
+        ESP_LOGI(TAG, "[%s] GPIO%-2d %-15s %s%s  pad=%d", when, pins[i], names[i], out_en ? "OUT=" : "input/hi-Z",
+            out_en ? (out ? "1" : "0") : "", gpio_get_level(pins[i]));
     }
 }
 

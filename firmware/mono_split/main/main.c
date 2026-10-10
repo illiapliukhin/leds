@@ -15,15 +15,23 @@ static const char *TAG = "mono_split";
 
 static matrix_panel_t s_panel;
 
-static void register_builtin_console(void)
+static void register_builtin_console(matrix_panel_t *panel)
 {
     esp_console_repl_t *repl = NULL;
     esp_console_repl_config_t repl_config = ESP_CONSOLE_REPL_CONFIG_DEFAULT();
     repl_config.prompt = "mono> ";
 
+#if CONFIG_ESP_CONSOLE_UART
+    /* QEMU / bench build only (sdkconfig.qemu): UART0 console. On the real board GPIO44 is ROW_XLAT_OE_N. */
+    esp_console_dev_uart_config_t hw_config = ESP_CONSOLE_DEV_UART_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_console_new_repl_uart(&hw_config, &repl_config, &repl));
+#else
     esp_console_dev_usb_serial_jtag_config_t hw_config =
         ESP_CONSOLE_DEV_USB_SERIAL_JTAG_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_console_new_repl_usb_serial_jtag(&hw_config, &repl_config, &repl));
+#endif
+    ESP_ERROR_CHECK(esp_console_register_help_command());
+    ESP_ERROR_CHECK(console_test_register(panel));
     ESP_ERROR_CHECK(esp_console_start_repl(repl));
 }
 
@@ -66,10 +74,9 @@ void app_main(void)
     ESP_ERROR_CHECK(power_seq_matrix_enable());
     ESP_ERROR_CHECK(matrix_refresh_start(&s_panel));
 
-    esp_console_config_t console_config = ESP_CONSOLE_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_console_init(&console_config));
-    ESP_ERROR_CHECK(console_test_register(&s_panel));
-    register_builtin_console();
+    /* esp_console_new_repl_*() calls esp_console_init() itself; calling it first made the
+     * REPL creation fail with ESP_ERR_INVALID_STATE -> abort -> boot loop (found in QEMU). */
+    register_builtin_console(&s_panel);
 
     ESP_LOGI(
         TAG,

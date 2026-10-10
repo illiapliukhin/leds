@@ -12,3 +12,7 @@ idf_component_register(
     INCLUDE_DIRS "."
     REQUIRES driver esp_timer esp_driver_gpio esp_driver_spi esp_driver_i2c console nvs_flash
 )
+
+if(MONO_SIM)
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE MONO_SIM=1)
+endif()

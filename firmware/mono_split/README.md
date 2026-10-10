@@ -118,6 +118,3 @@ firmware/mono_split/
   tools/          check_pins.py
   scripts/        build_local.sh, build_in_docker.sh
 ```
-
-## v8–v10 pin update (PR #4 board)
-`main/board_pins.h` now mirrors the hand-routed PCB (30 entries): ROW_A3 → GPIO37 (pad 42), ROW_XLAT_OE_N → GPIO44 (pad 50, U0RXD — has a reset pull-up, translator stays off), new GAUGE_ALRT_N GPIO1, TH_ADC GPIO2, AUDIO_ADC GPIO4, stacking ports RS485_RX GPIO33 / RS485_TX GPIO34 / FRAME_SYNC GPIO48 / PRES_N GPIO3 / PRES_E GPIO47 / PRES_S GPIO35 / PRES_W GPIO26. `power_seq_init()` parks all port pins as inputs with pull-down (the THVD1406 sits on the switched LED_LOGIC_3V3 rail, so TX must never be driven while it is off), logs GPIO states at reset/after init and timestamps each rail step; boot also probes the MAX17048 (0x36). `tools/check_pins.py`: OK (30). Built with ESP-IDF v5.3.6 (release/v5.3, as in CI), 0 warnings, image 312 kB.

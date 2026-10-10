@@ -10,6 +10,14 @@ static spi_device_handle_t s_spi_device;
 
 esp_err_t mbi5124_driver_init(void)
 {
+#ifdef MONO_SIM
+    /* QEMU: GPSPI2 is not emulated for ESP32-S3; shift register is stubbed. */
+    gpio_set_direction(BOARD_PIN_GPIO_LED_LE, GPIO_MODE_OUTPUT);
+    gpio_set_direction(BOARD_PIN_GPIO_LED_OE_N, GPIO_MODE_OUTPUT);
+    mbi5124_set_blank(true);
+    ESP_LOGW(TAG, "MONO_SIM: SPI shift stubbed, LE/OE on GPIO");
+    return ESP_OK;
+#endif
     spi_bus_config_t bus_config = {
         .mosi_io_num = BOARD_PIN_GPIO_LED_SDI,
         .miso_io_num = -1,
@@ -55,6 +63,10 @@ void mbi5124_shift_columns(const uint32_t column_bits)
         (uint8_t)(column_bits & 0xFF),
     };
 
+#ifdef MONO_SIM
+    (void)bytes;
+    return;
+#endif
     spi_transaction_t transaction = {
         .length = 32,
         .tx_buffer = bytes,
