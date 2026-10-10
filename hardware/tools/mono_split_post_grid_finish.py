@@ -27,7 +27,12 @@ from mcu_grid_drc import (
     violation_type_counts,
 )
 from mono_split_aon_in1_zone import apply_aon_in1_zone_plan
-from mono_split_copper_utils import GND_STITCH_TARGETS, dogbone_via_candidates, remove_dangling_track_stubs
+from mono_split_copper_utils import (
+    GND_STITCH_FIXED_FALLBACK,
+    GND_STITCH_TARGETS,
+    dogbone_via_candidates,
+    track_is_dangling_stub,
+)
 
 MM = 1e-6
 VIA_D_MM = 0.45
@@ -48,6 +53,10 @@ def _with_monotonic_commit(board_path: Path, phase_name: str, apply_fn) -> bool:
     """Apply phase to board_path; keep changes only if monotonic DRC gate passes."""
     backup_path = board_path.parent / f"{board_path.name}.monobak"
     shutil.copy2(board_path, backup_path)
+    try:
+        refill_zones_save(board_path)
+    except Exception:
+        pass
     before = board_metrics(board_path)
     try:
         apply_fn(board_path)
@@ -216,7 +225,46 @@ def stitch_gnd_pads_with_drc_gate(board_path: Path) -> int:
             )
             break
         if not placed:
-            print(f"gnd stitch: no legal via for {ref}:{pad_num} @ ({pad_x:.2f},{pad_y:.2f})", flush=True)
+            fixed = GND_STITCH_FIXED_FALLBACK.get((ref, pad_num))
+            if fixed is not None:
+                via_x, via_y = fixed
+                before = board_metrics(board_path)
+                with tempfile.TemporaryDirectory() as temporary_directory:
+                    trial_path = Path(temporary_directory) / board_path.name
+                    shutil.copy2(board_path, trial_path)
+                    trial = pcbnew.LoadBoard(str(trial_path))
+                    _add_gnd_stitch(trial, pad_x, pad_y, via_x, via_y)
+                    _save_board(trial, trial_path)
+                    try:
+                        refill_zones_save(trial_path)
+                    except Exception:
+                        fixed = None
+                    else:
+                        after = board_metrics(trial_path)
+                        if (
+                            not after.shorts
+                            and not after.crossings
+                            and after.unconnected < before.unconnected
+                            and monotonic_gate_allows(before, after)
+                        ):
+                            _add_gnd_stitch(board, pad_x, pad_y, via_x, via_y)
+                            _save_board(board, board_path)
+                            try:
+                                refill_zones_save(board_path)
+                            except Exception:
+                                pass
+                            accepted += 1
+                            placed = True
+                            print(
+                                f"gnd stitch {ref}:{pad_num} fixed fallback ok "
+                                f"unconnected {before.unconnected}->{after.unconnected}",
+                                flush=True,
+                            )
+            if not placed:
+                print(
+                    f"gnd stitch: no legal via for {ref}:{pad_num} @ ({pad_x:.2f},{pad_y:.2f})",
+                    flush=True,
+                )
     return accepted
 
 
@@ -320,6 +368,10 @@ def route_aon_u1_ties(board: pcbnew.BOARD) -> None:
 
 
 def apply_aon_steps_gated(board_path: Path) -> None:
+    from mono_split_aon_in1_zone import _aon_zone_exists
+
+    board = pcbnew.LoadBoard(str(board_path))
+    zone_present = _aon_zone_exists(board)
     steps = (
         ("aon_north", _aon_north_face),
         ("aon_east", _aon_east_face),
@@ -327,6 +379,8 @@ def apply_aon_steps_gated(board_path: Path) -> None:
         ("aon_pad20", _aon_pad20_pulls),
         ("aon_pad46", _aon_pad46_in1),
     )
+    if zone_present:
+        steps = tuple(step for step in steps if step[0] not in ("aon_north", "aon_in2"))
     for label, step in steps:
         if _try_signal_step(board_path, step):
             print(f"aon step {label}: ok", flush=True)
@@ -364,8 +418,11 @@ def _try_signal_step(
     *,
     max_clearance: int | None = None,
 ) -> bool:
-    if max_clearance is None:
-        max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
+    try:
+        refill_zones_save(board_path)
+    except Exception:
+        pass
+    before = board_metrics(board_path)
     with tempfile.TemporaryDirectory() as temporary_directory:
         trial_path = Path(temporary_directory) / board_path.name
         shutil.copy2(board_path, trial_path)
@@ -376,11 +433,15 @@ def _try_signal_step(
             refill_zones_save(trial_path)
         except Exception:
             return False
-        report = run_drc_report(trial_path)
-        shorts, crossings = copper_gate_counts(report)
-        clearance = violation_type_counts(report).get("clearance", 0)
-        if shorts or crossings or clearance > max_clearance:
+        after = board_metrics(trial_path)
+        if after.shorts or after.crossings:
             return False
+        if not monotonic_gate_allows(before, after):
+            return False
+        if max_clearance is not None:
+            clearance = violation_type_counts(run_drc_report(trial_path)).get("clearance", 0)
+            if clearance > max_clearance:
+                return False
         board = pcbnew.LoadBoard(str(board_path))
         apply_fn(board)
         _save_board(board, board_path)
@@ -494,7 +555,7 @@ def route_grid_open_nets(board_path: Path) -> None:
 
     raw = os.environ.get(
         "MONO_GRID_ONE_NETS",
-        "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3,GND",
+        "DEC_A_EN_N,USB_D_N_MCU,IMU_SDA,IMU_SCL,IMU_INT1,ROW_A3",
     )
     nets = [part.strip() for part in raw.split(",") if part.strip()]
     max_clearance = violation_type_counts(run_drc_report(board_path)).get("clearance", 999)
@@ -530,12 +591,68 @@ def route_open_mcu_signals(board_path: Path) -> None:
             print(f"signal step {label}: skipped (DRC gate)", flush=True)
 
 
+def _remove_dangling_stubs_gated(board_path: Path) -> int:
+    """Remove one dangling F.Cu stub at a time; keep only if monotonic DRC gate passes."""
+    accepted = 0
+    while True:
+        board = pcbnew.LoadBoard(str(board_path))
+        tracks = list(board.GetTracks())
+        candidate: pcbnew.PCB_TRACK | None = None
+        for item in tracks:
+            if item.GetClass() != "PCB_TRACK" or item.GetLayer() != pcbnew.F_Cu:
+                continue
+            start = millimeters(item.GetStart())
+            end = millimeters(item.GetEnd())
+            if (start[0] - end[0]) ** 2 + (start[1] - end[1]) ** 2 > 0.90**2:
+                continue
+            if track_is_dangling_stub(board, item, tracks=tracks):
+                candidate = item
+                break
+        if candidate is None:
+            break
+        candidate_uuid = candidate.m_Uuid
+        before = board_metrics(board_path)
+
+        def _remove_one(path: Path) -> None:
+            trial_board = pcbnew.LoadBoard(str(path))
+            for item in list(trial_board.GetTracks()):
+                if item.m_Uuid == candidate_uuid:
+                    trial_board.Remove(item)
+                    break
+            _save_board(trial_board, path)
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            trial_path = Path(temporary_directory) / board_path.name
+            shutil.copy2(board_path, trial_path)
+            _remove_one(trial_path)
+            try:
+                refill_zones_save(trial_path)
+            except Exception:
+                break
+            after = board_metrics(trial_path)
+            if not monotonic_gate_allows(before, after):
+                break
+        _remove_one(board_path)
+        try:
+            refill_zones_save(board_path)
+        except Exception:
+            break
+        accepted += 1
+    if accepted:
+        print(f"cleanup: removed {accepted} dangling track stub(s)", flush=True)
+    return accepted
+
+
 def cleanup_danglers_and_move_oe(board: pcbnew.BOARD) -> None:
-    """Nudge ROW_XLAT clearance via; delete only tracks with a floating endpoint."""
+    """Nudge ROW_XLAT clearance via; dangling stub removal runs gated on board path."""
     move_row_xlat_oe_drop_via(board, None)
-    removed = remove_dangling_track_stubs(board)
-    if removed:
-        print(f"cleanup: removed {removed} dangling track stub(s)", flush=True)
+
+
+def cleanup_danglers_and_move_oe_on_path(board_path: Path) -> None:
+    board = pcbnew.LoadBoard(str(board_path))
+    cleanup_danglers_and_move_oe(board)
+    _save_board(board, board_path)
+    _remove_dangling_stubs_gated(board_path)
 
 
 def _trial_copper_gate(board_path: Path, apply_fn) -> tuple[int, int]:
@@ -553,9 +670,7 @@ def _trial_copper_gate(board_path: Path, apply_fn) -> tuple[int, int]:
 
 
 def _apply_cleanup_phase(board_path: Path) -> None:
-    board = pcbnew.LoadBoard(str(board_path))
-    cleanup_danglers_and_move_oe(board)
-    _save_board(board, board_path)
+    cleanup_danglers_and_move_oe_on_path(board_path)
 
 
 def _apply_aon_phase(board_path: Path) -> None:
@@ -567,8 +682,28 @@ def _apply_aon_phase(board_path: Path) -> None:
 
 
 def _apply_aon_zone_phase(board_path: Path) -> None:
-    if not apply_aon_in1_zone_gated(board_path):
-        print("aon_zone: trial gate failed (board unchanged)", flush=True)
+    from mono_split_aon_in1_zone import (
+        add_aon_in1_zone,
+        connect_u1_aon_dogbones,
+        tie_in2_spine_to_zone,
+        tie_translator_aon,
+    )
+
+    def _ensure_zone(board: pcbnew.BOARD) -> None:
+        add_aon_in1_zone(board)
+
+    zone_steps = (
+        ("zone", _ensure_zone),
+        ("dogbones", connect_u1_aon_dogbones),
+        ("in2_spine", tie_in2_spine_to_zone),
+        ("translator", tie_translator_aon),
+    )
+
+    for label, step in zone_steps:
+        if _try_signal_step(board_path, step):
+            print(f"aon_zone step {label}: ok", flush=True)
+        else:
+            print(f"aon_zone step {label}: skipped (DRC gate)", flush=True)
 
 
 def _apply_grid_one_phase(board_path: Path) -> None:
@@ -582,33 +717,19 @@ def run_phase(board_path: Path, phase: str) -> dict[str, int]:
         _with_monotonic_commit(board_path, "cleanup", _apply_cleanup_phase)
         return stats
     if phase == "gnd":
-        stitch_count: list[int] = [0]
-
-        def _gnd_apply(path: Path) -> None:
-            stitch_count[0] = stitch_gnd_pads_with_drc_gate(path)
-
-        if _with_monotonic_commit(board_path, "gnd", _gnd_apply):
-            stats["gnd_stitches"] = stitch_count[0]
+        stats["gnd_stitches"] = stitch_gnd_pads_with_drc_gate(board_path)
+        stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "aon_zone":
-        if _with_monotonic_commit(board_path, "aon_zone", _apply_aon_zone_phase):
-            print("aon_zone: ok", flush=True)
-        else:
-            print("aon_zone: skipped (monotonic gate)", flush=True)
+        _apply_aon_zone_phase(board_path)
         stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "aon":
-        if _with_monotonic_commit(board_path, "aon", _apply_aon_phase):
-            print("aon: ok", flush=True)
-        else:
-            print("aon: skipped (monotonic gate)", flush=True)
+        _apply_aon_phase(board_path)
         stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "grid_one":
-        if _with_monotonic_commit(board_path, "grid_one", _apply_grid_one_phase):
-            print("grid_one: ok", flush=True)
-        else:
-            print("grid_one: skipped (monotonic gate)", flush=True)
+        _apply_grid_one_phase(board_path)
         stats["shorts"], stats["crossings"] = _copper_gate(board_path)
         return stats
     if phase == "signals":
@@ -638,7 +759,10 @@ def run_post_grid_finish(board_path: Path) -> dict[str, int]:
 def _default_phases() -> tuple[str, ...]:
     import os
 
-    raw = os.environ.get("MONO_POST_GRID_PHASES", "cleanup,gnd,aon")
+    raw = os.environ.get(
+        "MONO_POST_GRID_PHASES",
+        "gnd,aon_zone,aon",
+    )
     return tuple(part.strip() for part in raw.split(",") if part.strip())
 
 

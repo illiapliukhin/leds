@@ -12,6 +12,15 @@ ENDPOINT_TOL_MM = 0.06
 PAD_HIT_TOL_MM = 0.08
 
 # F-only GND pads that need a stitch into In2/B pours (ref, pad number).
+# Validated on baseline mono_electronics (run #7); used when dogbone search finds no candidate.
+GND_STITCH_FIXED_FALLBACK: dict[tuple[str, str], tuple[float, float]] = {
+    ("C_USB1", "2"): (16.48, 24.45),
+    ("U_ESD", "5"): (17.14, 12.45),
+    ("C_MCU1", "2"): (40.95, 14.55),
+    ("U_IMU", "6"): (62.66, 5.20),
+    ("U_IMU", "7"): (62.85, 5.96),
+}
+
 GND_STITCH_TARGETS: tuple[tuple[str, str], ...] = (
     ("SW1", "2"),
     ("U_ESD", "2"),

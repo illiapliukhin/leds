@@ -390,12 +390,26 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
             borrow_nets,
             drc_gate=_gate_routes,
         )
-        pf_complete = len(pf_candidate.get("complete_nets") or [])
-        if pf_complete > len(pf_routes.get("complete_nets") or []):
-            borrowed = sorted(set(pf_candidate.get("complete_nets") or []) - pf_nets)
+    if pf_ok and greedy_ok:
+        pf_complete_set = set(pf_candidate.get("complete_nets") or [])
+        greedy_complete_set = set(greedy_routes.get("complete_nets") or [])
+        rip_recovery = sorted(
+            (set(pf_candidate.get("incomplete_nets") or []) & greedy_complete_set)
+            - pf_complete_set
+        )
+        if rip_recovery:
+            pf_candidate = merge_greedy_one_at_a_time(
+                pf_candidate,
+                greedy_routes,
+                set(rip_recovery),
+                drc_gate=_gate_routes,
+            )
+        borrowed = sorted(set(pf_candidate.get("complete_nets") or []) - pf_nets)
+        if borrowed:
             pf_candidate["route_engine"] = (
                 f"pathfinder+greedy({','.join(borrowed)})"
             )
+    pf_complete = len(pf_candidate.get("complete_nets") or [])
     if pf_ok and pf_complete >= greedy_complete:
         chosen = pf_candidate
         chosen_label = pf_candidate.get("route_engine", "pathfinder")
@@ -460,21 +474,31 @@ def run_mcu_grid_pipeline(board_path: Path) -> None:
             for key, value in os.environ.items()
             if key not in ("PYTHONHOME", "PYTHONPATH", "LD_LIBRARY_PATH")
         }
-        post_env.setdefault("MONO_POST_GRID_PHASES", "cleanup,gnd,aon")
+        post_env.setdefault(
+            "MONO_POST_GRID_PHASES",
+            "gnd,aon_zone,aon",
+        )
         subprocess.run(
             [str(kicad_python), str(post_script), str(board_path)],
             check=False,
             env=post_env,
         )
         after_post_grid = board_metrics(board_path)
-        if not monotonic_gate_allows(before_post_grid, after_post_grid):
+        if after_post_grid.shorts or after_post_grid.crossings:
+            if post_grid_backup is not None:
+                shutil.copy2(post_grid_backup, board_path)
+            print(
+                "post-grid reverted (copper gate): "
+                f"shorts={after_post_grid.shorts} crossings={after_post_grid.crossings}",
+                flush=True,
+            )
+        elif not monotonic_gate_allows(before_post_grid, after_post_grid):
             if post_grid_backup is not None:
                 shutil.copy2(post_grid_backup, board_path)
             print(
                 "post-grid reverted (monotonic gate): "
                 f"unconnected {before_post_grid.unconnected}->{after_post_grid.unconnected} "
-                f"clearance {before_post_grid.clearance}->{after_post_grid.clearance} "
-                f"shorts={after_post_grid.shorts} crossings={after_post_grid.crossings}",
+                f"clearance {before_post_grid.clearance}->{after_post_grid.clearance}",
                 flush=True,
             )
         elif post_grid_backup is not None:

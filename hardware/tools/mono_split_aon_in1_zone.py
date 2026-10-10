@@ -107,11 +107,27 @@ def _stub_f_to_zone_y(board: pcbnew.BOARD, x_mm: float, y_start: float, y_end: f
     _via_into_zone(board, bus_x, y_end)
 
 
+def _north_pad_outward_to_zone(board: pcbnew.BOARD, pad_x: float, pad_y: float) -> None:
+    """Escape north-face AON pads toward −Y (away from EP), then via into In1 zone."""
+    target_y = min(pad_y - 0.35, AON_IN1_Y_MAX_MM - 0.15)
+    target_y = max(target_y, 4.05)
+    if _via_exists(board, pad_x, target_y, "AON_3V3"):
+        return
+    route_net_polyline(
+        board,
+        "AON_3V3",
+        pcbnew.F_Cu,
+        [(pad_x, pad_y), (pad_x, target_y)],
+        AON_STUB_W_MM,
+    )
+    _via_into_zone(board, pad_x, target_y)
+
+
 def connect_u1_aon_dogbones(board: pcbnew.BOARD) -> None:
     u1 = footprint_by_reference(board, "U1")
     for pad_num in U1_AON_NORTH:
         pad_x, pad_y = millimeters(get_pad(u1, pad_num).GetPosition())
-        _stub_f_to_zone_y(board, pad_x, pad_y)
+        _north_pad_outward_to_zone(board, pad_x, pad_y)
     # Pads 20/29/46/55/56: legacy post-grid `aon` phase (F/In2 escapes).
 
 
@@ -133,4 +149,6 @@ def connect_periphery_aon_stubs(board: pcbnew.BOARD) -> None:
 def apply_aon_in1_zone_plan(board: pcbnew.BOARD) -> None:
     add_aon_in1_zone(board)
     connect_u1_aon_dogbones(board)
+    tie_in2_spine_to_zone(board)
+    tie_translator_aon(board)
     connect_periphery_aon_stubs(board)
