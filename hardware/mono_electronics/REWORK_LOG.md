@@ -143,3 +143,10 @@ Step 5 (TPS63802 hot loop) not done.
 - No block moves (no clean empty bands inside the content). Edge.Cuts 190x148 -> 187x99.5 mm (square corners, no mounting holes on the board). J_USB stays on the west edge, J_ROW/J_COL 2 mm from the east edge.
 - GND In2/B zone outlines clipped to 0.5..186.5 x 0.5..99.0; 118 stitch vias outside removed; LED_4V1/AON already inside.
 - Removed obsolete Dwgs.User note "SCAN AND IMU SIGNAL RESERVE" (reserve pads deleted in step 8).
+
+## Step 11: connectors west (2026-10-10, not committed)
+- J_ROW moved 19.6 mm west to (162.4, 22); its 32 F fan-in tracks shortened by 19.6 mm each.
+- J_COL moved to (162.4, 68.6) (19.6 mm west, 6.6 mm south); the COL fan (In1 run, B riser, F stub) shifted rigidly 19.6 mm west, with the riser tops 6.6 mm lower so they clear the anode B lanes (x <= 156.2, y <= 58.35).
+- Edge.Cuts 187 x 99.5 -> 167.4 x 99.5 mm; GND In2/B clipped; 21 + 27 stitch vias in moved/cut areas removed; B GND pieces all still >= 2 vias.
+- Branding (Cmts.User text "PCB CREATED BY ILLIA PLIUKHIN" + star) moved into the free bottom strip at x=40, y=96-98.7 (no parts or pads below y=93.5, board not grown). Stale Dwgs.User boxes and notes removed (12 lines, "BRANDING KEEPOUT", "MCU PIN ESCAPE").
+- Full DRC: 0 errors, 0 unconnected, 13 warnings (silk_over_copper 7, silk_overlap 6), 0 parts on B.

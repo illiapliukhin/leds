@@ -1,5 +1,14 @@
 # Latest changes
 
+## Mono electronics: connectors moved west, board 167.4 x 99.5 mm (PR #4, 2026-10-10)
+
+- J_ROW -> (162.4, 22) and J_COL -> (162.4, 68.6): still on the right edge, cable exit right, pinout unchanged. Row fan-in shortened 19.6 mm per net; the COL fan was moved with J_COL as one block.
+- Edge.Cuts 187 x 99.5 -> **167.4 x 99.5 mm** (-40.8 % vs. the original 190 x 148). Total track length 16.93 -> 15.47 m; worst LED anode drop 117.6 -> **107.3 mV**.
+- GND In2/B clipped and refilled; every B GND piece has >= 2 vias to In2.
+- Branding text + star (Cmts.User) moved into the bottom strip inside the board; stale Dwgs.User boxes removed.
+- KiCad 10 DRC: 0 errors, 0 unconnected, 0 parts on B; 13 silk warnings. Image: `hardware/mono_electronics/img/v3_F.png`.
+
+
 ## Mono electronics: board outline shrunk to 187 x 99.5 mm (PR #4, 2026-10-10)
 
 - Edge.Cuts 190 x 148 mm -> **187 x 99.5 mm** (-9,514 mm2, ~34 %). The south band y 97-148 and the strip x 185-190 were empty; no blocks moved, routing unchanged.
