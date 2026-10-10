@@ -1,5 +1,22 @@
 # Latest changes
 
+## Mono electronics: hand-routed board is now the source of truth (PR #4, 2026-10-10)
+
+`hardware/mono_electronics/mono_electronics.kicad_pcb` was reworked by hand (pcbnew API, one gated change at a time: 0 shorts / 0 crossings / 0 clearance / 0 unconnected, no net relabels, dangling count not increasing, no parts on B.Cu). **The generator output no longer matches this board**; update the generator/schematic from `hardware/mono_electronics/REWORK_LOG.md` before regenerating.
+
+Final state (KiCad 10 DRC, all severities): **0 errors, 0 unconnected**; warnings: silk_over_copper 7, silk_overlap 6. 184 footprints, **all on F.Cu** (single-sided assembly).
+
+Main changes:
+- Netlist fixes: USBLC6 pinout (D-, VBUS, GND), **R_CC1/R_CC2 5.1k** CC pull-downs, BMI270 SDO->GND / CSB->VDDIO + 4.7k I2C pull-ups, translator EP->GND. MIC1, U_AUDIO, U_GAUGE, TH_PCB removed (deferred); AUDIO_EN kept.
+- Decoupling for MBI5124, 74HC154, LVC8T245, LV125A, BMI270, TPS22917 output, ESP32-S3 (per Espressif guide), 24 nH on XTAL_P; CHIP_PU RC at the pin. All former bottom-side parts moved to the top.
+- LED power: LED_4V1 pour on In1, anodes rerouted short on B/F: worst row drop **722 mV -> 117.6 mV** at 0.32 A.
+- TPS63802: L/Cin/Cout within ~2 mm, double GND vias, EP vias; output-cap GND -> IC GND **33.6 -> 1.26 mOhm**.
+- **In2 = continuous GND plane** (one piece, full outline); signal copper on In2 **4297 mm -> 27.6 mm** (IMU_INT1 19.7 mm, VBUS 7.9 mm, accepted). B GND pour full outline, every piece >= 2 vias, ~260 stitching vias.
+- USB D+/D- fully on F, length-matched (A: 57.03/56.93 mm, B: 54.47/54.06 mm). The single crossing is between R_USB_P's pads (topologically required on one layer).
+- Reserve pads RP01-RP16 and their stubs removed; LED_CLK/SDI pull-downs moved to the buffer; detours smoothed, duplicate/dangling copper removed.
+- Images: `hardware/mono_electronics/img/final_F.png`, `final_In2.png`, `final_mcu_F.png`.
+
+
 ## Mono split boards (PR #4) — clearance gate + one-command generate (2026-10-10)
 
 ### Reproduce (single command)
