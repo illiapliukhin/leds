@@ -1,0 +1,1998 @@
+(kicad_sch
+  (version 20260306)
+  (generator "mono_schematic")
+  (generator_version "1.0")
+  (uuid "e790a4f6-2313-4304-b0d6-2421c82f7785")
+  (paper "A3")
+  (title_block
+    (title "Factory / firmware reserve pads")
+    (date "2026-10-10")
+    (rev "EVT")
+    (comment 1 "Generated from mono_electronics.kicad_pcb pad nets")
+    (comment 2 "Cross-check: hardware/mono_schematic/tools/compare_sch_pcb_nets.py")
+  )
+  (lib_symbols
+    (symbol
+      "mono_parts:IMU_SDA_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "IMU_SDA")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:IMU_SCL_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "IMU_SCL")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:IMU_INT1_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "IMU_INT1")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:LED_CLK_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "LED_CLK")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:LED_SDI_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "LED_SDI")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:LED_LE_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "LED_LE")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:LED_OE_N_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "LED_OE_N")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:ROW_A0_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "ROW_A0")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:ROW_A1_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "ROW_A1")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:ROW_A2_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "ROW_A2")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:ROW_A3_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "ROW_A3")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:DEC_A_EN_N_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "DEC_A_EN_N")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:DEC_B_EN_N_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "DEC_B_EN_N")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:ROW_XLAT_OE_N_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "ROW_XLAT_OE_N")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:LED_EN_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "LED_EN")
+        (number "1")
+      )
+    )
+    (symbol
+      "mono_parts:LED_LOGIC_EN_R_0402_1005Metric_1"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "LED_LOGIC_EN")
+        (number "1")
+      )
+    )
+    (symbol
+      "power:GND"
+      (pin
+        power_in
+        line
+        (at -5.08 0.0 180)
+        (length 0)
+        (name "GND")
+        (number "1")
+      )
+    )
+    (symbol
+      "power:PWR_FLAG"
+      (pin
+        power_out
+        line
+        (at 0 0 0)
+        (length 0)
+        (hide yes)
+        (name "pwr")
+        (number "1")
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:GND")
+    (at 15.24 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "d2591098-91bd-4689-9b17-23b50ba4268f")
+    (property
+      "Reference"
+      "#PWR01"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "GND"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 15.24 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "#PWR01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 21.59 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "6c2fd300-6b5d-4e3e-861d-aec6456811d8")
+    (property
+      "Reference"
+      "#FLG01"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 21.59 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "#FLG01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 29.21 15.24 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "2ca21eff-6eb4-4bac-b067-9ac5076cddc4")
+    (property
+      "Reference"
+      "#FLG02"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "~"
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 29.21 15.24 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "#FLG02")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:IMU_SDA_R_0402_1005Metric_1")
+    (at 35.56 35.56 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "6776e6b8-66c4-442c-b77f-ebe838b2f3dc")
+    (property
+      "Reference"
+      "RP01"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "IMU_SDA"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 35.56 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "77fcd8eb-c526-4236-9e07-c2c902893dd0"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP01")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:IMU_SCL_R_0402_1005Metric_1")
+    (at 81.28 35.56 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "740e2bdf-c274-4e5e-b3d8-60910232e696")
+    (property
+      "Reference"
+      "RP02"
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "IMU_SCL"
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 81.28 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "e6644a00-26a4-479f-8802-80168ed1f87f"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP02")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:IMU_INT1_R_0402_1005Metric_1")
+    (at 127 35.56 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "34c7623d-a440-4ee9-b495-cc710a93e1a8")
+    (property
+      "Reference"
+      "RP03"
+      (at 127 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "IMU_INT1"
+      (at 127 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 127 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 127 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "d8487b47-405f-4e3a-b8dd-a80054ef7e42"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP03")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:LED_CLK_R_0402_1005Metric_1")
+    (at 172.72 35.56 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "7c3e4d3f-a601-43fc-a7fc-0be3f9c4acb8")
+    (property
+      "Reference"
+      "RP04"
+      (at 172.72 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "LED_CLK"
+      (at 172.72 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 172.72 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 172.72 35.56 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "121d0abf-d48f-461f-b3e7-a4529e8afa5c"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP04")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:LED_SDI_R_0402_1005Metric_1")
+    (at 35.56 91.44 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "488e0d66-ba0b-4987-860e-3ea72384c58f")
+    (property
+      "Reference"
+      "RP05"
+      (at 35.56 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "LED_SDI"
+      (at 35.56 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 35.56 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 35.56 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "bf1f1eed-3215-4c51-9293-5e55e53044ed"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP05")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:LED_LE_R_0402_1005Metric_1")
+    (at 81.28 91.44 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "011e7d13-456c-47ef-a5ca-f1bc5bad207c")
+    (property
+      "Reference"
+      "RP06"
+      (at 81.28 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "LED_LE"
+      (at 81.28 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 81.28 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 81.28 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "c1ece74f-861e-40cc-98f0-de018ec960bc"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP06")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:LED_OE_N_R_0402_1005Metric_1")
+    (at 127 91.44 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "0379939c-ab0d-45b7-9388-ace53e6bbd73")
+    (property
+      "Reference"
+      "RP07"
+      (at 127 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "LED_OE_N"
+      (at 127 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 127 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 127 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "a42feb6f-a528-48f1-8dd0-66a667b164e7"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP07")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:ROW_A0_R_0402_1005Metric_1")
+    (at 172.72 91.44 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "35907cbf-23f1-47ba-96f1-a7ef028748a8")
+    (property
+      "Reference"
+      "RP08"
+      (at 172.72 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "ROW_A0"
+      (at 172.72 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 172.72 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 172.72 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "d1b81316-b9a2-4174-bfe7-46d978969c86"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP08")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:ROW_A1_R_0402_1005Metric_1")
+    (at 35.56 147.32 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "7d532337-a451-4f69-af8a-8a95238d2d17")
+    (property
+      "Reference"
+      "RP09"
+      (at 35.56 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "ROW_A1"
+      (at 35.56 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 35.56 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 35.56 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "43134971-9dc3-4665-906d-ef64c3dfe018"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP09")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:ROW_A2_R_0402_1005Metric_1")
+    (at 81.28 147.32 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "80e2bb19-1bc7-40dc-bec2-d48892378c75")
+    (property
+      "Reference"
+      "RP10"
+      (at 81.28 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "ROW_A2"
+      (at 81.28 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 81.28 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 81.28 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "350b2d1d-5005-4c76-a752-8a297e071749"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP10")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:ROW_A3_R_0402_1005Metric_1")
+    (at 127 147.32 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "3fc7c358-b909-4f23-93ae-c7650308000a")
+    (property
+      "Reference"
+      "RP11"
+      (at 127 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "ROW_A3"
+      (at 127 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 127 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 127 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "07a6971a-8158-4eac-a9b3-258e63870871"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP11")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:DEC_A_EN_N_R_0402_1005Metric_1")
+    (at 172.72 147.32 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "6f670c1d-30a8-4092-bec8-acb474e0426f")
+    (property
+      "Reference"
+      "RP12"
+      (at 172.72 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "DEC_A_EN_N"
+      (at 172.72 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 172.72 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 172.72 147.32 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "99d84193-3927-456e-9095-f04f6d1e0c1f"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP12")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:DEC_B_EN_N_R_0402_1005Metric_1")
+    (at 35.56 203.2 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "122ded52-cf04-4366-85d7-8c91395f973a")
+    (property
+      "Reference"
+      "RP13"
+      (at 35.56 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "DEC_B_EN_N"
+      (at 35.56 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 35.56 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 35.56 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "fa75599b-4483-46d4-854b-7083727ebe0d"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP13")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:ROW_XLAT_OE_N_R_0402_1005Metric_1")
+    (at 81.28 203.2 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "7bd6787e-ba62-4a6a-b481-faa1c2545abb")
+    (property
+      "Reference"
+      "RP14"
+      (at 81.28 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "ROW_XLAT_OE_N"
+      (at 81.28 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 81.28 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 81.28 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "ce920208-da5a-472a-bf68-b933f551bca1"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP14")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:LED_EN_R_0402_1005Metric_1")
+    (at 127 203.2 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "45c483f4-8537-4be3-8f96-1276f5d2aa63")
+    (property
+      "Reference"
+      "RP15"
+      (at 127 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "LED_EN"
+      (at 127 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 127 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 127 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "8a636225-1810-40cc-924c-4f87906075f1"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP15")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (symbol
+    (lib_id "mono_parts:LED_LOGIC_EN_R_0402_1005Metric_1")
+    (at 172.72 203.2 0)
+    (unit 1)
+    (body_style 1)
+    (exclude_from_sim no)
+    (in_bom yes)
+    (on_board yes)
+    (in_pos_files yes)
+    (dnp no)
+    (uuid "58b7dc2c-2776-4f08-a63e-d693506db835")
+    (property
+      "Reference"
+      "RP16"
+      (at 172.72 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Value"
+      "LED_LOGIC_EN"
+      (at 172.72 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property
+      "Footprint"
+      "R_0402_1005Metric"
+      (at 172.72 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (property
+      "Datasheet"
+      ""
+      (at 172.72 203.2 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+      (hide yes)
+    )
+    (pin "1" (uuid "7c680220-bf3e-49ef-b15a-0c57a42d4e05"))
+    (instances
+      (project "mono_electronics"
+        (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+          (reference "RP16")
+          (unit 1)
+        )
+      )
+    )
+  )
+  (wire
+    (pts
+      (xy 10.16 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "90977040-38bf-434a-b4e2-0fe5900709d7")
+  )
+  (wire
+    (pts
+      (xy 21.59 15.24)
+      (xy 3.81 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "12d2ce9b-4ada-4976-a032-d1bd385dd4bf")
+  )
+  (wire
+    (pts
+      (xy 29.21 15.24)
+      (xy 35.56 15.24)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "8f7d5319-1363-4b62-b823-cea95ff1edd6")
+  )
+  (wire
+    (pts
+      (xy 30.48 35.56)
+      (xy 24.13 35.56)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "12be9865-24e6-470a-8f1a-96a1b06b2ab6")
+  )
+  (wire
+    (pts
+      (xy 76.2 35.56)
+      (xy 69.85 35.56)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "468c239d-e6ed-4d9e-8fd4-2b477d015561")
+  )
+  (wire
+    (pts
+      (xy 121.92 35.56)
+      (xy 115.57 35.56)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "d08b37ba-f45d-4af8-a580-2e9639490412")
+  )
+  (wire
+    (pts
+      (xy 167.64 35.56)
+      (xy 161.29 35.56)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "16f640cb-eb7f-470d-b148-b75e02fec103")
+  )
+  (wire
+    (pts
+      (xy 30.48 91.44)
+      (xy 24.13 91.44)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "1b781cf4-8110-4155-9de6-e43734ffa1c5")
+  )
+  (wire
+    (pts
+      (xy 76.2 91.44)
+      (xy 69.85 91.44)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "ca159371-dc38-4625-becb-396376e5aebc")
+  )
+  (wire
+    (pts
+      (xy 121.92 91.44)
+      (xy 115.57 91.44)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "d30fcfea-ee9a-4ceb-a0ca-6b1ddfa2c257")
+  )
+  (wire
+    (pts
+      (xy 167.64 91.44)
+      (xy 161.29 91.44)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "6c18b07f-308b-4369-89a1-e225d63f2fab")
+  )
+  (wire
+    (pts
+      (xy 30.48 147.32)
+      (xy 24.13 147.32)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "42070f66-2d31-415b-9c9b-87f742dafee9")
+  )
+  (wire
+    (pts
+      (xy 76.2 147.32)
+      (xy 69.85 147.32)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "2587b899-000a-4ccf-b7da-a1d6e5f55ab3")
+  )
+  (wire
+    (pts
+      (xy 121.92 147.32)
+      (xy 115.57 147.32)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "93d0c58f-d878-4031-8920-72807f9926f0")
+  )
+  (wire
+    (pts
+      (xy 167.64 147.32)
+      (xy 161.29 147.32)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "da5f20fe-405f-4573-804b-9a213f6bf504")
+  )
+  (wire
+    (pts
+      (xy 30.48 203.2)
+      (xy 24.13 203.2)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "60501c27-f347-40ff-86a1-eb10bd1721c1")
+  )
+  (wire
+    (pts
+      (xy 76.2 203.2)
+      (xy 69.85 203.2)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "0c034900-57b6-4ef1-ac22-c8df4b146afd")
+  )
+  (wire
+    (pts
+      (xy 121.92 203.2)
+      (xy 115.57 203.2)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "969121fe-a03f-479f-a45f-31276920303b")
+  )
+  (wire
+    (pts
+      (xy 167.64 203.2)
+      (xy 161.29 203.2)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "02bf13d2-9558-42cc-b647-9f3d7f74eec1")
+  )
+  (label "GND"
+    (at 3.81 15.24 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "29e3b149-51f6-4ae5-a11a-0e79cc6c39dd")
+  )
+  (label "VBUS"
+    (at 35.56 15.24 0)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "ea03fcc3-f85f-4c1d-b235-7decf8cfa74e")
+  )
+  (label "IMU_SDA"
+    (at 24.13 35.56 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "ee1350e7-70a2-44cd-b6b7-fbc6e7ef053f")
+  )
+  (label "IMU_SCL"
+    (at 69.85 35.56 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "c670d521-a3ff-42c0-b65c-aa758f9356db")
+  )
+  (label "IMU_INT1"
+    (at 115.57 35.56 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "28297730-efc0-4af3-978b-2fbac8f2a9ee")
+  )
+  (label "LED_CLK"
+    (at 161.29 35.56 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "c96248a4-197c-430c-b482-3ab4998d4191")
+  )
+  (label "LED_SDI"
+    (at 24.13 91.44 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "0287fcde-2d76-47e8-ac2a-408ba082477e")
+  )
+  (label "LED_LE"
+    (at 69.85 91.44 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "dd5739dc-76fa-4b18-86c6-d86532a6cd98")
+  )
+  (label "LED_OE_N"
+    (at 115.57 91.44 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "537a6a46-45b6-401c-9e18-87aa793a1adc")
+  )
+  (label "ROW_A0"
+    (at 161.29 91.44 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "2ae870a7-6a71-4c2e-83e4-9ec48ad511be")
+  )
+  (label "ROW_A1"
+    (at 24.13 147.32 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "4743bb2e-ff15-4340-873a-eadc26479c25")
+  )
+  (label "ROW_A2"
+    (at 69.85 147.32 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "d25fceb9-1e2d-48ae-b91c-b759100d74e4")
+  )
+  (label "ROW_A3"
+    (at 115.57 147.32 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "5696a04f-c83b-40bc-bfed-c0cba9759798")
+  )
+  (label "DEC_A_EN_N"
+    (at 161.29 147.32 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "69b9f8f0-c70a-44a7-9478-89d7950d9e67")
+  )
+  (label "DEC_B_EN_N"
+    (at 24.13 203.2 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "f3611d76-3afa-4179-b657-0103b38ab47d")
+  )
+  (label "ROW_XLAT_OE_N"
+    (at 69.85 203.2 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "0db699dc-d65c-44d6-92d3-fde8b8585614")
+  )
+  (label "LED_EN"
+    (at 115.57 203.2 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "909723b5-3ceb-40a1-a3b5-beca74bd3df2")
+  )
+  (label "LED_LOGIC_EN"
+    (at 161.29 203.2 180)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify left bottom)
+    )
+    (uuid "9855e6d8-bde2-4dcf-9bde-8059b361b98b")
+  )
+  (junction
+    (at 30.48 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "16c9279a-9a1e-4478-bbd4-485986e3b354")
+  )
+  (junction
+    (at 24.13 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "9731d7d1-f86b-41e0-ae63-a93339d5270e")
+  )
+  (junction
+    (at 76.2 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "fe05444b-3698-43b8-a469-f62cb5f242e2")
+  )
+  (junction
+    (at 69.85 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "b6af6143-fbec-4a55-a319-adb991cca089")
+  )
+  (junction
+    (at 121.92 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "ec30cda5-b1f9-4a85-bc5f-1304a8d5e691")
+  )
+  (junction
+    (at 115.57 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "720af659-83b2-4747-b67b-03ed51ef8647")
+  )
+  (junction
+    (at 167.64 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "63d612e8-04d7-41be-8aeb-af842abfbe85")
+  )
+  (junction
+    (at 161.29 35.56)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "08c8a99d-b6e6-470b-a260-cf03eef15b3b")
+  )
+  (junction
+    (at 30.48 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "b15b61f6-bc99-4b21-b797-707556926192")
+  )
+  (junction
+    (at 24.13 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "125cca3e-211d-4b81-bfa5-d7e1bc956fb2")
+  )
+  (junction
+    (at 76.2 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "8a5ceaa2-9a52-49c2-bc8f-ff094ef57e38")
+  )
+  (junction
+    (at 69.85 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "090839a7-09a6-4286-aecf-7fa7ca71cb2f")
+  )
+  (junction
+    (at 121.92 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "8e6a6173-ba9a-4929-8153-57b6a946f7b1")
+  )
+  (junction
+    (at 115.57 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "801ea043-41bf-43c7-9b4c-7ed037f37700")
+  )
+  (junction
+    (at 167.64 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "495ca7cb-45df-4b0e-93d4-f34296ecbdb5")
+  )
+  (junction
+    (at 161.29 91.44)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "420771b1-5559-4b07-bded-4aa68eebfaec")
+  )
+  (junction
+    (at 30.48 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "2e06aa86-c9a6-4b08-a8d3-15678dfd2b8f")
+  )
+  (junction
+    (at 24.13 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "c9fc15ad-53c3-423d-ba41-6c7388a3aafe")
+  )
+  (junction
+    (at 76.2 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "d77510e1-afd1-4464-a826-63456de7ca0b")
+  )
+  (junction
+    (at 69.85 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "58db68e0-d2ea-481a-9f75-7b2e620b40a1")
+  )
+  (junction
+    (at 121.92 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "fc674a52-17f9-4059-904f-af44f3da409c")
+  )
+  (junction
+    (at 115.57 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "a3d4c7a3-f3d6-4919-91b3-952be7027e07")
+  )
+  (junction
+    (at 167.64 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "10972b74-9d1b-4968-9ce3-47fd6ed512fb")
+  )
+  (junction
+    (at 161.29 147.32)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "16b19005-ff2d-4007-ace3-2af7cb518127")
+  )
+  (junction
+    (at 30.48 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "79e6ecda-e347-437b-9a28-e493a830bcaf")
+  )
+  (junction
+    (at 24.13 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "35a36012-2103-462c-9099-a57555f69f4d")
+  )
+  (junction
+    (at 76.2 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "c2bb1d87-f833-4569-8b2d-1b87737888ca")
+  )
+  (junction
+    (at 69.85 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "453a312b-b014-4dca-ae43-436f3ab935bc")
+  )
+  (junction
+    (at 121.92 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "15aa46cf-a35f-4b79-acfb-3a9589ff6f7c")
+  )
+  (junction
+    (at 115.57 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "20766a22-8783-4e62-bee5-448adb772ed4")
+  )
+  (junction
+    (at 167.64 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "c9c4cb8d-9caf-4b2a-b4c7-47ba61ec57d9")
+  )
+  (junction
+    (at 161.29 203.2)
+    (diameter 0)
+    (color 0 0 0 0)
+    (uuid "e392b45b-1b8c-434c-9638-0865e42f76cc")
+  )
+  (sheet_instances
+    (path "/03d375a9-87f9-48da-a627-dcdd65c20f78"
+      (page "1")
+    )
+  )
+)

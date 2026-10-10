@@ -1,5 +1,10 @@
 # Latest changes
 
+## Mono schematic + fab tooling (2026-10-10)
+
+- **`hardware/mono_schematic/`** — programmatic KiCad 10 hierarchical schematic for `mono_electronics` (181 refs, pad nets from committed PCB). Regenerate: `python3.11 hardware/mono_schematic/tools/generate_mono_schematic.py`. Cross-check: `compare_sch_pcb_nets.py` (181/181 match). ERC: `tools/run_erc.sh` (see `ERC_WAIVERS.md`). Design report: `DESIGN_ISSUES.md`.
+- **`manufacturing/mono_split/`** — `tools/make_fab.sh` → Gerbers, drill, CPL (`positions.csv`), BOM CSV, PDF/SVG. Committed **READY** packages for `mono_panel_20x20` and `mono_panel_32x32`; `mono_electronics` dry-run only (`output/mono_electronics_NOT_READY/`, gitignored).
+
 ## Mono split boards (PR #4) — clearance gate + one-command generate (2026-10-10)
 
 ### Reproduce (single command)
