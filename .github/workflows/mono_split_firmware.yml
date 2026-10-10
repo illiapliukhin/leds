@@ -24,5 +24,6 @@ jobs:
         run: python3 tools/check_pins.py
       - name: Build
         run: |
+          . "${IDF_PATH}/export.sh"
           idf.py set-target esp32s3
           idf.py build

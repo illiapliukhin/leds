@@ -9,4 +9,4 @@
 - Power sequencing: LED_LOGIC_EN → LED_EN → row translator enable, OE blanked until rails up.
 - BMI270 chip ID read + I2C bus scan on boot.
 - USB Serial/JTAG console: panel geometry, test patterns, per-pixel set, brightness.
-- CI: `.github/workflows/mono_split_firmware.yml` (Espressif IDF Docker image).
+- CI: `.github/workflows/mono_split_firmware.yml` (Espressif IDF Docker image); Build step sources `${IDF_PATH}/export.sh` before `idf.py`.
