@@ -10,6 +10,8 @@
 #include "freertos/task.h"
 #include "matrix_refresh.h"
 #include "power_seq.h"
+#include "demo.h"
+#include "sim_scan.h"
 #include "test_patterns.h"
 
 static const char *TAG = "console";
@@ -79,6 +81,33 @@ static esp_err_t display_ensure_on(void)
     return err;
 }
 
+static int cmd_demo(int argc, char **argv)
+{
+    if (argc < 2) {
+        printf("Usage: demo smiley|logo|scroll|ball|life|ring|plasma|tilt|cycle|stop\n");
+        return 1;
+    }
+    if (strcmp(argv[1], "stop") == 0) {
+        demo_stop();
+        printf("Demo stopped\n");
+        return 0;
+    }
+    bool cycle = strcmp(argv[1], "cycle") == 0;
+    demo_mode_t mode = cycle ? DEMO_SMILEY : demo_from_name(argv[1]);
+    if (mode == DEMO_NONE) {
+        printf("Unknown demo\n");
+        return 1;
+    }
+    if (display_ensure_on() != ESP_OK) {
+        return 1;
+    }
+    s_animator_running = false;
+    sim_scan_start();
+    demo_start(s_panel, mode, cycle);
+    printf("Demo: %s%s\n", demo_name(mode), cycle ? " (cycle, 5 s each)" : "");
+    return 0;
+}
+
 static int cmd_display(int argc, char **argv)
 {
     if (argc < 2) {
@@ -91,6 +120,7 @@ static int cmd_display(int argc, char **argv)
     if (strcmp(argv[1], "off") == 0) {
         if (s_display_on) {
             s_animator_running = false;
+            demo_stop();
             matrix_refresh_stop();
             power_seq_matrix_disable();
             s_display_on = false;
@@ -125,6 +155,9 @@ static int cmd_test(int argc, char **argv)
     if (display_ensure_on() != ESP_OK) {
         printf("Display power-up failed\n");
         return 1;
+    }
+    if (demo_running()) {
+        demo_stop();
     }
     if (strcmp(argv[1], "pixel") == 0 && argc >= 5) {
         uint8_t row = (uint8_t)atoi(argv[2]);
@@ -217,6 +250,13 @@ esp_err_t console_test_register(matrix_panel_t *panel)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&display_cmd));
 
-    ESP_LOGI(TAG, "Console commands: panel, test, bright, display (LED rails off until first use)");
+    const esp_console_cmd_t demo_cmd = {
+        .command = "demo",
+        .help = "32x32 demos: demo smiley|logo|scroll|ball|life|ring|plasma|tilt|cycle|stop",
+        .func = &cmd_demo,
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&demo_cmd));
+
+    ESP_LOGI(TAG, "Console commands: panel, test, bright, display, demo (LED rails off until first use)");
     return ESP_OK;
 }

@@ -9,6 +9,7 @@
 #include "freertos/task.h"
 #include "esp_rom_sys.h"
 #include "mbi5124_driver.h"
+#include "sim_scan.h"
 
 static const char *TAG = "matrix_refresh";
 
@@ -17,9 +18,16 @@ static TaskHandle_t s_refresh_task;
 static volatile bool s_running;
 static volatile uint8_t s_brightness = 64;
 static SemaphoreHandle_t s_panel_mutex;
+static volatile uint32_t s_frames;
+
+uint32_t matrix_refresh_frame_count(void)
+{
+    return s_frames;
+}
 
 static void row_select(uint8_t row_index)
 {
+    sim_scan_note_row(row_index);
     uint8_t address = row_index & 0x0F;
     gpio_set_level(BOARD_PIN_GPIO_ROW_A0, (address >> 0) & 1);
     gpio_set_level(BOARD_PIN_GPIO_ROW_A1, (address >> 1) & 1);
@@ -58,32 +66,42 @@ static void refresh_task(void *argument)
 
     uint8_t row = 0;
     while (s_running) {
-        uint32_t column_bits = 0;
+        uint32_t planes[2] = {0, 0};
         if (xSemaphoreTake(s_panel_mutex, portMAX_DELAY) == pdTRUE) {
-            column_bits = matrix_panel_row_bits(s_panel, row);
+            planes[0] = matrix_panel_row_plane(s_panel, row, 0);
+            planes[1] = matrix_panel_row_plane(s_panel, row, 1);
             xSemaphoreGive(s_panel_mutex);
         }
 
         mbi5124_set_blank(true);
         row_disable_all();
         esp_rom_delay_us(pm_off_us);
-
         row_select(row);
-        mbi5124_shift_columns(column_bits);
-        mbi5124_latch();
-        esp_rom_delay_us(blank_us);
 
-        mbi5124_set_blank(false);
-
+        /* Binary-code modulation: plane 0 lit for 1/3, plane 1 for 2/3 of the row's on-time. */
         uint32_t on_us = (row_period_us * s_brightness) / 255U;
-        if (on_us > blank_us + pm_off_us) {
-            on_us -= blank_us + pm_off_us;
+        if (on_us > 2 * (blank_us + pm_off_us)) {
+            on_us -= 2 * (blank_us + pm_off_us);
         }
-        if (on_us > 0) {
-            esp_rom_delay_us(on_us);
+        for (int plane = 0; plane < 2; plane++) {
+            mbi5124_set_blank(true);
+            mbi5124_shift_columns(planes[plane]);
+            mbi5124_latch();
+            esp_rom_delay_us(blank_us);
+            uint32_t slot_us = plane == 0 ? on_us / 3 : on_us - on_us / 3;
+            if (slot_us > 0 && planes[plane]) {
+                mbi5124_set_blank(false);
+                esp_rom_delay_us(slot_us);
+                mbi5124_set_blank(true);
+            } else if (slot_us > 0) {
+                esp_rom_delay_us(slot_us);
+            }
         }
 
         row = (row + 1) % BOARD_MATRIX_ROWS;
+        if (row == 0) {
+            s_frames++;
+        }
     }
     vTaskDelete(NULL);
 }

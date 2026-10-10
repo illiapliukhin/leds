@@ -74,3 +74,15 @@ Command returned non-zero error code: 0x1 (ERROR)
 - **R5 — Battery inrush into LED_4V1 (low).** 44 µF charged during the 224 µs current-limit ramp ≈ 0.8 A from BAT through J_BAT (PicoBlade, 1 A/contact). Within ratings. Do not add more output capacitance without slowing the start.
 - **R6 — LED rails at boot (FIXED).** Rails are now on demand only.
 - **R7 — USB VBUS capacitance.** 10.1 µF is at the USB 2.0 10 µF limit. Do not increase C_CHG_IN.
+
+## v12 — 32×32 matrix demo in QEMU with a virtual board
+
+**Firmware.** `matrix_panel` now holds two bit planes (4 grey levels). `matrix_refresh` scans 32 rows at a 400 Hz target. For each row it selects the row (ROW_A0..A3 + DEC_A/B_EN_N), then for each plane it shifts 32 column bits to the MBI5124 chain, pulses LE, and drives OE_N low for 1/3 (plane 0) or 2/3 (plane 1) of the row's on-time (binary-code modulation). `demo.c` renders at 25 fps: `smiley`, `logo` (star + "LED"), `scroll` ("ILLIA"), `ball`, `life`, `ring`, `plasma` and `tilt` (the IMU is mocked in QEMU). New console command: `demo <name>|cycle|stop`. It powers the LED rails on demand, the same way as `test`.
+
+**What's real and what's sim-hooked.** QEMU's ESP32-S3 model doesn't expose pin levels or GPSPI2, so `sim_scan.c` (MONO_SIM builds only; the hooks are empty inlines in production) taps the low-level drivers at `row_select()`, `mbi5124_shift_columns()`, `mbi5124_latch()` and `mbi5124_set_blank()`. From those calls it records each row's latched column words and the measured OE-low time. Every 50 ms it prints a snapshot of the last full scan as an `@F seq fps×10 cur_row  b0:on0:b1:on1 ×32` line on UART0. The GPIO writes still go to the real pins; only the SPI shift itself is stubbed in the sim.
+
+**Virtual board.** `sim/matrix/virtual_board.py` (pygame) connects to QEMU's UART over TCP. Each LED's brightness is the time OE was low with its bit set, divided by the row period. Persistence is modelled with a 40 ms exponential filter. A side panel shows the scan FPS, the current row and decoder, the row's peak current and the average current. Current is estimated at about 10.2 mA per column (MBI5124 at 1.24 V/1.82 kΩ ×15).
+
+**Measured.** The scan runs at about 260–300 Hz in QEMU (the 400 Hz target is QEMU-paced) and the stream at about 16–20 snapshots/s. The worst row peak (plasma or a full ring row) is about 320 mA, and the average LED current is 3–100 mA depending on the demo.
+
+Run: `/workspace/sim/run_matrix_sim.sh [--record]` (copy in `sim/matrix/`).

@@ -14,6 +14,7 @@ extern "C" {
 
 esp_err_t matrix_refresh_start(matrix_panel_t *panel);
 void matrix_refresh_stop(void);
+uint32_t matrix_refresh_frame_count(void);
 void matrix_refresh_set_brightness(uint8_t level_0_255);
 uint8_t matrix_refresh_get_brightness(void);
 void matrix_refresh_lock_panel(void);

@@ -9,8 +9,10 @@ idf_component_register(
         "bmi270_probe.c"
         "test_patterns.c"
         "console_test.c"
+        "demo.c"
+        "sim_scan.c"
     INCLUDE_DIRS "."
-    REQUIRES driver esp_timer esp_driver_gpio esp_driver_spi esp_driver_i2c console nvs_flash
+    REQUIRES driver esp_timer esp_driver_gpio esp_driver_spi esp_driver_i2c console nvs_flash esp_hw_support
 )
 
 if(MONO_SIM)

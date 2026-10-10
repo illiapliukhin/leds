@@ -4,6 +4,7 @@
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "esp_log.h"
+#include "sim_scan.h"
 
 static const char *TAG = "mbi5124";
 static spi_device_handle_t s_spi_device;
@@ -63,6 +64,7 @@ void mbi5124_shift_columns(const uint32_t column_bits)
         (uint8_t)(column_bits & 0xFF),
     };
 
+    sim_scan_note_shift(column_bits);
 #ifdef MONO_SIM
     (void)bytes;
     return;
@@ -79,9 +81,11 @@ void mbi5124_latch(void)
     gpio_set_level(BOARD_PIN_GPIO_LED_LE, 1);
     esp_rom_delay_us(1);
     gpio_set_level(BOARD_PIN_GPIO_LED_LE, 0);
+    sim_scan_note_latch();
 }
 
 void mbi5124_set_blank(bool blanked)
 {
     gpio_set_level(BOARD_PIN_GPIO_LED_OE_N, blanked ? 1 : 0);
+    sim_scan_note_oe(!blanked);
 }
