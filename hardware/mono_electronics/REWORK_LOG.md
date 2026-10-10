@@ -205,3 +205,6 @@ Step 5 (TPS63802 hot loop) not done.
   - SW hole placed 3.5 mm from the bottom edge so its courtyard clears J_PORT_W; N/E ports not affected.
 - Clearance: 118 vias next to other-net copper 0.45 → 0.40 mm (board minimum, already used by 428 vias); ROW_13..32_Y F feed band re-pitched 0.375 → 0.43 mm (vias + In1 feeds moved with it); COL_01..32 B fan re-pitched 0.405 → 0.43 mm (east-anchored); B anode verticals 0.40 → 0.39 mm (ROW_32 0.38) to reach 0.15; USB_D_N_MCU horizontal moved 0.03 mm off R_USB_P pad; LED_EN and IMU_SDA re-drawn at U1; 11 via moves along their own stub; 31 local neck-downs of signal tracks to 0.145 mm (and 4 to 0.125–0.13 on long AUDIO_ADC/PRES_E/LED_EN runs; SYS arc 0.30→0.26, GND In1 0.25→0.245).
 - Bends: remaining 9 unrounded + 2 chopped corners → arcs (stale key rounding in arcapply fixed); 0 unrounded signal bends.
+
+## v10b — C_MIC next to MIC1
+- MIC1 moved 0.8 mm south to (2.1,9.6 r180); C_MIC moved (8.3,5.1) → (0.75,6.6 r270). C_MIC VDD pad 1.43 mm centre-to-centre (0.62 mm edge gap) from MIC1 pin 6; GND pad straight to a via 0.67 mm away at (0.75,5.45). AUDIO_3V3 via moved to (1.6,7.6), feeding In1; MIC GND via moved to (2.1,11.65); MIC_OUT redrawn. Old C_MIC stubs and via removed. Gates unchanged (DRC 0/0, copcheck 0 < 0.127, 224/224 continuity).

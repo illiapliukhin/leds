@@ -2,6 +2,7 @@
 
 ## mono_electronics v10 (clearances, last arcs, mounting holes)
 
+- C_MIC now 1.4 mm from the MIC1 supply pin (v10b).
 - 4 × M2.5 plated mounting holes (GND ring, 5.4 mm pad) in the corners, 3.8 mm from both edges (SW: 3.8/3.5 mm), each with a 3 mm copper keepout rule area and courtyard. Board stays 148.0 × 99.5 mm. MIC1 moved to make room in the NW corner.
 - Clearance: every other-net track spacing now ≥ 0.127 mm (was 166 spots < 0.127, min 0.100); spots < 0.15 mm 254 → 113. Done by shrinking crowded vias to the 0.40 mm board minimum, re-pitching the ROW_Y feed band (0.43) and the COL fan (0.43), small track/via moves and local neck-downs (mostly 0.15→0.145).
 - 0 unrounded signal bends, 0 chopped corners (arcs 499 → 507).
