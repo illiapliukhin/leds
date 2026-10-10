@@ -180,3 +180,14 @@ Step 5 (TPS63802 hot loop) not done.
 - Riser band (anode + COL risers, J_ROW/J_COL fan, COL bottom staircase; x 122.6-142.2) scaled by 0.9; everything east moved 1.96 mm west.
 - Not done: COL risers to In1. The COL bottom bus is on In1 and runs east past the risers, so In1 risers would cross it. Columns 1-3 at 6.8 mm: no length gain unless the decoders and feed band also move, and with the decoders moved 5 mm, 13-19 conflicts remain in the translator/decoder pocket (DEC_B_EN_N, ROW_02/04/05/07_Y, ROW_A1, DEC_A_EN_N). That pocket needs a full reroute.
 - DRC: 0 errors, 0 unconnected, 0 dangling; 13 silk warnings. Worst LED drop 95.9 -> 92.3 mV. Track length 14.04 -> 13.65 m. In2 signal copper 27.6 mm. B GND pieces all >=2 vias. 0 parts on B, no relabels.
+
+
+## v8 (2026-10-10): stacking ports, staircases, arcs
+- Moved ROW_A3 from U1 pad 38 to pad 42, and ROW_XLAT_OE_N from pad 37 to pad 50 (B escape moved to the GPIO44 pocket via at 51.1, 9.2).
+- Placed J_PORT_N (126.0, 3.125, 180°), J_PORT_E (144.915, 42.0, 90°), J_PORT_S (64.0, 96.375, 0°) and J_PORT_W (3.125, 88.0, 270°).
+- Placed an ESD pair at every port: D_x_AB (SM712) and D_x_SP (PESD3V3S2UT).
+- Placed the RS-485 block: U_485 THVD1406DR at (60, 86), C_485 at (63.5, 82.6), R_TERM 120R 0603 at (66.0, 85.365), JP_TERM at (68.9, 86.0, 90°).
+- Routed new nets with gated point-to-point octilinear routes on F/In1/B, one net per step, each with DRC: RS485_A/B, FRAME_SYNC, PRES_N/E/S/W, RS485_TX/RX, LED_LOGIC_3V3. Added 4 B GND stitching vias.
+- Reshaped ROW_04_Y and ROW_05_Y on In1 into vertical + 45° segments (west) and horizontal + 45° segments (east): staircase joints 41 → 0.
+- Offset the ROW_02_Y B corner to x 34.2, clear of the F USB_D_N stub end.
+- Added 550 tangent-arc corners (arcplan.py / arcapply.py), excluding GND and the USB pair.

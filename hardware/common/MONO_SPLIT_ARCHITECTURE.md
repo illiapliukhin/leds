@@ -162,7 +162,7 @@ These numbers are first-pass healthy values. Shrinking the outline and the court
 
 ## ESP32-S3FN8 GPIO map (EVT)
 
-Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as functional outputs. In-package Quad SPI flash pins stay unnamed on the PCB. Native USB uses `GPIO19`/`GPIO20` as `USB_D_N_MCU` / `USB_D_P_MCU` through 22 Ω from `USB_D_N` / `USB_D_P` at the ESD device.
+Strapping pins `GPIO0`, `GPIO45`, and `GPIO46` are not used as functional outputs. `GPIO3` (JTAG-source strap, only sampled when `EFUSE_STRAP_JTAG_SEL` is burned, which this design never does) is used as the north-port `PRES_N` input; it is not driven during reset. In-package Quad SPI flash pins stay unnamed on the PCB. Native USB uses `GPIO19`/`GPIO20` as `USB_D_N_MCU` / `USB_D_P_MCU` through 22 Ω from `USB_D_N` / `USB_D_P` at the ESD device.
 
 | GPIO | QFN pad | Net | Role |
 |---:|---:|---|---|
@@ -176,7 +176,7 @@ Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as function
 | 2 | 7 | `TH_ADC` | Board NTC divider (ADC1_CH1) |
 | 4 | 9 | `AUDIO_ADC` | Mic preamp output (ADC1_CH3) |
 | 6 | 11 | `AUDIO_EN` | Audio switch |
-| 33 | 38 | `ROW_A3` | Row address |
+| 37 | 42 | `ROW_A3` | Row address (moved from GPIO33 in v8) |
 | 38 | 43 | `ROW_A2` | Row address (east face) |
 | 39 | 44 | `ROW_A0` | Row address (east face) |
 | 40 | 45 | `ROW_A1` | Row address (east face) |
@@ -186,10 +186,17 @@ Strapping pins `GPIO0`, `GPIO3`, `GPIO45`, and `GPIO46` are not used as function
 | 21 | 27 | `LED_LOGIC_EN` | LED logic switch |
 | 19 | 25 | `USB_D_N_MCU` | Native USB D− |
 | 20 | 26 | `USB_D_P_MCU` | Native USB D+ |
-| 47 | 37 | `ROW_XLAT_OE_N` | Translator `/OE` |
+| 44 | 50 | `ROW_XLAT_OE_N` | Translator `/OE` (moved from GPIO47 in v8; U0RXD has an internal pull-up during reset, so the translator stays disabled until firmware drives it) |
+| 33 | 38 | `RS485_RX` | THVD1406 `R` → MCU (UART RX) |
+| 34 | 39 | `RS485_TX` | MCU → THVD1406 `D` (UART TX, auto-direction transceiver) |
+| 48 | 36 | `FRAME_SYNC` | Stacking ports pin 4, shared frame sync |
+| 3 | 8 | `PRES_N` | North port pin 5 (presence / side detect) |
+| 47 | 37 | `PRES_E` | East port pin 5 |
+| 35 | 40 | `PRES_S` | South port pin 5 |
+| 26 | 28 | `PRES_W` | West port pin 5 (pad 28 = SPICS1, free on FN8: no PSRAM) |
 | — | 53–54 | `XTAL_N` / `XTAL_P` | 40 MHz crystal |
 
-**Part choice:** BOM targets **ESP32-S3FN8** (in-package **quad** flash). Row address uses **`GPIO39`/`40`/`38`** (pads 44/45/43) plus **`GPIO33`** (pad 38). Enables and audio use remapped west/east pads: **`GPIO18`/`GPIO21`** (pads 24/27), **`GPIO41`/`GPIO42`** (pads 47/48 — datasheet **MTDI/MTMS**; acceptable here because bring-up uses **USB Serial/JTAG**, not a header on those balls), **`GPIO6`** (pad 11). USB stays on **`GPIO19`/`GPIO20`** (pads 25/26). **Pad 32 (`SPICS0`) stays NC** — never tie to `GND`. `GPIO33`–`GPIO37` on FN8 conflict with **octal** `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin or firmware remap.
+**Part choice:** BOM targets **ESP32-S3FN8** (in-package **quad** flash). Row address uses **`GPIO39`/`40`/`38`** (pads 44/45/43) plus **`GPIO37`** (pad 42, v8). Enables and audio use remapped west/east pads: **`GPIO18`/`GPIO21`** (pads 24/27), **`GPIO41`/`GPIO42`** (pads 47/48 — datasheet **MTDI/MTMS**; acceptable here because bring-up uses **USB Serial/JTAG**, not a header on those balls), **`GPIO6`** (pad 11). USB stays on **`GPIO19`/`GPIO20`** (pads 25/26). **Pad 32 (`SPICS0`) stays NC** — never tie to `GND`. `GPIO33`–`GPIO37` on FN8 conflict with **octal** `-R8`/`-N16R8` modules; this PCB is not drop-in for those without respin or firmware remap.
 
 MCU copper is **PathFinder-first** grid-routed in `hardware/tools/mcu_grid_route.py` (F/In1/In2/**B**, via-legal pockets): compute runs greedy + PathFinder, applies the larger complete set that passes DRC (**0 shorts / 0 crossings**), then **`kicad-cli pcb drc --refill-zones --save-board`** fills GND pours on In2/B.
 
@@ -197,3 +204,33 @@ MCU copper is **PathFinder-first** grid-routed in `hardware/tools/mcu_grid_route
 
 - LED panels: geometric DRC must be clean, including connectivity of every populated row and column to the matching FFC pin.
 - Electronics: matrix and driver nets listed in earlier revisions must remain one connected group each. MCU nets (`IMU_*`, `LED_CLK`/`LED_SDI`/`LED_LE`/`LED_OE_N`, row address, enables, `ROW_XLAT_OE_N`, `LED_EN`, `LED_LOGIC_EN`, `AUDIO_EN`, `CHIP_PU`, `GPIO0_BOOT`, `USB_D_*`, `XTAL_*`) are now assigned and routed in the generator; geometric clearance on the MCU escape field is still being cleaned up (not production-frozen).
+
+## Stacking ports (v8)
+
+Four identical ports, one per board edge (`J_PORT_N`, `J_PORT_E`, `J_PORT_S`, `J_PORT_W`), so several boards can be tiled into a larger wearable. Every port has the same pinout, so any port mates any port with a straight (pin 1 ↔ pin 1) cable.
+
+**Connector:** JST SH 1.0 mm, 6-pin, side-entry SMD, **SM06B-SRSS-TB** (mating housing SHR-06V-S, pre-crimped SH jumpers). It is 2.9 mm tall, has no through-hole pins, and sits 0.55 mm inside the outline with its opening facing outward, so nothing sticks out past the board edge. Every port part is DNP-friendly: an unpopulated port leaves only floating, ESD-free pads on lines with internal pull-downs.
+
+| Pin | Net | Notes |
+|---:|---|---|
+| 1 | `GND` | |
+| 2 | `RS485_A` | shared multi-drop bus, bussed to all four ports |
+| 3 | `RS485_B` | |
+| 4 | `FRAME_SYNC` | shared, push-pull from the current leader, GPIO48 |
+| 5 | `PRES_x` | per-port presence line, own GPIO (N=GPIO3, E=GPIO47, S=GPIO35, W=GPIO26) |
+| 6 | `GND` | |
+| MP | `GND` | mechanical pads |
+
+**RS-485:** one **TI THVD1406DR** (SOIC-8; same die as the SOT-8 THVD1426 but available in SOIC), half duplex with automatic direction control, so only `RS485_TX` (GPIO34 → D) and `RS485_RX` (GPIO33 ← R) are needed. `/RE` is tied to GND and `/SHDN` to VCC. VCC comes from **`LED_LOGIC_3V3`**, the TPS22917 load-switched rail (enable GPIO21, off by default, quick output discharge). When the rail is off the transceiver is unpowered, so standby current is zero. Firmware rule: before turning the rail off, put GPIO34 into input or drive it low so D is not back-powered. The bus has 100 nF decoupling (`C_485`). A 120 Ω termination (`R_TERM`, 0603) can be switched across A/B by closing the solder jumper `JP_TERM`. Close it only on the two physical ends of a chain; there was no free GPIO left for an electronic switch.
+
+**ESD:** behind every connector there is an **SM712** (SOT-23, asymmetric −7/+12 V TVS for RS-485) on A/B (`D_x_AB`) and a **PESD3V3S2UT** (SOT-23, dual 3.3 V TVS) on FRAME_SYNC/PRES (`D_x_SP`).
+
+**Side detection / topology discovery:** every `PRES_x` pin idles as an input with the ESP32 internal pull-down (GPIO-enabled, no external resistor, no standby current). The cable ties board A's port pin 5 directly to the neighbour's port pin 5. Discovery runs over RS-485:
+1. After power-up, each board waits a random back-off, then claims an ID on the bus (the lowest MAC wins the leader role).
+2. The leader grants a token to one board at a time. The token holder drives `PRES_x` high on one port for about 1 ms and broadcasts "board <id> port <x> high".
+3. Any board that sees a high on one of its own `PRES` inputs answers "board <id'> port <y>". This gives the edge (id, x) ↔ (id', y): the neighbour's identity and which side it is on, including its rotation.
+4. Steps 2–3 repeat for all four ports of every board, and the leader distributes the resulting grid map.
+
+Only one board drives a `PRES` line at a time, and the other side is always an input, so there is no contention. `FRAME_SYNC` is driven only by the leader; everyone else keeps it as an input with the internal pull-down.
+
+**PCB placement (v8):** S port at (64.0, 96.4) 0°, W at (3.1, 88.0) 270°, E at (144.9, 42.0) 90°, N at (126.0, 3.1) 180°. The RS-485 block sits at (60–69, 82–89), just above the S port. The outline is unchanged at 148.0 × 99.5 mm. All parts are on the top side.

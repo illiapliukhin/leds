@@ -1,5 +1,20 @@
 # Latest changes
 
+## mono_electronics v8: four stacking ports + RS-485, staircases removed, arc corners (148.0 × 99.5 mm, 4 layers)
+
+- **Stacking ports:** J_PORT_N/E/S/W, JST SH SM06B-SRSS-TB (6-pin, 1.0 mm, side-entry SMD, 2.9 mm tall). Each sits 0.55 mm inside its edge with nothing past the outline. All four share one pinout: 1 GND, 2 RS485_A, 3 RS485_B, 4 FRAME_SYNC, 5 PRES_x, 6 GND, so a straight cable mates any port to any port.
+- **RS-485:** one THVD1406DR (auto-direction, SOIC-8) on the switched LED_LOGIC_3V3 rail (GPIO21, off by default, zero standby). 100 nF C_485. 120 Ω R_TERM switched in by solder jumper JP_TERM. A/B bussed to all four ports.
+- **ESD at every port:** SM712 on A/B and PESD3V3S2UT on FRAME_SYNC/PRES.
+- **GPIOs:** RS485_TX = GPIO34, RS485_RX = GPIO33, FRAME_SYNC = GPIO48, PRES_N/E/S/W = GPIO3/47/35/26 (internal pull-downs, no external resistors).
+- **Freeing pins:** ROW_A3 moved GPIO33 → GPIO37; ROW_XLAT_OE_N moved GPIO47 → GPIO44 (U0RXD, boot pull-up keeps the translator off).
+- **Docs:** pinout, GPIOs and the side-detection / topology-discovery scheme are in MONO_SPLIT_ARCHITECTURE.md § Stacking ports.
+- **Stair-stepped joints:** 41 → 0. ROW_04/05_Y on In1 now run as one straight 45° segment each. The existing diagonal via row already left a legal corridor, so no vias had to move.
+- **x≈33.9 corner:** B ROW_02_Y was offset 0.3 mm so it no longer ends exactly under the F USB_D_N stub. It was never connected (different layers, DRC clean).
+- **Smooth corners:** 550 tangent arcs (KiCad arc tracks, r = 3 × track width where room allows, otherwise the largest that fits). They replace the 45°/90° corners on all signal and power tracks except GND and the length-matched USB pair.
+- **Continuity check:** see PROZVONKA.md. 220/220 parts PASS, 0 unconnected; the only single-pad nets are the 16 FFC spares.
+- **DRC:** 0 errors, 0 unconnected, 14 warnings (silk only, same as v7).
+- **Other gates:** no parts on B, 0 dangling, no copper renamed, LED worst drop 92.2 mV, In2 signal copper 27.2 mm, all B GND pieces stitched.
+
 ## mono_electronics v7: all deferred parts placed, continuity check, corner cleanup (148.0 × 99.5 mm, 4 layers)
 
 - **Parts added (top side only):** MAX17048 fuel gauge U_GAUGE + C_GAUGE + R_ALRT (BAT_RAW cell/VDD, shared I2C IMU_SDA/SCL at 0x36, ALRT → GPIO1); MEMS mic MIC1 (Gettop MA-HFA381, custom footprint) + TLV9001 preamp U_AUDIO with bias/gain network (C_AUD, C_MIC, C_AC, R_INB, R_B1, R_B2, C_B, R_F, R_GN, C_GN) on the switched AUDIO_3V3 rail (U_AUDIO_SW moved next to it, C_AUD_SW), output → GPIO4 (ADC1_CH3); board NTC TH_PCB + R_TH divider → GPIO2 (ADC1_CH1); 1 µF VIN caps C_ASW_IN / C_LL_IN at both TPS22917s.

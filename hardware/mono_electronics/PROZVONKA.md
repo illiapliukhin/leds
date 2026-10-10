@@ -1,16 +1,19 @@
-# mono_electronics v7 — continuity check (прозвонка)
+# mono_electronics v8 — continuity check (прозвонка)
 
-Method: every pad's board net compared with the intended net (net manifest from hardware/mono_schematic + documented rework deltas + specs for parts added in rework). Copper connectivity from the KiCad connectivity engine (each pad with copper attached when its net has >1 pad). KiCad DRC: 0 errors, 0 unconnected.
+Method: every pad's board net compared with the intended net (net manifest from hardware/mono_schematic + documented rework deltas + specs for parts added in rework, including the v8 stacking-port parts). Copper connectivity from the KiCad connectivity engine (each pad with copper attached when its net has >1 pad). KiCad DRC: 0 errors, 0 unconnected.
 
-**Result: 204 parts, 204 PASS, 0 FAIL.**
+**Result: 220 parts, 220 PASS, 0 FAIL.**
 
 Single-pad nets: only the 16 unused FFC spare pins (COL_SPARE_33..40, ROW_SPARE_33..40), expected (32×32 matrix on 40-pin FFCs).
+
+v8 U1 pin changes (all documented deltas): GPIO3=PRES_N, GPIO26=PRES_W, GPIO47=PRES_E, GPIO35=PRES_S, GPIO48=FRAME_SYNC, GPIO33=RS485_RX, GPIO34=RS485_TX; ROW_A3 moved GPIO33→GPIO37, ROW_XLAT_OE_N moved GPIO47→GPIO44 (U0RXD, internal boot pull-up keeps the translator disabled during reset).
 
 ## IC power / GND / decoupling
 
 | IC | value | GND pads | supply rail: nearest decoupling cap @ pad-to-pad distance |
 |---|---|---|---|
 | U1 | ESP32-S3FN8 | 1 | AON_3V3:C_MCU_A3@1.3mm |
+| U_485 | THVD1406DR | 2 | LED_LOGIC_3V3:C_485@1.6mm |
 | U_AUDIO | TLV9001IDCKR | 1 | AUDIO_3V3:C_AUD@1.3mm |
 | U_AUDIO_SW | TPS22917 | 1 | AON_3V3:C_ASW_IN@3.8mm; AUDIO_3V3:C_AUD_SW@1.6mm |
 | U_CHG | BQ25185 | 3 | BAT_RAW:C_CHG_BAT@4.8mm; SYS:C_CHG_SYS@3.6mm; VBUS:C_CHG_IN@4.5mm |
@@ -27,12 +30,13 @@ Single-pad nets: only the 16 unused FFC spare pins (COL_SPARE_33..40, ROW_SPARE_
 | U_LED_PWR | TPS63802DLAR | 4 | LED_4V1:C_LED1@2.2mm; SYS:C_SYS@2.3mm |
 | U_ROW_XLAT | SN74LVC8T245RHLR | 6 | AON_3V3:C_XLAT_A@3.0mm; LED_4V1:C_XLAT_B@1.6mm |
 
-U_ESD (USBLC6-2) is a TVS array, no decoupling needed. C_ASW_IN and C_LL_IN (1 µF) were added in v7 at the TPS22917 VIN pins, which previously had no local input cap.
+U_ESD (USBLC6-2) and the per-port D_x_AB (SM712) / D_x_SP (PESD3V3S2UT) are TVS arrays, no decoupling needed. U_485 (THVD1406) is powered from the switched LED_LOGIC_3V3 rail (off by default).
 
 ## Per-part table
 
 | Ref | Value | Intended-net source | Pads | Pads with net | Result | Notes |
 |---|---|---|---|---|---|---|
+| C_485 | 100nF | rework spec | 2 | 2 | PASS |  |
 | C_AC | 1u | rework spec | 2 | 2 | PASS |  |
 | C_ASW_IN | 1u | rework spec | 2 | 2 | PASS |  |
 | C_AUD | 100n | rework spec | 2 | 2 | PASS |  |
@@ -73,8 +77,21 @@ U_ESD (USBLC6-2) is a TVS array, no decoupling needed. C_ASW_IN and C_LL_IN (1 �
 | C_XLAT_B | 100n | rework spec | 2 | 2 | PASS |  |
 | C_XTAL1 | 10p | manifest | 2 | 2 | PASS |  |
 | C_XTAL2 | 10p | manifest | 2 | 2 | PASS |  |
+| D_E_AB | SM712 | rework spec | 3 | 3 | PASS |  |
+| D_E_SP | PESD3V3S2UT | rework spec | 3 | 3 | PASS |  |
+| D_N_AB | SM712 | rework spec | 3 | 3 | PASS |  |
+| D_N_SP | PESD3V3S2UT | rework spec | 3 | 3 | PASS |  |
+| D_S_AB | SM712 | rework spec | 3 | 3 | PASS |  |
+| D_S_SP | PESD3V3S2UT | rework spec | 3 | 3 | PASS |  |
+| D_W_AB | SM712 | rework spec | 3 | 3 | PASS |  |
+| D_W_SP | PESD3V3S2UT | rework spec | 3 | 3 | PASS |  |
+| JP_TERM | TERM | rework spec | 2 | 2 | PASS |  |
 | J_BAT | 53398-0371 | manifest | 5 | 3 | PASS |  |
 | J_COL | FFC_40P_050_COL | manifest | 42 | 40 | PASS |  |
+| J_PORT_E | SM06B-SRSS-TB | rework spec | 8 | 8 | PASS |  |
+| J_PORT_N | SM06B-SRSS-TB | rework spec | 8 | 8 | PASS |  |
+| J_PORT_S | SM06B-SRSS-TB | rework spec | 8 | 8 | PASS |  |
+| J_PORT_W | SM06B-SRSS-TB | rework spec | 8 | 8 | PASS |  |
 | J_ROW | FFC_40P_050_ROW | manifest | 42 | 40 | PASS |  |
 | J_USB | USB4105 | manifest | 20 | 18 | PASS |  |
 | L_LED | DFE201612E-R47M | manifest | 2 | 2 | PASS |  |
@@ -212,6 +229,7 @@ U_ESD (USBLC6-2) is a TVS array, no decoupling needed. C_ASW_IN and C_LL_IN (1 �
 | R_SDA | 4.7k | rework spec | 2 | 2 | PASS |  |
 | R_SDI_PD | 100k | rework spec | 2 | 2 | PASS |  |
 | R_SDI_SER | 22R | manifest | 2 | 2 | PASS |  |
+| R_TERM | 120R | rework spec | 2 | 2 | PASS |  |
 | R_TH | 10k 1% | rework spec | 2 | 2 | PASS |  |
 | R_USB_N | 22R | manifest | 2 | 2 | PASS |  |
 | R_USB_P | 22R | manifest | 2 | 2 | PASS |  |
@@ -220,7 +238,8 @@ U_ESD (USBLC6-2) is a TVS array, no decoupling needed. C_ASW_IN and C_LL_IN (1 �
 | TH_PCB | NTC 10k B3435 | rework spec | 2 | 2 | PASS |  |
 | TP1 | AON_3V3 | manifest | 2 | 2 | PASS |  |
 | TP2 | GND | manifest | 2 | 1 | PASS |  |
-| U1 | ESP32-S3FN8 | manifest | 57 | 34 | PASS |  |
+| U1 | ESP32-S3FN8 | manifest | 57 | 41 | PASS |  |
+| U_485 | THVD1406DR | rework spec | 8 | 8 | PASS |  |
 | U_AUDIO | TLV9001IDCKR | rework spec | 5 | 5 | PASS |  |
 | U_AUDIO_SW | TPS22917 | manifest | 6 | 4 | PASS |  |
 | U_CHG | BQ25185 | manifest | 11 | 9 | PASS |  |
