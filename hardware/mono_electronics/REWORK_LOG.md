@@ -191,3 +191,9 @@ Step 5 (TPS63802 hot loop) not done.
 - Reshaped ROW_04_Y and ROW_05_Y on In1 into vertical + 45° segments (west) and horizontal + 45° segments (east): staircase joints 41 → 0.
 - Offset the ROW_02_Y B corner to x 34.2, clear of the F USB_D_N stub end.
 - Added 550 tangent-arc corners (arcplan.py / arcapply.py), excluding GND and the USB pair.
+
+
+## v9 (2026-10-10): track cleanup
+- Ran simplify.py (chain window replacement scored by turns, short and non-45° segments; clearance ≥0.115 mm vs all other-net copper). Rounds were gated by DRC, copper renames and total error count, and failing chains were dropped. Then colmerge.py (16 collinear merges).
+- Rerouted the AON_3V3 F escape off the B LED_SDI line. Regenerated tangent arcs (arcplan.py/arcapply.py).
+- Ran copcheck.py (shapely, all nets) after every change: 0 violations.
