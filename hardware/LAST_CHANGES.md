@@ -1,5 +1,9 @@
 # Latest changes
 
+## mono_schematic synced to PCB v11
+
+- Regenerated hardware/mono_schematic from the PR #4 PCB (224 parts, 9 sheets incl. stacking and mechanical); generator fixed (pin Y mirror, global labels, lib tables, footprint lib). ERC 0, schematic netlist vs PCB 0 differences.
+
 ## mono_electronics v11 phase 1
 
 - Removed the last B GND sliver, DRC now 0 errors / 0 warnings / 0 unconnected (silk cleaned), 3D models for U_GAUGE, U_LED_PWR, J_ROW, J_COL, J_USB.
