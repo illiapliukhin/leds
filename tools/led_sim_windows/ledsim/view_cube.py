@@ -166,11 +166,11 @@ class CubeView:
         sp_ = sp_cam
         zb = -(n - 1) / 2 / 16 * s.zpitch(); zt = -zb
         e = 31 / 32
-        dl = lambda a_, b_, *r: (a_ and b_) and dim_line(surf, a_, b_, *r)
+        dl = lambda a_, b_, *r: getattr(s, 'show_hw', False) and (a_ and b_) and dim_line(surf, a_, b_, *r)   # off by default: only the cube
         dl(P3(-e, 1.12, zb), P3(e, 1.12, zb), 'W %.1f мм (32 × %.2f)' % (31 * pitch, pitch), (255, 210, 120))
         dl(P3(1.12, -e, zb), P3(1.12, e, zb), 'D %.1f мм' % (31 * pitch), (255, 210, 120))
         dl(P3(-1.12, 1.0, zb), P3(-1.12, 1.0, zt), 'H %.1f мм, %d слоёв × %.2f мм' % ((n - 1) * sp, n, sp), (255, 210, 120))
-        if getattr(s, 'show_hw', True): s.draw_hw(surf, P3, zb, pitch, sp)
+        if getattr(s, 'show_hw', False): s.draw_hw(surf, P3, zb, pitch, sp)
         text(surf, '%d × 32 × 32  (%d LED)  —  %s' % (n, n * 1024, DEMO_RU[DEMOS3D[s.demo]]), (view.x + 10, view.y + 8), (255, 220, 140), 16)
         text(surf, T('hint_cube'), (view.x + 8, view.bottom - 20), (140, 146, 160), 11)
         surf.set_clip(None)
@@ -312,11 +312,13 @@ class CubeView:
         sv = s.app.views['system'].w
         sv.brightness = int(ui.slider(surf, (x, y, bw, 8), T('brightness'), sv.brightness, 0, 255))
         sv.gamma = round(ui.slider(surf, (x + bw + 4, y, bw, 8), T('gamma'), sv.gamma, 1.0, 3.0, '%.2f'), 2); y += 14
-        show = s.app.views['system'].show; tb = (W - 16) // 5
-        for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'), ('led', 'Гирлянды'))):
-            if ui.button(surf, (x + i * (tb + 4), y, tb, 20), lab, on=show.get(k, True), sz=9): show[k] = not show.get(k, True)
-        if ui.button(surf, (x + 4 * (tb + 4), y, tb, 20), 'Платы', on=getattr(s, 'show_hw', True), sz=9): s.show_hw = not getattr(s, 'show_hw', True)
+        show = s.app.views['system'].show; tb = (W - 16) // 4; hw = getattr(s, 'show_hw', False)
+        if ui.button(surf, (x, y, W - 16, 20), 'Электроника, кабели и размеры: ' + ('вкл' if hw else 'выкл'), on=hw, sz=10): s.show_hw = not hw
         y += 24
+        if hw:
+            for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'), ('led', 'Гирлянды'))):
+                if ui.button(surf, (x + i * (tb + 4), y, tb, 20), lab, on=show.get(k, True), sz=9): show[k] = not show.get(k, True)
+            y += 24
         lim = s.limits()
         for ln in lim:
             text(surf, ln, (x, y), (150, 160, 180), 10); y += 13
