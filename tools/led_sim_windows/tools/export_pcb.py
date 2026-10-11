@@ -54,7 +54,8 @@ def export(path, title):
         if not nn: return ''
         if len(nn) >= 3: return nn[2]
         return nets.get(nn[1], nn[1]) if len(nn) == 2 and nn[1].isdigit() else (nn[1] if len(nn) == 2 else '')
-    out = {'title': title, 'outline': [], 'fps': [], 'pads': [], 'tracks': [], 'vias': [], 'zones': []}
+    out = {'title': title, 'outline': [], 'fps': [], 'pads': [], 'tracks': [], 'vias': [], 'zones': [], 'gfx': [], 'holes': []}
+    GL = {'F.SilkS': 0, 'F.Silkscreen': 0, 'F.Fab': 1, 'F.CrtYd': 2, 'F.Courtyard': 2, 'B.SilkS': 3, 'B.Silkscreen': 3, 'B.Fab': 4, 'B.CrtYd': 5, 'B.Courtyard': 5}
     for g in kids(root, 'gr_line') + kids(root, 'gr_arc') + kids(root, 'gr_rect') + kids(root, 'gr_circle') + kids(root, 'gr_poly'):
         ly = kid(g, 'layer')
         if not ly or ly[1] != 'Edge.Cuts': continue
@@ -83,7 +84,26 @@ def export(path, title):
             if t[1] == 'reference': ref = t[2]
             if t[1] == 'value': val = t[2]
         fi = len(out['fps']); out['fps'].append([ref, val, r3(fx), r3(fy), fr, side])
+        # footprint graphics (silkscreen / fab body / courtyard) in board coordinates: [layer, fp index, width, flat pts]
+        for g in kids(fp, 'fp_line') + kids(fp, 'fp_rect') + kids(fp, 'fp_circle') + kids(fp, 'fp_poly') + kids(fp, 'fp_arc'):
+            ly = kid(g, 'layer')
+            if not ly or ly[1] not in GL: continue
+            st = kid(g, 'stroke'); w = fl(kid(st, 'width')[1]) if st and kid(st, 'width') else (fl(kid(g, 'width')[1]) if kid(g, 'width') else 0.12)
+            if g[0] == 'fp_line': P = [(fl(kid(g, 'start')[1]), fl(kid(g, 'start')[2])), (fl(kid(g, 'end')[1]), fl(kid(g, 'end')[2]))]
+            elif g[0] == 'fp_rect':
+                x1, y1, x2, y2 = fl(kid(g, 'start')[1]), fl(kid(g, 'start')[2]), fl(kid(g, 'end')[1]), fl(kid(g, 'end')[2]); P = [(x1, y1), (x2, y1), (x2, y2), (x1, y2), (x1, y1)]
+            elif g[0] == 'fp_circle':
+                cx, cy = fl(kid(g, 'center')[1]), fl(kid(g, 'center')[2]); r = math.hypot(fl(kid(g, 'end')[1]) - cx, fl(kid(g, 'end')[2]) - cy)
+                P = [(cx + r * math.cos(k * math.pi / 8), cy + r * math.sin(k * math.pi / 8)) for k in range(17)]
+            elif g[0] == 'fp_arc' and kid(g, 'mid'):
+                P = arc_pts((fl(kid(g, 'start')[1]), fl(kid(g, 'start')[2])), (fl(kid(g, 'mid')[1]), fl(kid(g, 'mid')[2])), (fl(kid(g, 'end')[1]), fl(kid(g, 'end')[2])), 6)
+            elif g[0] == 'fp_poly' and kid(g, 'pts'): P = [(fl(q[1]), fl(q[2])) for q in kids(kid(g, 'pts'), 'xy')]; P = P + P[:1]
+            else: continue
+            out['gfx'].append([GL[ly[1]], fi, r3(w), [r3(c) for (x, y) in P for c in (lambda d: (fx + d[0], fy + d[1]))(rot(x, y, fr))]])
         for pd in kids(fp, 'pad'):
+            if len(pd) > 2 and pd[2] in ('np_thru_hole', 'thru_hole') and kid(pd, 'drill'):
+                pa = kid(pd, 'at'); dx, dy = rot(fl(pa[1]), fl(pa[2]), fr); dr = kid(pd, 'drill'); dv = [c for c in dr[1:] if not isinstance(c, list) and c != 'oval']
+                out['holes'].append([r3(fx + dx), r3(fy + dy), r3(fl(dv[0])) if dv else 1.0, 1 if pd[2] == 'np_thru_hole' else 0])
             pa = kid(pd, 'at'); px, py = fl(pa[1]), fl(pa[2]); pr = fl(pa[3]) if len(pa) > 3 else fr
             dx, dy = rot(px, py, fr); sz = kid(pd, 'size')
             lys = kid(pd, 'layers') or ['layers']

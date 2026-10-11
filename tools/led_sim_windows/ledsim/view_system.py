@@ -300,7 +300,7 @@ class SystemView(Nav2D, Rulers):
                 for j in range(n - 1):
                     q = [L[j], L[j + 1], R[j + 1], R[j]]
                     shade = 0.65 + 0.35 * abs(math.cos(twist * (j + 0.5) / (n - 1)))
-                    pygame.draw.polygon(ov, tuple(int(c * shade) for c in col) + (150,), q)
+                    pygame.draw.polygon(ov, tuple(int(c * shade) for c in col) + (110 if k[0] == 'F' else 150,), q)
                 pygame.draw.lines(ov, (230, 70, 70, 220), False, L, max(1, int(s.zoom * 0.8)))    # pin-1 stripe
                 if k[0] == 'F' and s.zoom > 0.6: text(surf, 'FFC J_ROW+J_COL (2×40P) %s %d мм' % (p.ffc, p.ffc_len), (pts[n // 2][0] + 8, pts[n // 2][1]), (170, 190, 230), 10)
                 if k[0] == 'f' and s.zoom > 1.5 and k[2] == 'J_ROW': text(surf, 'FFC %s %d мм' % (p.ffc, p.ffc_len), (pts[n // 2][0] + 8, pts[n // 2][1]), (170, 190, 230), 10)
@@ -360,7 +360,10 @@ class SystemView(Nav2D, Rulers):
         r = pygame.Rect(x, y, size, size)
         if not r.colliderect(surf.get_rect()): return
         pygame.draw.rect(surf, (18, 20, 18) if p.kind != 'lattice' else (12, 14, 12), r)
-        if p.kind == 'lattice' and size > 60:
+        if size > 220:                                                 # real panel PCB under the LEDs
+            from . import pcbtex
+            surf.blit(pcbtex.scaled({'full': 'panel_full', 'flat': 'panel_flat', 'lattice': 'panel_lattice'}[p.kind], r.size, p.rot), r.topleft)
+        elif p.kind == 'lattice' and size > 60:
             for i in range(33):
                 pygame.draw.line(surf, (34, 40, 30), (x + i * size / 32, y), (x + i * size / 32, y + size))
                 pygame.draw.line(surf, (34, 40, 30), (x, y + i * size / 32), (x + size, y + i * size / 32))
@@ -403,7 +406,13 @@ class SystemView(Nav2D, Rulers):
         if k not in s.masks:
             a = (150 if s.xray else 22) if behind else 70
             ov = pygame.Surface(r.size, pygame.SRCALPHA); ov.fill((20, 70, 40, a) if b.powered else (70, 20, 20, a)); s.masks[k] = ov
-        surf.blit(s.masks[k], r.topleft)
+        if (not behind or s.xray) and r.w > 40:                       # the real PCB: mask, copper, pads, parts, silkscreen
+            from . import pcbtex
+            tex = pcbtex.scaled('board_v13', r.size, b.rot, b.mirror, 'B' if b.mirror else 'F')
+            if behind: tex = tex.copy(); tex.set_alpha(150)
+            surf.blit(tex, r.topleft)
+            if not b.powered: surf.blit(s.masks[k], r.topleft)
+        else: surf.blit(s.masks[k], r.topleft)
         if behind and s.xray and s.zoom > 0.6:
             for nm, cc in (('J_ROW', (120, 150, 220)), ('J_COL', (120, 150, 220)), ('J_USB', (210, 210, 220)), ('J_BAT', (220, 90, 90))):
                 q = s.w2s(*b.conn_pos(nm)); pygame.draw.rect(surf, cc, (q[0] - 4, q[1] - 4, 8, 8), 1)

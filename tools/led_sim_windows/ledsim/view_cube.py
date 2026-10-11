@@ -207,6 +207,13 @@ class CubeView:
             def rect(cx, cy, w, h, colr):
                 pts = [P3(cx + dx * w / 2, cy + dy * h / 2, zf) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
                 SD.polygon(surf, colr, pts, 1)
+            from . import pcbtex
+            for (cx_, cy_, ww, hh, key_) in ((bx, by, BOARD_W, BOARD_H, 'board_v13'), (gx, by, 60, 145, 'garland')):
+                pts = [P3(cx_ + dx * ww * U / 2, cy_ + dy * hh * U / 2, zf) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+                SD.polygon(surf, pcbtex.MASK, pts)                               # solder mask
+                if lod == 1:
+                    for (px0, py0, pw, ph, colr) in pcbtex.parts(key_):          # every package body at its real place
+                        SD.polygon(surf, colr, [P3(cx_ + (px0 + dx * pw / 2) * U, cy_ + (py0 + dy * ph / 2) * U, zf) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
             rect(bx, by, BOARD_W * U, BOARD_H * U, (80, 180, 110)); rect(gx, by, 60 * U, 145 * U, (180, 150, 80))
             q = P3(bx - BOARD_W * U / 2, by - BOARD_H * U / 2, zf); q and text(surf, 'L%d' % k, q, (150, 200, 160), 9)
             B = lambda nm: (bx + BOARD_CONN[nm][0] * U, by + BOARD_CONN[nm][1] * U)
