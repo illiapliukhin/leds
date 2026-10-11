@@ -98,7 +98,24 @@ Rules:
 | Panel mounted on/behind the electronics board, ≤ 0.3 m | FFC Type B direct (flat, lattice, full-bleed panels) |
 | 0.3–0.67 m, rigid mount, no hand handling | FFC is possible but marginal (drop, flex fatigue, no ESD) — prefer breakout |
 | Anything that people touch, wire nets/garlands, 0.5–5 m, outdoor or installation | **Garland breakout** + 2×8 IDC ribbon (or soldered wire) — TVS on every line, GND bonding, latching connectors |
+| Stationary/installation build without a breakout | **On-board installation headers** (mono_electronics v14): `J_RH1`/`J_CH1` fitted, FFC optional — see §6.1 |
 | > 5 m or > 32×32 | Tile more boards over the stacking ports (RS-485 + FRAME_SYNC), keep each board's LED wiring short |
+
+### 6.1 On-board installation headers (mono_electronics v14)
+
+The main board carries two DNP connectors wired **in parallel, pin for pin**, with `J_ROW1` and `J_COL1`:
+
+| Ref | Part | Pins | Position (board mm) |
+|---|---|---|---|
+| `J_RH1` | 2×20 1.27 mm SMD male pin header, JXT-PZ1.27-2X20P-A2 (LCSC C54803356; alt C55020606) | **header pin n = J_ROW1 pin n** for n = 1…40: rows 1–32, then 33 GND, 34 VLED_SENSE (`ROW_SPARE_34`, no connection on the main board), 35/36 ID_SDA/ID_SCL, 37 ID_3V3, 38 GND, 39 ID_PRESENT_N (`ROW_SPARE_39`, no connection), 40 GND | centre (152.2, 21.68) |
+| `J_CH1` | same | **header pin n = J_COL1 pin n**: cols 1–32, then 33 GND, 34–37 EXP_SDI/CLK/LE/OE (DNP taps), 38 GND, 39 EXP_3V3, 40 GND | centre (152.2, 68.28) |
+| `D_R01…D_R32`, `D_C01…D_C32` | PESD5V0S1BL (LCSC C84374), SOD-882 | one per LED line, to GND (via to the B/In2 GND planes) | two columns east of each header |
+
+- **Wearable build:** FFC fitted, headers and all 64 TVS DNP. Unpopulated pads are flat, the stub is ≤ 16 mm of 0.2–0.25 mm copper (irrelevant at the scan frequencies). The FFC cable still exits east and lies flat over the DNP strip.
+- **Installation build:** headers + TVS fitted; the FFCs are optional (remove them from the BOM if no panel is plugged in). Do not plug an FFC panel and a header load at the same time — they are the same lines.
+- **Cable:** a 40-way 1.27 mm IDC socket on 0.635 mm flat ribbon (e.g. 3M/Samtec FFSD-20 class). Ribbon conductor n = line n, exactly like the FFC, so the panel ID EEPROM, VLED sense and GND pins ride along. Pins 33/38/40 give three GND returns per cable; for long runs add GND conductors/earth at the far end as in §5.
+- **Row copper:** 0.2 mm in the 0.5→0.635 mm fan (≈3 mm long), 0.25 mm to the TVS. The added header path is ≈ 15 mm of 0.2–0.25 mm copper, ≈ 30–36 mΩ, ≈ 11 mV at 0.32 A (worst on-board LED drop stays 92.5 mV to the FFC, ≈ 104 mV to the header).
+- **Why 2×20 1.27 mm and not 4 × 2×8 2.54 mm box headers (garland-breakout grouping):** the east edge between the two FFCs is taken by `J_PORT_E1` (y 37–47, cable exits east), so the free edge length is ~36 mm above it and ~51 mm below it. Two stacked 2×8 box headers need 58 mm (courtyard 10 × 29 mm each) and two unshrouded 2×8 2.54 mm headers 43 mm — the row pair does not fit above J_PORT_E without moving that port or putting the headers in two columns (board +23 mm). 2×8 2.0 mm fits but breaks ribbon compatibility anyway. A 2×20 1.27 mm header is one connector per FFC, keeps the FFC pin numbering 1:1 including the ID/GND/sense spares, and fits in a 12.5 mm strip. Trade-off: the 1.27 mm ribbon is finer and the header is unshrouded (unkeyed) — pin 1 is marked on silk; use a keyed socket/strain relief. To reach the garland 2×8 2.54 mm wiring, use a passive 2×20 1.27 → 4× 2×8 2.54 adapter (pin n → line n).
 
 ## 7. Compliance checklist for a new load
 
