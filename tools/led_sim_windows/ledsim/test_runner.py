@@ -48,6 +48,7 @@ class Runner:
 
     def start(s, boards, batch):
         s.log = []; s.res = {b.id: {} for b in boards}; s.batch = max(1, batch); s.t0 = s.w.now
+        if getattr(s.w, 'lab', None) is not None: s.w.lab.running = True     # the 'phys' step needs the electrothermal model
         s.queue = list(sorted(boards, key=lambda b: b.id)); s.active = []; s.running = True; s.started = time.time(); s.done_at = None
         s.order = [b.id for b in s.queue]
         s.L_sys('INFO', 'Запуск теста: %d плат, пакеты по %d' % (len(boards), s.batch))

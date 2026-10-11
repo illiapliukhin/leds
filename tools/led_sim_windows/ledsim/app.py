@@ -41,6 +41,8 @@ class App:
             return None
     def draw_status(s, sc):
         pygame.draw.rect(sc, (18, 20, 26), s.status); lab = s.views['lab'].get(); sp = lab.system_power()
+        if not getattr(lab, 'running', False):
+            text(sc, 'Питание/тепло: модель остановлена — «Лаборатория» → «Запустить» (в фоне ничего не считается)', (8, s.status.y + 4), (150, 156, 170), 12); return
         if not sp: text(sc, 'Питание: модель ещё считает…', (8, s.status.y + 4), (150, 156, 170), 12); return
         b = s.views['lab'].board(); bp = lab.boards.get(b.id) if b else None
         t = 'СИСТЕМА %d плат: %.2f Вт · %.2f А при 5 В · LED %.2f Вт · потери %.2f Вт · энергия %.2f Вт·ч · БП ≥ %.0f Вт / %.1f А (текущий режим +25 %%)' % (
@@ -62,7 +64,8 @@ class App:
             s.dt = dt
             if dt > 0.2: __import__('logging').warning('slow frame %.0f ms (tab %s, %d boards)', dt * 1000, s.tab, len(s.views['system'].w.boards))
             sv = s.views['system']; sv.tick(dt)
-            if not sv.w.paused: s.views['test'].tick()                 # the stack keeps running in every tab
+            tr = s.views['test'].runner()
+            if not sv.w.paused and tr.running: s.views['test'].tick()   # tests only when started explicitly
             s.views['lab'].tick(dt)                                     # electrothermal model runs in every tab
             v = s.views[s.tab]
             sc = s.screen; sc.fill((24, 26, 32))

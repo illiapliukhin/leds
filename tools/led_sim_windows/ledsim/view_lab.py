@@ -30,7 +30,7 @@ class LabView:
         return w.boards[0] if w.boards else None
     def tick(s, dt):
         lab = s.get(); lab.sel = s.board()
-        if not lab.w.paused: lab.tick(dt, budget=3 if len(lab.w.boards) > 20 else 6)
+        if getattr(lab, 'running', False) and not lab.w.paused: lab.tick(dt, budget=3 if len(lab.w.boards) > 20 else 6)
     def event(s, e, view):
         if e.type == pygame.MOUSEWHEEL: s.scroll = max(0, s.scroll + e.y * 3)
 
@@ -127,10 +127,14 @@ class LabView:
 
     def panel(s, surf, ui, rr):
         lab = s.get(); p = lab.p; f = lab.faults; x, y, W = rr.x + 10, rr.y + 6, rr.w - 20
-        text(surf, 'Пресеты', (x, y), (170, 180, 200), 12); y += 16
+        run = getattr(lab, 'running', False)
+        if ui.button(surf, (x, y, W, 26), ('■ Остановить модель и журнал' if run else '▶ Запустить электротепловую модель и журнал'), on=run, sz=11):
+            lab.running = not run; lab.log(None, 'INFO', 'Лаборатория: модель %s' % ('запущена' if lab.running else 'остановлена'))
+        y += 30
+        text(surf, 'Пресеты (запускают модель)', (x, y), (170, 180, 200), 12); y += 16
         names = list(PRESETS); bw = (W - 8) // 3
         for i, n in enumerate(names):
-            if ui.button(surf, (x + (i % 3) * (bw + 4), y + (i // 3) * 26, bw, 23), n, sz=10): lab.apply_preset(n)
+            if ui.button(surf, (x + (i % 3) * (bw + 4), y + (i // 3) * 26, bw, 23), n, sz=10): lab.apply_preset(n); lab.running = True
         y += 56
         hb = (W - 4) // 2
         if ui.button(surf, (x, y, hb, 22), 'Батарея', on=p['src'] == 'battery', sz=11): p['src'] = 'battery'

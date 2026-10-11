@@ -46,7 +46,7 @@ class BoardPhys:
 
 class Lab:
     def __init__(s, world):
-        s.w = world; s.p = default_params(); s.faults = {}; s.boards = {}; s.events = []; s.rr = 0; s.sel = None
+        s.w = world; s.p = default_params(); s.faults = {}; s.boards = {}; s.events = []; s.rr = 0; s.sel = None; s.running = False
         pcb = json.load(gzip.open(host.data_path('pcb', BOARD_PCB), 'rt', encoding='utf-8'))
         xs = [q[0] for sg in pcb['outline'] for q in sg]; ys = [q[1] for sg in pcb['outline'] for q in sg]
         cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
@@ -63,6 +63,7 @@ class Lab:
         s.ir = json.load(open(host.data_path('ir_rows.json')))
         s.led = elec.LedModel()
     def apply_preset(s, name):
+        s.running = True                                                   # an explicit user action starts the model
         pr = dict(PRESETS[name]); s.faults = dict(pr.pop('faults', {}))
         br = pr.pop('brightness', None)
         if br is not None: s.w.brightness = br
@@ -209,7 +210,10 @@ class Lab:
         P['J_BAT1'].P = i_cell ** 2 * 2 * DS['PicoBlade']['r_contact']
         P['U_GAUGE1'].P = 0.0001; P['U_485'].P = 0.003
         P['D_VBUS1'].P = bp.vconn * bp.i_tvs if P['D_VBUS1'].state == 'ok' else 0.0
-        P['U_OVP1'].P = max(0.0, bp.vconn - Vb) * info['i_usb'] if P['U_OVP1'].state == 'ok' else (info['i_usb'] ** 2 * 0.05 if P['U_OVP1'].state == 'short' else 0.0)
+        vin_ef = bp.vconn - info['i_usb'] * p['usb_r']                              # eFuse IN pin = VBUS_CONN after the cable drop
+        # normal: RON·I² (34 mΩ); OVC clamp: (VIN − VBUS)·I. (Was (V_adapter − VBUS)·I: counted the USB cable's I·R as eFuse heat.)
+        P['U_OVP1'].P = (max(DS['TPS259531']['ron'] * info['i_usb'] ** 2, (vin_ef - Vb) * info['i_usb']) if P['U_OVP1'].state == 'ok'
+                         else (info['i_usb'] ** 2 * 0.05 if P['U_OVP1'].state == 'short' else 0.0))
         P['F_BAT1'].P = i_cell ** 2 * DS['F466_2A']['r'] if P['F_BAT1'].state == 'ok' else 0.0
         P['Q_BAT1'].P = i_cell ** 2 * DS['AO3401A']['rds'] if P['Q_BAT1'].state == 'ok' else 0.0
         for q in P.values():                                                       # destroyed parts dissipate nothing more

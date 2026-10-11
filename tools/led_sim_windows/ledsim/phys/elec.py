@@ -90,6 +90,10 @@ class PowerTree:
             # SYS regulator: target min(VSYS_REG, VIN − Ron·I) behind 5 mΩ, clipped to [0, ILIM]
             v_t = min(DS['BQ25185']['vsys'], Vb - 0.25 * p.get('i_in_prev', 0.3))
             i_in = smooth_clip((v_t - Vs) / 0.005, 0.0, p['ilim'], 300) + 0.01 * (v_t - Vs) * (Vb > Vs)   # 10 mS output conductance in current limit (keeps Newton gradient; ≤ 5 mA error)
+            # battery-tracking VINDPM (datasheet §8.3.1): input current is cut back to hold VIN ≥ VBAT + 330 mV (3.6 V if VBAT < 3.5 V)
+            vindpm = Va + 0.33 if Va > 3.5 else 3.6
+            i_in = i_in / (1 + math.exp(-min(60.0, max(-60.0, (Vb - vindpm) / 0.01))))
+            info['vindpm'] = vindpm
         else: i_in = 0.0
         I[0] -= i_in; I[1] += i_in; info['i_in'] = i_in
         # BAT FET BAT->SYS (supplement / battery-only), 50 mΩ (assumption)
@@ -132,7 +136,7 @@ class PowerTree:
         # charger SYS->BAT: ICHG, CV 4.2 V, DPM (input headroom), TREG derating
         i_chg = 0.0
         if vin_ok and not p['f_chg_short'] and p['charge_en']:
-            head = max(0.0, p['ilim'] - i_tin - i_ldo)             # DPM: charge only from input headroom (same Newton iterate)
+            head = max(0.0, min(p['ilim'], i_in) - i_tin - i_ldo)  # DPM/VINDPM: charge only from what the input actually delivers
             cv = 1 / (1 + math.exp(min(60, (Va - 4.2) / 0.005)))
             i_chg = min(p['ichg'] * p['treg_k'], head) * cv
         I[1] -= i_chg; I[2] += i_chg; info['i_chg'] = i_chg
