@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>/workspace/leds_push/hardware/mono_schematic/mono_electronics.kicad_sch</source>
-    <date>2026-10-11T17:17:59</date>
+    <date>2026-10-11T17:31:25</date>
     <tool>Eeschema 10.0.7</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -22,7 +22,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="2" name="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/">
+    <sheet number="2" name="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/">
       <title_block>
         <title>Power - charger, bucks, LDO, switches, battery</title>
         <company/>
@@ -40,7 +40,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="3" name="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/">
+    <sheet number="3" name="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/">
       <title_block>
         <title>MCU - ESP32-S3, USB, crystal, boot</title>
         <company/>
@@ -58,7 +58,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="4" name="/imu/" tstamps="/79b6d043-0bbf-44b5-ae21-fc17131e4dee/">
+    <sheet number="4" name="/imu/" tstamps="/2f302368-ce8f-4a87-a999-b50d26586f8c/">
       <title_block>
         <title>IMU - BMI270</title>
         <company/>
@@ -76,7 +76,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="5" name="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/">
+    <sheet number="5" name="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/">
       <title_block>
         <title>LED column drive - MBI5124, buffers, translator, decoders, FFC col</title>
         <company/>
@@ -94,7 +94,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="6" name="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/">
+    <sheet number="6" name="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/">
       <title_block>
         <title>Row farm - AO3403 x32, FFC row</title>
         <company/>
@@ -112,7 +112,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="7" name="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/">
+    <sheet number="7" name="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/">
       <title_block>
         <title>Audio - microphone and op-amp</title>
         <company/>
@@ -130,7 +130,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="8" name="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/">
+    <sheet number="8" name="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/">
       <title_block>
         <title>Stacking ports N/S/W/E - JST-SH 6P, RS-485 (THVD1406), ESD, termination</title>
         <company/>
@@ -148,7 +148,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="9" name="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/">
+    <sheet number="9" name="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/">
       <title_block>
         <title>LED interface standard v1 - FFC spares: panel ID I2C (33R/100R, PESD3V3S2UT), column-expansion taps (DNP)</title>
         <company/>
@@ -166,9 +166,9 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="10" name="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/">
+    <sheet number="10" name="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/">
       <title_block>
-        <title>Installation-build cable headers (v14, DNP in wearable) - J_RH1/J_CH1 2x20 1.27 mm SMD in parallel with J_ROW1/J_COL1 pin-for-pin, PESD5V0S1BL per LED line</title>
+        <title>Installation-build cable headers (v14, DNP in wearable) - J_RH1/J_CH1 2x20 1.27 mm shrouded keyed box headers (XFCN BH127VS-40P-H49) in parallel with J_ROW1/J_COL1 pin-for-pin, PESD5V0S1BL per LED line</title>
         <company/>
         <rev>EVT</rev>
         <date>2026-10-10</date>
@@ -184,7 +184,7 @@
         <comment number="9" value=""/>
       </title_block>
     </sheet>
-    <sheet number="11" name="/mechanical/" tstamps="/83487414-95de-444b-bc61-c5f741dfd430/">
+    <sheet number="11" name="/mechanical/" tstamps="/ee4af36d-6c2f-48e3-9a3e-cd5ee9fd2a70/">
       <title_block>
         <title>Mechanical - M2.5 plated mounting holes (GND)</title>
         <company/>
@@ -215,8 +215,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>16484340-6821-4acd-8288-f240611dd871</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>53d80749-5bfd-43de-b5f9-a7472bc1a952</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -237,8 +237,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>f6c8e52f-e27e-4973-8177-759cd2e00901</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>f7d9aa53-7aba-4858-a2ce-689eae906e49</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -259,8 +259,8 @@
       <libsource lib="mono_parts" part="10u_C_0805_2012Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>fa910026-c662-4ed8-9f40-8b255d40a3da</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>3c20e49a-dfda-46c5-bbbd-7705ab7df7a3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -281,8 +281,8 @@
       <libsource lib="mono_parts" part="10u_C_0805_2012Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>bcd1d8f8-1741-4961-be9d-f13c38d6a258</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>099d95a8-f13a-4f96-ac5a-d1dd801385e6</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -303,8 +303,8 @@
       <libsource lib="mono_parts" part="10u_C_0805_2012Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>c4d22148-89e1-4b74-b7fa-435f1799583e</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>21f45a24-64fd-442b-992a-1c5381e77006</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -325,8 +325,8 @@
       <libsource lib="mono_parts" part="10n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>fd26f965-b954-4b63-9983-de64af3d62d1</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>34bf9041-e97c-4595-8230-0d2b797fc949</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -347,8 +347,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>b4b610d7-31a4-4851-90e8-36219b272448</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>84a71f43-41a4-43b1-a6b3-1fc37ee82ebd</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -369,8 +369,8 @@
       <libsource lib="mono_parts" part="1u_C_0603_1608Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>1f41fef0-fb30-4093-bf09-dd64f55f790f</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>dbd7b1a0-29d0-4fd5-aadb-d72eead9356d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -391,8 +391,8 @@
       <libsource lib="mono_parts" part="1u_C_0603_1608Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>b45cb232-ed4d-4f92-9e83-9c4444b8eb43</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>36493d08-983a-406a-bb0f-29f3701ed560</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -413,8 +413,8 @@
       <libsource lib="mono_parts" part="22u_C_0805_2012Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>01939bd0-33a0-4990-8d27-d0c14d8bf55b</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>558616eb-4453-444e-a6cd-406a1599d87f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -435,8 +435,8 @@
       <libsource lib="mono_parts" part="22u_C_0805_2012Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>fe54ed11-0083-4da5-8c0d-f8b50b4970fe</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>68dbefca-bc55-470d-871c-375e428da06a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -457,8 +457,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>06eef083-39fb-4017-bf85-67c535098606</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>7263c3dc-f419-4e85-af93-8eac3528ddd9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -479,8 +479,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>7046fdd3-f93a-4ae7-954e-c0d434ffa5ea</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>f643eab7-1290-4166-b0ce-51fbebb97772</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -501,8 +501,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>33a0e6a0-341f-4015-8c26-37cc10a4d58a</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>b1479721-efa3-4f86-9483-84267dc2cd0d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -523,8 +523,8 @@
       <libsource lib="mono_parts" part="10u_C_0805_2012Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>3ca2d6eb-e138-4fd6-a1a1-b86afe1fbad3</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>c05569cd-c14d-4a64-89de-cffc78f0effc</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -545,8 +545,8 @@
       <libsource lib="mono_parts" part="SMF12A_D_SOD-123F_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>120f8207-18cd-4b28-b2e1-f1737eba7a2e</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>ce6f9124-05c3-424f-a4d9-5bbb063cf416</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -567,8 +567,8 @@
       <libsource lib="mono_parts" part="0466002.NRHF_2A_Fuse_1206_3216Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>7c11706b-c2e5-494f-bd4b-8985c31e35ad</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>755a518e-7b0d-4581-b4a2-a21c64e47f17</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -589,8 +589,8 @@
       <libsource lib="mono_parts" part="S3B-PH-SM4-TB_JST_PH_S3B-PH-SM4-TB_1x03-1MP_P2.00mm_Horizontal_3" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>a5cf6756-0637-4cdb-9b85-4b071cca9a7e</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>a4061ab8-c455-4b25-8447-aafdb037dbed</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -612,8 +612,8 @@
       <libsource lib="mono_parts" part="DFE201612E-R47M_L_Murata_DFE201610P_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>a3068e45-08c2-4341-b208-4fa22c2630b6</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>1809b677-8022-49fc-9439-fe51ea193b60</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -634,8 +634,8 @@
       <libsource lib="mono_parts" part="AO3401A_SOT-23_3" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>394f488a-f555-4923-abb9-4b4e789c2edf</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>8939601c-d372-4056-8c82-ac4eeb702dba</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -657,8 +657,8 @@
       <libsource lib="mono_parts" part="10k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>1ffabcb2-1e08-4d7c-9b81-1e693c5e9494</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>c312dd06-0adc-43c3-a830-5523473f4cc3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -679,8 +679,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>033a0172-2c64-4c13-a649-29c282ee2cba</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>863be54f-867f-4408-83b1-9d0407a68b5c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -701,8 +701,8 @@
       <libsource lib="mono_parts" part="10k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>2e55bce1-baf2-4168-b4d6-161cc999f943</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>bf7941b6-562d-43f4-b63d-2b0da9360303</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -723,8 +723,8 @@
       <libsource lib="mono_parts" part="91k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>6a3df15b-0c53-472c-bd50-bbd350050b9e</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>0b93308c-613d-4851-b702-3826eaba667f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -745,8 +745,8 @@
       <libsource lib="mono_parts" part="681k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>7ee7a59b-b662-4aa0-83b4-ec87771f60a6</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>b5780d0d-2060-496f-acaa-9dea6bfb7569</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -767,8 +767,8 @@
       <libsource lib="mono_parts" part="18k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>f048b610-8da5-4ebb-b942-b97c75af155f</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>8bdbc410-db25-4c64-a5a6-2bc4172d8bd4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -789,8 +789,8 @@
       <libsource lib="mono_parts" part="2.7k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>084330e7-beaf-4aac-9715-2a414a0bcc4c</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>739a8d64-752c-4bd9-9df2-66db50d1bef4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -811,8 +811,8 @@
       <libsource lib="mono_parts" part="600R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>51708664-90b6-4731-91e8-4357f5bfaaa8</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>6094307e-49eb-4167-bf31-71dd939756b2</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -833,8 +833,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>d7a55b09-4c66-4499-8277-08db70673343</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>adbf7156-e275-42f7-977e-833101de565e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -855,8 +855,8 @@
       <libsource lib="mono_parts" part="1k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>498fdabe-c30f-4119-ba84-769a6c83967a</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>fc3b98cf-4f81-47e8-b272-77c785aa3ba1</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -877,8 +877,8 @@
       <libsource lib="mono_parts" part="10k_1__R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>adb94da5-21b3-4853-b5cd-76e18302fb33</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>af9f72c4-339b-4ed6-beb5-ebd9f51e4ed3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -899,8 +899,8 @@
       <libsource lib="mono_parts" part="NTC_10k_B3435_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>cf0e38b4-749f-4c85-b889-fd023f7a7590</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>ff4b3302-cce4-4d19-9308-e103a7099573</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -921,8 +921,8 @@
       <libsource lib="mono_parts" part="TPS22917_SOT-23-6_4" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>3e5b4dce-bf17-4396-a782-0a0ab5708637</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>a8fdef21-9370-4d44-986d-fd8211b53e33</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -945,8 +945,8 @@
       <libsource lib="mono_parts" part="BQ25185_Texas_DLH0010A_WSON-10-1EP_2x2mm_P0.4mm_EP0.9x1.5mm_9" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>8d6b288d-5708-4605-a161-fb9fa0d0b8d7</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>3e9365a9-ae72-427f-975f-71366ab8ec6c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -974,8 +974,8 @@
       <libsource lib="mono_parts" part="MAX17048G_T10_TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm_9" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>35f36234-7c8f-478c-8616-58298e9d3be6</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>ca73c30e-4d86-4d18-8582-ee9ce3476488</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1003,8 +1003,8 @@
       <libsource lib="mono_parts" part="TLV75733PDBVR_SOT-23-5_4" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>c01cdd3d-8214-4482-855a-804c555bf72a</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>650d9602-8851-47e5-9d2a-f74ed39c03cd</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1027,8 +1027,8 @@
       <libsource lib="mono_parts" part="TPS259531DSGR_Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm_7" description=""/>
       <property name="Sheetname" value="power"/>
       <property name="Sheetfile" value="sheets/power.kicad_sch"/>
-      <sheetpath names="/power/" tstamps="/55b968ea-c8b3-4956-9980-e404a72a05ed/"/>
-      <tstamps>ff02f305-c76d-483e-b249-4668c29b751f</tstamps>
+      <sheetpath names="/power/" tstamps="/b901b63a-d34b-4a06-b331-95a6cedd0c4c/"/>
+      <tstamps>c7f4a1f0-98fc-48e8-b514-db827709275a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1054,8 +1054,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>eac22680-6b99-4275-8b55-294ccd12e5cb</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>8f533b16-7ab9-487b-976f-3c24778d5656</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1076,8 +1076,8 @@
       <libsource lib="mono_parts" part="22u_C_0805_2012Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>46bfbe18-1b46-4990-9a47-317c7f1ef517</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>76d2a4bc-c4f7-4eab-a7fd-dcb4ebdf1fb0</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1098,8 +1098,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>645900c7-d4cd-4ae9-a6e5-55f1372b9983</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>d04212d3-17a7-4a78-87b3-f93f336b1332</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1120,8 +1120,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>91995f52-d739-42b1-9e71-75dbe67374a6</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>0d1f515b-cd30-4bf6-ab0d-0277f24c4ce4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1142,8 +1142,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>93947481-df3e-41b2-a02d-8a5ac91ebbfd</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>ec52a279-a847-497d-9577-fbdff7179d95</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1164,8 +1164,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>3a66c098-3528-4486-a58d-1762968ee63e</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>d1f942fc-21c4-47f3-ab74-e5f16b271178</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1186,8 +1186,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>e5b9e2a0-c780-4ddf-bc39-c27a9a490a9f</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>d3919803-1f42-437d-90d4-ee91e6977668</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1208,8 +1208,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>6a2d9347-f318-4127-bdf9-f16710998aad</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>8a68f3cc-9956-401e-b481-df0d00ef1df0</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1230,8 +1230,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>c608ac5a-d269-4d70-9f9d-fa0d437fa932</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>78561a5a-7938-4d12-a4d8-601b12804d3f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1252,8 +1252,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>cbee3188-d7b2-4640-9009-d896886a4bf7</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>8e58fb67-5bbe-4374-8ac0-d62dfbffe313</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1274,8 +1274,8 @@
       <libsource lib="mono_parts" part="10p_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>796bc520-9c02-4c10-934b-f2c217d125ab</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>19bf88e9-992f-4106-9d01-9bba61572631</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1296,8 +1296,8 @@
       <libsource lib="mono_parts" part="10p_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>269ebae0-c27a-42c4-8d9e-e0da188a71c4</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>bff4b04e-cf78-4443-91e2-e2fc0a6f758a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1318,8 +1318,8 @@
       <libsource lib="mono_parts" part="TYPE-C-31-M-12_USB_C_Receptacle_HRO_TYPE-C-31-M-12_15" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>f95b3377-d1a9-49a8-85f5-3962aa522619</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>7d4ed836-a288-431a-a1aa-bb40952f1765</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1353,8 +1353,8 @@
       <libsource lib="mono_parts" part="24nH_L_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>2b583bee-bf34-40a0-9108-0649c5b04fd5</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>e4fd0ef4-a23e-462e-907f-22f77b62c9bd</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1375,8 +1375,8 @@
       <libsource lib="mono_parts" part="10k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>36fb0002-9c13-47f6-bd09-6f85ceb7672e</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>861572bb-6364-481b-a617-bbec9495174c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1397,8 +1397,8 @@
       <libsource lib="mono_parts" part="5.1k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>08c4aec1-f7b6-498b-ab6a-e6ea6b6aaf2d</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>8d58c54e-cf43-4c09-ade3-23c0142bc08c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1419,8 +1419,8 @@
       <libsource lib="mono_parts" part="5.1k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>842a12d6-f5bc-4139-bc23-79aac0d4c9eb</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>747320f2-24bf-4976-bebc-c3257b765f55</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1441,8 +1441,8 @@
       <libsource lib="mono_parts" part="10k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>e8be7bb7-2631-4ae5-8b52-f81e9a43d3f2</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>a305e521-0ea2-4417-96f0-2c79ccb33d4e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1463,8 +1463,8 @@
       <libsource lib="mono_parts" part="22R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>fe1e3620-1f81-45cc-9f97-73bf8a4aed2a</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>99ecbe7c-3cdc-441b-a5b9-dac63050a0f9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1485,8 +1485,8 @@
       <libsource lib="mono_parts" part="22R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>a9f27ed9-3746-4286-b8e9-b3a07de53169</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>0209ff14-8c98-4f2d-9a0e-2a0ee7e0fd08</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1507,8 +1507,8 @@
       <libsource lib="mono_parts" part="KMR2_SW_Push_1P1T_NO_CK_KMR2_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>0aef82a0-3a1b-42e4-9253-c5e8ed0acad0</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>4b595433-e378-40e3-a347-9dfc27e71b70</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1529,8 +1529,8 @@
       <libsource lib="mono_parts" part="AON_3V3_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>f0519cf9-c54a-4f7d-ac57-ad8e441d3f8a</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>f08770ef-ab67-4fba-9943-24cb6436d106</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1551,8 +1551,8 @@
       <libsource lib="mono_parts" part="GND_R_0402_1005Metric_1" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>b98e9303-4688-4c7b-8c5a-fe1873ee2538</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>a1917084-2049-47cf-ac9e-455ff3751e3b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1572,8 +1572,8 @@
       <libsource lib="mono_parts" part="ESP32-S3FN8_QFN-56-1EP_7x7mm_P0.4mm_EP5.6x5.6mm_41" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>662bd11a-abb3-4262-9ce9-ed6b780dc537</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>23f5f4c2-fabc-4243-8bd7-fcc4fc871459</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1633,8 +1633,8 @@
       <libsource lib="mono_parts" part="USBLC6-2SC6_SOT-23-6_6" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>3fe2b67b-7457-47fa-9bbd-6eebbc429330</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>fe9947aa-5277-4d24-986e-83d73169d9d9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1659,8 +1659,8 @@
       <libsource lib="mono_parts" part="L327S400H11L_Crystal_SMD_3225-4Pin_3.2x2.5mm_4" description=""/>
       <property name="Sheetname" value="mcu"/>
       <property name="Sheetfile" value="sheets/mcu.kicad_sch"/>
-      <sheetpath names="/mcu/" tstamps="/349c0511-d3c0-4387-81e8-6c00dadc94b0/"/>
-      <tstamps>4be634b0-6fbb-45de-80a9-966bfc727654</tstamps>
+      <sheetpath names="/mcu/" tstamps="/52f7dab6-d9b1-40ae-9ae0-1242423abc59/"/>
+      <tstamps>acb56c15-904c-43fe-a193-a4cde9dbdf80</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1683,8 +1683,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="imu"/>
       <property name="Sheetfile" value="sheets/imu.kicad_sch"/>
-      <sheetpath names="/imu/" tstamps="/79b6d043-0bbf-44b5-ae21-fc17131e4dee/"/>
-      <tstamps>d0ab5d9f-2b63-4671-b093-a259d3aceac5</tstamps>
+      <sheetpath names="/imu/" tstamps="/2f302368-ce8f-4a87-a999-b50d26586f8c/"/>
+      <tstamps>10f7ddce-65c6-4e40-8ec2-b35f1370e5e3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1705,8 +1705,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="imu"/>
       <property name="Sheetfile" value="sheets/imu.kicad_sch"/>
-      <sheetpath names="/imu/" tstamps="/79b6d043-0bbf-44b5-ae21-fc17131e4dee/"/>
-      <tstamps>ea6f3749-3760-44bb-a178-cddba06fc52c</tstamps>
+      <sheetpath names="/imu/" tstamps="/2f302368-ce8f-4a87-a999-b50d26586f8c/"/>
+      <tstamps>4f167254-a1a6-4580-a14a-20ff1285c46e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1727,8 +1727,8 @@
       <libsource lib="mono_parts" part="4.7k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="imu"/>
       <property name="Sheetfile" value="sheets/imu.kicad_sch"/>
-      <sheetpath names="/imu/" tstamps="/79b6d043-0bbf-44b5-ae21-fc17131e4dee/"/>
-      <tstamps>b6138c39-4a9d-4a8c-a093-733aa5616fb8</tstamps>
+      <sheetpath names="/imu/" tstamps="/2f302368-ce8f-4a87-a999-b50d26586f8c/"/>
+      <tstamps>01649666-226f-473c-9a86-e22f64902b2c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1749,8 +1749,8 @@
       <libsource lib="mono_parts" part="4.7k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="imu"/>
       <property name="Sheetfile" value="sheets/imu.kicad_sch"/>
-      <sheetpath names="/imu/" tstamps="/79b6d043-0bbf-44b5-ae21-fc17131e4dee/"/>
-      <tstamps>b5f2354c-4127-4bce-899e-a0dc4648f3a5</tstamps>
+      <sheetpath names="/imu/" tstamps="/2f302368-ce8f-4a87-a999-b50d26586f8c/"/>
+      <tstamps>b15c29a1-7796-4c6d-b407-15f49eb8595c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1771,8 +1771,8 @@
       <libsource lib="mono_parts" part="BMI270_Bosch_LGA-14_3x2.5mm_P0.5mm_9" description=""/>
       <property name="Sheetname" value="imu"/>
       <property name="Sheetfile" value="sheets/imu.kicad_sch"/>
-      <sheetpath names="/imu/" tstamps="/79b6d043-0bbf-44b5-ae21-fc17131e4dee/"/>
-      <tstamps>127e25ff-d44b-405c-a2fd-a56b8ae2022e</tstamps>
+      <sheetpath names="/imu/" tstamps="/2f302368-ce8f-4a87-a999-b50d26586f8c/"/>
+      <tstamps>c56cb2b4-52a4-4d05-8313-e0384da42087</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1800,8 +1800,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>09803e15-8e02-4811-bd8b-cff91e3e9d2c</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>698f44fd-6f9f-4028-8a39-631830eef0c1</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1822,8 +1822,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>2c07fff3-aaea-4707-8de6-e3e8ff1fdecb</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>5bf00b7e-8846-4193-91ce-ea617da312a5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1844,8 +1844,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>7c7dfcad-9ed1-4c1c-924b-1b7b32d1ae74</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>7012903d-be31-4ef9-9cb3-c075dee9a44b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1866,8 +1866,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>1d8bcd24-aec8-4de1-ab57-f8ccfdabe7cf</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>c889a2f3-4525-45f5-aa95-5bf5613a42b8</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1888,8 +1888,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>98a6b025-1262-43a7-979f-8dbf9584b812</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>c4914a3e-f9ec-413b-b98e-ac496ae234b3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1910,8 +1910,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>81a17e87-7aa5-4663-aec3-9c5ac0cfb80e</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>a4beb089-3cfc-4839-91dc-f08df313965e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1932,8 +1932,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>09facf15-aba0-452f-b75a-e9e4066983eb</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>d1037ac8-9cbd-4c11-bfdd-5d809d08ef48</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -1954,8 +1954,8 @@
       <libsource lib="mono_parts" part="FFC_40P_050_COL_FFC_40P_050_COL_40" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>0db0c6d3-7cac-40e9-95e0-275046ce76ec</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>6a4d0255-d621-43b0-b1e3-262f8aa39644</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2014,8 +2014,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>542b5094-303c-4095-ad26-2ba5c1b09a82</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>0b18769f-ca9a-426e-ac52-9950f40640e7</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2036,8 +2036,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>379ff908-24be-4298-8011-11964df3fdbd</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>2c818574-ea04-4a77-aa44-625fc3a96758</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2058,8 +2058,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>3c01e64f-2158-4d3a-9feb-1e1853931533</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>e9dbde0e-012d-49ae-8bc5-ed63f14c9aea</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2080,8 +2080,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>4c92c7be-e318-4344-8e62-e983936f7bac</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>443dcbf9-f55f-439e-878b-76c86d27ba37</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2102,8 +2102,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>3a327fbd-223f-41f3-a38c-867068b3e7cc</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>cc0817ea-fcc1-411e-9ac4-19ee21e85ef3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2124,8 +2124,8 @@
       <libsource lib="mono_parts" part="22R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>8d4a4681-a1c9-46d8-acd4-1735b7aa3f0f</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>b265caa4-9c7a-45da-a440-fb9f6fd764fe</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2146,8 +2146,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>2ddc0bdc-ea15-4012-bd9a-ee66f7f23b99</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>73ba2437-32d3-49f0-98d8-9b2413e451a2</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2168,8 +2168,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>889c532b-6efc-40d3-a44a-7c8c35bc3bdd</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>746ee86d-98a3-4bd3-9c4f-b57c74538950</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2190,8 +2190,8 @@
       <libsource lib="mono_parts" part="39k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>16e58793-b085-4ccb-bfe3-63c92a1d02fc</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>7d619a8b-6c66-407f-8b69-d74fdbd65ee4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2212,8 +2212,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>24c022ba-0783-4f3c-b350-68bfa8869a2c</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>d7d2b7ce-5810-49ae-908f-161e2301f75e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2234,8 +2234,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>8f0bde76-c4dd-4b3f-863f-b9b997a0328a</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>a1b6f9bd-fea0-43bd-8cf6-8956adf38149</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2256,8 +2256,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>386b5486-2808-43bc-8bdf-536c735aef8a</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>4018155d-13f8-4eaa-a870-9d8643d099ce</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2278,8 +2278,8 @@
       <libsource lib="mono_parts" part="1.82k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>bee2d4ea-a148-4396-97f4-af988d6ae271</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>adc66056-f1c8-405f-9a9c-c5d7b792ed36</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2300,8 +2300,8 @@
       <libsource lib="mono_parts" part="1.82k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>dd58adf2-05db-44d0-8f64-6c0f82836542</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>59f70d16-5ef4-4445-ba1f-6baa522412fb</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2322,8 +2322,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>aa2c273f-30c7-4006-83b1-c7b5355f139d</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>cc76d5a6-fccb-4391-8675-65e982176589</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2344,8 +2344,8 @@
       <libsource lib="mono_parts" part="22R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>c96c49ee-0b91-457f-a536-06143f18f509</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>f526514a-78eb-4df9-affb-fabc0bc8b005</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2366,8 +2366,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>3c8d4371-a5ef-4d6a-bcad-48e1c62857f8</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>3d4432ab-8195-4ebe-b23a-9a8f1810ff25</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2388,8 +2388,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>563b5741-6260-4017-aa91-6367935def94</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>54046c9a-732b-41a6-93b3-16bb574cbe3d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2410,8 +2410,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>862347a7-0868-47b7-a6c5-a2dc4e57abac</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>836433f6-9f0c-414d-b68e-cf2ac4940503</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2432,8 +2432,8 @@
       <libsource lib="mono_parts" part="22R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>8c99f2fe-bdfc-4328-8c97-fc93f4271d2d</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>368d064b-9ffd-4e87-968c-75240c6b4040</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2454,8 +2454,8 @@
       <libsource lib="mono_parts" part="10k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>12a278e6-6590-47c0-932e-0634efdb54bf</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>6e471af6-c8a9-452a-a3e7-501847f1788e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2476,8 +2476,8 @@
       <libsource lib="mono_parts" part="74HC154_TSSOP-24_4.4x7.8mm_P0.65mm_24" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>c11bb505-5067-4bf0-9e60-c55fab38701f</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>89570f3a-b66e-4b41-abc8-5d5d75b6242e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2520,8 +2520,8 @@
       <libsource lib="mono_parts" part="74HC154_TSSOP-24_4.4x7.8mm_P0.65mm_24" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>d7b5803d-d6c8-47d1-b58c-c3a7d517744f</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>b92256bc-b05d-438b-b4c8-e1ca68c0e95b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2564,8 +2564,8 @@
       <libsource lib="mono_parts" part="MBI5124GP-B_SSOP-24_3.9x8.7mm_P0.635mm_24" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>dfe59c67-3d25-4034-aba6-9786a714149f</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>548e5e7b-41b3-4516-9808-ee959c77b4d4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2608,8 +2608,8 @@
       <libsource lib="mono_parts" part="MBI5124GP-B_SSOP-24_3.9x8.7mm_P0.635mm_24" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>00d6f76c-9393-4c20-8d98-247dc3473b7e</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>ccb7e062-c1a4-4976-b65e-7f0dacffb8df</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2652,8 +2652,8 @@
       <libsource lib="mono_parts" part="SN74LV125A_TSSOP-14_4.4x5mm_P0.65mm_14" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>be819af4-33ec-496e-a4c1-0b73d17df78e</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>4e268017-f25e-4bc8-8eaa-dd4ea563fc6f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2686,8 +2686,8 @@
       <libsource lib="mono_parts" part="TPS22917_SOT-23-6_5" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>b1df9add-7b2f-4163-b00e-da430915e7b3</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>10a0c36e-8978-4d78-b20c-13665fd1bba4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2711,8 +2711,8 @@
       <libsource lib="mono_parts" part="TPS63802DLAR_TDFN-10-1EP_2x3mm_P0.5mm_EP0.9x2mm_10" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>bb16a9d3-2117-4ee5-9228-50d07924bb5b</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>9976978f-3cc5-44e4-a75c-dfcd8a39b1cb</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2741,8 +2741,8 @@
       <libsource lib="mono_parts" part="SN74LVC8T245RHLR_Texas_RHL0024A_VQFN-24-1EP_3.5x5.5mm_P0.5mm_EP2.05x4.05mm_23" description=""/>
       <property name="Sheetname" value="led_drive"/>
       <property name="Sheetfile" value="sheets/led_drive.kicad_sch"/>
-      <sheetpath names="/led_drive/" tstamps="/1e86964a-4de5-4bee-9aab-96b6b709e5cf/"/>
-      <tstamps>c41b7d9e-418a-4dfa-8756-f7d227edbc43</tstamps>
+      <sheetpath names="/led_drive/" tstamps="/9e42f89d-d3ba-4478-8984-a1072f4addd9/"/>
+      <tstamps>d97d5f92-76df-445a-8e06-e4e023228aba</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2784,8 +2784,8 @@
       <libsource lib="mono_parts" part="FFC_40P_050_ROW_FFC_40P_050_ROW_40" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>ec38d2fb-4f58-481d-9d09-5fe6285ba0f9</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>89005560-0d70-4217-949c-fc71889a28a7</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2844,8 +2844,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>1c87f7f1-d079-454b-9ab1-fd2ce3a6e8c6</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>648b6cc0-f390-48eb-8f2c-71dfdc6ec6cb</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2867,8 +2867,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>b7d7f614-b493-4ea3-8d19-b10f5a7d0952</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>d4a97640-6956-4090-95c2-e71ddb803290</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2890,8 +2890,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>43b1a70d-b7ef-417f-ad55-b47cb71d551b</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>9bf42b3d-9064-4c97-a591-c6e9e55f3dd6</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2913,8 +2913,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>9c778938-9982-45ad-9551-6584baf568ff</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>e003ac10-c03b-4779-873b-0e23d9fb6172</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2936,8 +2936,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>421617d5-6bfb-4bd9-974f-918f087e5c36</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>962275b9-48e7-483e-94f9-7b797c7ad385</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2959,8 +2959,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>667dc4ab-0ecd-453e-b051-fd1e8f9db907</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>a2cc0202-b2c8-45dc-8659-b0050bb61f03</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2982,8 +2982,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>3bca0d38-911c-4617-ba94-0701dc6549f2</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>8d943cb6-9d87-4f1d-b0da-fc19baf0b1a8</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3005,8 +3005,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>5e286988-460a-4843-9536-687209be8458</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>8f0d982b-7bc4-4d7b-9aa2-7dab41e1f92a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3028,8 +3028,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>ce8d35eb-19eb-4b65-a7c8-4b79585739bc</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>a82d35fa-4110-4d62-8b7d-a846da764a58</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3051,8 +3051,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>1b8c8cc6-81a3-4779-85df-8ab53cd7f17f</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>843512b7-b60c-416a-9439-169239c3a3d1</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3074,8 +3074,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>a55ae53a-3328-419f-9963-5a5f82c0eba5</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>0c139ffd-8690-4f29-8f67-c2b132d6ee91</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3097,8 +3097,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>d574a947-b1c9-4498-825f-ac1547127956</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>cfb5372f-d580-4379-af0a-b52946b14235</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3120,8 +3120,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>e79e55b4-de90-4fc5-bf8e-56f57bd3551f</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>5f0c06eb-4438-4eb5-b707-7ac8cf723e65</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3143,8 +3143,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>2d92c234-0975-4ab3-a1c2-bcc05f69c9a0</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>fa3e8117-7aee-4864-822e-b19cd9d34fad</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3166,8 +3166,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>53688cf8-32d6-486b-9813-c9e5adcd75ca</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>54b504e2-6986-440b-9432-afef4c7457c2</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3189,8 +3189,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>ba055f0c-2c14-478a-90cd-9d70a9dc282e</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>567ed8a7-d1c9-46bb-b66d-caca4e44845e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3212,8 +3212,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>36ced166-1faa-402a-b315-abe4c497cb89</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>571baed0-3cf3-4d5a-a6c0-674fc8255c37</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3235,8 +3235,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>69f08b96-5bf8-4dd2-b87f-d998586f26af</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>914aa0ec-b7f0-46d4-ba67-e7cf01250ce4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3258,8 +3258,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>ed5db053-e6da-432e-b223-0b27f96866bb</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>49e2722d-220d-42d9-88f9-1466baedb066</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3281,8 +3281,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>2aa19ff9-ada1-4549-9220-e273cc9d888c</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>58fa5f37-e64e-44bd-9947-f0ddfe30962f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3304,8 +3304,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>64abf28f-0bd4-474a-b2b4-b4cc611010b1</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>e270154a-8296-449b-8c94-70b0f1d574c3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3327,8 +3327,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>998ce4f5-7edc-4272-bd5d-eb9fa93e561d</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>efc084d1-127a-48d5-a3f4-49d28f0472a8</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3350,8 +3350,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>61b768dc-6dc7-422b-ab24-d3b0206e14f6</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>62534458-77a6-4842-9571-fae60f31e102</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3373,8 +3373,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>43b1c00d-c886-42b2-889f-3c1905b9d667</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>42199efc-78c4-41e7-a3f5-210d5012214e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3396,8 +3396,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>f0377857-7ad7-4a28-858a-728838811247</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>09b326c7-1efe-49ce-a965-daec34b2bed6</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3419,8 +3419,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>428a7c9b-5603-449d-adc2-ce5685d5cd0c</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>6995f644-07df-46d2-84a8-f9622f79f519</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3442,8 +3442,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>b35df37c-9f2c-4f13-8ea8-d13c2255a8e9</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>0e0a98f2-c625-4ea6-8ece-4ba908a6ea1f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3465,8 +3465,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>c8fca6d8-6b6c-4802-8c98-ef0e469cef32</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>b9fd21b0-4ae2-4517-aff4-5fed8ea634e6</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3488,8 +3488,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>be803678-7b8c-4334-9e85-0652db19357e</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>fdc0cdb8-9caa-4981-88ee-c9b718c34b7e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3511,8 +3511,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>c3afdfb6-9d5d-487c-af4c-8721166cacd8</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>f642f4d6-aed1-40df-a41f-1dbd952678f1</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3534,8 +3534,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>e86e2340-ec7f-4f8a-94b9-c9c3841c2807</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>9f9d90c1-905e-4b02-939d-1c43a9946154</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3557,8 +3557,8 @@
       <libsource lib="mono_parts" part="AO3403_SOT-23_3" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>0bfc0376-ece4-4994-9ad8-6574c29f40c5</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>468f87b3-47ec-4e5d-86ea-d42c928c6505</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3580,8 +3580,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>56bf4446-7ae7-4018-8f15-3ab155aff696</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>11681e97-cb52-4a30-84a8-578605fe38cc</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3602,8 +3602,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>963819aa-6b6c-47db-bb0b-0d8d35158594</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>444c2ce0-5258-4d80-9d97-ed8be87d6dad</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3624,8 +3624,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>f8f29659-4f8d-46e3-825f-5ade48932d0e</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>4d3d4dea-41f0-4792-a244-e72f29a43f0e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3646,8 +3646,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>19d5cb06-ab21-489a-9551-1c9115e12f65</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>cb8f3329-f8d1-43a4-b728-3a5f2fca2eea</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3668,8 +3668,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>3b913330-7f42-4e98-a47d-775856d9534b</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>d3a59b03-75de-4969-a3da-2b2b83c1f78c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3690,8 +3690,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>c9f9683a-b360-4422-96c0-7f4ec7f2f83a</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>f59d398b-e6c5-4ca5-a625-779bbb6d8cbb</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3712,8 +3712,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>4c0752f2-2825-477f-8120-a0bf3d59e515</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>38a6e352-ec3c-4b47-bb33-e815a479fabe</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3734,8 +3734,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>e7e73660-56f1-4ed9-96ae-75826ac4d035</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>71c89540-1af3-45de-8386-2eb77aec4512</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3756,8 +3756,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>c5a41904-adce-4c38-90df-44e18c7db747</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>c7901910-de8c-4824-9b34-9c8ec24d72ad</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3778,8 +3778,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>62266216-a079-465f-badf-422df2b43fe9</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>4087dbc6-daa9-469e-89e9-d78804c6522c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3800,8 +3800,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>b1ca28a7-4984-4fa4-8876-64f7b9e6d907</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>43fc4e74-559d-4e22-bdf4-42922eb36005</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3822,8 +3822,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>c1453bc0-f27f-4e22-a951-c9c9a11b4ec0</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>722ed8ce-6b62-4693-b235-6a27177e40c7</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3844,8 +3844,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>b8ea29a9-12e3-41ee-bef0-9baf607532ce</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>683d4747-e305-4aca-8e4a-137e9c57e417</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3866,8 +3866,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>94d46b0b-6f76-4ce1-b18c-fae1becc486f</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>5d9b29c1-007b-4f52-ad5c-ce7c7a75eb3b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3888,8 +3888,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>2c95056a-fb0c-4601-b8be-84bb7d0b3da6</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>cda958c1-6681-4f20-864e-d5e10e347b9e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3910,8 +3910,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>cef25510-2815-4982-9e61-ec300f393334</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>784a4bd8-0f49-4b2d-b523-d835fa0e3819</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3932,8 +3932,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>438d119d-3c43-4e71-9bb1-393fca7d6134</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>ed8cf8f4-e8af-4d2c-8a34-b59327b16112</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3954,8 +3954,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>bb46da74-74f4-40e2-9942-15d8c373b3e0</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>ab8ddb27-871f-4cc4-ba23-bd06ba1d7d1f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3976,8 +3976,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>377a9693-d949-4faa-a8d9-8bc7a5c123a0</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>2fd7f506-bbda-4f00-81fc-c3f3af0d03c5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3998,8 +3998,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>f92868fb-10d9-4ab6-8682-1cee6400c2ff</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>57c3a8d7-6171-4525-83d3-127f02452f69</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4020,8 +4020,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>6a434369-5cdb-4717-ad1a-d30f76176677</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>4286b83b-8d1a-4a56-8202-148fb1646a6e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4042,8 +4042,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>c06755b0-15f8-4e9f-bed6-f9462be964ae</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>e2d2e737-a950-4f12-b487-c9987f535ef2</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4064,8 +4064,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>0141618b-f0b8-4791-bc9d-542819a3f614</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>10128e16-9a73-4f98-a1d7-63946582e0a8</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4086,8 +4086,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>6cb72b08-c83d-45c9-be22-918d9e3d429c</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>3a563c5a-ecd5-4472-a71b-27116becf98e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4108,8 +4108,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>55a266c6-2f9c-4b7f-856c-461d6e507309</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>e12afea8-7696-4e5f-af55-64fb89626cd5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4130,8 +4130,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>3010b860-d5b4-462f-afdf-240139de3115</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>78621c70-ab36-4000-968e-09d32fcb39ce</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4152,8 +4152,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>78bca8fb-77b2-4fa4-8f70-31120c6ea455</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>7004df25-b463-498a-939f-3aef206db10d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4174,8 +4174,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>39ac0852-c47d-471a-a5ab-af2236f84780</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>a6e1b257-5904-4cea-a391-8770ee12776a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4196,8 +4196,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>2f2bfcc0-f6ee-44ac-9127-72233f6c6a85</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>9e0e54ee-bfa1-45d9-a8f5-f4718b821283</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4218,8 +4218,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>7cc97c63-d6f7-4991-9ab6-3b139be807ce</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>6081214c-a08f-43b6-bfea-7908d4d253d9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4240,8 +4240,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>11137d6b-2a45-46d1-96c2-c29de019d641</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>0e2d1ebd-8cc8-4c20-8051-01ea000222be</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4262,8 +4262,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>78ebb53e-33eb-4ccd-8ebe-e594417e199f</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>0a6c3eed-a22c-43db-ac78-ca2e329ae1c3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4284,8 +4284,8 @@
       <libsource lib="mono_parts" part="2.2k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>47391679-6fde-4090-b99b-4e9c99dd6c49</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>164d6129-07d9-4f1e-aa57-9837c9899bae</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4306,8 +4306,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>944a6c43-2bb1-4574-a886-a104605999c5</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>be748e64-d632-4c03-9baa-1c84fb6ee2a9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4328,8 +4328,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>89ba5d6e-2720-449e-8858-da76957990a0</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>585ea04a-cb05-4e14-8651-20e1d735fb8a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4350,8 +4350,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>58d4b2f8-23ff-429b-85b7-8e3ef4153e88</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>5b92041a-cf8b-404d-8994-bb5ac40cae11</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4372,8 +4372,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>980f097e-ca71-4b8d-bcd0-fd1a1da13c1d</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>643f0407-3c0c-4a16-b733-a22f5700fedb</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4394,8 +4394,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>e2655809-0169-44a7-bf38-1af795cb6f14</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>0d0aae2d-c6c4-44b1-ab8c-5f8c032e77bc</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4416,8 +4416,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>de15e16f-9b3f-408b-a1b1-38a49a78abc8</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>61585de1-6700-435e-999a-43a9d70bee39</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4438,8 +4438,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>cb0c042d-ebb4-47e0-a67b-feb7a84775dd</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>9408053c-970d-42ba-8499-63b11afd6eb5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4460,8 +4460,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>ad28de25-3735-4d24-9595-6e0847be7ac5</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>8a3bb41b-84ef-45cf-9e92-5f27ea2b8437</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4482,8 +4482,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>129c439d-deac-4591-bef1-1b5a611aabf2</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>2bb35ae4-a615-4d98-96c6-936a5ed56e4e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4504,8 +4504,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>6998942b-4718-4323-a2ee-9f76a185d130</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>98e36b23-d72d-49d6-af7d-eb9c27dd876d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4526,8 +4526,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>ef9f6d81-5d71-4557-99c9-aeecd3b7c117</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>3d1efb73-d7f3-4dac-848c-c8742768b97c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4548,8 +4548,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>a44059d1-065d-43a5-a405-e72026ea7619</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>ba55cab5-2637-4d7f-9cf2-eaaf3e71c4b5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4570,8 +4570,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>271a105f-ed2d-4e00-a223-fa2ac965fe57</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>7b58c8cc-7d8e-4e41-a005-27b290cf3af5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4592,8 +4592,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>826e1ca3-bcf6-4990-ba8c-1e36c580db67</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>eb7dfb06-1daf-496c-a5e5-d1969afd67ed</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4614,8 +4614,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>515fcc5e-0d98-4d95-9d91-e7e5e9e27c9c</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>d9cb0323-d0bd-4ef4-aab7-0b68552db981</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4636,8 +4636,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>0f411e59-f332-4107-8853-c065fec8db64</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>57c9aca5-b2b2-47b1-8e11-b7f2be116d1e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4658,8 +4658,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>8ed449d3-e890-4f4a-8503-36745668668f</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>aa3ab06c-3e47-42a8-a51e-3c34d16bd272</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4680,8 +4680,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>282d49a6-725a-48fc-8493-8d816e9f5966</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>89df2df2-bc74-4c70-8e50-321a9e16541f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4702,8 +4702,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>3e44a70b-687a-4cac-aec3-6f4725c4186c</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>75540225-0e3a-4e01-a108-90ae539bdfed</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4724,8 +4724,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>e8812328-780e-4227-b737-8ad971b9725a</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>8a099d2a-2e4a-4f00-975e-7b1201e406d5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4746,8 +4746,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>df09f8aa-0ad5-4313-a191-0d4cd1c9f120</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>0b69252c-28ba-437e-9df9-50d238d9e40b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4768,8 +4768,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>191622b8-6a89-4afd-8e15-8d93cbceaf98</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>98464b16-1ab1-4714-ab5b-5f71d5545a33</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4790,8 +4790,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>3c96053a-984c-499c-9fd3-54aaebcdacc9</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>4bce3b15-c5ab-486c-9c7d-1930b8773a7e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4812,8 +4812,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>85b23910-5bd1-4643-b0a9-2c6e35a39f65</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>555d0904-992b-4f1c-b71b-7e7ef193af79</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4834,8 +4834,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>c4460c13-6e22-413d-995d-96592babf016</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>f3b6d9ea-5961-49da-b123-a280b1171f05</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4856,8 +4856,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>5a9e3c3e-9942-4147-8a5f-66d81e4ce618</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>aff4fc7b-c37f-4117-b8e6-4892590d79a9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4878,8 +4878,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>74073e93-1b66-46fd-a0f7-e92712640e90</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>1af66f53-af6f-43e2-8338-d311b4917311</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4900,8 +4900,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>b082a8bc-125d-44be-91aa-7d2f9ed8fc7e</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>2d991d90-5f47-48e8-a624-a65b058ad0c8</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4922,8 +4922,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>aca6e711-971c-4841-99db-7cc017b18344</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>d5bbba6b-5108-4b14-84e6-171a8bdaab91</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4944,8 +4944,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>04696310-a55a-424d-b814-0de756346652</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>8690d031-69c0-4244-80af-bc9cd3e1222b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4966,8 +4966,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>171e351b-4cf2-45e0-a16e-e2388b936593</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>fc29bc14-8b67-42e0-9bce-23292f5a3dee</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -4988,8 +4988,8 @@
       <libsource lib="mono_parts" part="47k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="row_farm"/>
       <property name="Sheetfile" value="sheets/row_farm.kicad_sch"/>
-      <sheetpath names="/row_farm/" tstamps="/8e0dfec5-0a6b-4a3f-a484-ff5180e66a87/"/>
-      <tstamps>0fcb654e-e634-4f11-8cb9-8de6fdf1c68f</tstamps>
+      <sheetpath names="/row_farm/" tstamps="/0a953bf6-10e8-41b1-ab1d-6103638b46d1/"/>
+      <tstamps>64ba13dd-9cdb-41ca-ad06-c7db94f32ad0</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5010,8 +5010,8 @@
       <libsource lib="mono_parts" part="1u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>5c1c69b0-592b-4912-b5ed-19b5edfc41bc</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>a785834a-8514-418f-86d0-22162192549e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5032,8 +5032,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>5142cedd-f5ef-4df7-ab65-35882b8e1ee5</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>40a4ed21-a4fc-464d-af76-bb39f78b19ca</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5054,8 +5054,8 @@
       <libsource lib="mono_parts" part="4.7u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>a0f729fd-541e-4c10-abe8-a3225e9a6de5</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>fe2aef8a-9367-4f92-8e3d-5c9486e6d70c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5076,8 +5076,8 @@
       <libsource lib="mono_parts" part="4.7u_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>347acb11-462e-4213-84c6-f050ff31b75d</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>de2bad5c-9e3c-469b-9df7-23006cb568e0</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5098,8 +5098,8 @@
       <libsource lib="mono_parts" part="100n_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>c61bde62-7906-45d1-a139-a5b609b5172f</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>0e75d07b-f37a-4632-b308-ad63653fde46</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5120,8 +5120,8 @@
       <libsource lib="mono_parts" part="MA-HFA381-H13-1AF_MIC_Gettop_MA-HFA381_3.5x2.65mm_6" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>adbfcc93-5372-4340-973d-f6a246460a8d</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>65677a61-fe09-4c6d-a06b-42e1c343cf6b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5146,8 +5146,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>1c975705-1505-486b-be49-5644544fb076</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>78e0a575-520b-4a54-a062-bdb777dd756a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5168,8 +5168,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>05d6ea74-1ba0-4c9d-a945-4c3947b9732a</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>20f80e86-23ce-4a6a-b5ce-cc00f25d6d9e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5190,8 +5190,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>052aa6d1-dca5-4f59-84a3-b363d860b1a8</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>0bc310d2-701d-4e3f-b8fd-a3db2d3ef08d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5212,8 +5212,8 @@
       <libsource lib="mono_parts" part="100k_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>ccee972a-8e89-4163-ae06-d11cc0be0e68</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>63c894c0-9fac-4367-8c10-5fc116cc0139</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5234,8 +5234,8 @@
       <libsource lib="mono_parts" part="TLV9001IDCKR_SOT-353_SC-70-5_5" description=""/>
       <property name="Sheetname" value="audio"/>
       <property name="Sheetfile" value="sheets/audio.kicad_sch"/>
-      <sheetpath names="/audio/" tstamps="/e28eb744-82a5-4343-b4c6-b6c8b34afffa/"/>
-      <tstamps>99a9e8f5-bfb6-4765-adf3-92e06c582d85</tstamps>
+      <sheetpath names="/audio/" tstamps="/2ff98606-9510-4311-b267-b7b1ad2dabe2/"/>
+      <tstamps>afed0d04-88a3-4eb3-a531-028eff5841a5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5259,8 +5259,8 @@
       <libsource lib="mono_parts" part="100nF_C_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>4f475100-beac-4fde-9728-0bd65f0a1ee7</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>f8ff3345-9950-4afe-923f-2e850bf45a87</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5281,8 +5281,8 @@
       <libsource lib="mono_parts" part="SM712_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>fca22f6d-5922-40cc-93e4-0f61bcdd3dd0</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>cfe2d899-3805-4ae9-9a6a-c540c46f3e23</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5304,8 +5304,8 @@
       <libsource lib="mono_parts" part="PESD3V3S2UT_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>06fe7b5a-1fa5-4b6f-8f51-7f59fb6bf22b</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>fcf30882-cdbb-44f3-9d4d-f6d05e8d1ae6</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5327,8 +5327,8 @@
       <libsource lib="mono_parts" part="SM712_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>93c465c8-0bcb-491d-9dee-88850e42debd</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>f8ad9a7c-5d71-4ebb-97f2-c3a1c14e6878</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5350,8 +5350,8 @@
       <libsource lib="mono_parts" part="PESD3V3S2UT_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>454558e2-ffa0-4e38-baae-496c598f11ee</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>cd48acbc-c86e-42d3-a8bb-7a6619ce2b82</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5373,8 +5373,8 @@
       <libsource lib="mono_parts" part="SM712_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>fddaf0f5-e515-443b-83c1-724d5ff5a791</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>0eb5fe13-fe6b-4bc9-9558-7d3d87cf8f56</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5396,8 +5396,8 @@
       <libsource lib="mono_parts" part="PESD3V3S2UT_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>53aab3b5-3ae4-4ffc-9a38-357d1786a8c9</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>a26191d8-b479-4be2-b2ce-249afdce52cd</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5419,8 +5419,8 @@
       <libsource lib="mono_parts" part="SM712_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>c918d028-a804-4c24-a8eb-515c5e8004a1</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>ec10c5cd-8d31-481c-bf02-237a8e110885</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5442,8 +5442,8 @@
       <libsource lib="mono_parts" part="PESD3V3S2UT_SOT-23_3" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>cc09b3f7-0402-4922-a8c8-44be44695e32</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>57c9dc3d-20cd-4020-b107-ab1c60fb4278</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5465,8 +5465,8 @@
       <libsource lib="mono_parts" part="TERM_SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm_2" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>a4bbdbb4-4449-4a88-a125-9d66e70be0f9</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>d848efd0-4943-4685-8b18-a1220c67804b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5487,8 +5487,8 @@
       <libsource lib="mono_parts" part="SM06B-SRSS-TB_JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal_7" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>bed41e6b-ebb8-4016-b486-f7695363a9c0</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>818822ba-016a-4537-8b6b-b57e70a3dec3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5514,8 +5514,8 @@
       <libsource lib="mono_parts" part="SM06B-SRSS-TB_JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal_7" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>4d8bf7b1-436f-4e40-aec1-3179ca07c381</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>a60c336d-e008-4047-9f20-3906c421ff0a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5541,8 +5541,8 @@
       <libsource lib="mono_parts" part="SM06B-SRSS-TB_JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal_7" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>7609406f-1679-4bf2-bf75-8ebfc9e3f192</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>70d99eab-99b1-4501-ab0c-10a84cc7f8c4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5568,8 +5568,8 @@
       <libsource lib="mono_parts" part="SM06B-SRSS-TB_JST_SH_SM06B-SRSS-TB_1x06-1MP_P1.00mm_Horizontal_7" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>e7317b66-0a44-47e0-a92e-c061644c4377</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>3e817fbe-06ad-41c5-8b00-8c43bde75bc3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5595,8 +5595,8 @@
       <libsource lib="mono_parts" part="120R_R_0603_1608Metric_2" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>327c89c3-a5bf-41d2-befa-c9da34a0cbbe</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>36d90448-f834-4b52-a2de-1c39ac75578a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5617,8 +5617,8 @@
       <libsource lib="mono_parts" part="THVD1406DR_SOIC-8_3.9x4.9mm_P1.27mm_8" description=""/>
       <property name="Sheetname" value="stacking"/>
       <property name="Sheetfile" value="sheets/stacking.kicad_sch"/>
-      <sheetpath names="/stacking/" tstamps="/366560e4-a333-4cdb-acbe-c9a1b687b38e/"/>
-      <tstamps>8408a504-a0f3-428a-9e2e-d92171fe73ab</tstamps>
+      <sheetpath names="/stacking/" tstamps="/c2409d80-5332-461b-b6ad-65df7b188ead/"/>
+      <tstamps>a45f7f4a-0d32-4560-bdad-72afda3ca153</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5645,8 +5645,8 @@
       <libsource lib="mono_parts" part="PESD5V0S2BT_SOT-23_3" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>3dace1f7-111d-413c-a06b-1970c9e49700</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>df440922-548d-4deb-ad3f-76ef207f04c6</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5668,8 +5668,8 @@
       <libsource lib="mono_parts" part="0R_DNP_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>ad5b5978-4866-4101-b247-e2ce7b50efd4</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>7ac99a3e-fb2e-4e82-b742-41766577cab2</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5690,8 +5690,8 @@
       <libsource lib="mono_parts" part="33R_DNP_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>ef145228-5eb3-45b6-a700-be6369c4558e</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>18dc4296-4424-42fd-b0dc-9283e966b0e0</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5712,8 +5712,8 @@
       <libsource lib="mono_parts" part="33R_DNP_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>d796a6ad-e8c5-4351-98fe-45e773bcc59e</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>effa235f-5109-48a8-9340-b3dc6eb5c3b3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5734,8 +5734,8 @@
       <libsource lib="mono_parts" part="33R_DNP_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>14d41aa4-a37b-4083-8ea0-d7bb640323b9</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>b61d6951-cfac-4d6f-b46a-0b5026e06a95</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5756,8 +5756,8 @@
       <libsource lib="mono_parts" part="33R_DNP_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>76f324c6-2aeb-4550-ab93-df1b67f2d35b</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>27442f7e-8843-4d48-88cb-fdc5c405a39d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5778,8 +5778,8 @@
       <libsource lib="mono_parts" part="100R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>1a0808d8-037e-4622-ba97-bafd1ea71c08</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>5f60954f-d1f8-40e7-b61b-4acbfe98b973</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5800,8 +5800,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>2d87c664-cf9a-4117-af74-3a52432c67f2</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>b03308c6-02c6-4695-90d5-bee0fb29547e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5822,8 +5822,8 @@
       <libsource lib="mono_parts" part="33R_R_0402_1005Metric_2" description=""/>
       <property name="Sheetname" value="led_interface"/>
       <property name="Sheetfile" value="sheets/led_interface.kicad_sch"/>
-      <sheetpath names="/led_interface/" tstamps="/79597a84-2bc5-4503-b7a9-3b7b04b7b079/"/>
-      <tstamps>02fd1b57-2835-4c7c-8dae-6b69bc135c5d</tstamps>
+      <sheetpath names="/led_interface/" tstamps="/ba12c412-8e80-4d78-8ead-9783bbe32a1f/"/>
+      <tstamps>13b8d89a-a64b-4dd4-b84b-f1d50366a5f3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5844,8 +5844,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>30f1307d-f02d-4d85-8b70-4ce07a7a2584</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>a2c2eff7-9d33-4ad9-9696-4940cc2226c9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5866,8 +5866,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>f97871a1-156e-4221-9059-818cd89e3322</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>bcf8821e-689d-4e65-a58d-4b1a9997924e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5888,8 +5888,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>16e2f293-ecb5-44be-ba4f-b73a8a46d451</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>99177d9c-e67b-4535-bfb3-e1453723a2ae</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5910,8 +5910,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>f83714ee-69ff-4fa9-a375-0c37df20aa04</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>f9454141-f645-4dc7-b5c9-0cef133a2ec9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5932,8 +5932,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>1f76a6a5-0e8f-499e-9fe7-d650441bdde2</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>1e3f59d3-cba1-4f98-b02f-d3b423620e6a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5954,8 +5954,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>264ada7d-2d99-4c8e-99a7-652e18e027dd</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>63734e4f-d12f-410c-ad34-a926b80a2bfd</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5976,8 +5976,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>c9a37ac5-d0e2-4688-a3ca-0e06141a473f</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>5cb70eed-3a4b-4174-a2d9-d50639793b54</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -5998,8 +5998,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>360f73f1-8cc2-4e55-b283-eae85c9d1d02</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>f77aa717-49c9-4109-86a6-5459b05b2361</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6020,8 +6020,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>48ff4b4b-8fa5-4ace-9b0c-0c33455139ae</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>12023c25-a3e9-4d50-8412-2defb26afb61</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6042,8 +6042,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>e2670bdc-0bb2-422e-89b0-993c816b2de8</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>df618e7a-21c4-4b07-a6cd-7c8f32b4ad3b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6064,8 +6064,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>3f1de7a1-d128-4afb-9f1c-6c56fab7f4b8</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>2c746f19-a854-4b30-bbd0-f9f04e5f7551</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6086,8 +6086,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>c40420a4-7b32-426d-b8f5-45b1cb8d87b5</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>f6a6e65b-23ec-4f55-9568-f2283c83ec3b</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6108,8 +6108,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>547051a9-9358-4721-82e8-4f692b0d86ad</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>2bcac17e-1ac8-4bf2-9d74-11bdbf6510f9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6130,8 +6130,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>b4c0bbda-dbc3-4b93-bb3c-c2650fa54fb9</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>053ae4a5-adb1-4fd9-a454-dc596c65eb31</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6152,8 +6152,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>c2b32e4c-2191-495b-8d71-251929ecf336</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>dad0a439-25d3-4557-89e3-67050bacd5b9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6174,8 +6174,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>4b0842ea-afb2-4eeb-92da-d43eea056e27</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>d70bbe80-5d7c-466b-912b-b5eb85c20167</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6196,8 +6196,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>625d2198-95a5-4ecc-9888-36fabadead5e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>7bf032ce-94e2-4e32-b23e-cb8cef86a170</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6218,8 +6218,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>bbe0c2e4-e0ac-478e-8b91-6977178dadc4</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>0fd31159-0e5d-4e12-8dbf-7a0726218fd4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6240,8 +6240,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>fbfb7cbd-5ff9-4afa-8d6f-f9ae682db264</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>5da4708c-5dac-4f2f-98ac-510ad4894d7d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6262,8 +6262,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>ace34753-4e67-4f5c-823c-5079cabbc5a7</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>b8469927-34ff-49ca-a31f-90b61f14f65c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6284,8 +6284,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>720fb740-902d-4d05-8f01-146bad39805e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>553370d0-4839-4669-aa46-a0778ba9b2aa</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6306,8 +6306,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>23c8d512-2c15-4b30-85a6-9847e68ebc50</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>56193212-521a-4e5b-99c8-77be3f38282a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6328,8 +6328,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>d58e993f-a2a6-4548-ad26-6da2f2295d17</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>03b5bafa-0c1d-483b-ab62-7495455d1e96</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6350,8 +6350,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>4b4e03dc-03e1-4776-8e2e-8c920e424005</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>cec3959c-669b-4c7f-b4d9-750b4ed2ba1a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6372,8 +6372,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>9f4538af-cad1-4c69-ae44-41d3d9c08274</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>1d703f52-2cbf-484f-b226-7143a4b5d2f5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6394,8 +6394,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>ca3e8255-1c7a-4093-8f51-b3c55b2a623e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>b537ecba-2bb3-4e91-a86b-0da22d773b7c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6416,8 +6416,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>684bc458-8379-4d4b-82da-a932c7ab90ca</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>87cf0418-fa67-469c-b3de-914cfb660b6d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6438,8 +6438,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>cb0da556-6097-4fb9-b313-7d28f5ce9b19</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>c796f63f-ce22-4871-a201-72acffce32ae</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6460,8 +6460,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>94dcb417-872f-4d0c-9443-6ec37f863743</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>e3daa114-b012-442e-9492-c15cecf1135c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6482,8 +6482,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>98d8dd1f-3cbf-489a-88d2-16725cc6e05d</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>a0497514-5f3f-433c-9bd8-3237b09737f8</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6504,8 +6504,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>fada6f64-d314-487e-8061-6c3fd002c7a6</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>489f5077-2bbf-45de-8680-e043eec6b8ef</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6526,8 +6526,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>7b041815-9755-42f0-9dcf-ea6afe6e1020</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>cb439349-1f4c-46a0-a738-950431e19098</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6548,8 +6548,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>1efd1bc5-5b78-4954-8137-1558b25eadf3</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>fd343d45-b327-4080-852c-6a0fc50cfab3</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6570,8 +6570,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>cccc47a8-88e0-4a93-b686-ae4cd7231840</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>dd3b286e-ae91-4018-9ef6-263ee7e48f58</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6592,8 +6592,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>95e68bbc-aae5-4a61-a179-0019b2a12572</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>419941cc-55bd-4c7e-bfc0-def0dde5b012</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6614,8 +6614,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>8c6d4195-fb20-429f-89dd-3a14a545e4e3</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>20ad4a23-5f51-4be1-8833-a4d7c564e899</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6636,8 +6636,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>cf575b2a-73fa-4750-bc49-3bb382808de9</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>a2454d67-03bf-4606-bc0d-a8c665774c9f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6658,8 +6658,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>7a8b46c9-559c-4a47-b2e7-3965bc80319c</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>6e0aabeb-246a-4afb-968c-b10ea08f638a</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6680,8 +6680,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>2df90ec4-2844-4630-a518-01f00b43400e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>b3c43191-d371-4555-8b55-f9cda4ee9ca7</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6702,8 +6702,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>464d8fdb-f38a-48c2-9790-e86554a9133b</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>38614239-e0d1-4997-b7c4-9c5a60cf94b5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6724,8 +6724,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>18d7fc5a-4239-4d48-bf7d-4f9393f5977e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>b24e860d-6c38-423b-bd18-dbcbf469d9a9</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6746,8 +6746,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>9048525b-58de-407e-90be-0631ada82e5b</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>19caf235-fd67-4258-b95e-86a4a9795b27</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6768,8 +6768,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>5d215894-20e8-4b0f-b065-c3a689035d00</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>7b911f8b-a5b7-466a-a1e1-cbcbaac4f8a5</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6790,8 +6790,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>9d502f56-b4b9-407b-9723-a8bfad76dffa</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>4d0d8807-1905-4548-9307-7afb5e7376e4</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6812,8 +6812,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>ebc932c5-3b85-47e7-b1ae-1bc2d3403451</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>63846e1a-12a0-4792-a8bd-76e3942b6084</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6834,8 +6834,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>f91620b6-f220-4358-ab27-f7018784c4c9</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>746dc8de-176d-4694-a06b-27e16bb5d2f1</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6856,8 +6856,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>1a8f74ef-3302-4159-b80b-27d6134211c6</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>8b81e3b2-5316-4272-8004-ffb07e34a1fa</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6878,8 +6878,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>7f82c3ae-7159-4f80-88df-da13cebf9d51</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>b7ceaadb-132a-426d-a026-c8bbf8430a6d</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6900,8 +6900,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>7aa1bb11-9fed-4a38-b2d8-14ed3bd42baa</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>db1a2047-212f-4cee-9ab6-6baa855c2b3c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6922,8 +6922,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>f3af7d7b-9970-4d47-bab4-018f2b134fdc</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>52d9b537-d553-4cc4-b9a4-752dfbf01249</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6944,8 +6944,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>16e074b3-7817-4fdb-a99e-acef44989b2f</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>dd6cdaed-3a1a-4475-bb63-fcb69900ff4c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6966,8 +6966,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>c8bec103-62f2-4159-b9c8-29247ebaf501</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>4aca2c03-edf4-4251-929b-c9c54ed6be8e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -6988,8 +6988,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>07f9b25b-c407-40b3-86de-1a3b3d44a7b3</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>8042741e-7eac-4296-9e1b-b3b8f5dfaf97</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7010,8 +7010,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>d5e9a0b4-276c-49b2-9adc-04a7340d3f0c</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>5cbec43d-56fb-4766-af78-f6b105ff31c1</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7032,8 +7032,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>7aaf27a3-2185-414d-b926-04ca20c8bbb6</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>93fdfbb5-27fd-42f5-b2a9-67667a65a507</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7054,8 +7054,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>bd368577-8971-4b49-ab63-a5815e29ee2d</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>56b5e3f4-5366-4fe9-95cf-c519a4b3d8a0</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7076,8 +7076,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>bab5d0e5-1447-48a8-a8b7-63b557969889</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>ad8b6467-9030-4600-ab2d-569db7ac4000</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7098,8 +7098,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>797189e0-7fb4-4a5a-9309-6a61a5ce682f</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>007a8190-5eee-46c9-bb2a-9eea56090875</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7120,8 +7120,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>0d48554f-ac0f-4937-8b59-a2b91d38272e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>afbc6e7f-961b-4f3a-8496-995cd6fbc92c</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7142,8 +7142,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>6a5afaf5-96a2-4479-9c0e-b8a77374e55a</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>8c15f476-32a2-4259-a774-a9135b2b606e</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7164,8 +7164,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>0e085375-cc09-4f4d-a6b6-71bccff40b8e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>9d4e1af9-86a6-49ab-941b-a800bf69d956</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7186,8 +7186,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>30d0fdb9-7728-4668-bef8-90379e18fd6e</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>dec69019-0016-45b5-99a7-40b49bbd5fed</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7208,8 +7208,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>109916af-922a-4159-99a1-54b6e780ddc5</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>ff3c9e7b-3375-4d32-a68e-a40ec8dcea60</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7230,8 +7230,8 @@
       <libsource lib="mono_parts" part="PESD5V0S1BL__DNP_wearable__D_SOD-882_2" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>bfe8efc0-11b3-41cc-a16c-d7b393f01fdf</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>68094caa-7d6a-46d3-8a01-fb4d210d5ab2</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7242,18 +7242,18 @@
       </units>
     </comp>
     <comp ref="J_CH1">
-      <value>2x20 1.27mm SMD header (DNP wearable)</value>
-      <footprint>mono_electronics:PinHeader_2x20_P1.27mm_Vertical_SMD</footprint>
+      <value>BH127VS-40P-H49 2x20 1.27mm box header (DNP wearable)</value>
+      <footprint>mono_electronics:BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD</footprint>
       <fields>
-        <field name="Footprint">mono_electronics:PinHeader_2x20_P1.27mm_Vertical_SMD</field>
+        <field name="Footprint">mono_electronics:BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
-      <libsource lib="mono_parts" part="2x20_1.27mm_SMD_header__DNP_wearable__PinHeader_2x20_P1.27mm_Vertical_SMD_40" description=""/>
+      <libsource lib="mono_parts" part="BH127VS-40P-H49_2x20_1.27mm_box_header__DNP_wearable__BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD_40" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>77e34e03-7f88-48fc-9c2b-967f4244fb24</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>bc822edb-bed3-4468-b5e6-51f0e575b948</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7302,18 +7302,18 @@
       </units>
     </comp>
     <comp ref="J_RH1">
-      <value>2x20 1.27mm SMD header (DNP wearable)</value>
-      <footprint>mono_electronics:PinHeader_2x20_P1.27mm_Vertical_SMD</footprint>
+      <value>BH127VS-40P-H49 2x20 1.27mm box header (DNP wearable)</value>
+      <footprint>mono_electronics:BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD</footprint>
       <fields>
-        <field name="Footprint">mono_electronics:PinHeader_2x20_P1.27mm_Vertical_SMD</field>
+        <field name="Footprint">mono_electronics:BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
-      <libsource lib="mono_parts" part="2x20_1.27mm_SMD_header__DNP_wearable__PinHeader_2x20_P1.27mm_Vertical_SMD_40" description=""/>
+      <libsource lib="mono_parts" part="BH127VS-40P-H49_2x20_1.27mm_box_header__DNP_wearable__BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD_40" description=""/>
       <property name="Sheetname" value="install_headers"/>
       <property name="Sheetfile" value="sheets/install_headers.kicad_sch"/>
-      <sheetpath names="/install_headers/" tstamps="/7fe4ad1b-9c09-4e4c-be48-3546a2163111/"/>
-      <tstamps>f14425bb-8018-4545-a1ef-66f0116ee008</tstamps>
+      <sheetpath names="/install_headers/" tstamps="/6861f804-220f-4a8c-9f94-450785eb4b57/"/>
+      <tstamps>032f4084-810a-414a-bbce-881c6a34dc1f</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7372,8 +7372,8 @@
       <libsource lib="mono_parts" part="M2.5_MountingHole_2.7mm_M2.5_Pad_1" description=""/>
       <property name="Sheetname" value="mechanical"/>
       <property name="Sheetfile" value="sheets/mechanical.kicad_sch"/>
-      <sheetpath names="/mechanical/" tstamps="/83487414-95de-444b-bc61-c5f741dfd430/"/>
-      <tstamps>73976a20-a097-49fa-907c-e256106b679d</tstamps>
+      <sheetpath names="/mechanical/" tstamps="/ee4af36d-6c2f-48e3-9a3e-cd5ee9fd2a70/"/>
+      <tstamps>3f383454-f8c8-404e-9b56-3f5729339ced</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7393,8 +7393,8 @@
       <libsource lib="mono_parts" part="M2.5_MountingHole_2.7mm_M2.5_Pad_1" description=""/>
       <property name="Sheetname" value="mechanical"/>
       <property name="Sheetfile" value="sheets/mechanical.kicad_sch"/>
-      <sheetpath names="/mechanical/" tstamps="/83487414-95de-444b-bc61-c5f741dfd430/"/>
-      <tstamps>1e2b3369-c397-4239-a356-6ba49c5b68af</tstamps>
+      <sheetpath names="/mechanical/" tstamps="/ee4af36d-6c2f-48e3-9a3e-cd5ee9fd2a70/"/>
+      <tstamps>1b305135-b90a-4475-a3b5-3a2807b65394</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7414,8 +7414,8 @@
       <libsource lib="mono_parts" part="M2.5_MountingHole_2.7mm_M2.5_Pad_1" description=""/>
       <property name="Sheetname" value="mechanical"/>
       <property name="Sheetfile" value="sheets/mechanical.kicad_sch"/>
-      <sheetpath names="/mechanical/" tstamps="/83487414-95de-444b-bc61-c5f741dfd430/"/>
-      <tstamps>4b0e5336-77b2-4277-941e-87fedc8ba130</tstamps>
+      <sheetpath names="/mechanical/" tstamps="/ee4af36d-6c2f-48e3-9a3e-cd5ee9fd2a70/"/>
+      <tstamps>e711ed56-2386-49c5-9f32-e84471bb0cb8</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7435,8 +7435,8 @@
       <libsource lib="mono_parts" part="M2.5_MountingHole_2.7mm_M2.5_Pad_1" description=""/>
       <property name="Sheetname" value="mechanical"/>
       <property name="Sheetfile" value="sheets/mechanical.kicad_sch"/>
-      <sheetpath names="/mechanical/" tstamps="/83487414-95de-444b-bc61-c5f741dfd430/"/>
-      <tstamps>decfd8eb-a806-4838-bdae-98c26a8f90c5</tstamps>
+      <sheetpath names="/mechanical/" tstamps="/ee4af36d-6c2f-48e3-9a3e-cd5ee9fd2a70/"/>
+      <tstamps>493f1387-3dac-49bf-9b21-fa9229a32675</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -7733,57 +7733,6 @@
         <pin num="2" name="~" type="passive"/>
       </pins>
     </libpart>
-    <libpart lib="mono_parts" part="2x20_1.27mm_SMD_header__DNP_wearable__PinHeader_2x20_P1.27mm_Vertical_SMD_40">
-      <fields>
-        <field name="Reference"/>
-        <field name="Value"/>
-        <field name="Footprint"/>
-        <field name="Datasheet"/>
-        <field name="Description"/>
-      </fields>
-      <pins>
-        <pin num="1" name="COL_01" type="passive"/>
-        <pin num="2" name="COL_02" type="passive"/>
-        <pin num="3" name="COL_03" type="passive"/>
-        <pin num="4" name="COL_04" type="passive"/>
-        <pin num="5" name="COL_05" type="passive"/>
-        <pin num="6" name="COL_06" type="passive"/>
-        <pin num="7" name="COL_07" type="passive"/>
-        <pin num="8" name="COL_08" type="passive"/>
-        <pin num="9" name="COL_09" type="passive"/>
-        <pin num="10" name="COL_10" type="passive"/>
-        <pin num="11" name="COL_11" type="passive"/>
-        <pin num="12" name="COL_12" type="passive"/>
-        <pin num="13" name="COL_13" type="passive"/>
-        <pin num="14" name="COL_14" type="passive"/>
-        <pin num="15" name="COL_15" type="passive"/>
-        <pin num="16" name="COL_16" type="passive"/>
-        <pin num="17" name="COL_17" type="passive"/>
-        <pin num="18" name="COL_18" type="passive"/>
-        <pin num="19" name="COL_19" type="passive"/>
-        <pin num="20" name="COL_20" type="passive"/>
-        <pin num="21" name="COL_21" type="passive"/>
-        <pin num="22" name="COL_22" type="passive"/>
-        <pin num="23" name="COL_23" type="passive"/>
-        <pin num="24" name="COL_24" type="passive"/>
-        <pin num="25" name="COL_25" type="passive"/>
-        <pin num="26" name="COL_26" type="passive"/>
-        <pin num="27" name="COL_27" type="passive"/>
-        <pin num="28" name="COL_28" type="passive"/>
-        <pin num="29" name="COL_29" type="passive"/>
-        <pin num="30" name="COL_30" type="passive"/>
-        <pin num="31" name="COL_31" type="passive"/>
-        <pin num="32" name="COL_32" type="passive"/>
-        <pin num="33" name="GND" type="power_in"/>
-        <pin num="34" name="EXP_SDI" type="passive"/>
-        <pin num="35" name="EXP_CLK" type="passive"/>
-        <pin num="36" name="EXP_LE" type="passive"/>
-        <pin num="37" name="EXP_OE" type="passive"/>
-        <pin num="38" name="GND" type="power_in"/>
-        <pin num="39" name="EXP_3V3" type="passive"/>
-        <pin num="40" name="GND" type="power_in"/>
-      </pins>
-    </libpart>
     <libpart lib="mono_parts" part="33R_DNP_R_0402_1005Metric_2">
       <fields>
         <field name="Reference"/>
@@ -7988,6 +7937,57 @@
       <pins>
         <pin num="1" name="~" type="passive"/>
         <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="mono_parts" part="BH127VS-40P-H49_2x20_1.27mm_box_header__DNP_wearable__BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD_40">
+      <fields>
+        <field name="Reference"/>
+        <field name="Value"/>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="COL_01" type="passive"/>
+        <pin num="2" name="COL_02" type="passive"/>
+        <pin num="3" name="COL_03" type="passive"/>
+        <pin num="4" name="COL_04" type="passive"/>
+        <pin num="5" name="COL_05" type="passive"/>
+        <pin num="6" name="COL_06" type="passive"/>
+        <pin num="7" name="COL_07" type="passive"/>
+        <pin num="8" name="COL_08" type="passive"/>
+        <pin num="9" name="COL_09" type="passive"/>
+        <pin num="10" name="COL_10" type="passive"/>
+        <pin num="11" name="COL_11" type="passive"/>
+        <pin num="12" name="COL_12" type="passive"/>
+        <pin num="13" name="COL_13" type="passive"/>
+        <pin num="14" name="COL_14" type="passive"/>
+        <pin num="15" name="COL_15" type="passive"/>
+        <pin num="16" name="COL_16" type="passive"/>
+        <pin num="17" name="COL_17" type="passive"/>
+        <pin num="18" name="COL_18" type="passive"/>
+        <pin num="19" name="COL_19" type="passive"/>
+        <pin num="20" name="COL_20" type="passive"/>
+        <pin num="21" name="COL_21" type="passive"/>
+        <pin num="22" name="COL_22" type="passive"/>
+        <pin num="23" name="COL_23" type="passive"/>
+        <pin num="24" name="COL_24" type="passive"/>
+        <pin num="25" name="COL_25" type="passive"/>
+        <pin num="26" name="COL_26" type="passive"/>
+        <pin num="27" name="COL_27" type="passive"/>
+        <pin num="28" name="COL_28" type="passive"/>
+        <pin num="29" name="COL_29" type="passive"/>
+        <pin num="30" name="COL_30" type="passive"/>
+        <pin num="31" name="COL_31" type="passive"/>
+        <pin num="32" name="COL_32" type="passive"/>
+        <pin num="33" name="GND" type="power_in"/>
+        <pin num="34" name="EXP_SDI" type="passive"/>
+        <pin num="35" name="EXP_CLK" type="passive"/>
+        <pin num="36" name="EXP_LE" type="passive"/>
+        <pin num="37" name="EXP_OE" type="passive"/>
+        <pin num="38" name="GND" type="power_in"/>
+        <pin num="39" name="EXP_3V3" type="passive"/>
+        <pin num="40" name="GND" type="power_in"/>
       </pins>
     </libpart>
     <libpart lib="mono_parts" part="BMI270_Bosch_LGA-14_3x2.5mm_P0.5mm_9">

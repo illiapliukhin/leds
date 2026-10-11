@@ -5,11 +5,11 @@
 	(at 0 0)
 	(descr "SOD-882, DFN1006-2, body 1.0 x 0.6 x 0.48mm, pitch 0.65mm, https://assets.nexperia.com/documents/package-information/SOD882.pdf")
 	(tags "Diode SOD882 DFN1006-2")
-	(property "Reference" "D_R10"
+	(property "Reference" "D_C27"
 		(at 0 -1.35 0)
 		(layer "F.SilkS")
 		(hide yes)
-		(uuid "7220ccc4-5150-4964-8b20-d65136eca30f")
+		(uuid "23e3e4ef-89cd-4322-a372-b8e7674786fc")
 		(effects
 			(font
 				(size 1 1)
@@ -21,7 +21,7 @@
 		(at 0 1.35 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "792e1036-6cf2-4eef-ba26-258e152a69a1")
+		(uuid "0a7d202e-b124-4130-9db4-af39f548bf83")
 		(effects
 			(font
 				(size 1 1)
@@ -34,7 +34,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "7609463a-8282-4ee8-8824-b49763710334")
+		(uuid "c0c00108-4988-4044-99c3-750c2310a0a0")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -47,7 +47,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "debd749f-dbf1-49df-9770-2f582c11abe1")
+		(uuid "5081b0d0-bdf7-4297-81c0-cfb431fca29e")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -58,44 +58,44 @@
 	(attr smd dnp)
 	(duplicate_pad_numbers_are_jumpers no)
 	(fp_line
-		(start -0.8 -0.62)
-		(end -0.8 0.62)
+		(start -0.75 -0.62)
+		(end -0.75 0.62)
 		(stroke
 			(width 0.05)
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "25834681-35c7-475f-9d73-8114e7e49ffc")
+		(uuid "a2748ef8-9325-455d-9c4e-d18109bf3267")
 	)
 	(fp_line
-		(start -0.8 -0.62)
-		(end 0.8 -0.62)
+		(start -0.75 -0.62)
+		(end 0.75 -0.62)
 		(stroke
 			(width 0.05)
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "291fd1cf-8301-4463-ac47-5dcf775c94c1")
+		(uuid "42a2e1e9-bb9e-45e9-aaf0-ef8385067ab5")
 	)
 	(fp_line
-		(start 0.8 -0.62)
-		(end 0.8 0.62)
+		(start 0.75 -0.62)
+		(end 0.75 0.62)
 		(stroke
 			(width 0.05)
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "d9bd1de7-9606-482c-bb41-48c5858c3db5")
+		(uuid "bbb55cec-9be8-4584-96c8-059583cdedae")
 	)
 	(fp_line
-		(start 0.8 0.62)
-		(end -0.8 0.62)
+		(start 0.75 0.62)
+		(end -0.75 0.62)
 		(stroke
 			(width 0.05)
 			(type solid)
 		)
 		(layer "F.CrtYd")
-		(uuid "476c1fea-f57e-44a0-9501-696dd3963654")
+		(uuid "fb75001b-faec-48a2-9cf3-ff3232bd3c01")
 	)
 	(fp_line
 		(start -0.5 -0.3)
@@ -105,7 +105,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "b5cad2a1-bf39-4bce-969a-debd9d022604")
+		(uuid "54316c15-992f-452a-a183-98eeb04016d1")
 	)
 	(fp_line
 		(start -0.5 0.3)
@@ -115,7 +115,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "eede1079-7ad6-43bc-9442-412fa018640a")
+		(uuid "c9081f4a-00ad-4546-bb7b-3818378ef54b")
 	)
 	(fp_line
 		(start -0.15 0)
@@ -125,7 +125,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "c044258a-4075-43b1-aaf8-98574edf2cc8")
+		(uuid "9ee8757c-ed01-4f87-8335-3f460e40949c")
 	)
 	(fp_line
 		(start -0.15 0)
@@ -135,7 +135,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "046542c8-07a2-445a-9c30-47ba3d4991a9")
+		(uuid "1d21e6ca-5bb4-4921-bc20-3d24b3353936")
 	)
 	(fp_line
 		(start -0.15 0.2)
@@ -145,7 +145,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "17fad5b3-29e3-455d-bfe8-fea4ca772bc0")
+		(uuid "819e4209-52be-41c3-8cc3-42d45230926e")
 	)
 	(fp_line
 		(start 0.15 -0.2)
@@ -155,7 +155,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "f415a33e-16aa-43ad-8ca5-b5a9131e3fc8")
+		(uuid "122e3210-5823-40b2-b0fa-e56e68ea7a33")
 	)
 	(fp_line
 		(start 0.15 0)
@@ -165,7 +165,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "c26f4cec-8a5e-4e1c-a52d-1127727537b1")
+		(uuid "0a435266-34b9-458c-aa72-6de67f7e138f")
 	)
 	(fp_line
 		(start 0.15 0.2)
@@ -175,7 +175,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "1c98f5b5-0356-4728-8d08-845a707fcac8")
+		(uuid "4f8b0c2b-5e5c-4079-9f5e-2ec850e8b6b4")
 	)
 	(fp_line
 		(start 0.5 -0.3)
@@ -185,7 +185,7 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "1512e512-f7f3-4b90-a3b2-2c577fbe2a27")
+		(uuid "dc2abf20-b632-4d59-bd2c-d7247c435cd4")
 	)
 	(fp_line
 		(start 0.5 0.3)
@@ -195,12 +195,12 @@
 			(type solid)
 		)
 		(layer "F.Fab")
-		(uuid "5c1855fd-fdc5-4c68-abac-42c6640352d9")
+		(uuid "6a1e09eb-caf1-49f9-ae93-bfddcc158de2")
 	)
 	(fp_text user "${REFERENCE}"
 		(at -0.127 -1.35 0)
 		(layer "F.Fab")
-		(uuid "3ab756f6-6122-4399-b405-708efca6d3fe")
+		(uuid "59dd92b2-6ba9-422b-98b4-a69099fc6a49")
 		(effects
 			(font
 				(size 1 1)
@@ -214,7 +214,7 @@
 		(layers "F.Paste")
 		(roundrect_rratio 0.1666666667)
 		(solder_paste_margin -0.05)
-		(uuid "a678778d-b3dd-483a-b8d8-8365ca323ac3")
+		(uuid "d1eaefcc-bef7-4621-8014-232b3be02619")
 	)
 	(pad "" smd roundrect
 		(at 0.35 0)
@@ -222,7 +222,7 @@
 		(layers "F.Paste")
 		(roundrect_rratio 0.1666666667)
 		(solder_paste_margin -0.05)
-		(uuid "c3b92aee-be8e-4064-aa1d-936ed28c2a06")
+		(uuid "f568e058-e21b-47fa-a471-ade052cca356")
 	)
 	(pad "1" smd roundrect
 		(at -0.35 0)
@@ -231,7 +231,7 @@
 		(roundrect_rratio 0.125)
 		
 		(solder_paste_margin -0.05)
-		(uuid "d6d56b3f-beb0-4097-8520-57f6826345d9")
+		(uuid "f17f37d7-c9ae-40bc-a516-2cddb7f39604")
 	)
 	(pad "2" smd roundrect
 		(at 0.35 0)
@@ -240,7 +240,7 @@
 		(roundrect_rratio 0.125)
 		
 		(solder_paste_margin -0.05)
-		(uuid "753dae8a-acf5-4486-bba7-2da541503a3f")
+		(uuid "df915182-db67-44cd-ae91-40a173622707")
 	)
 	(embedded_fonts no)
 	(model "${KICAD10_3DMODEL_DIR}/Diode_SMD.3dshapes/D_SOD-882.step"

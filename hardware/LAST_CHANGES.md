@@ -1,6 +1,7 @@
 # Latest changes
 
 ## mono_electronics v12
+- mono_electronics v14b: installation headers are now XFCN BH127VS-40P-H49 2×20 1.27 mm shrouded, keyed box headers (C42462832; mate IDC3-40232A1EUB1 C49232620 + 0.635 mm ribbon); board 159.45 mm wide (+11.4); gates clean; fab v14 regen.
 - mono_electronics v14: installation headers J_RH1/J_CH1 (2×20 1.27 mm SMD, pin n = FFC pin n) + 64 PESD5V0S1BL, all DNP in the wearable build; board 148 → 160.5 mm wide; wearable and installation BOM/CPL; gates clean (DRC 0/0/0, ERC 0, 0 diffs, прозвонка 309/309); fab v14.
 - mono_electronics v13d: R_ILM1 reverted to 2.7k (C25885, 0.78 A eFuse limit, under the BQ25185 1.1 A abs max); v13c U_OVP1 thermal copper kept; gates clean; fab v13 regen.
 - mono_electronics v13c: R_ILM1 2.7k → 1.6k (C4908), eFuse limit 0.78 → 1.29 A (1.19–1.39 A, TPS2595 Eq.4); U_OVP1 F GND pour 21.5 mm² + 2 thermal vias; gates clean; fab v13 regen.

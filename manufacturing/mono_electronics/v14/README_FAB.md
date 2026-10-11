@@ -1,11 +1,11 @@
 # mono_electronics v14 — JLCPCB fab package (PR #4 board), two assembly variants
 
-Board: **160.5 × 99.5 mm** (v14: +12.5 mm east strip for the installation headers; was 148.0 × 99.5), 4 layers (F / In1 / In2 / B), single-sided assembly (top only). KiCad DRC 0 errors / 0 warnings / 0 unconnected.
+Board: **159.45 × 99.5 mm** (v14: +11.4 mm east strip for the installation box headers; was 148.0 × 99.5), 4 layers (F / In1 / In2 / B), single-sided assembly (top only). KiCad DRC 0 errors / 0 warnings / 0 unconnected.
 
 ## Files
 - `gerbers/` — Protel extensions, no X2, soldermask subtracted from silk, drill-file (aux) origin. Layer order for the JLC stackup: GTL (F.Cu) / G1 (In1) / G2 (In2) / GBL (B.Cu). Excellon drill, mm, separate PTH / NPTH, with drill maps.
 - **Wearable variant:** `BOM_mono_electronics_v14_wearable_JLCPCB.csv` + `CPL_mono_electronics_v14_wearable.csv` — FFC J_ROW1/J_COL1 fitted; J_RH1, J_CH1 and the 64 TVS D_R01–D_R32 / D_C01–D_C32 DNP (not listed). Identical part list to v13.
-- **Installation variant:** `BOM_mono_electronics_v14_installation_JLCPCB.csv` + `CPL_mono_electronics_v14_installation.csv` — adds J_RH1/J_CH1 (2×20 1.27 mm SMD male header, JXT-PZ1.27-2X20P-A2, C54803356, stock 145; alt AZ-PZ1.12-V13-2*20P C55020606, stock 185) and 64 × PESD5V0S1BL (Nexperia, C84374, stock 127k). The FFC lines are kept; delete the J_ROW1/J_COL1 line (and its CPL rows) to drop the FFCs.
+- **Installation variant:** `BOM_mono_electronics_v14_installation_JLCPCB.csv` + `CPL_mono_electronics_v14_installation.csv` — adds J_RH1/J_CH1 (XFCN BH127VS-40P-H49 2×20 1.27 mm SMD shrouded, keyed box header, C42462832, stock 125; mates XFCN IDC3-40232A1EUB1 IDC socket C49232620 on 0.635 mm 40-way ribbon) and 64 × PESD5V0S1BL (Nexperia, C84374, stock 127k). The FFC lines are kept; delete the J_ROW1/J_COL1 line (and its CPL rows) to drop the FFCs.
 - `BOM_mono_electronics_v14_annotated.csv` — with MPN, basic/extended, live stock and unit price (queried from the JLCPCB parts API on 2026-10-11), and flags.
 - CPL: placement (Designator, Mid X, Mid Y, Layer, Rotation), all Top; wearable 231 parts, installation 297 parts (R_EXP_* DNP in both).
 
@@ -13,8 +13,8 @@ Board: **160.5 × 99.5 mm** (v14: +12.5 mm east strip for the installation heade
 4 layers, FR-4, 1.6 mm (project rule says 1.0 mm — pick deliberately), JLC04161H-7628 or any stackup with ≥0.127 mm trace/space capability (board min other-net spacing 0.127 mm, min track 0.125 mm, vias 0.40/0.20 mm), ENIG recommended (QFN/LGA/VQFN fine pitch), tented vias, Standard PCBA, top side, remove order number or "specify position".
 
 ## Flags before ordering
-- **v14 installation headers (LED_INTERFACE_STANDARD.md §6.1):** J_RH1/J_CH1 repeat J_ROW1/J_COL1 pin for pin (pin n = FFC pin n, rows/cols 1–32, GND on 33/38/40). Never fit FFC panels and header loads at the same time. Header stock (145 / 185) is thin; check before ordering. Check the header and SOD-882 rotations in the CPL preview.
-- **v14 cost delta (estimate):** wearable: parts $0; bare PCB +8.4 % area (≈ +$3–4 for 5 boards, ≈ +$10–15 for 50). Installation: +2 extended lines ($6 loading fee per order); parts ≈ $3.1/board @5 (2 × $0.48 + 64 × $0.033) and ≈ $2.4/board @50 (2 × $0.38 + 64 × $0.026); +208 joints ≈ $0.35/board. Dropping the FFCs saves ≈ $1.46/board @5 (≈ $1.04 @50).
+- **v14 installation headers (LED_INTERFACE_STANDARD.md §6.1):** J_RH1/J_CH1 repeat J_ROW1/J_COL1 pin for pin (pin n = FFC pin n, rows/cols 1–32, GND on 33/38/40). Never fit FFC panels and header loads at the same time. Header stock (125) and socket stock (140) are thin; check before ordering. Check the header and SOD-882 rotations in the CPL preview.
+- **v14 cost delta (estimate):** wearable: parts $0; bare PCB +7.7 % area (≈ +$3–4 for 5 boards, ≈ +$10–15 for 50). Installation: +2 extended lines ($6 loading fee per order); parts ≈ $3.8/board @5 (2 × $0.81 + 64 × $0.033) and ≈ $3.0/board @50 (2 × $0.65 + 64 × $0.026); +208 joints ≈ $0.35/board. Dropping the FFCs saves ≈ $1.46/board @5 (≈ $1.04 @50).
 - **v13b:** J_BAT1 is now JST PH S3B-PH-SM4-TB(LF)(SN) (C265101, JLC stock 865, enough for 50 boards; 2 A/contact). The battery lead needs a JST PHR-3 housing (pin 1 BAT+, 2 NTC, 3 GND). The annotated BOM stock and prices were refreshed from the JLCPCB parts API on 2026-10-11 (66 of 70 lines; the rest are not assembled).
 - **v13 protections (see hardware/mono_electronics/ABSMAX_REVIEW_v13.md):**
   - F_BAT1 0466002.NRHF 2 A very-fast 1206 fuse (C3105, LCSC stock 33,770) right at J_BAT1.

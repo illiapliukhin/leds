@@ -181,7 +181,7 @@ SHEET_SPECS: list[SheetSpec] = [
     SheetSpec(
         "install_headers",
         "sheets/install_headers.kicad_sch",
-        "Installation-build cable headers (v14, DNP in wearable) - J_RH1/J_CH1 2x20 1.27 mm SMD in parallel with J_ROW1/J_COL1 pin-for-pin, PESD5V0S1BL per LED line",
+        "Installation-build cable headers (v14, DNP in wearable) - J_RH1/J_CH1 2x20 1.27 mm shrouded keyed box headers (XFCN BH127VS-40P-H49) in parallel with J_ROW1/J_COL1 pin-for-pin, PESD5V0S1BL per LED line",
         reference_prefixes=("J_RH", "J_CH", "D_R0", "D_R1", "D_R2", "D_R3", "D_C0", "D_C1", "D_C2", "D_C3"),
     ),
     SheetSpec(

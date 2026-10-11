@@ -290,3 +290,8 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - The DNP strip is flat in the wearable build. The FFC cables and the J_PORT_E1 plug lie on it. No parts are in the J_PORT_E1 band (y 35–48).
 - Gates: DRC 0/0/0 (all severities); copper check 0 < 0.127 mm; netcheck 0 relabels; 0 B parts; worst LED drop to the FFC 92.5 mV (row 17, unchanged), about +11 mV more to the header pins; B GND pieces each have ≥ 2 vias; ERC 0; schematic vs PCB 309/309 refs, 0 pin differences (new sheet `install_headers`); continuity (PROZVONKA_v14.md) 309/309 PASS; all corners arced (only straight width steps remain); USB skew unchanged (−0.131/+0.189 mm).
 - Fab: manufacturing/mono_electronics/v14/ (wearable and installation BOM/CPL) and mono_electronics_v14_fab.zip. Images: hardware/mono_electronics/img/v14/.
+
+## v14 (rev b) — shrouded keyed box headers
+- J_RH1/J_CH1 changed from unshrouded 2×20 1.27 mm pin headers to XFCN BH127VS-40P-H49 2×20 1.27 mm SMD shrouded, keyed IDC box headers (C42462832). The custom footprint `BoxHeader_XFCN_BH127VS-40P-H49_2x20_P1.27mm_Vertical_SMD` follows the datasheet land pattern (pads 0.6 × 2.6 mm, rows ±2.2 mm, body 31.75 × 6.0 mm). The silk shows the body ends and a pin-1 triangle. Centres (151.9, 21.68) and (151.9, 68.28). Same 1:1 pinout and the same 64 TVS.
+- Board 160.5 → **159.45 mm** wide (v13 was 148.0). The E-column TVS GND vias are tied by an In1.Cu GND strap per header, with GND vias at both ends.
+- Gates: DRC 0/0/0; copper 0 < 0.127 mm; netcheck 0; 0 B parts; LED drop 92.5 mV (FFC, unchanged); B GND pieces ≥ 2 vias; ERC 0; sch vs PCB 309/309, 0 diffs; прозвонка 309/309 PASS; all corners arced; USB skew unchanged.

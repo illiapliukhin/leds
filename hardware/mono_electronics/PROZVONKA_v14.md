@@ -129,13 +129,13 @@ Method: each pad's board net is compared with the exported schematic netlist (ha
 | H4 | M2.5 | 1 | 1 | 1 | PASS |  |
 | JP_TERM1 | TERM | 2 | 2 | 2 | PASS |  |
 | J_BAT1 | S3B-PH-SM4-TB | 5 | 5 | 5 | PASS |  |
-| J_CH1 | 2x20 1.27mm SMD header (DNP wearable) | 40 | 40 | 40 | PASS |  |
+| J_CH1 | BH127VS-40P-H49 2x20 1.27mm box header (DNP wearable) | 40 | 40 | 40 | PASS |  |
 | J_COL1 | FFC_40P_050_COL | 42 | 42 | 42 | PASS |  |
 | J_PORT_E1 | SM06B-SRSS-TB | 8 | 8 | 8 | PASS |  |
 | J_PORT_N1 | SM06B-SRSS-TB | 8 | 8 | 8 | PASS |  |
 | J_PORT_S1 | SM06B-SRSS-TB | 8 | 8 | 8 | PASS |  |
 | J_PORT_W1 | SM06B-SRSS-TB | 8 | 8 | 8 | PASS |  |
-| J_RH1 | 2x20 1.27mm SMD header (DNP wearable) | 40 | 40 | 40 | PASS |  |
+| J_RH1 | BH127VS-40P-H49 2x20 1.27mm box header (DNP wearable) | 40 | 40 | 40 | PASS |  |
 | J_ROW1 | FFC_40P_050_ROW | 42 | 42 | 42 | PASS |  |
 | J_USB1 | TYPE-C-31-M-12 | 20 | 20 | 20 | PASS |  |
 | L_LED1 | DFE201612E-R47M | 2 | 2 | 2 | PASS |  |
