@@ -5,7 +5,7 @@ import gzip, json, math, random
 import numpy as np
 from .. import host
 from . import elec, thermal, pcbnet
-from .elec import DS
+from .elec import DS, bq_ilim
 
 BOARD_PCB = 'board_v13.json.gz'          # v13: eFuse U_OVP1 + TVS D_VBUS1 on USB, F_BAT1 + Q_BAT1 in the battery path
 PART_REFS = ['U_LED_PWR1', 'U_LDO1', 'U_CHG1', 'U_ESD1', 'U1', 'U_LED1', 'U_LED2', 'J_BAT1', 'L_LED1', 'U_GAUGE1', 'U_485', 'Q_ROW01', 'Q_ROW16', 'Q_ROW17', 'Q_ROW32', 'U_OVP1', 'D_VBUS1', 'F_BAT1', 'Q_BAT1']
@@ -23,7 +23,7 @@ PRESETS = {
 
 def default_params():
     return dict(src='battery', cap_mah=2000.0, rint25=0.080, soc=0.8, t_cell=25.0, pcm=True, bench_v=3.8, bench_ilim=2.0,
-                usb_on=True, usb_v=5.0, usb_ilim=1.5, usb_r=0.15, ambient=25.0, esp_mode='active', rext=1820.0, full_white=False,
+                usb_on=True, usb_v=5.0, usb_ilim=1.5, usb_r=0.15, r_ilim=18e3, ambient=25.0, esp_mode='active', rext=1820.0, full_white=False,
                 time_k=20.0, ffc_mm=100.0)
 
 class Part:
@@ -176,7 +176,7 @@ class Lab:
                   usb_on=p['usb_on'] and b.powered, usb_v=usb_v, usb_r=p['usb_r'], usb_ilim=p['usb_ilim'],
                   f_esd_short=P['U_ESD1'].state == 'short', chg_ok=P['U_CHG1'].state == 'ok' and not bp.flags['chg_tshut'],
                   f_chg_short=P['U_CHG1'].state == 'short', f_chg_open=P['U_CHG1'].state == 'open',
-                  ilim=DS['BQ25185']['ilim_max'], ichg=0.5, i_in_prev=bp.info.get('i_in', 0.3) if bp.info else 0.3, charge_en=True, treg_k=treg_k, i_sys_prev=bp.i_sys_prev,
+                  ilim=bq_ilim(p.get('r_ilim', DS['BQ25185']['r_ilim']))[0], ichg=0.5, i_in_prev=bp.info.get('i_in', 0.3) if bp.info else 0.3, charge_en=True, treg_k=treg_k, i_sys_prev=bp.i_sys_prev,
                   batfet_on=not bp.flags['batfet_off'] and P['U_CHG1'].state == 'ok' and not bp.flags['chg_tshut'],
                   src=p['src'], bat_conn=b.powered and bp.dead is None or p['src'] != 'none', pcm_open=bp.flags['pcm_open'] or bp.flags.get('trace_fused', False),
                   reverse=f.get('reverse', False), ocv=ocv, rint=rint, r_path=s.r_path, bench_v=bench_v, bench_ilim=p['bench_ilim'],

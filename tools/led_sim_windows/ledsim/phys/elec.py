@@ -18,7 +18,7 @@ DS = {
                   vfb=0.5, S='TI TPS63802 Rev.D: abs max VIN 6 V, VIN 1.3-5.5 V, switch limit 5 A typ, 2 A out, RθJA 81, ΨJB 23.5 °C/W, TJ 150 °C'),
  'TLV75733': dict(vin_abs=6.0, rdo=0.3 / 1.0, ilim=1.2, ignd=33e-6, theta_ja_evm=100.8, theta_ja_jedec=231.0, tsd=165.0,
                   S='TI TLV757P: dropout 300 mV @ 1 A (REWORK_LOG), ILIM ≥ 1.2 A, IGND ≤ 33 µA, RθJA 100.8 (EVM)…231 °C/W (JEDEC); abs max VIN 6.0 V и TSD 165 °C — допущение'),
- 'BQ25185': dict(vin_abs=25.0, vin_ovp=18.5, vin_ovp_hys=0.5, vsys=4.5, ilim_max=1.1, ibat_dis=3.125, batocp=3.0, treg=100.0, tshut=150.0, tshut_rec=135.0,
+ 'BQ25185': dict(r_ilim=18e3, vin_abs=25.0, vin_ovp=18.5, vin_ovp_hys=0.5, vsys=4.5, ilim_max=1.1, ibat_dis=3.125, batocp=3.0, treg=100.0, tshut=150.0, tshut_rec=135.0,
                  theta_ja=60.0, S='TI BQ25185 Rev.B: VIN abs max 25 V, OVP 18.5 V (18-19), hyst 0.5 V, SYS 4.5 V, IIN ≤ 1.1 A, BAT→SYS 3.125 A, BATOCP ≥ 3 A, TREG 100 °C, TSHUT 150/135 °C; RθJA 60 °C/W — допущение'),
  'AO3403': dict(rds25=0.115, rds_tc=0.004, id_max=2.6, theta_ja=125.0, tj_abs=150.0,
                 S='AOS AO3403: RDS(on) ≤ 115 mΩ @ VGS −4.5 V, ID −2.6 A; ТКС +0.4 %/°C и RθJA 125 °C/W — типовые для SOT-23 (допущение)'),
@@ -51,6 +51,20 @@ def tps_eta(iout, vin, vout):
     return max(0.3, min(0.97, eta))
 
 def _sp(z): return z + math.log1p(math.exp(-z)) if z > 0 else math.log1p(math.exp(z))
+# BQ25185 ILIM/VSET resistor map (datasheet Table 6-1): no formula — the pin decodes one of 16 resistor values.
+# (R kΩ, input current limit A (typ: ILIM100 = 0.090, ILIM500 = 0.475, ILIM1100 = 1.050), VBATREG V)
+BQ_ILIM_MAP = [(130, .475, 4.1), (100, 1.05, 4.1), (75, .475, 4.4), (56, 1.05, 4.4), (43, .475, 4.35), (33, 1.05, 4.35),
+               (24, .090, 4.2), (18, .475, 4.2), (13, 1.05, 4.2), (9.1, .475, 4.05), (6.8, 1.05, 4.05), (5.1, 1.05, 3.65),
+               (3.6, .475, 3.6), (2.4, 1.05, 3.6)]
+
+def bq_ilim(r_ohm):
+    """(ILIM A, VBATREG V) for the resistor on ILIM/VSET: nearest map entry (log scale); > 180 k → 0.475 A, charge off; < 1.5 k → battery-only"""
+    k = r_ohm / 1e3
+    if k > 180: return 0.475, 0.0
+    if k < 1.5: return 0.0, 0.0
+    e = min(BQ_ILIM_MAP, key=lambda t: abs(math.log(t[0] / k)))
+    return e[1], e[2]
+
 def smooth_clip(x, lo, hi, k=200.0):
     if not isinstance(x, np.ndarray):
         a = lo + _sp(k * (x - lo)) / k
