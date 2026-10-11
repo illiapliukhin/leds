@@ -16,7 +16,7 @@ Board: 148.0 × 99.5 mm, 4 layers (F / In1 / In2 / B), single-sided assembly (to
 - **v13 protections (see hardware/mono_electronics/ABSMAX_REVIEW_v13.md):**
   - F_BAT1 0466002.NRHF 2 A very-fast 1206 fuse (C3105, LCSC stock 33,770) right at J_BAT1.
   - Q_BAT1 AO3401A (C15127, basic) reverse-battery ideal-diode P-FET with R_BATG1 10 k gate pull-down. BAT copper is 1.0 mm on F from J_BAT1 to Q_BAT1, and the In1 BAT_RAW riser is 0.8 mm.
-  - U_OVP1 TPS259531DSGR eFuse (C2155674, JLC stock 2,988): 5.7 V OV clamp, R_ILM1 1.6 k (C4908, 73,801 in stock) gives a 1.29 A limit (1.19–1.39 A), UVLO 4.28 V from R_EN_TOP1 100 k / R_EN_BOT1 39 k (C25783, verify).
+  - U_OVP1 TPS259531DSGR eFuse (C2155674, JLC stock 2,988): 5.7 V OV clamp, R_ILM1 2.7 k (C25885) gives a 0.78 A limit (0.72–0.84 A), under the BQ25185 1.1 A IN abs max, UVLO 4.28 V from R_EN_TOP1 100 k / R_EN_BOT1 39 k (C25783, verify).
   - D_VBUS1 SMF12A (JSMSEMI C2857273, stock 25,035) on the connector side (VBUS_CONN).
   - BQ25185: F.Cu GND pour plus 4 thermal vias.
   - The battery pack's own PCM (Jauch LP523450JU) is still assumed as primary over-current/over-discharge protection. F_BAT1 is the board-level backstop against a short on the board.

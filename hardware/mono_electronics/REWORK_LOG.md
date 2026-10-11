@@ -276,3 +276,7 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - U_OVP1 thermal: F.Cu GND zone x 5.5–10.8, y 24.9–30.4 (21.5 mm² fill, solid pad connection), an EP strap down to a GND via at (7.0, 29.6), and a second GND via at (8.0, 30.0).
 - Note: the BQ25185 ILIM (18 k) caps the steady-state input at 0.5 A. The new eFuse limit is above the BQ's 1.1 A IN DC abs max, so it only bounds faults and inrush (see ABSMAX_REVIEW_v13.md).
 - Gates: DRC 0/0/0; copper check 0 < 0.127 mm; netcheck 0 relabels; 0 B parts; LED drop 92.5 mV; B GND ≥ 2 vias per piece; ERC 0; schematic vs PCB 0 diffs; continuity 243/243 PASS; all corners arced; USB skew −0.131/+0.189 mm.
+
+## v13d: R_ILM1 back to 2.7 k (2026-10-11)
+- Your decision: R_ILM1 1.6 k → 2.7 k (C25885). The eFuse limit is 0.78 A (0.72–0.84 A), which stays under the BQ25185 1.1 A IN DC abs max. The v13c thermal copper and vias under U_OVP1 are kept. The abs-max trade-off note was removed.
+- Gates: DRC 0/0/0; copper check 0 < 0.127 mm; netcheck 0 relabels; 0 B parts; ERC 0; schematic vs PCB 0 diffs; continuity 243/243 PASS; all corners arced.

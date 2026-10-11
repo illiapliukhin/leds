@@ -176,7 +176,7 @@ Method: each pad's board net is compared with the exported schematic netlist (ha
 | R_ID_SCL1 | 33R | 2 | 2 | 2 | PASS |  |
 | R_ID_SDA1 | 33R | 2 | 2 | 2 | PASS |  |
 | R_ILIM1 | 18k | 2 | 2 | 2 | PASS |  |
-| R_ILM1 | 1.6k | 2 | 2 | 2 | PASS |  |
+| R_ILM1 | 2.7k | 2 | 2 | 2 | PASS |  |
 | R_INB1 | 100k | 2 | 2 | 2 | PASS |  |
 | R_ISET1 | 600R | 2 | 2 | 2 | PASS |  |
 | R_LE_PD1 | 100k | 2 | 2 | 2 | PASS |  |

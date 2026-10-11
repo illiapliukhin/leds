@@ -1,6 +1,7 @@
 # Latest changes
 
 ## mono_electronics v12
+- mono_electronics v13d: R_ILM1 reverted to 2.7k (C25885, 0.78 A eFuse limit, under the BQ25185 1.1 A abs max); v13c U_OVP1 thermal copper kept; gates clean; fab v13 regen.
 - mono_electronics v13c: R_ILM1 2.7k → 1.6k (C4908), eFuse limit 0.78 → 1.29 A (1.19–1.39 A, TPS2595 Eq.4); U_OVP1 F GND pour 21.5 mm² + 2 thermal vias; gates clean; fab v13 regen.
 - mono_electronics v13b: J_BAT1 → JST PH S3B-PH-SM4-TB (2 A/contact, C265101; pack needs PHR-3), battery path re-placed with 1.0 mm copper, gates clean, BOM stock/prices refreshed from JLC API.
 - mono_electronics v13: protections — F_BAT1 2 A fuse + Q_BAT1 reverse-battery PFET + 1 mm BAT copper; U_OVP1 TPS259531 eFuse (5.7 V clamp, 0.79 A) + D_VBUS1 SMF12A; BQ25185 GND pour + thermal vias; abs-max review (R_ILM1 2.7k); full check clean (DRC 0/0/0, ERC 0, 0 diffs, прозвонка 243/243), fab v13.
