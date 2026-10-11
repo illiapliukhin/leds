@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Virtual bench bring-up of mono_electronics v11b + mono_panel_32x32.
+"""Virtual bench bring-up of mono_electronics v11c + mono_panel_32x32.
 Real firmware in Espressif QEMU (MONO_SIM build) -> scan tap -> netlist-driven board/FFC/panel model -> pygame scene.
 Scripted bench session with automatic verification and one fault-injection run; ends in `demo cycle`."""
 import argparse, json, math, os, re, socket, subprocess, threading, time, queue
@@ -114,7 +114,7 @@ class Scene:
     def __init__(self, model):
         pygame.init()
         self.scr = pygame.display.set_mode((W, H))
-        pygame.display.set_caption('mono_split bench bring-up - mono_electronics v11b + mono_panel_32x32 (virtual)')
+        pygame.display.set_caption('mono_split bench bring-up - mono_electronics v11c + mono_panel_32x32 (virtual)')
         self.f = pygame.font.SysFont('dejavusansmono', 14); self.fs = pygame.font.SysFont('dejavusansmono', 12)
         self.fb = pygame.font.SysFont('dejavusans', 19, bold=True); self.fh = pygame.font.SysFont('dejavusans', 26, bold=True)
         self.m = model
@@ -153,7 +153,7 @@ class Scene:
         return pts
     def draw(self, q, steps):
         s = self.scr; s.fill((22, 24, 28))
-        s.blit(self.fh.render('Bench bring-up: mono_electronics v11b  +  mono_panel_32x32', True, (255, 180, 60)), (20, 14))
+        s.blit(self.fh.render('Bench bring-up: mono_electronics v11c  +  mono_panel_32x32', True, (255, 180, 60)), (20, 14))
         # board
         s.blit(self.board, (self.bx, self.by))
         pygame.draw.rect(s, (90, 90, 90), (self.bx - 1, self.by - 1, self.bw + 2, self.bh + 2), 1)
@@ -299,18 +299,21 @@ def main():
         time.sleep(2)
         # ---- fault injection 1: wrong cable (Type A, same-side contacts)
         step('FAULT 1: swap both FFCs for Type A (same-side contacts) cables', 'INFO')
+        sc.banner = 'FAULT 1 ACTIVE: Type A cables (pins mirrored)'; sc.banner_col = (255, 80, 80)
         model.set_cable('A', set()); sc.fault = 'Type A'; sc.cable_label = 'Type A (same-side) -> pins mirrored 1<->40'
         f1 = [run_check('[F1] All on', 'all', 'test all', 2.0), run_check('[F1] Row walk', 'row', 'test row', 4.5, settle=0.3)]
         q.send('test off'); time.sleep(0.5)
         # ---- fault injection 2: open conductor COL_07 on the correct cable
         step('FAULT 2: Type B cable, conductor 7 of the COL cable open (COL_07)', 'INFO')
+        sc.banner = 'FAULT 2 ACTIVE: COL conductor 7 open'; sc.banner_col = (255, 80, 80)
         model.set_cable('B', {'COL_07'}); sc.fault = 'COL_07'; sc.cable_label = 'Type B, conductor 7 OPEN'
         f2 = [run_check('[F2] Column walk', 'col', 'test col', 5.2, settle=0.3)]
         q.send('test off'); time.sleep(0.5)
         model.set_cable('B', set()); sc.fault = None; sc.cable_label = 'FFC 40P 0.5 mm, Type B (opposite-side contacts)'
         step('Faults removed, correct Type B cables back in', 'INFO')
+        sc.banner = 'Faults removed - Type B cables back in'; sc.banner_col = (170, 190, 255)
         # ---- report
-        rep = [('BENCH REPORT  mono_electronics v11b + mono_panel_32x32', (255, 190, 60))]
+        rep = [('BENCH REPORT  mono_electronics v11c + mono_panel_32x32', (255, 190, 60))]
         for c in nominal:
             if isinstance(c, Check):
                 rep.append(('%-14s %s  rows %2d/32  cols %2d/32  (%d scans)' % (c.name, 'PASS' if c.passed() else 'FAIL', sum(c.rows_ok()), sum(c.cols_ok()), c.snaps), (90, 255, 110) if c.passed() else (255, 80, 80)))

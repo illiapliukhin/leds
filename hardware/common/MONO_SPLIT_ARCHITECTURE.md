@@ -24,6 +24,13 @@ Front copper carries only LED pads, anode-row buses, cathode stubs, and row fan-
 
 Both panels and the electronics board use the same two Hirose `FH12-40S-0.5SH` 0.50 mm 40-circuit bottom-contact receptacles. Each contact is specified at 0.5 A. One 32×32 row at 10 mA/pixel is 0.32 A, so a single contact per row is the starting assignment. Spare contacts 33…40 may later be paralleled onto the outer rows if a longer cable drops too much voltage.
 
+**Interconnect cable (required type): 2 × 40-pin, 0.5 mm pitch FFC, Type B (reverse / opposite-side contacts), 0.3 mm thick with stiffened ends, one for ROW (J_ROW1↔J_ROW) and one for COL (J_COL1↔J_COL).**
+
+- **Why Type B.** The board receptacles are on F.Cu with the cable exiting east. The panel receptacles are on B.Cu with the cable exiting west (J_ROW) and south (J_COL). Both ends are FH12 bottom-contact. In that geometry pin 1 meets pin 1 only with a Type B cable. A Type A (same-side) cable mirrors pins 1↔40, so all 32 nets land wrong. This holds however the ribbon is bent or folded; `firmware/mono_split/sim/bringup/cable.py` derives it from the pad coordinates.
+- **Default length 100 mm:** LCSC C2857750, JS05B-40P-100-4-8. Same series, all Type B: 80 mm C5371275, 120 mm C5371276, 150 mm C2857751, 200 mm C2857752.
+- **Choosing a length.** Use the shortest one that reaches the panel with a gentle bend. Each conductor is about 0.3 × 0.035 mm copper, roughly 0.16 Ω per 100 mm. One row contact at 0.32 A drops about 50 mV per 100 mm, on top of the board's 92 mV worst case. Above about 150 mm, parallel the spare contacts 33…40 onto the farthest rows.
+- **Board marking.** F.Silkscreen reads "FFC TYPE B" and "PIN1" beside J_ROW1 and J_COL1. Pin 1 is the north end of each receptacle.
+
 ### `J_ROW`
 
 | Pin | Net | 20×20 panel | 32×32 panel | Electronics |

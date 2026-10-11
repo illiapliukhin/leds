@@ -159,3 +159,7 @@ See **`hardware/MONO_ELECTRONICS_BACKLOG.md`**:
 
 1. **Full-board GND zones** on In2/B (extend past 151×137 mm; stitch at J_ROW/J_COL fan-in).
 2. **USB-C CC1/CC2** — **5.1 kΩ** pulldowns to GND (sink/UFP) for C-to-C VBUS.
+
+## v11c — FFC cable spec and silkscreen note
+- Specified 2 × 40-pin 0.5 mm FFC, **Type B** (reverse / opposite-side contacts), 100 mm, LCSC C2857750 (JS05B-40P-100-4-8). Other lengths: 80 mm C5371275, 120 mm C5371276, 150 mm C2857751, 200 mm C2857752. Added to `MONO_SPLIT_ARCHITECTURE.md` and the annotated fab BOM as an order-separately item. A Type A cable mirrors pins 1↔40.
+- F.Silkscreen: "FFC TYPE B" beside J_ROW1 and J_COL1, and "PIN1" at the north (pin 1) end of each. Copper unchanged. DRC 0 errors / 0 warnings / 0 unconnected. The F_Silkscreen gerber was regenerated with the same options (`--no-x2 --subtract-soldermask`) and the fab zip rebuilt.

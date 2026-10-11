@@ -34,3 +34,14 @@ Based on JLCPCB public pricing rules as understood on 2026-10-11 (Standard PCBA 
 | **Total** | **~$325–340 (~$65–68/board)** | **~$1400–1450 (~$28–29/board)** |
 
 Dropping the stacking-port group (DNP) removes ~6 extended lines (~$18 in fees) plus ~$1.6/board in parts.
+
+## FFC cables (off-board, order separately)
+
+The board and the panel need **2 × 40-pin 0.5 mm FFC, Type B (reverse / opposite-side contacts), 0.3 mm thick with stiffened ends**. They are not part of the SMT order and are not in the JLCPCB BOM upload; they are listed in the annotated BOM.
+
+- **Default:** 100 mm, LCSC **C2857750** (JS05B-40P-100-4-8), about $0.14 each, 1289 in stock at lookup time.
+- **Other lengths, same series (all Type B):** 80 mm C5371275, 120 mm C5371276, 150 mm C2857751, 200 mm C2857752.
+
+A Type A (same-side) cable mirrors pins 1↔40, and nothing on the panel would light correctly; `firmware/mono_split/sim/bringup` (`cable.py`) derives this from the pad geometry.
+
+The board's F.Silkscreen now has "FFC TYPE B" and "PIN1" beside J_ROW1/J_COL1 (silkscreen gerber regenerated; copper unchanged; DRC 0/0).

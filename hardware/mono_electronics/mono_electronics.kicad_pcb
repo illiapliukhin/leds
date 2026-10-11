@@ -49472,6 +49472,50 @@
 			)
 		)
 	)
+	(gr_text "PIN1"
+		(at 143.4 8.35 0)
+		(layer "F.SilkS")
+		(uuid "cd77c66e-50f0-4846-9b82-068511ab024d")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(gr_text "PIN1"
+		(at 143.4 54.95 0)
+		(layer "F.SilkS")
+		(uuid "00f6146e-4ada-48bc-a20f-2c6d47665678")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(gr_text "FFC TYPE B"
+		(at 136.9 18.5 90)
+		(layer "F.SilkS")
+		(uuid "219a008f-8ce0-4813-a2c5-4281ac00d17c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(gr_text "FFC TYPE B"
+		(at 136.9 65 90)
+		(layer "F.SilkS")
+		(uuid "546721a6-3294-4e93-813a-019f1779b12a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
 	(gr_text "MONO ELECTRONICS / 32 ROW x 32 COL FFC"
 		(at 95 2 0)
 		(layer "Cmts.User")
