@@ -182,7 +182,7 @@ class Scene:
         # panel
         if self.pbg is not None:                                              # lattice: see-through bars, bench shows through
             s.blit(self.pbg, (self.px, self.py))
-            s.blit(self.fs.render(('%s (front; bars + windows from its geometry, LEDs from its .kicad_pcb; FFCs on the back of the tab)' if panels.NAME == 'lattice' else '%s (front, edge-to-edge; LEDs from its .kicad_pcb; FFCs + ribbons are on the back)') % panels.CFG['title'], True, (150, 170, 150)), (self.px - 300, self.py + self.pph + 4))
+            s.blit(self.fs.render(('%s (front; bars + windows from its geometry, LEDs from its .kicad_pcb; FFCs on the back of the tab)' if panels.NAME == 'lattice' else '%s (front; LEDs on wires, no PCB: 0.5 mm row / 0.25 mm column wires, 10 mm pitch; breakout tab south)' if panels.NAME == 'wire' else '%s (front, edge-to-edge; LEDs from its .kicad_pcb; FFCs + ribbons are on the back)') % panels.CFG['title'], True, (150, 170, 150)), (self.px - 300, self.py + self.pph + 4))
         else:
             pygame.draw.rect(s, (14, 40, 24), (self.px, self.py, self.pw, self.pw), border_radius=4)
             pygame.draw.rect(s, (80, 120, 90), (self.px, self.py, self.pw, self.pw), 1)
@@ -194,7 +194,7 @@ class Scene:
         # ribbons
         rb = netmodel.BF['J_ROW1']; cb = netmodel.BF['J_COL1']
         col = (150, 105, 35) if not self.fault else (170, 60, 40)
-        if panels.NAME in ('lattice', 'full'):                                # receptacles side by side, cables exit south
+        if panels.NAME in ('lattice', 'full', 'wire'):                        # receptacles side by side, cables exit south
             jr, jc = netmodel.PF['J_ROW'], netmodel.PF['J_COL']; yb = max(p['y'] for p in jr['pads']) + 1.5
             p_row_b = self.bpt(148.5, rb['y']); p_row_p = self.ppt(jr['x'], yb)
             self.ribbon(p_row_b, p_row_p, (p_row_b[0] + 200, p_row_b[1]), (p_row_p[0], p_row_p[1] + 200), 30, col, 'J_ROW1 -> J_ROW  ' + self.cable_label, 6)

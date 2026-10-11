@@ -10,6 +10,7 @@ PRESETS = {  # class, led, rows, cols, pitch_um, i_led_ua, i_row_ma, vf_mv, map,
  'flat20':     (0, 0, 20, 20, 6000, 10000, 200, 3000, 0, 0, 2000, 0, 300, 'mono20_flat', 1),
  'lattice32':  (1, 0, 32, 32, 4000, 10000, 320, 3000, 0, 0, 2000, 0, 300, 'mono32_lattice', 1),
  'full32':     (2, 0, 32, 32, 4000, 10000, 320, 3000, 0, 0, 2000, 0, 300, 'mono32_full', 1),
+ 'wire32':     (3, 0, 32, 32, 10000, 10000, 320, 3000, 0, 2, 2000, 500, 415, 'wire32_grid', 1),  # hardware/wire_grid_32x32: LEDs on wires, 10 mm pitch, ribbon lead-in
  'garland32':  (3, 0, 32, 32, 0, 8000, 256, 3000, 0, 2, 3000, 1000, 1200, 'garland32', 2),  # 480 Hz garland scan mode, 6.1 % overhead
 }
 def crc16(b):

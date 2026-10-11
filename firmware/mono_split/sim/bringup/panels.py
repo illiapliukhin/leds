@@ -1,5 +1,5 @@
 """Panel selection for the bring-up sim: `--panel mono32` (default, mono_panel_32x32), `--panel lattice`
-(hardware/mono_panel_32x32_lattice) or `--panel full` (hardware/mono_panel_32x32_full, edge-to-edge). Also BRINGUP_PANEL=lattice. Read at import so netmodel/cable pick it up.
+(hardware/mono_panel_32x32_lattice) or `--panel full` (hardware/mono_panel_32x32_full, edge-to-edge) or `--panel wire` (hardware/wire_grid_32x32, LEDs on wires). Also BRINGUP_PANEL=lattice. Read at import so netmodel/cable pick it up.
 The panel dump (pads, nets, positions) is regenerated from the panel's .kicad_pcb with pdump.py (KiCad python)
 whenever the .kicad_pcb is newer than the dump."""
 import json, os, subprocess, sys
@@ -23,6 +23,13 @@ PANELS = {
                  cable_json='cable_check_full.json',
                  bg=os.path.join(HW, 'mono_panel_32x32_full', 'renders', 'full_sim_bg.png'),
                  ir=os.path.join(HW, 'mono_panel_32x32_full', 'analysis.json'), led_dy=0.0),
+    # hardware/wire_grid_32x32: LEDs on wires, no PCB. The dump panel_wire.json is generated (no .kicad_pcb): 1024 nodes at 10 mm
+    # + the garland_breakout FH12 receptacles (to the FFC the breakout looks exactly like a panel), ribbons/fan to the grid.
+    'wire': dict(title='wire_grid_32x32 (via garland_breakout)', json='panel_wire.json',
+                 pcb=os.path.join(HW, 'wire_grid_32x32', 'NO_PCB'),
+                 exit={'J_ROW': (0, -1.0, 0), 'J_COL': (0, -1.0, 0)},
+                 cable_json='cable_check_wire.json', bg=os.path.join(HW, 'wire_grid_32x32', 'renders', 'wire_sim_bg.png'),
+                 ir=os.path.join(HW, 'wire_grid_32x32', 'analysis.json'), led_dy=0.0),
 }
 
 def _pick():
