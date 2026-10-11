@@ -12,6 +12,7 @@ Board: 148.0 × 99.5 mm, 4 layers (F / In1 / In2 / B), single-sided assembly (to
 4 layers, FR-4, 1.6 mm (project rule says 1.0 mm — pick deliberately), JLC04161H-7628 or any stackup with ≥0.127 mm trace/space capability (board min other-net spacing 0.127 mm, min track 0.125 mm, vias 0.40/0.20 mm), ENIG recommended (QFN/LGA/VQFN fine pitch), tented vias, Standard PCBA, top side, remove order number or "specify position".
 
 ## Flags before ordering
+- **v13b:** J_BAT1 is now JST PH S3B-PH-SM4-TB(LF)(SN) (C265101, JLC stock 865, enough for 50 boards; 2 A/contact). The battery lead needs a JST PHR-3 housing (pin 1 BAT+, 2 NTC, 3 GND). The annotated BOM stock and prices were refreshed from the JLCPCB parts API on 2026-10-11 (66 of 70 lines; the rest are not assembled).
 - **v13 protections (see hardware/mono_electronics/ABSMAX_REVIEW_v13.md):**
   - F_BAT1 0466002.NRHF 2 A very-fast 1206 fuse (C3105, LCSC stock 33,770) right at J_BAT1.
   - Q_BAT1 AO3401A (C15127, basic) reverse-battery ideal-diode P-FET with R_BATG1 10 k gate pull-down. BAT copper is 1.0 mm on F from J_BAT1 to Q_BAT1, and the In1 BAT_RAW riser is 0.8 mm.

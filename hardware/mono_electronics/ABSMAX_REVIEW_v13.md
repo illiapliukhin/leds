@@ -26,7 +26,7 @@ Worst-case rail voltages after the v13 protections:
 | R_EN_TOP1 100 k 0402 | rating | 50 V | 20 V | OK |
 | Q_BAT1 AO3401A | VDS / VGS | −30 V / ±12 V | 4.35 V / −4.35 V | OK; RDS(on) ≈ 60 mΩ at 4.5 V → 72 mV at the 1.2 A peak |
 | F_BAT1 0466002.NRHF | 63 V, 50 A interrupt | — | 4.35 V; pack short limited by the pack PCM and cell ESR (< 50 A) | OK |
-| J_BAT1 Molex 53398 (PicoBlade) | 1 A/contact | — | 1.22 A peak (power model), 0.5 A charge | **Marginal:** short peaks only; the pack PCM (overcurrent typ. 2–3 A, see pack datasheet) is assumed as primary protection, and F_BAT1 is the board-level backstop |
+| J_BAT1 JST S3B-PH-SM4-TB (v13b; was Molex PicoBlade 53398, 1 A) | 2 A/contact, 100 V | — | 1.22 A peak, 0.5 A charge | OK (1.6× margin). The pack PCM is still assumed as primary over-current protection; F_BAT1 is the board backstop |
 | U_GAUGE1 MAX17048 | CELL | 6 V | 4.35 V | OK; behind Q_BAT1, so it never sees reverse polarity |
 | U_LED_PWR1 TPS63802 | VIN | 6 V (abs) | 4.5 V | OK |
 | U_LDO1 TLV75733P | IN | 6.5 V | 4.5 V | OK |

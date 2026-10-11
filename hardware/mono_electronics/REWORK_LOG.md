@@ -261,3 +261,12 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
   - Continuity (PROZVONKA_v13.md): 243/243 PASS.
   - All corners arced (only 39 straight width steps remain). USB skew −0.131 / +0.189 mm.
 - Fab: manufacturing/mono_electronics/v13 and mono_electronics_v13_fab.zip. Images: img/v13_battery.png, v13_usb_ovp.png, v13_charger_thermal.png, v13_F.png.
+
+## v13b: 2 A battery connector (2026-10-11)
+- J_BAT1: Molex PicoBlade 53398-0371 (1 A/contact) replaced by JST PH S3B-PH-SM4-TB(LF)(SN) (2 A/contact, side entry, 5.5 mm tall), placed at (7.0, 57.0) rot 270 with the cable entering from the west edge. Pin 1 BAT_PACK, pin 2 TS_MR, pin 3 GND. The battery lead must be re-terminated in a PHR-3 housing.
+- Re-placed: F_BAT1 to (8.6, 48.9), Q_BAT1 to (8.6, 44.4) rot 270, R_BATG1 to (11.0, 45.5).
+- Battery copper: BAT_PACK and BAT_FUSE 1.0 mm on F. BAT_RAW 1.0 mm from Q_BAT1 to x = 11, then 0.6 mm down to the 0.4 mm entry at (12.4, 45.2), where GND vias leave no room for more.
+- TS_MR rerouted east of the connector along x = 12.4. The old x = 3.4 run and the west part of the y = 48.4 run were removed.
+- GND vias: 3 stitch vias plus the connector GND via were re-placed.
+- Gates: DRC 0/0/0; copper check 0 < 0.127 mm; netcheck 0 relabels; 0 B parts; LED drop 92.5 mV; B GND ≥ 2 vias per piece; ERC 0; schematic vs PCB 0 diffs; continuity 243/243 PASS; all corners arced; USB skew unchanged.
+- BOM: JLC stock and prices refreshed from the JLCPCB API. AO3401A C15127 is a basic part with 680,966 in stock. 39 k is C25783 0402WGF3902TCE, an extended part with 201,024 in stock.

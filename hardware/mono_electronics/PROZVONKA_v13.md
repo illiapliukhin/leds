@@ -64,7 +64,7 @@ Method: each pad's board net is compared with the exported schematic netlist (ha
 | H3 | M2.5 | 1 | 1 | 1 | PASS |  |
 | H4 | M2.5 | 1 | 1 | 1 | PASS |  |
 | JP_TERM1 | TERM | 2 | 2 | 2 | PASS |  |
-| J_BAT1 | 53398-0371 | 5 | 5 | 5 | PASS |  |
+| J_BAT1 | S3B-PH-SM4-TB | 5 | 5 | 5 | PASS |  |
 | J_COL1 | FFC_40P_050_COL | 42 | 42 | 42 | PASS |  |
 | J_PORT_E1 | SM06B-SRSS-TB | 8 | 8 | 8 | PASS |  |
 | J_PORT_N1 | SM06B-SRSS-TB | 8 | 8 | 8 | PASS |  |
