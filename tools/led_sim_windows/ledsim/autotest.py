@@ -188,6 +188,8 @@ def script(app, t, timing):
     cv.N = 8; cv._grid(); cv.demo = 0
 
     # ---------------------------------------------------------------- 5a. every cube effect actually animates in the drawn view
+    t.sec = 'soak3x2'
+    for ln, ok in (yield from soak_3x2(app, 120.0)): t.check(ok, ln)
     t.sec = 'cubemotion'
     for ln, ok in (yield from cube_motion(app)): t.check(ok, ln)
 
@@ -307,6 +309,17 @@ def script(app, t, timing):
     for l in lost[:10]: t.L('INFO', '  ' + l)
     lab.running = False
     tab('system'); yield 30
+
+def soak_3x2(app, sim_s=180.0):
+    """generator: the user's exact layout (preset 3×2 full panels), run in the real app loop for sim_s of sim time;
+    every link drop / role change is counted. -> [(line, ok)]"""
+    app.tab = 'system'; w = app.views['system'].w; w.preset(3, 2, 'full'); w.link_drops = 0
+    yield 60
+    d0 = w.link_drops; t0 = w.now
+    while w.now - t0 < sim_s * 1000: yield 30
+    roles = [b.node.state for b in w.boards]
+    n = w.link_drops - d0
+    return [('3×2 full, %.0f с сим. времени: потерь связи %d, роли %s, тайлов %d' % ((w.now - t0) / 1000, n, roles, sum(1 for b in w.boards if b.node.state in (4, 5))), n == 0 and all(r in (4, 5) for r in roles))]
 
 def cube_motion(app, N=8, frames=40):
     """generator (yields frame counts to the app hook): select every cube effect in the real UI path, draw `frames`

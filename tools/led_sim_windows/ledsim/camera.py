@@ -130,10 +130,22 @@ class OrbitCam:
             d = math.exp(-dt * 3.5); s.wy *= d; s.wp *= d
         if app.ui.focus is None:
             k = pygame.key.get_pressed()
-            if k[pygame.K_a] or k[pygame.K_LEFT]: s.yaw -= 1.6 * dt
-            if k[pygame.K_d] or k[pygame.K_RIGHT]: s.yaw += 1.6 * dt
-            if k[pygame.K_w] or k[pygame.K_UP]: s.pitch = min(1.55, s.pitch + 1.2 * dt)
-            if k[pygame.K_s] or k[pygame.K_DOWN]: s.pitch = max(-1.55, s.pitch - 1.2 * dt)
+            # turntable: Left/Right spin the cube about its own vertical axis (world Y through the cube centre),
+            # Up/Down tilt about the horizontal screen axis; works after a free trackball drag too (no screen-plane roll)
+            ky = (k[pygame.K_d] or k[pygame.K_RIGHT]) - (k[pygame.K_a] or k[pygame.K_LEFT])
+            kp = (k[pygame.K_w] or k[pygame.K_UP]) - (k[pygame.K_s] or k[pygame.K_DOWN])
+            s.kwy = s.kwy + (ky * 1.6 - s.kwy) * (1 - math.exp(-dt * 12)) if hasattr(s, 'kwy') else 0.0   # eased key spin
+            s.kwp = s.kwp + (kp * 1.2 - s.kwp) * (1 - math.exp(-dt * 12)) if hasattr(s, 'kwp') else 0.0
+            if abs(s.kwy) + abs(s.kwp) > 1e-4:
+                s.goal = None
+                if getattr(s, 'R', None) is not None:
+                    import numpy as _np
+                    a, b = s.kwy * dt, s.kwp * dt
+                    ry = _np.array([[math.cos(a), 0, -math.sin(a)], [0, 1, 0], [math.sin(a), 0, math.cos(a)]])   # about world Y
+                    rx = _np.array([[1, 0, 0], [0, math.cos(b), math.sin(b)], [0, -math.sin(b), math.cos(b)]])   # about screen X
+                    R = rx @ s.R @ ry; u, _, vt = _np.linalg.svd(R); s.R = u @ vt
+                else:
+                    s.yaw += s.kwy * dt; s.pitch = max(-1.55, min(1.55, s.pitch + s.kwp * dt))
             if k[pygame.K_q]: s.dist_t = min(10, s.dist_t * (1 + dt))
             if k[pygame.K_e]: s.dist_t = max(0.9, s.dist_t * (1 - dt))
         if s.goal:

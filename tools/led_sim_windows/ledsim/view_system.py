@@ -711,7 +711,7 @@ class SystemView(Nav2D, Rulers):
         if ui.button(surf, (x + hb + 4, y, hb, 24), 'MAXB %d' % s.w.maxb): s.w.maxb = 256 if s.w.maxb == 16 else 16
         y += 28
         if ui.button(surf, (x, y, W, 24), '%s: %s' % (T('timing'), stack_model.PROFILE)):
-            ks = list(stack_model.PROFILES); stack_model.set_profile(ks[(ks.index(stack_model.PROFILE) + 1) % len(ks)])
+            ks = stack_model.UI_PROFILES; stack_model.set_profile(ks[(ks.index(stack_model.PROFILE) + 1) % len(ks)] if stack_model.PROFILE in ks else ks[0])
         y += 32
         # selection
         o = s.sel

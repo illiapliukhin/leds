@@ -104,7 +104,7 @@ def main():
     if '--cubecheck' in a:                                   # quick self-check on the user's PC: every cube effect animates
         i = a.index('--cubecheck'); out = a[i + 1] if i + 1 < len(a) and not a[i + 1].startswith('--') else 'cubecheck.txt'
         from . import autotest; import logging
-        app = App(); g = autotest.cube_motion(app); st = {'n': 0, 'res': None}
+        app = App(); g = autotest.soak_3x2(app, float(a[a.index('--soak') + 1])) if '--soak' in a else autotest.cube_motion(app); st = {'n': 0, 'res': None}
         def hook(ap, frame, dt, work):
             if st['n'] > 0: st['n'] -= 1; return
             try: st['n'] = next(g)

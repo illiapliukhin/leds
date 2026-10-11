@@ -12,14 +12,20 @@ from . import host
 # member is pinged less often than T_MEMBER_LOST=400 ms and gets dropped -> endless re-discovery
 # (the simulator reproduces this; see README). Default = 'hw+fix': HW timings with the proposed fix
 # (ping period = min(150 ms, T_MEMBER_LOST / (2 * followers)) so every member is pinged in time).
-PROFILES = {'hw': dict(SETTLE=1, SEEN=6, TOKEN=20, ELECT=600, LOST=600, MEMBER_LOST=400),
+# 'hw' now = stack.c HEAD (the ping fix is in the firmware: per = LOST/(2·(n−1)), ≤150 ms). The unfixed old
+# firmware is kept only as 'hw-old' for regression tests and is NOT offered in the UI (it was one click away and
+# made a board drop every ~1 s in a 3×2 stack -> user report "периодически отваливается плата").
+PROFILES = {'hw': dict(SETTLE=1, SEEN=6, TOKEN=20, ELECT=600, LOST=600, MEMBER_LOST=400, PINGFIX=1),
             'sim': dict(SETTLE=25, SEEN=110, TOKEN=450, ELECT=1500, LOST=2500, MEMBER_LOST=1600),
-            'hw+fix': dict(SETTLE=1, SEEN=6, TOKEN=20, ELECT=600, LOST=600, MEMBER_LOST=400, PINGFIX=1)}
+            'hw-old': dict(SETTLE=1, SEEN=6, TOKEN=20, ELECT=600, LOST=600, MEMBER_LOST=400)}
+PROFILES['hw+fix'] = PROFILES['hw']
+UI_PROFILES = ('hw', 'sim')
 PING_FIX = True
 T_SETTLE, T_SEEN, T_TOKEN, T_ELECT, T_LOST, T_MEMBER_LOST = 1, 6, 20, 600, 600, 400
-PROFILE = 'hw+fix'
+PROFILE = 'hw'
 def set_profile(name):
     global T_SETTLE, T_SEEN, T_TOKEN, T_ELECT, T_LOST, T_MEMBER_LOST, PING_FIX, PROFILE
+    import logging; logging.warning('stack timing profile -> %s', name)
     p = PROFILES[name]; PING_FIX = bool(p.get('PINGFIX')); PROFILE = name
     T_SETTLE, T_SEEN, T_TOKEN, T_ELECT, T_LOST, T_MEMBER_LOST = p['SETTLE'], p['SEEN'], p['TOKEN'], p['ELECT'], p['LOST'], p['MEMBER_LOST']
 from collections import namedtuple
