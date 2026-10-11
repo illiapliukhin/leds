@@ -167,7 +167,7 @@ def script(app, t, timing):
     pc = next(p for p in w.panels if p.board is bs[2]); pc.open_col = 9
     w.set_power(bs[5], False)
     exp = [('%08X' % bs[1].id, k) for k in ('eeprom', 'ffc', 'allon', 'row', 'col', 'checker')] + \
-          [('%08X' % bs[2].id, k) for k in ('allon', 'col', 'checker')] + [('%08X' % bs[5].id, 'power')]
+          [('%08X' % bs[2].id, k) for k in ('allon', 'row', 'col', 'checker')] + [('%08X' % bs[5].id, 'power')]
     yield from settle_stack(1500)
     # neighbours of the unpowered board see PRES/RS-485 failures: those are expected too
     for c in w.cables:

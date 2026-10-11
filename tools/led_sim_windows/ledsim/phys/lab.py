@@ -72,7 +72,7 @@ class Lab:
         if 'surge' in s.faults: s.trigger_surge(*s.faults['surge'])
         s.log(None, 'INFO', 'Пресет «%s»' % name)
     def reset_damage(s):
-        s.boards = {}; s.log(None, 'INFO', 'Все платы заменены новыми (сброс повреждений)')
+        s.boards = {}; s.pending_surge = None; s.log(None, 'INFO', 'Все платы заменены новыми (сброс повреждений)')   # a past surge must not hit the new boards
         for b in s.w.boards:
             if getattr(b, 'phys_dead', None): b.phys_dead = None; s.w.set_power(b, True)
     def trigger_surge(s, target, v, ms):
