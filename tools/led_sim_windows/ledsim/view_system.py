@@ -27,7 +27,7 @@ class SystemView(Nav2D, Rulers):
         s.zoom = 1.2; s.pan = [260, 200]; s.sel = None; s.drag = None; s.wire = None; s.menu = None; s.kind = 'full'
         s.snap = 10.0; s.demo_i = 0; s.fps = 60; s.speed = 1.0; s.acc = 0.0; s.msg = ''; s.msg_t = 0
         s.masks = {}; s.ropes = Ropes(); s.rope_idx = {}; s.scroll = 0; s.show_topo = True; s.load_ms = 0.0
-        s.show = {'ffc': True, 'stack': True, 'power': True, 'led': True, 'bundle': True}; s.bundle_sel = None; s.xray = False; s.checks = []; s.check_t = 0
+        s.show = {'ffc': True, 'stack': True, 'power': True, 'led': True, 'bundle': True, 'panels': True, 'boards': True}; s.bundle_sel = None; s.board_alpha = 0.35; s.xray = False; s.checks = []; s.check_t = 0
 
     # ------------------------------------------------ coords
     def focus_at(s, wx, wy):
@@ -302,16 +302,19 @@ class SystemView(Nav2D, Rulers):
         s.ropes.sync(s.rope_specs()); s.rope_idx = {k: i for i, k in enumerate(s.ropes.keys)}
         s.ropes.step(dt)
         ten = s.ropes.tension()
-        if s.drag is None: return                                    # only a user drag can over-stretch
+        # cables never unplug on their own: over-length is shown in red (tcol) + a one-shot note; unplug only by the user
+        if s.drag is None: return
         for c in s.w.cables:
             i = s.rope_idx.get(('c', id(c)))
-            if i is not None and c.plugged and ten[i] > 1.12:
-                c.plugged = False; s.w.dirty(); s.note('Кабель %08X.%s перерастянут (%.0f > %d мм) — отключён' % (c.a.id, SIDES[c.as_], ten[i] * c.length, c.length))
+            if i is not None and c.plugged and ten[i] > 1.0 and not getattr(c, '_warned', False):
+                c._warned = True; s.note('Кабель %08X.%s длиннее не станет: нужно %.0f > %d мм (красный)' % (c.a.id, SIDES[c.as_], ten[i] * c.length, c.length))
+            elif i is not None and ten[i] <= 1.0: c._warned = False
         for p in s.w.panels:
             i = s.rope_idx.get(('f', id(p), 'J_ROW')); j = s.rope_idx.get(('f', id(p), 'J_COL'))
             if i is None: i = j = s.rope_idx.get(('F', id(p)))
-            if p.board is not None and i is not None and max(ten[i], ten[j]) > 1.12:
-                s.note('FFC перерастянут (%.0f > %d мм) — панель отключена' % (max(ten[i], ten[j]) * p.ffc_len, p.ffc_len)); p.board = None
+            if p.board is not None and i is not None and max(ten[i], ten[j]) > 1.0 and not getattr(p, '_warned', False):
+                p._warned = True; s.note('FFC %d мм не хватает: нужно %.0f мм (красный)' % (p.ffc_len, max(ten[i], ten[j]) * p.ffc_len))
+            elif i is not None and max(ten[i], ten[j]) <= 1.0: p._warned = False
     def tcol(s, t, base):
         if t > 1.0: return (255, 60, 60)
         if t > 0.92: return (255, 200, 60)
@@ -556,8 +559,17 @@ class SystemView(Nav2D, Rulers):
             while x < view.right: pygame.draw.line(surf, (24, 26, 32), (x, view.y), (x, view.bottom)); x += g
             y = y0 % g + view.y
             while y < view.bottom: pygame.draw.line(surf, (24, 26, 32), (view.x, y), (view.right, y)); y += g
-        for p in s.w.panels: s.draw_panel(surf, p)
-        for b in s.w.boards: s.draw_board(surf, b)
+        # draw order: LED panels on top; boards as a semi-transparent layer (opacity slider, default 35 %)
+        if s.show.get('panels', True):
+            for p in s.w.panels: s.draw_panel(surf, p)
+        if s.show.get('boards', True):
+            if s.board_alpha >= 0.99:
+                for b in s.w.boards: s.draw_board(surf, b)
+            else:
+                if getattr(s, '_blayer', None) is None or s._blayer.get_size() != surf.get_size(): s._blayer = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
+                L = s._blayer; L.fill((0, 0, 0, 0)); L.set_clip(view)
+                for b in s.w.boards: s.draw_board(L, b)
+                L.set_clip(None); L.set_alpha(int(255 * s.board_alpha)); surf.blit(L, (0, 0))
         s.draw_ropes(surf)
         if s.show['power']: s.draw_power(surf)
         now = pygame.time.get_ticks()
@@ -625,13 +637,17 @@ class SystemView(Nav2D, Rulers):
             px += 56
         y += 30
         tb = (W - 16) // 5
-        for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'))):
+        for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Кабели'), ('power', 'Питание'))):
             if ui.button(surf, (x + i * (tb + 4), y, tb, 22), lab, on=s.show[k], sz=10): s.show[k] = not s.show[k]
         cats = ('ffc', 'stack', 'power', 'led'); allon = all(s.show[k] for k in cats)
         if ui.button(surf, (x + 3 * (tb + 4), y, tb, 22), 'Все', on=allon, sz=10):
             for k in cats: s.show[k] = not allon
         if ui.button(surf, (x + 4 * (tb + 4), y, tb, 22), 'Рентген', on=s.xray, sz=10): s.xray = not s.xray
         y += 26
+        for i, (k, lab) in enumerate((('panels', 'LED-панели'), ('boards', 'Платы'))):
+            if ui.button(surf, (x + i * (W // 2 + 2), y, W // 2 - 2, 22), lab, on=s.show[k], sz=10): s.show[k] = not s.show[k]
+        y += 40
+        s.board_alpha = round(ui.slider(surf, (x, y, W, 8), 'Непрозрачность плат', s.board_alpha, 0.05, 1.0, '%.2f'), 2); y += 16
         if ui.button(surf, (x, y, W, 22), 'Объединять параллельные кабели в жгуты/ленты: ' + ('да' if s.show['bundle'] else 'нет'), on=s.show['bundle'], sz=10):
             s.show['bundle'] = not s.show['bundle']; s.bundle_sel = None
         y += 26
