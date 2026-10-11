@@ -187,6 +187,22 @@ def script(app, t, timing):
                 'вышиванка 3D N=%d: стежки на всех 6 гранях %s, ядро-звезда %.2f, %d уровней яркости из 256, расчёт %.1f мс' % (N, lit, core, lv, ms))
     cv.N = 8; cv._grid(); cv.demo = 0
 
+    # ---------------------------------------------------------------- 5b. hardware feasibility of every effect on the real board
+    t.sec = 'feasibility'
+    from . import feasibility as FZ
+    cal = FZ.calibrate()
+    t.L('INFO', 'калибровка: эталон DEMO_PLASMA ≈ %.2f мс на S3 (модель %d циклов/пиксель); C на этой машине %.1f мкс, numpy %.1f мкс → ×%.0f / ×%.0f' % (
+        FZ.REF_S3_S * 1e3, FZ.REF_CYC_PX, cal['c_host'] * 1e6, cal['np_host'] * 1e6, cal['k_c'], cal['k_np']))
+    t.L('INFO', 'пределы: CPU ≤ %.0f мс/кадр (≥ 30 fps на ядре 0 при 60 %% загрузке), RAM эффекта ≤ %d КБ (512 − система 230 − буферы развёртки %d), flash контента ≤ 4 МБ, вход ≤ 0.475 А, строка ≤ 0.32 А, RS-485 ≤ 50 %% от 500 кбит/с' % (
+        FZ.BUDGET_S * 1e3, FZ.RAM_EFFECT // 1024, FZ.RAM_SCAN // 1024))
+    rows = FZ.check_2d(); yield 2
+    cvf = app.views['cube']; keep = (cvf.N, cvf.demo)
+    rows += FZ.check_3d(cvf, list(DEMOS3D), Ns=(8, 16, 32), frames=12); yield 2
+    cvf.N, cvf.demo = keep; cvf._grid()
+    with open(os.path.join(t.out, 'feasibility.txt'), 'w', encoding='utf-8') as f_:
+        for r in rows: f_.write(FZ.line(r) + ('   ПРЕВЫШЕНО: ' + '; '.join(r['lim']) if r['lim'] else '') + '\n')
+    for r in rows: t.check(not r['lim'], 'выполнимо на железе: ' + FZ.line(r) + ('   ПРЕВЫШЕНО: ' + '; '.join(r['lim']) if r['lim'] else ''))
+
     # ---------------------------------------------------------------- 6. Тест mode (bring-up), clean and with faults
     t.sec = 'testmode'; layout(3, 2); yield from settle_stack(); tab('test')
     R = app.views['test'].runner()

@@ -27,6 +27,8 @@ uint32_t esp_random(void) { g_rng ^= g_rng << 13; g_rng ^= g_rng >> 17; g_rng ^=
 int64_t esp_timer_get_time(void) { return g_now_us; }
 void matrix_panel_init(matrix_panel_t *p, matrix_panel_geometry_t g) { memset(p, 0, sizeof(*p)); p->geometry = g; p->active_rows = p->active_cols = 32; }
 void matrix_panel_set_level(matrix_panel_t *p, uint8_t r, uint8_t c, uint8_t v) { if (r < 32 && c < 32) p->level[r][c] = v; }
+static float g_gamma = 2.2f;
+float matrix_refresh_get_gamma(void) { return g_gamma; }
 void matrix_refresh_lock_panel(void) {}
 void matrix_refresh_unlock_panel(void) {}
 void matrix_refresh_set_sync(bool on, int burst) { (void)on; (void)burst; }
@@ -120,6 +122,7 @@ API int sim_crc8(const uint8_t *d, int n) { return crc8(d, n); }
  * a 2<<k full-scale window -> time-averaged duty relative to full white at brightness 255. */
 API void sim_duty_lut(int br, float gamma, float *out)
 {
+    g_gamma = gamma;                                             /* demo.c's dither follows the scan engine gamma */
     for (int i = 0; i < 256; i++) {
         float v = powf(i / 255.0f, gamma) * 255.0f + 0.5f;
         uint8_t g = (uint8_t)(v > 255 ? 255 : v);
@@ -127,4 +130,13 @@ API void sim_duty_lut(int br, float gamma, float *out)
         for (int k = 0; k < 8; k++) if ((g >> k) & 1) on += ((2u << k) * (uint32_t)br + 127) / 255;
         out[i] = on / 510.0f;
     }
+}
+
+/* demo.c dither, for the host test: level the firmware emits for intensity v at pixel (r,c), frame t */
+API int sim_dither_level(float v, uint32_t t, int r, int c)
+{
+    dither_build();
+    int k = (int)(v * (DITH_N - 1) + 0.5f); if (k <= 0) return 0; if (k >= DITH_N) k = DITH_N - 1;
+    int thr = (BAYER4[r & 3][c & 3] + (int)(t & 3) * 4 + ((t >> 2) & 1) * 2) & 15;
+    return (s_dfr[k] > thr * 16 + 8) ? s_dhi[k] : s_dlo[k];
 }

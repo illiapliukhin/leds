@@ -112,9 +112,13 @@ class FX:
         return V
     @staticmethod
     def heart(x, y, z, t):
-        k = 1 + 0.12 * max(0, math.sin(t * 6.0)) ** 8 * 3                       # heartbeat
-        X, Y, Z = x / 0.75 * k, -z / 0.75 * k, y / 0.75 * k
-        f = (X * X + 9 / 4 * Z * Z + Y * Y - 1) ** 3 - X * X * Y ** 3 - 9 / 80 * Z * Z * Y ** 3
+        # double-thump heartbeat (lub-dub) with eased decay instead of a single sine spike
+        ph = (t * 1.1) % 1.0
+        k = 1 + 0.10 * math.exp(-((ph - 0.08) / 0.05) ** 2) + 0.06 * math.exp(-((ph - 0.30) / 0.06) ** 2)
+        s_ = k / 0.75
+        X2 = (x * s_) ** 2; Z2 = (y * s_) ** 2; Y = -z * s_
+        Y3 = Y * Y * Y
+        f = (X2 + 2.25 * Z2 + Y * Y - 1) ** 3 - (X2 + 0.1125 * Z2) * Y3          # 1 cube, ~12 FPU ops per voxel
         return np.clip(1 - np.abs(f) * 6, 0, 1) * 0.9 + (f < 0) * 0.02
     @staticmethod
     def ripples(x, y, z, t):
@@ -392,13 +396,17 @@ def _motif(m, dx, dy, u, v):
         put(((cx == 5) & (v == 4)) | ((cx == 6) & (v == 8)) | ((cx == 4) & (v == 1)), RED_T)
     return o
 
+_FACE = {}; _VGRID = {}
 def vysh_face(W, H, t, m, seed=0, T=14.0):
     """one embroidered face W x H (array [H, W]) — patterns.c vysh(): zigzag borders top/bottom, a 16x16 (8x8 on small
     faces) mirrored rapport field that is sewn stitch by stitch from each rapport centre and later unpicked, alternate
     rapports swap red/black thread, a breathing pulse runs through the red thread, needle flash on the newest stitch."""
-    Y, X = np.mgrid[0:H, 0:W]; Xs, Ys = X + seed * 37, Y + seed * 11
+    c = _FACE.get((W, H, seed))
+    if c is None:                                                # static per face: coordinates, linen weave, stitch jitter
+        Y, X = np.mgrid[0:H, 0:W]; Xs, Ys = X + seed * 37, Y + seed * 11
+        c = _FACE[(W, H, seed)] = (Y, X, (0.035 + 0.012 * np.where((X + Y) & 1, 1, -1) + 0.008 * _hash2(Xs, Ys)).astype(np.float32), _hash2(Xs, Ys))
+    Y, X, linen, hj = c
     ph = (t / T) % 1.0
-    linen = 0.035 + 0.012 * np.where((X + Y) & 1, 1, -1) + 0.008 * _hash2(Xs, Ys)
     pulse = 0.82 + 0.18 * np.sin(t * 1.7 - (X + Y) * 0.16)
     out = linen.astype(np.float32)
     bh = 0 if H < 8 else (3 if H < 64 else 5)
@@ -416,7 +424,7 @@ def vysh_face(W, H, t, m, seed=0, T=14.0):
     val = _motif(m % 4, dx, dy, u, v)
     tx, ty = (X - ox) // R, (fy - oy) // R
     if m % 4 != 3: val = np.where(((tx + ty) & 1) == 1, np.where(val == RED_T, BLK_T, np.where(val == BLK_T, RED_T, 0)), val)
-    order = (np.maximum(dx, dy) + 0.4 * (dx + dy)) / 10.0 * 0.55 + 0.12 * _hash2(Xs, Ys) + 0.05 * ((tx + ty) & 3)
+    order = (np.maximum(dx, dy) + 0.4 * (dx + dy)) / 10.0 * 0.55 + 0.12 * hj + 0.05 * ((tx + ty) & 3)
     rin = _smooth(order, order + 0.05, ph * 1.6); rout = 1 - _smooth(order, order + 0.05, (ph - 0.86) * 7.0)
     a = rin * rout
     xst = np.where((u + v) & 1, 1.0, 0.84)                       # cross-stitch texture: the two diagonals of an X
@@ -458,24 +466,34 @@ def vysh3d(n, t, zpitch=1.0):
         for zz in (d, n - 1 - d):
             for xx in (d, 31 - d): V[zz, d:32 - d, xx] = np.maximum(V[zz, d:32 - d, xx], e2)
     # core: rotating rhombus-star (octahedron shell + 6 tapered spikes + 8 diagonal stitches), grown with the motif phase
-    z_, y_, x_ = np.meshgrid(np.arange(n), np.arange(32), np.arange(32), indexing='ij')
-    x, y, z = (x_ - 15.5) / 16, (y_ - 15.5) / 16, (z_ - (n - 1) / 2) / 16 * zpitch
-    a, b = t * 0.45, 0.5 + 0.25 * math.sin(t * 0.3)
-    X1 = x * math.cos(a) + z * math.sin(a); Z1 = -x * math.sin(a) + z * math.cos(a)
-    Y2 = y * math.cos(b) - Z1 * math.sin(b); Z2 = y * math.sin(b) + Z1 * math.cos(b)
     zext = max((n - 1) / 2 / 16 * zpitch, 0.12)
     grow = _smooth(0.0, 0.5, (t / 14.0) % 1.0) * (1 - _smooth(0.86, 1.0, (t / 14.0) % 1.0)) * 0.7 + 0.3
     r = min(0.42, 0.55 * max(zext, 0.25)) * breath * grow
+    # only the voxels inside the star's bounding box are evaluated (on the board: only rows/cols inside it)
+    e = int(math.ceil(r * 1.95 * 16)) + 1
+    lo, hi = max(1, 16 - e), min(31, 16 + e)
+    g = _VGRID.get((n, zpitch, lo, hi))
+    if g is None:
+        z_, y_, x_ = np.meshgrid(np.arange(n), np.arange(lo, hi), np.arange(lo, hi), indexing='ij')
+        g = _VGRID[(n, zpitch, lo, hi)] = ((x_ - 15.5) / 16, (y_ - 15.5) / 16, (z_ - (n - 1) / 2) / 16 * zpitch,
+                                           (z_ > 0) & (z_ < n - 1) if n > 2 else np.ones(z_.shape, bool))
+        if len(_VGRID) > 64: _VGRID.clear()
+    x, y, z, inside = g
+    a, b = t * 0.45, 0.5 + 0.25 * math.sin(t * 0.3)
+    a = a + 0.35 * math.sin(t * 0.45)                                            # eased (non-uniform) spin: lingers at the reading faces
+    X1 = x * math.cos(a) + z * math.sin(a); Z1 = -x * math.sin(a) + z * math.cos(a)
+    Y2 = y * math.cos(b) - Z1 * math.sin(b); Z2 = y * math.sin(b) + Z1 * math.cos(b)
     w = 1.6 / 16                                                                 # ~1.6 voxel thick shell, anti-aliased
-    A = np.abs(X1) + np.abs(Y2) + np.abs(Z2)
-    shell = np.clip(1 - np.abs(A - r) / w, 0, 1) * BLK_T * 1.4
+    aX, aY, aZ = np.abs(X1), np.abs(Y2), np.abs(Z2)
+    A = aX + aY + aZ
+    shell = np.clip(1 - np.abs(A - r) / w, 0, 1) * (BLK_T * 1.4)
     inner = np.clip(1 - np.abs(A - r * 0.45) / w, 0, 1) * RED_T
-    sp = 0
-    for P, Q, Rr in ((X1, Y2, Z2), (Y2, X1, Z2), (Z2, X1, Y2)):
-        L = np.abs(P); taper = np.clip(1 - L / (r * 1.9), 0, 1) * 0.11 + 0.01
-        sp = np.maximum(sp, np.clip(1 - np.maximum(np.abs(Q), np.abs(Rr)) / taper, 0, 1) * (L > r * 0.5) * (L < r * 1.9))
-    diag = np.clip(1 - (np.abs(np.abs(X1) - np.abs(Y2)) + np.abs(np.abs(Y2) - np.abs(Z2))) / w, 0, 1) * (A < r * 1.25) * (A > r * 0.6)
-    core = np.maximum.reduce([shell, inner, sp * RED_T, diag * BLK_T]) * (0.82 + 0.18 * math.sin(t * 1.7))
-    inside = (x_ > 0) & (x_ < 31) & (y_ > 0) & (y_ < 31) & (z_ > 0) & (z_ < n - 1) if n > 2 else np.ones_like(V, bool)
-    V = np.where(inside, np.maximum(V, core), V)
+    sp = np.zeros_like(A)
+    for L, Q, Rr in ((aX, aY, aZ), (aY, aX, aZ), (aZ, aX, aY)):
+        taper = np.clip(1 - L / (r * 1.9), 0, 1) * 0.11 + 0.01
+        sp = np.maximum(sp, np.clip(1 - np.maximum(Q, Rr) / taper, 0, 1) * ((L > r * 0.5) & (L < r * 1.9)))
+    diag = np.clip(1 - (np.abs(aX - aY) + np.abs(aY - aZ)) / w, 0, 1) * ((A < r * 1.25) & (A > r * 0.6))
+    core = np.maximum(np.maximum(shell, inner), np.maximum(sp * RED_T, diag * BLK_T)) * (0.82 + 0.18 * math.sin(t * 1.7))
+    sub = V[:, lo:hi, lo:hi]
+    V[:, lo:hi, lo:hi] = np.where(inside, np.maximum(sub, core), sub)
     return np.clip(V * (0.9 + 0.1 * breath), 0, 1).astype(np.float32)

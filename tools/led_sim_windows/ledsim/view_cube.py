@@ -2,6 +2,7 @@
 (numpy projection + additive splat + bloom), volumetric demos and 2D firmware demos mapped onto layers."""
 import math, time
 import numpy as np
+from . import hwquant
 import pygame
 from . import host
 from .ui import T, text
@@ -16,6 +17,12 @@ DEMO_RU = {'shapes': 'Вращающиеся фигуры', 'wave': '3D-волн
            'fireworks': 'Фейерверк', 'snake': '3D-змейка', 'heart': 'Воксельное сердце', 'ripples': 'Круги на воде', 'plasma': 'Плазма', 'dna': 'ДНК (двойная спираль)', 'walker': 'Идущий человек', 'runner': 'Бегущий человек', 'gogo': 'Гоу-гоу (танцовщица)', 'vysh3d': 'Вышиванка 3D'}
 _GLUT = ((np.linspace(0, 1, 1024)[:, None] ** (1 / 2.2)) * np.array([255, 246, 228])).astype(np.uint8)
 GLYPH = {}
+# persistence (decay per frame at 60 fps) for fast-moving effects = temporal AA; 0 = none (static/slow effects)
+PERSIST = {'rain': 0.55, 'fireworks': 0.6, 'snake': 0.4, 'tsweep': 0.35, 'shapes': 0.3, 'sphere': 0.3, 'dna': 0.35, 'wave': 0.25,
+           'walker': 0.25, 'runner': 0.35, 'gogo': 0.3, 'text': 0.3, 'ripples': 0.2, 'heart': 0.2, 'vysh3d': 0.15}
+
+FIG_LOOP = {'walker': 60, 'runner': 40, 'gogo': 225}     # loop length in frames @ 60 fps (flash clip)
+
 def glyph_cols(ch):
     if ch not in GLYPH:
         from .host import L
@@ -24,7 +31,7 @@ def glyph_cols(ch):
 
 class CubeView:
     def __init__(s, app):
-        s.app = app; s.N = 8; s.kind = 'lattice'; s.demo = DEMOS3D.index('ambigram'); s.cam = OrbitCam()
+        s.app = app; s.clips = {}; s.N = 8; s.kind = 'lattice'; s.demo = DEMOS3D.index('ambigram'); s.cam = OrbitCam()
         s.t0 = time.time(); s.rain = None; s.d2 = 0; s.drag = False
         s.words = ['LED', 'ILLIA', 'MONO']; s.fx = cube_fx.FX(); s.amb = None; s.amb_key = None; s.ana = None; s.ana_key = None
         s.img = image3d.demo_image(); s.img2 = None; s.img_name = 'встроенная картинка'; s.imode = 0; s.igamma = 1.0; s.ithr = 0.5
@@ -57,7 +64,20 @@ class CubeView:
             m2 = image3d.preprocess(s.img2, s.igamma, s.ithr, s.idither, s.iinvert)[1] if s.img2 is not None else None
             return image3d.volume(image3d.MODES[s.imode], g, m, n, t, mask2=m2, fill=s.ifill)
         if name == 'tsweep': return cube_fx.FX.text_sweep(s.words[0], x, y, z, t, n)
-        if name in ('walker', 'runner', 'gogo'): return cube_fx.figure({'walker': 'walk', 'runner': 'run'}.get(name, name), x, y, z, t, dt)
+        if name in ('walker', 'runner', 'gogo'):
+            # The skeletal SDF figure costs 25–100 ms/frame on the S3 (see the autotest feasibility section), so on the board it
+            # is PRECOMPUTED into flash: one gait/choreography loop (walk 1 s = 60, run 0.67 s = 40, go-go 8 beats @128 bpm =
+            # 225 frames), 1 KB per frame per board (its own layer). The simulator does the same: it renders each loop phase
+            # once (after one warm-up loop so hair/skirt physics are settled) and then plays the clip back.
+            P = FIG_LOOP[name]; k = int(round(t * 60)) % P
+            clip = s.clips.get((name, n, s.kind))
+            if clip is None:
+                if len(s.clips) > 3: s.clips.clear()
+                clip = s.clips[(name, n, s.kind)] = {}
+            if len(clip) == P: return clip[k].astype(np.float32) * (1 / 255)
+            v = cube_fx.figure({'walker': 'walk', 'runner': 'run'}.get(name, name), x, y, z, t, dt)
+            if t > P / 60 + 0.5 and k not in clip: clip[k] = (np.clip(v, 0, 1) * 255 + 0.5).astype(np.uint8)
+            return v
         if name == 'vysh3d': return cube_fx.vysh3d(n, t, s.zpitch())
         if name == 'life': return s.fx.life3d(t, dt)
         if name == 'fireworks': return s.fx.fireworks(t, dt)
@@ -115,11 +135,33 @@ class CubeView:
 
     def event(s, e, view): s.cam.event(e, view, s.app)
 
+    def post(s, vol, t):
+        """per-board output stage every effect shares (what the firmware does after the effect kernel): a phosphor-like
+        persistence for fast movers (temporal anti-aliasing: a moving voxel leaves a 1–3 frame fading trail through the
+        8-bit levels instead of jumping), and a 0.6 s smoothstep cross-fade when the effect or layer count changes.
+        RAM: one float layer per board (4 KB)."""
+        name = DEMOS3D[s.demo]; key = (name, s.N)
+        prev = getattr(s, '_pv', None)
+        if prev is not None and prev.shape == vol.shape and getattr(s, '_pkey', None) == key:
+            d = PERSIST.get(name, 0.0)
+            if d: vol = np.maximum(vol, prev * d)
+        elif prev is not None and prev.shape == vol.shape:
+            s._fade = (prev.copy(), t)                                       # effect switched: cross-fade from the last frame
+        s._pkey = key
+        fd = getattr(s, '_fade', None)
+        if fd is not None:
+            a = (t - fd[1]) / 0.6
+            if a >= 1 or fd[0].shape != vol.shape: s._fade = None
+            else: a = a * a * (3 - 2 * a); vol = fd[0] * (1 - a) + vol * a
+        s._pv = vol
+        return vol
+
     def draw(s, surf, view):
         t = time.time() - s.t0
         sv = s.app.views['system'].w
-        vol = np.clip(s.volume(t), 0, 1)
-        lv = (vol * 255 + 0.5).astype(np.uint8); s.last_lv = lv
+        vol = s.post(np.clip(s.volume(t), 0, 1).astype(np.float32), t)
+        s.qframe = getattr(s, 'qframe', 0) + 1
+        lv = hwquant.quantize(vol, s.qframe, sv.gamma); s.last_lv = lv      # firmware demo.c gamma-aware dither
         duty = host.duty_lut(sv.brightness, sv.gamma)[lv]                # same 8-bit gamma/BCM as the firmware
         x, y, z = s.ncoords()
         c = s.cam; c.update(s.app.dt, s.app); tx, ty, tz = c.target

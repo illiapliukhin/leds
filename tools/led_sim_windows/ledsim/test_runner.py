@@ -96,13 +96,14 @@ class Runner:
         # I2C scan
         yield 12
         found = ['0x36 MAX17048', '0x68 BMI270']
-        has_id = panel is not None and panel.kind == 'full' and panel.ffc == 'B'
+        has_id = panel is not None and panel.kind in ('full', 'wire') and panel.ffc == 'B'
         if has_id: found.append('0x50 24LC02 (ID панели, FFC)')
         s.L(b, 'INFO', 'i2c', 'найдено: ' + ', '.join(found))
         s.L(b, 'PASS', 'i2c', '%d устройств на шине' % len(found))
         # EEPROM
         yield 6
         if panel is None: s.L(b, 'FAIL', 'eeprom', 'панель не подключена (FFC)')
+        elif panel.kind == 'wire' and panel.ffc == 'B': s.L(b, 'PASS', 'eeprom', 'ID: wire32_grid (WG_TAG / garland_breakout), 32x32, шаг 10 мм, flags LONG_WIRES, row_path %d мОм' % 415)
         elif panel.kind != 'full': s.L(b, 'WARN', 'eeprom', '%s: нет EEPROM (панель до стандарта LED interface v1) — тип задан вручную' % PANELS[panel.kind][2])
         elif panel.ffc == 'A': s.L(b, 'FAIL', 'eeprom', '0x50 не отвечает: ID I2C на запасных контактах FFC зеркалирован (тип A)')
         else: s.L(b, 'PASS', 'eeprom', 'ID: mono_panel_32x32_full, 32x32, шаг 5.0 мм, LED interface std v1, GND/ID ok')

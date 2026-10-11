@@ -141,7 +141,8 @@ class Lab:
         on = (d > 0) & ~bp.led_dead
         if P['U_LED1'].state != 'ok' or P['U_LED2'].state != 'ok': on[:] = False
         V_led = bp.rails.get('LED_4V1', 4.24)
-        r_ffc = 0.0016 * (panel.ffc_len if panel else 100) * 2                 # FFC: ~0.16 Ω/100 mm per conductor (arch doc), row + share of GND
+        r_ffc = 0.0 if (panel and panel.kind == 'wire') else 0.0016 * (panel.ffc_len if panel else 100) * 2   # wire grid: ribbon already in ir_rows['wire']
+        # FFC: ~0.16 Ω/100 mm per conductor (arch doc), row + share of GND
         rds = DS['AO3403']['rds25'] * (1 + DS['AO3403']['rds_tc'] * (P['Q_ROW01'].Tj - 25))
         r_feed = np.array([ir[str(r + 1)][0] + rds + r_ffc for r in range(32)])
         r_panel = np.array([ir[str(r + 1)][1] for r in range(32)])

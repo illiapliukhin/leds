@@ -8,7 +8,7 @@ from .world import World, PANELS, BOARD_W, BOARD_H, rotv, panel_data
 from .stack_model import LEAD, FOLLOW, STATE_NAMES
 from .camera import Nav2D
 from .physics import Ropes
-from .world import FFC_LENGTHS, JST_LENGTHS
+from .world import FFC_LENGTHS, JST_LENGTHS, lead_lengths
 
 SIDES = 'NESW'
 LED_RGB = np.array([255, 246, 228], np.float32)
@@ -445,8 +445,13 @@ class SystemView(Nav2D, Rulers):
         x, y = s.w2s(p.x - p.size / 2, p.y - p.size / 2)
         r = pygame.Rect(x, y, size, size)
         if not r.colliderect(surf.get_rect()): return
-        pygame.draw.rect(surf, (18, 20, 18) if p.kind != 'lattice' else (12, 14, 12), r)
-        if size > 220:                                                 # real panel PCB under the LEDs
+        pygame.draw.rect(surf, (18, 20, 18) if p.kind not in ('lattice', 'wire') else (12, 14, 12), r)
+        if p.kind == 'wire' and size > 40:                             # wire grid: no PCB, row (Cu) + column (enamel) wires
+            pd0 = panel_data('wire'); pt = (pd0['hi'][0] - pd0['lo'][0]) / 31
+            for i in range(32):
+                o = (pd0['lo'][0] + i * pt) * s.zoom
+                pygame.draw.line(surf, (150, 85, 40), (x, y + o), (x + size, y + o)); pygame.draw.line(surf, (95, 55, 30), (x + o, y), (x + o, y + size))
+        elif size > 220:                                                 # real panel PCB under the LEDs
             from . import pcbtex
             surf.blit(pcbtex.scaled({'full': 'panel_full', 'flat': 'panel_flat', 'lattice': 'panel_lattice'}[p.kind], r.size, p.rot), r.topleft)
         elif p.kind == 'lattice' and size > 60:
@@ -734,8 +739,8 @@ class SystemView(Nav2D, Rulers):
                     if s.w.boards: o.board = min(s.w.boards, key=lambda b: math.hypot(b.x - o.x, b.y - o.y))
                 if ui.button(surf, (x + hb + 4, y, hb, 24), T('disconnect_ffc')): o.board = None
                 y += 28
-                text(surf, 'FFC, мм:', (x, y + 4), sz=12)
-                for i, L in enumerate(FFC_LENGTHS):
+                text(surf, 'шлейф, мм:' if o.kind == 'wire' else 'FFC, мм:', (x, y + 4), sz=12)
+                for i, L in enumerate(lead_lengths(o.kind)):
                     if ui.button(surf, (x + 70 + i * 52, y, 48, 22), str(L), on=o.ffc_len == L, sz=11): o.ffc_len = L
                 y += 30
             else:

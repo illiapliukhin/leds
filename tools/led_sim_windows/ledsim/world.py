@@ -9,6 +9,7 @@ PANELS = {   # kind -> (size mm, cable/LED data file, title)
     'full': (160.0, 'cable_full.json', 'mono_panel_32x32_full 160 мм, шаг 5.0'),
     'flat': (166.7, 'cable_mono32.json', 'mono_panel_32x32 166.7 мм, шаг 2.54'),
     'lattice': (166.7, 'cable_lattice.json', 'mono_panel_32x32_lattice'),
+    'wire': (340.0, 'cable_wire.json', 'wire_grid_32x32 340 мм, шаг 10 (LED на проводах)'),   # hardware/wire_grid_32x32
 }
 _pd = {}
 def panel_data(kind):
@@ -34,9 +35,12 @@ except Exception: pass
 MOUNT_GAP = 8.0            # mm, panel back to board (standoff) — assumption; FFC path = planar distance + 2·gap
 PANEL_CONN = {'full': {'J_ROW': (-7.2, 0.0), 'J_COL': (27.8, 0.0)},              # back side receptacles
               'flat': {'J_ROW': (-75.3, 0.0), 'J_COL': (0.0, 75.1)},
-              'lattice': {'J_ROW': (-14.0, 81.0), 'J_COL': (14.0, 81.0)}}
+              'lattice': {'J_ROW': (-14.0, 81.0), 'J_COL': (14.0, 81.0)},
+              'wire': {'J_ROW': (-187.0, 160.0), 'J_COL': (-187.0, 175.0)}}   # WG_TAG at the lower-left frame corner
 FFC_LENGTHS = [80, 100, 120, 150, 200]     # 40P 0.5 mm Type B FFC; v15 default 120 mm (C5371276)
-JST_LENGTHS = [50, 100, 150, 200, 300]     # JST-SH 5P stacking cables
+JST_LENGTHS = [50, 100, 150, 200, 300]
+RIBBON_LENGTHS = [300, 500, 700, 1000]   # wire grid: IDC ribbon (J_RH1/J_CH1 or breakout) to WG_TAG; drop limit ~3.5–4 m (drop_calc.json)
+def lead_lengths(kind): return RIBBON_LENGTHS if kind == 'wire' else FFC_LENGTHS     # JST-SH 5P stacking cables
 def pick_len(d, options): return next((L for L in options if L >= d * 1.12), options[-1])
 def rotv(x, y, r):
     for _ in range(r & 3): x, y = -y, x
@@ -61,7 +65,7 @@ class Board:
 class Panel:
     def __init__(s, kind, x, y, rot=0):
         s.kind, s.x, s.y, s.rot = kind, x, y, rot
-        s.board = None; s.ffc = 'B'; s.open_col = -1; s.ffc_len = 120
+        s.board = None; s.ffc = 'B'; s.open_col = -1; s.ffc_len = 500 if kind == 'wire' else 120
         s.duty = np.zeros(1024, np.float32)
     @property
     def size(s): return PANELS[s.kind][0]
@@ -132,7 +136,8 @@ class World:
             if q.board is b: q.board = None
         if b.mount is not None and b.mount is not p: b.mount = None
         p.board = b; b.mount = None; b.mirror = s.mirror_mount           # separate objects: board stays put, the FFC follows
-        need = s.ffc_need(p); p.ffc_len = 120 if need <= 120 else pick_len(need, FFC_LENGTHS); s.dirty()
+        need = s.ffc_need(p); L0 = lead_lengths(p.kind)[1] if p.kind == 'wire' else 120
+        p.ffc_len = L0 if need <= L0 else pick_len(need, lead_lengths(p.kind)); s.dirty()
     def auto_panels(s, kind):
         for b in s.boards:
             if not any(p.board is b for p in s.panels):
