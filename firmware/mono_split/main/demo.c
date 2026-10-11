@@ -112,6 +112,10 @@ static void draw_smiley(void)
 
 static void draw_logo(void)
 {
+    /* static artwork: the 4x4-supersampled star is rasterised once (was ~10 ms/frame on the S3), 528 B cache */
+    static uint8_t cache[22][24]; static bool done;
+    if (done) { for (int r = 0; r < 22; r++) for (int c = 4; c < 28; c++) pxf(r, c, cache[r][c - 4] / 255.0f); draw_text_sub("LED", (32 - text_width("LED") + 1) / 2.0f, 24, 1.0f); return; }
+    done = true;
     static const int8_t sx[10] = {0, 23, 95, 37, 59, 0, -59, -37, -95, -23};
     static const int8_t sy[10] = {-100, -32, -31, 12, 81, 40, 81, 12, -31, -32};
     for (int r = 0; r < 22; r++) for (int c = 4; c < 28; c++) {
@@ -123,7 +127,7 @@ static void draw_logo(void)
                 if (((sy[i] > y) != (sy[j] > y)) && (x < (sx[j] - sx[i]) * (y - sy[i]) / (sy[j] - sy[i]) + sx[i])) in = !in;
             hits += in;
         }
-        pxf(r, c, hits / 16.0f);
+        cache[r][c - 4] = (uint8_t)(hits * 255 / 16); pxf(r, c, hits / 16.0f);
     }
     draw_text_sub("LED", (32 - text_width("LED") + 1) / 2.0f, 24, 1.0f);
 }
@@ -147,6 +151,30 @@ static void life_step(void)
     }
     memcpy(s_life, n, sizeof(n));
     if (alive < 20) life_seed();
+}
+
+
+/* ---------------------------------------------------------------- gamma-aware dither tables (3 KB) */
+#define DITH_N 1024
+static uint8_t s_dlo[DITH_N], s_dhi[DITH_N], s_dfr[DITH_N];       /* low/high level, fraction (0..255) toward high */
+static float s_dgamma = -1;
+static const uint8_t BAYER4[4][4] = {{0, 8, 2, 10}, {12, 4, 14, 6}, {3, 11, 1, 9}, {15, 7, 13, 5}};
+static void dither_build(void)
+{
+    float g = matrix_refresh_get_gamma();
+    if (g == s_dgamma) return;
+    s_dgamma = g;
+    uint8_t G[256];
+    for (int i = 0; i < 256; i++) { float v = powf(i / 255.0f, g) * 255.0f + 0.5f; G[i] = (uint8_t)(v > 255 ? 255 : v); }
+    int lo = 0;
+    for (int k = 0; k < DITH_N; k++) {
+        float D = powf(k / (float)(DITH_N - 1), g) * 255.0f;            /* exact wanted duty */
+        while (lo < 255 && G[lo + 1] <= D) lo++;
+        int L = lo; while (L > 0 && G[L - 1] == G[L]) L--;               /* lowest level giving that duty */
+        int hi = lo; while (hi < 255 && G[hi] == G[lo]) hi++;
+        float fr = G[hi] > G[lo] ? (D - G[lo]) / (float)(G[hi] - G[lo]) : 0;
+        s_dlo[k] = (uint8_t)(G[lo] == 0 ? 0 : L); s_dhi[k] = (uint8_t)hi; s_dfr[k] = (uint8_t)(fr * 255 + 0.5f);
+    }
 }
 
 static void render(demo_mode_t mode, uint32_t t)
@@ -217,15 +245,27 @@ static void render(demo_mode_t mode, uint32_t t)
         if (x > 28) { x = 28; vx = -vx * 0.5f; }
         if (y < 3) { y = 3; vy = -vy * 0.5f; }
         if (y > 28) { y = 28; vy = -vy * 0.5f; }
-        for (int k = 0; k < 14; k++) pxf((int)(15.5f + ay * k), (int)(15.5f + ax * k), 0.12f);
+        for (int k = 0; k < 28; k++) {                                /* AA guide line (bilinear splat) */
+            float py = 15.5f + ay * k * 0.5f, px = 15.5f + ax * k * 0.5f; int iy = (int)floorf(py), ix = (int)floorf(px); float fy = py - iy, fx = px - ix;
+            pxf(iy, ix, 0.14f * (1 - fx) * (1 - fy)); pxf(iy, ix + 1, 0.14f * fx * (1 - fy)); pxf(iy + 1, ix, 0.14f * (1 - fx) * fy); pxf(iy + 1, ix + 1, 0.14f * fx * fy);
+        }
         disc_aa(x, y, 2.6f, 1.0f);
         break;
     }
     default: break;
     }
+    /* gamma-aware spatio-temporal dithering: the scan engine shows duty G[level] = round((level/255)^g * 255), which
+     * collapses levels 1..~20 into a few duty steps. Pick between the two neighbouring distinct duties so the average
+     * over 4 frames x 4x4 pixels equals the exact (v^g * 255): smooth dark gradients and sub-step fades, same mean. */
+    dither_build();
     for (int r = 0; r < 32; r++) for (int c = 0; c < 32; c++) {
-        int v = (int)(s_ff[r][c] * 255.0f + 0.5f);
-        if (v > s_fb[r][c]) s_fb[r][c] = (uint8_t)(v > 255 ? 255 : v);
+        float f = s_ff[r][c];
+        int k = (int)(f * (DITH_N - 1) + 0.5f);
+        if (k <= 0) continue;
+        if (k >= DITH_N) k = DITH_N - 1;
+        int thr = (BAYER4[r & 3][c & 3] + (int)(t & 3) * 4 + ((t >> 2) & 1) * 2) & 15;   /* 16-step ordered threshold */
+        uint8_t v = (s_dfr[k] > thr * 16 + 8) ? s_dhi[k] : s_dlo[k];
+        if (v > s_fb[r][c]) s_fb[r][c] = v;
     }
 }
 

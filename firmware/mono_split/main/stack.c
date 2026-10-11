@@ -195,17 +195,19 @@ static float canvas_px(int d, int X, int Y, uint32_t f, int fps, int W, int H)
         return val > base ? val : base;
     }
     case D_BALL: {
-        float r = H / 9.0f;
-        float bx = r + tri(t * 31.0f, W - 2 * r), by = r + tri(t * 23.0f, H - 2 * r);
-        float dd = sqrtf((X + 0.5f - bx) * (X + 0.5f - bx) + (Y + 0.5f - by) * (Y + 0.5f - by));
-        float cov = r + 0.5f - dd;
-        float v = cov > 1 ? 1 : cov < 0 ? 0 : cov;
-        for (int k = 1; k <= 6; k++) {   /* trail */
-            float tk = t - k * 0.04f;
-            float tx = r + tri(tk * 31.0f, W - 2 * r), ty = r + tri(tk * 23.0f, H - 2 * r);
-            float d2 = sqrtf((X + 0.5f - tx) * (X + 0.5f - tx) + (Y + 0.5f - ty) * (Y + 0.5f - ty));
-            float c2 = (r * 0.7f + 0.5f - d2) * 0.4f * (7 - k) / 7.0f;
-            if (c2 > v) v = c2 > 1 ? 1 : c2;
+        /* ball + 6-step trail: positions once per frame (was 14 fmodf per pixel), distance only near each disc */
+        static uint32_t lf = 0xFFFFFFFFu; static int lw, lh; static float px[7], py[7], r;
+        if (lf != f || lw != W || lh != H) {
+            lf = f; lw = W; lh = H; r = H / 9.0f;
+            for (int k = 0; k <= 6; k++) { float tk = t - k * 0.04f; px[k] = r + tri(tk * 31.0f, W - 2 * r); py[k] = r + tri(tk * 23.0f, H - 2 * r); }
+        }
+        float x = X + 0.5f, y = Y + 0.5f, v = 0;
+        for (int k = 0; k <= 6; k++) {
+            float dx = x - px[k], dy = y - py[k];
+            if (fabsf(dx) > r + 1 || fabsf(dy) > r + 1) continue;
+            float d = sqrtf(dx * dx + dy * dy);
+            float c = k == 0 ? r + 0.5f - d : (r * 0.7f + 0.5f - d) * 0.4f * (7 - k) / 7.0f;
+            if (c > v) v = c > 1 ? 1 : c;
         }
         return v;
     }

@@ -94,24 +94,35 @@ static float vysh(int X, int Y, int W, int H, float t)
 /* ---------------------------------------------------------------- aurora / flow */
 static float aurora(int X, int Y, int W, int H, float t)
 {
+    /* Everything except the vertical profile depends only on the column and time: computed once per column per
+     * frame (direct-mapped cache, 64 columns = 3 KB) instead of per pixel - 9 of 12 sinf per pixel saved on the S3. */
+    static struct { int x; float t, s; float yc[3], inv_w[3], k[3]; } col[64];
     float s = 32.0f / H;
     float x = X * s, y = Y * s;                                  /* 32-unit-tall space */
+    int ci = X & 63;
+    if (col[ci].x != X || col[ci].t != t || col[ci].s != s) {
+        col[ci].x = X; col[ci].t = t; col[ci].s = s;
+        for (int i = 0; i < 3; i++) {
+            float fi = (float)i;
+            col[ci].yc[i] = 9.0f + 7.0f * fi + 3.2f * sinf(x * (0.13f + 0.03f * fi) + t * (0.45f + 0.12f * fi) + fi * 2.1f)
+                          + 1.6f * sinf(x * 0.31f - t * (0.7f - 0.1f * fi));
+            col[ci].inv_w[i] = 1.0f / (2.2f + 1.1f * sinf(x * 0.07f + t * 0.3f + fi));
+            float rays = 0.65f + 0.35f * sinf(x * 1.3f + 2.0f * sinf(t * 0.5f + x * 0.2f) + fi);
+            float br = 0.55f + 0.45f * sinf(t * 0.37f + fi * 1.9f + x * 0.05f);
+            br = br * br * (3 - 2 * br);                         /* eased breathing of each curtain */
+            col[ci].k[i] = rays * br * (0.75f - 0.15f * fi);
+        }
+    }
     float v = 0;
     for (int i = 0; i < 3; i++) {
-        float fi = (float)i;
-        float yc = 9.0f + 7.0f * fi + 3.2f * sinf(x * (0.13f + 0.03f * fi) + t * (0.45f + 0.12f * fi) + fi * 2.1f)
-                 + 1.6f * sinf(x * 0.31f - t * (0.7f - 0.1f * fi));
-        float wdt = 2.2f + 1.1f * sinf(x * 0.07f + t * 0.3f + fi);
-        float d = (y - yc) / wdt;
+        float yc = col[ci].yc[i], d = (y - yc) * col[ci].inv_w[i];
         float curtain = expf(-d * d);
-        float tail = (y < yc) ? expf(-(yc - y) / (6.0f + 2.0f * fi)) * 0.35f : 0;   /* rays above the band */
-        float rays = 0.65f + 0.35f * sinf(x * 1.3f + 2.0f * sinf(t * 0.5f + x * 0.2f) + fi);
-        float br = 0.55f + 0.45f * sinf(t * 0.37f + fi * 1.9f + x * 0.05f);
-        v += (curtain + tail) * rays * br * (0.75f - 0.15f * fi);
+        float tail = (y < yc) ? expf(-(yc - y) / (6.0f + 2.0f * i)) * 0.35f : 0;   /* rays above the band */
+        v += (curtain + tail) * col[ci].k[i];
     }
     /* slow flow-field shimmer + faint twinkling stars in the dark */
     v += 0.06f * (0.5f + 0.5f * sinf(x * 0.21f + y * 0.17f + t * 0.9f) * sinf(y * 0.23f - t * 0.6f));
-    if ((hash2(X, Y) & 63) == 0) v += 0.18f * (0.5f + 0.5f * sinf(t * 2.3f + hashf(Y, X) * 40.0f));
+    if ((hash2(X, Y) & 63) == 0) { float tw = 0.5f + 0.5f * sinf(t * 2.3f + hashf(Y, X) * 40.0f); v += 0.18f * tw * tw; }
     return clampf(v * 0.92f);
 }
 
@@ -119,9 +130,9 @@ static float aurora(int X, int Y, int W, int H, float t)
 static float kin_seg(int seg, float x, float y, float cx, float cy, float t)
 {
     switch (seg & 3) {
-    case 0: {   /* rotating moire: two ring sets on orbiting centres */
-        float ax = cx + 7 * cosf(t * 0.6f), ay = cy + 5 * sinf(t * 0.8f);
-        float bx = cx - 7 * cosf(t * 0.5f), by = cy - 5 * sinf(t * 0.7f);
+    case 0: {   /* rotating moire: two ring sets on orbiting centres (centres once per frame) */
+        static float lt = -1, lcx, ax, ay, bx, by;
+        if (lt != t || lcx != cx) { lt = t; lcx = cx; ax = cx + 7 * cosf(t * 0.6f); ay = cy + 5 * sinf(t * 0.8f); bx = cx - 7 * cosf(t * 0.5f); by = cy - 5 * sinf(t * 0.7f); }
         float r1 = sqrtf((x - ax) * (x - ax) + (y - ay) * (y - ay)), r2 = sqrtf((x - bx) * (x - bx) + (y - by) * (y - by));
         float m = sinf(r1 * 1.15f - t * 2.0f) * sinf(r2 * 1.15f + t * 1.4f);
         return 0.5f + 0.5f * m;
@@ -135,10 +146,14 @@ static float kin_seg(int seg, float x, float y, float cx, float cy, float t)
         return clampf((0.5f + 0.5f * c) * fog + 0.15f * (1 - fog) * (0.5f + 0.5f * sinf(t * 3)));
     }
     case 2: {   /* Lissajous ribbon with a fading trail */
+        static float lt = -1, lcx, tpx[22], tpy[22];             /* trail points once per frame (was 44 sinf/pixel) */
+        if (lt != t || lcx != cx) {
+            lt = t; lcx = cx;
+            for (int k = 0; k < 22; k++) { float tk = t - k * 0.055f; tpx[k] = cx + (cx - 3) * sinf(tk * 1.3f + 0.5f); tpy[k] = cy + (cy - 3) * sinf(tk * 1.7f); }
+        }
         float best = 1e9f, bk = 0;
         for (int k = 0; k < 22; k++) {
-            float tk = t - k * 0.055f;
-            float px = cx + (cx - 3) * sinf(tk * 1.3f + 0.5f), py = cy + (cy - 3) * sinf(tk * 1.7f);
+            float px = tpx[k], py = tpy[k];
             float d = (x - px) * (x - px) + (y - py) * (y - py);
             float w = d * (1.0f + k * 0.12f);
             if (w < best) { best = w; bk = k; }
@@ -148,9 +163,11 @@ static float kin_seg(int seg, float x, float y, float cx, float cy, float t)
         return clampf(g + bg);
     }
     default: {  /* ripples: three sources interfering */
+        static float lt = -1, lcx, ssx[3], ssy[3];
+        if (lt != t || lcx != cx) { lt = t; lcx = cx; for (int i = 0; i < 3; i++) { ssx[i] = cx + (cx * 0.7f) * cosf(t * 0.23f + i * 2.094f); ssy[i] = cy + (cy * 0.6f) * sinf(t * 0.31f + i * 2.094f); } }
         float v = 0;
         for (int i = 0; i < 3; i++) {
-            float sx = cx + (cx * 0.7f) * cosf(t * 0.23f + i * 2.094f), sy = cy + (cy * 0.6f) * sinf(t * 0.31f + i * 2.094f);
+            float sx = ssx[i], sy = ssy[i];
             float d = sqrtf((x - sx) * (x - sx) + (y - sy) * (y - sy));
             v += sinf(d * 0.9f - t * 3.2f) / (1.0f + d * 0.06f);
         }
