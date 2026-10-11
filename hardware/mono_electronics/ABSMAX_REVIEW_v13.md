@@ -15,10 +15,10 @@ Worst-case rail voltages after the v13 protections:
 |---|---|---|---|---|
 | U_OVP1 TPS259531DSGR | IN | 20 V | 19.9 V clamp (D_VBUS1) | OK, 0.1 V margin at full 10 A surge, large margin at 12 V |
 | U_OVP1 | EN/UVLO | 7 V | 19.9 × 39/139 = 5.6 V | OK |
-| U_OVP1 | IN→OUT current | internal limit | R_ILM1 = 2.7 k → ≈ 0.79 A (0.73–0.85) | **Fixed in v13:** 1.78 k gave 1.09–1.24 A, above the BQ25185 1.1 A IN DC abs max |
+| U_OVP1 | IN→OUT current | internal limit | **v13c:** R_ILM1 = 1.6 k (C4908). Datasheet Eq. 4: R_ILM = 2000 / (I_LIMIT − 0.04), so I_LIMIT = 2000/1600 + 0.04 = 1.29 A (±7.5 %: 1.19–1.39 A). This agrees with the datasheet table point (1.78 k → 1.17 A). | Changed from 2.7 k (0.78 A) after the physics simulation reported the eFuse sitting in current limit under heavy load (≈ 0.6 W). Normal conduction loss at the 0.5 A BQ input limit is 0.5² × 34 mΩ ≈ 9 mW |
 | D_VBUS1 SMF12A | VRWM | 12 V | 12 V continuous source | OK, leakage ≤ 2.5 µA; a 5 V-standoff TVS (SMBJ5.0A/SMF5.0A) would avalanche continuously on a 12 V source and burn, which is the failure the simulation found on the USBLC6 |
 | U_CHG1 BQ25185 | IN | 25 V | 5.9 V | OK (it would also survive 12 V by itself; its VIN_OVP is 18–19 V) |
-| U_CHG1 | IN DC current | 1.1 A | 0.85 A (eFuse limit) | OK after the R_ILM1 change; ILIM pin sets 500 mA |
+| U_CHG1 | IN DC current | 1.1 A | Steady state ≤ 0.5 A (BQ25185 ILIM pin, R_ILIM1 18 k). The eFuse limit (1.19–1.39 A) now sits **above** the 1.1 A abs max, so it only caps faults and inrush | **Accepted trade-off (v13c):** the BQ's own input current limit is the operative protection. If a BQ internal fault pulls more than 1.1 A, the eFuse no longer stops it below abs max; its thermal shutdown and auto-retry still bound the energy |
 | U_CHG1 | all other pins | 5.5 V | SYS 4.5 V, BAT 4.35 V, TS ≤ 3.3 V | OK |
 | U_CHG1 | TJ | 150 °C | linear charge (5 − 3.0 V) × 0.5 A = 1.0 W worst case, plus about 0.1 W SYS path | Internal thermal regulation folds back the charge current. v13 adds 62 mm² of F GND pour and 4 GND vias on the EP return. Still EVT-check the hottest case (empty cell, 5 V input) |
 | U_ESD1 USBLC6-2SC6 | VBUS pin | 6 V | 5.9 V | OK; was exposed to VBUS_CONN (12 V) before v13 |
@@ -40,4 +40,4 @@ Worst-case rail voltages after the v13 protections:
 | 22 µF 0805 (10 V) on LED_4V1 / AON | rating | 10 V | 4.24 V | OK |
 | D_*_SP1 PESD3V3S2UT, D_*_AB1 SM712, D_ID1 PESD5V0S2BT | VRWM | 3.3 / −7…12 / 5 V | 3.3 V / RS-485 bus / 3.3 V I²C | OK |
 
-Changes made by this review: R_ILM1 1.78 k → 2.7 k (C25885). Nothing else is over its abs max.
+Changes made by this review: R_ILM1 1.78 k → 2.7 k (C25885) in v13, then 2.7 k → 1.6 k (C4908) in v13c, at your request, after the simulation result. v13c also adds an F.Cu GND pour around U_OVP1 (21.5 mm²) and 2 GND thermal vias tied to the EP. Nothing else is over its abs max.

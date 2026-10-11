@@ -2,7 +2,7 @@
   (version 20260306)
   (generator "mono_schematic")
   (generator_version "1.0")
-  (uuid "fab2323f-b453-4fc1-9ed7-190f5badf6f9")
+  (uuid "99eb35ad-4d0e-44b8-b469-6f63d9fbb904")
   (paper "A4")
   (title_block
     (title "Mono electronics - sheet index")
@@ -46,7 +46,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "9703b487-1c5f-4520-8757-defa04b7f164")
+    (uuid "06fea6cc-81a7-442c-be62-ef4bb556a279")
     (property
       "Reference"
       "#PWR01"
@@ -109,7 +109,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "dad2ef11-9ac8-4d57-b143-048c7c791488")
+    (uuid "334d03df-6f51-4da4-9795-645210d34c55")
     (property
       "Reference"
       "#FLG01"
@@ -172,7 +172,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "d9cc4057-6a27-4687-9421-286f1057bcf5")
+    (uuid "35478b5b-0ddc-4a61-bff2-045b029c0966")
     (property
       "Reference"
       "#FLG02"
@@ -234,7 +234,7 @@
       (width 0)
       (type default)
     )
-    (uuid "977595d7-ffb9-4fbe-8d9e-394968904dc5")
+    (uuid "9665f63e-340a-4bcb-842e-abd4e8b371fe")
   )
   (wire
     (pts
@@ -245,7 +245,7 @@
       (width 0)
       (type default)
     )
-    (uuid "74c14bd0-3f1b-463e-acf4-03db58a7e2f7")
+    (uuid "4264ba4e-098a-4ef4-b889-b60fdb944770")
   )
   (wire
     (pts
@@ -256,7 +256,7 @@
       (width 0)
       (type default)
     )
-    (uuid "2a08aaaf-409b-4f1a-8ebf-522bd58d0d0f")
+    (uuid "c3714b2e-9817-4ee5-8045-d3168d1bb246")
   )
   (global_label "GND"
     (shape passive)
@@ -268,7 +268,7 @@
       )
       (justify right)
     )
-    (uuid "26eb7dcc-5b3b-4309-984c-f7e9efa4a426")
+    (uuid "4502c8e4-ec92-4247-a333-2fe214aceea2")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 3.81 15.24 0)
       (effects
@@ -289,7 +289,7 @@
       )
       (justify left)
     )
-    (uuid "200b02e2-73b8-4161-9c9f-39cba14b9a64")
+    (uuid "4a23179c-8163-4c1c-b211-59a29fa239a9")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 35.56 15.24 0)
       (effects
@@ -311,7 +311,7 @@
     (fill
       (type none)
     )
-    (uuid "c1d36c08-1136-47eb-9053-70dfc06ff652")
+    (uuid "766416fa-7416-4faa-a509-c758893cbb0c")
     (property "Sheetname" "power"
       (at 74.93 58.42 0)
       (effects
@@ -342,7 +342,7 @@
     (fill
       (type none)
     )
-    (uuid "b42203cd-3406-402c-becd-fd2de9ad621d")
+    (uuid "fe49858e-9c9e-4cbc-bc96-d4854cc85ed6")
     (property "Sheetname" "mcu"
       (at 119.38 58.42 0)
       (effects
@@ -373,7 +373,7 @@
     (fill
       (type none)
     )
-    (uuid "704b3f29-3266-4fca-9858-3786cd1c21e6")
+    (uuid "0ae9e442-6103-41e2-82ed-faed051235eb")
     (property "Sheetname" "imu"
       (at 165.1 58.42 0)
       (effects
@@ -404,7 +404,7 @@
     (fill
       (type none)
     )
-    (uuid "031722c5-0298-4842-bcf8-3f7be0f87228")
+    (uuid "ff317406-c906-4171-b13f-c549f0db7805")
     (property "Sheetname" "led_drive"
       (at 209.55 58.42 0)
       (effects
@@ -435,7 +435,7 @@
     (fill
       (type none)
     )
-    (uuid "1f48913a-ad75-4c4b-a823-670a48a2bfc6")
+    (uuid "b841dfed-6df3-4b06-b865-7c96d4406aba")
     (property "Sheetname" "row_farm"
       (at 255.27 58.42 0)
       (effects
@@ -466,7 +466,7 @@
     (fill
       (type none)
     )
-    (uuid "2d10e7a6-dd85-4555-9e00-066b883d9bcd")
+    (uuid "5100e4f5-503d-4012-b1dc-9bd8151e2379")
     (property "Sheetname" "audio"
       (at 299.72 58.42 0)
       (effects
@@ -497,7 +497,7 @@
     (fill
       (type none)
     )
-    (uuid "6a395d32-de06-4081-a943-753024f01417")
+    (uuid "470d8001-f511-460b-b03c-d04278d36b39")
     (property "Sheetname" "stacking"
       (at 345.44 58.42 0)
       (effects
@@ -528,7 +528,7 @@
     (fill
       (type none)
     )
-    (uuid "8b429845-22a9-4ecf-bb62-acfccc89182b")
+    (uuid "dfeea363-6ae5-429e-88a5-52d0f936db1b")
     (property "Sheetname" "led_interface"
       (at 389.89 58.42 0)
       (effects
@@ -559,7 +559,7 @@
     (fill
       (type none)
     )
-    (uuid "0c02072f-3849-4dd9-a814-d7fc60f7e14b")
+    (uuid "9c0b5a90-3162-42e6-9cb0-e532e4f2b726")
     (property "Sheetname" "mechanical"
       (at 435.61 58.42 0)
       (effects

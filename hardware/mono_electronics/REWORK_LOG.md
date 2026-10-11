@@ -270,3 +270,9 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - GND vias: 3 stitch vias plus the connector GND via were re-placed.
 - Gates: DRC 0/0/0; copper check 0 < 0.127 mm; netcheck 0 relabels; 0 B parts; LED drop 92.5 mV; B GND ≥ 2 vias per piece; ERC 0; schematic vs PCB 0 diffs; continuity 243/243 PASS; all corners arced; USB skew unchanged.
 - BOM: JLC stock and prices refreshed from the JLCPCB API. AO3401A C15127 is a basic part with 680,966 in stock. 39 k is C25783 0402WGF3902TCE, an extended part with 201,024 in stock.
+
+## v13c: eFuse current limit and thermal copper (2026-10-11)
+- R_ILM1 2.7 k → 1.6 k (0402WGF1601TCE, C4908, extended part, JLC stock 73,801). TPS2595 Eq. 4 gives I_LIMIT = 2000/R + 0.04 = 1.29 A (1.19–1.39 A at ±7.5 %); it was 0.78 A.
+- U_OVP1 thermal: F.Cu GND zone x 5.5–10.8, y 24.9–30.4 (21.5 mm² fill, solid pad connection), an EP strap down to a GND via at (7.0, 29.6), and a second GND via at (8.0, 30.0).
+- Note: the BQ25185 ILIM (18 k) caps the steady-state input at 0.5 A. The new eFuse limit is above the BQ's 1.1 A IN DC abs max, so it only bounds faults and inrush (see ABSMAX_REVIEW_v13.md).
+- Gates: DRC 0/0/0; copper check 0 < 0.127 mm; netcheck 0 relabels; 0 B parts; LED drop 92.5 mV; B GND ≥ 2 vias per piece; ERC 0; schematic vs PCB 0 diffs; continuity 243/243 PASS; all corners arced; USB skew −0.131/+0.189 mm.
