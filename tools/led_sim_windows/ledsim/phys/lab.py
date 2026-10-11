@@ -90,13 +90,15 @@ class Lab:
     def tick(s, dt_real, budget=6):
         boards = s.w.boards
         if not boards: return
-        todo = []
-        if s.sel in boards: todo.append(s.sel)
+        todo = []; s.frame = getattr(s, 'frame', 0) + 1
+        if s.sel in boards and s.frame % 2 == 0: todo.append(s.sel)          # selected board at 30 Hz
         n = min(budget, len(boards))
-        for _ in range(n):
-            s.rr = (s.rr + 1) % len(boards); b = boards[s.rr]
-            if b not in todo: todo.append(b)
-        for b in todo:
+        import time as _t; t0 = _t.perf_counter()
+        for b in todo + [None] * n:
+            if b is None:
+                if _t.perf_counter() - t0 > 0.006 and (todo or s.frame % 2): break                 # 8 ms budget per frame for background boards
+                s.rr = (s.rr + 1) % len(boards); b = boards[s.rr]
+                if b is s.sel: continue
             bp = s.bp(b)
             last = getattr(bp, 'last_real', None); import time as _t; now = _t.perf_counter(); bp.last_real = now
             dt = min(1.0, (now - last) if last else dt_real)
@@ -130,7 +132,7 @@ class Lab:
         r_feed = np.array([ir[str(r + 1)][0] + rds + r_ffc for r in range(32)])
         r_panel = np.array([ir[str(r + 1)][1] for r in range(32)])
         sc = [f['short_col']] if f.get('short_col', -1) is not None and f.get('short_col', -1) >= 0 else None
-        I, Vn = elec.solve_rows(V_led, on, r_feed, r_panel, s.led, T_led, iset, DS['MBI5124']['vknee'], sc)
+        I, Vn = elec.solve_rows(V_led, on, r_feed, r_panel, s.led, T_led, iset, DS['MBI5124']['vknee'], sc, I0=bp.led_I if bp.led_I.any() else None)
         sr = f.get('short_row', -1)
         if sr is not None and sr >= 0: I[sr] = 0.0
         bp.led_I = I
@@ -212,6 +214,18 @@ class Lab:
         bp.factor = np.clip(np.where(bp.led_dead, 0, lum + ghost), 0, 4)
         if Vl < 2.7 or P['U_LED_PWR1'].state != 'ok': bp.factor[:] = 0
         b.phys_factor = bp.factor
+        # ---- power accounting (from the solved operating point)
+        p_usb = info['i_usb'] * Vb; p_cell = i_cell * Va                         # + = into the board
+        p_in = p_usb + max(p_cell, 0.0); p_store = max(-p_cell, 0.0)              # charging power stored in the cell
+        p_esp = Vo * pp['i_esp']; p_ledp = p_led
+        p_loss = sum(q.P for q in P.values()) + info['i_in'] * 0 + (I.sum(1) ** 2 * r_feed).sum() / 32
+        bp.pw = dict(total=p_in, usb_w=p_usb, usb_a=info['i_usb'], bat_w=p_cell, bat_a=i_cell, i_led=info['i_tps_out'], i_aon=info['i_aon'],
+                     i_sys=info['i_tps_in'] + info['i_ldo'] + info['i_chg'], p_led=p_ledp, p_esp=p_esp, p_loss=max(0.0, p_in - p_store - p_ledp - p_esp),
+                     p_store=p_store, eff=(p_ledp + p_esp + p_store) / p_in if p_in > 1e-3 else 0.0)
+        bp.e_wh = getattr(bp, 'e_wh', 0.0) + p_in * dt_th / 3600
+        bp.hist = getattr(bp, 'hist', [])
+        bp.hist.append((bp.t, p_in, info['i_usb'], i_cell, bp.T_panel, max(q.Tj for q in P.values())))
+        if len(bp.hist) > 600: del bp.hist[:100]
         bp.t += dt_th
         s.check(b, bp, V, info, I, d, dt_th, dt_e, panel, i_cell)
         if bp.t >= bp.next_log and b is s.sel:
@@ -286,6 +300,9 @@ class Lab:
                 bp.trace_dmg['bat_trace'] = bp.trace_dmg.get('bat_trace', 0) + (dt_e or min(dt, 0.05)) / worst[0]
                 if bp.trace_dmg['bat_trace'] >= 1 and not bp.flags.get('trace_fused'):
                     bp.flags['trace_fused'] = True
+                    frac = min(1.0, worst[0] / max(dt_e or dt, 1e-6))                 # fused after t_fuse ≪ step: parts only saw that long
+                    for q in bp.parts.values():
+                        tb = bp.th.T[bp.th.cell(q.x, q.y)]; q.Tj = tb + (q.Tj - tb) * frac
                     x, y = worst[1][6]; cx = s.part_pos['J_BAT1']
                     xs = [q[0] for sg in s.pcb['outline'] for q in sg]; ys = [q[1] for sg in s.pcb['outline'] for q in sg]
                     lx, ly = x - (min(xs) + max(xs)) / 2, y - (min(ys) + max(ys)) / 2
@@ -317,10 +334,19 @@ class Lab:
             bp.dead = dead; s.log(b, 'FAIL', 'Плата не работает: %s' % dead); b.phys_dead = dead; b.node.reset()
         elif not dead and bp.dead: bp.dead = None; b.phys_dead = None
 
+    def system_power(s):
+        bs = [s.boards[b.id] for b in s.w.boards if b.id in s.boards and hasattr(s.boards[b.id], 'pw')]
+        n = len(s.w.boards); k = len(bs)
+        if not k: return None
+        tot = sum(bp.pw['total'] for bp in bs) * n / k                       # unvisited boards extrapolated
+        peak = max(bp.pw['total'] for bp in bs)
+        e = sum(getattr(bp, 'e_wh', 0) for bp in bs) * n / k
+        return dict(w=tot, a5=tot / 5.0, psu_w=peak * n * 1.25, psu_a=peak * n * 1.25 / 5.0, wh=e, n=n, k=k,
+                    p_led=sum(bp.pw['p_led'] for bp in bs) * n / k, loss=sum(bp.pw['p_loss'] for bp in bs) * n / k)
     def summary(s, b):
         bp = s.boards.get(b.id)
         if not bp: return None
         hot = max(bp.parts.values(), key=lambda q: q.Tj)
         failed = [q.ref + ':' + q.state for q in bp.parts.values() if q.state != 'ok']
         return dict(rails=bp.rails, hot=(hot.ref, hot.Tj), failed=failed, first=bp.first_limit, dead=bp.dead, soc=bp.soc, gauge=bp.gauge,
-                    i_cell=bp.info.get('i_cell', 0), t_panel=bp.T_panel, t_cell=bp.t_cell, fires=len(bp.fires), flags=dict(bp.flags))
+                    i_cell=bp.info.get('i_cell', 0), pw=getattr(bp, 'pw', {}), e_wh=getattr(bp, 'e_wh', 0.0), t_panel=bp.T_panel, t_cell=bp.t_cell, fires=len(bp.fires), flags=dict(bp.flags))

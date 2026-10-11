@@ -9,7 +9,7 @@ from .stack_model import LEAD, FOLLOW
 
 TESTS = [('power', 'Питание'), ('boot', 'Загрузка'), ('i2c', 'I2C скан'), ('eeprom', 'EEPROM панели'), ('ffc', 'Кабель FFC'),
          ('allon', 'Все вкл'), ('row', 'Строки'), ('col', 'Столбцы'), ('checker', 'Шахматка'),
-         ('pres', 'PRES'), ('rs485', 'RS-485'), ('fsync', 'FRAME_SYNC'), ('elect', 'Выборы'), ('tile', 'Плитка')]
+         ('pres', 'PRES'), ('rs485', 'RS-485'), ('fsync', 'FRAME_SYNC'), ('elect', 'Выборы'), ('tile', 'Плитка'), ('phys', 'Электротермика')]
 LEVELS = ['DEBUG', 'INFO', 'PASS', 'WARN', 'FAIL']
 SIDES = 'NESW'
 
@@ -181,6 +181,8 @@ class Runner:
         out = []
         boards = s.order if hasattr(s, 'order') else list(s.res)
         np_ = sum(1 for i in boards if s.res.get(i) and all(v in ('PASS', 'WARN') for v in s.res[i].values()))
+        lab = getattr(s.w, 'lab', None); sp = lab.system_power() if lab else None
+        if sp: out.append('ПИТАНИЕ: %.2f Вт, %.2f А при 5 В, рекомендуемый БП ≥ %.0f Вт / %.1f А, энергия %.2f Вт·ч' % (sp['w'], sp['a5'], sp['psu_w'], sp['psu_a'], sp['wh']))
         out.append('ИТОГ: %d плат, %d без ошибок, %d с ошибками' % (len(boards), np_, len(boards) - np_))
         for k, name in TESTS:
             f = [i for i in boards if s.res.get(i, {}).get(k) == 'FAIL']
@@ -190,7 +192,11 @@ class Runner:
         with open(path_base + '.txt', 'w', encoding='utf-8') as f:
             f.write('LED_Simulator — журнал тестов\n\n')
             for e in s.log: f.write('%9.3f  %-8s %-5s %-7s %s\n' % (e['t'], e['board'], e['level'], e['test'], e['msg']))
+            lab = getattr(s.w, 'lab', None)
+            if lab and lab.events:
+                f.write('\n--- Лаборатория (электротермика) ---\n')
+                for e in lab.events: f.write('%9.3f  %-8s %-5s lab     %s\n' % (e['t'], e['board'], e['level'], e['msg']))
             f.write('\n'); f.write('\n'.join(s.summary_lines())); f.write('\n')
         with open(path_base + '.json', 'w', encoding='utf-8') as f:
-            json.dump({'results': {'%08X' % k: v for k, v in s.res.items()}, 'summary': s.summary_lines(), 'log': s.log}, f, ensure_ascii=False, indent=1)
+            json.dump({'lab': getattr(getattr(s.w, 'lab', None), 'events', []), 'results': {'%08X' % k: v for k, v in s.res.items()}, 'summary': s.summary_lines(), 'log': s.log}, f, ensure_ascii=False, indent=1)
         return path_base + '.txt', path_base + '.json'

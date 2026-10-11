@@ -7,10 +7,12 @@ from .view_system import SystemView
 from .view_pcb import PcbView
 from .view_cube import CubeView
 from .view_test import TestView
+from .view_lab import LabView
+from .view_models import ModelsView
 
 SIDE_W = 400
-TABS = ['system', 'test', 'boards', 'panels', 'cube']
-TAB_KEYS = {'system': 'tab_sys', 'boards': 'tab_boards', 'panels': 'tab_panels', 'cube': 'tab_cube', 'test': 'tab_test'}
+TABS = ['system', 'test', 'lab', 'models', 'boards', 'panels', 'cube']
+TAB_KEYS = {'system': 'tab_sys', 'boards': 'tab_boards', 'panels': 'tab_panels', 'cube': 'tab_cube', 'test': 'tab_test', 'lab': 'tab_lab', 'models': 'tab_models'}
 
 class App:
     def __init__(s, size=(1600, 920), shots=None, lang='ru', tab='system', preset=None):
@@ -21,13 +23,13 @@ class App:
         s.ui = U.UI(); s.tab = tab; s.shots = shots or []
         s.layout()
         s.views = {'system': SystemView(s), 'boards': PcbView(s, 'boards'), 'panels': PcbView(s, 'panels'), 'cube': CubeView(s)}
-        s.views['test'] = TestView(s)
+        s.views['test'] = TestView(s); s.views['lab'] = LabView(s); s.views['models'] = ModelsView(s)
         if preset: c, r = preset; s.views['system'].w.preset(c, r)
         s.views['system'].fit(s.view); s.views['system'].apply_global()
         s.fps_meas = 60.0; s.dt = 1 / 60
     def layout(s):
         W, H = s.screen.get_size()
-        s.view = pygame.Rect(0, 36, W - SIDE_W, H - 36); s.side = pygame.Rect(W - SIDE_W, 36, SIDE_W, H - 36)
+        s.view = pygame.Rect(0, 36, W - SIDE_W, H - 36 - 22); s.side = pygame.Rect(W - SIDE_W, 36, SIDE_W, H - 36 - 22); s.status = pygame.Rect(0, H - 22, W, 22)
     def ask_file(s, save):
         try:
             import tkinter as tk; from tkinter import filedialog
@@ -37,6 +39,16 @@ class App:
             r.destroy(); return p or None
         except Exception:
             return None
+    def draw_status(s, sc):
+        pygame.draw.rect(sc, (18, 20, 26), s.status); lab = s.views['lab'].get(); sp = lab.system_power()
+        if not sp: text(sc, 'Питание: модель ещё считает…', (8, s.status.y + 4), (150, 156, 170), 12); return
+        b = s.views['lab'].board(); bp = lab.boards.get(b.id) if b else None
+        t = 'СИСТЕМА %d плат: %.2f Вт · %.2f А при 5 В · LED %.2f Вт · потери %.2f Вт · энергия %.2f Вт·ч · БП ≥ %.0f Вт / %.1f А (текущий режим +25 %%)' % (
+            sp['n'], sp['w'], sp['a5'], sp['p_led'], sp['loss'], sp['wh'], sp['psu_w'], sp['psu_a'])
+        if bp is not None and hasattr(bp, 'pw'):
+            pw = bp.pw
+            t += '   |   %08X: %.2f Вт, USB %.2f А, БАТ %+.2f А, LED_4V1 %.2f А, AON %.0f мА, η %.0f %%' % (b.id, pw['total'], pw['usb_a'], pw['bat_a'], pw['i_led'], pw['i_aon'] * 1e3, pw['eff'] * 100)
+        text(sc, t, (8, s.status.y + 4), (200, 220, 200), 12)
     def run(s):
         clock = pygame.time.Clock(); t_last = time.perf_counter(); frame = 0
         while True:
@@ -50,6 +62,7 @@ class App:
             s.dt = dt
             sv = s.views['system']; sv.tick(dt)
             if not sv.w.paused: s.views['test'].tick()                 # the stack keeps running in every tab
+            s.views['lab'].tick(dt)                                     # electrothermal model runs in every tab
             v = s.views[s.tab]
             sc = s.screen; sc.fill((24, 26, 32))
             # side panel + top bar first (they consume clicks), then the view gets the events
@@ -57,12 +70,13 @@ class App:
             v.panel(sc, s.ui, s.side)
             x = 8
             for t in TABS:
-                if s.ui.button(sc, (x, 4, 106, 28), T(TAB_KEYS[t]), on=s.tab == t): s.tab = t
-                x += 112
+                if s.ui.button(sc, (x, 4, 100, 28), T(TAB_KEYS[t]), on=s.tab == t): s.tab = t
+                x += 104
             if s.ui.button(sc, (x + 10, 4, 44, 28), T('lang')): U.LANG[0] = 'en' if U.LANG[0] == 'ru' else 'ru'
             text(sc, '%s   %.0f fps' % (T('title'), s.fps_meas), (x + 70, 11), (150, 156, 170), 13)
             for e in ev: v.event(e, s.view)
             v.draw(sc, s.view)
+            s.draw_status(sc)
             pygame.display.flip()
             frame += 1
             for (fr, tab, path, act) in list(s.shots):

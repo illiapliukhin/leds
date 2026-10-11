@@ -5,7 +5,7 @@ from . import host
 LANG = ['ru']
 S = {
  'title': ('Симулятор LED-системы mono_split', 'mono_split LED system simulator'),
- 'tab_sys': ('Система', 'System'), 'tab_boards': ('Платы', 'Boards'), 'tab_panels': ('Панели', 'Panels'), 'tab_cube': ('Куб', 'Cube'), 'tab_test': ('Тест', 'Test'),
+ 'tab_sys': ('Система', 'System'), 'tab_boards': ('Платы', 'Boards'), 'tab_panels': ('Панели', 'Panels'), 'tab_cube': ('Куб', 'Cube'), 'tab_test': ('Тест', 'Test'), 'tab_lab': ('Лаборатория', 'Lab'), 'tab_models': ('Модели', 'Models'),
  'add_board': ('+ Плата', '+ Board'), 'add_panel': ('+ Панель', '+ Panel'), 'delete': ('Удалить', 'Delete'),
  'autocable': ('Авто-кабели', 'Auto-cable'), 'autopanel': ('Авто-панели', 'Auto-panels'),
  'presets': ('Пресеты:', 'Presets:'), 'save': ('Сохранить', 'Save'), 'load': ('Загрузить', 'Load'),

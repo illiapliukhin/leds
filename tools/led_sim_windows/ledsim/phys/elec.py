@@ -45,7 +45,11 @@ def tps_eta(iout, vin, vout):
     if vin < vout: eta -= 0.015 * (vout - vin)                         # boost: higher RMS current
     return max(0.3, min(0.97, eta))
 
+def _sp(z): return z + math.log1p(math.exp(-z)) if z > 0 else math.log1p(math.exp(z))
 def smooth_clip(x, lo, hi, k=200.0):
+    if not isinstance(x, np.ndarray):
+        a = lo + _sp(k * (x - lo)) / k
+        return hi - _sp(k * (hi - a)) / k
     """differentiable clip for Newton"""
     a = lo + np.logaddexp(0, k * (x - lo)) / k
     return hi - np.logaddexp(0, k * (hi - a)) / k
@@ -77,13 +81,6 @@ class PowerTree:
             i_in = smooth_clip((v_t - Vs) / 0.005, 0.0, p['ilim'], 300) + 0.01 * (v_t - Vs) * (Vb > Vs)   # 10 mS output conductance in current limit (keeps Newton gradient; ≤ 5 mA error)
         else: i_in = 0.0
         I[0] -= i_in; I[1] += i_in; info['i_in'] = i_in
-        # charger SYS->BAT: ICHG, CV 4.2 V, DPM (input headroom), TREG derating
-        i_chg = 0.0
-        if vin_ok and not p['f_chg_short'] and p['charge_en']:
-            head = max(0.0, p['ilim'] - p['i_sys_prev'])
-            cv = 1 / (1 + math.exp(min(60, (Va - 4.2) / 0.005)))
-            i_chg = min(p['ichg'] * p['treg_k'], head) * cv
-        I[1] -= i_chg; I[2] += i_chg; info['i_chg'] = i_chg
         # BAT FET BAT->SYS (supplement / battery-only), 50 mΩ (assumption)
         if p['batfet_on'] and not p['f_chg_short']:
             i_bf = float(np.logaddexp(0, 300 * (Va - Vs - 0.01))) / 300 / 0.05     # ideal-diode BATFET, smoothed (C¹ for Newton)
@@ -119,6 +116,13 @@ class PowerTree:
             vt_ = min(3.3, Vs - DS['TLV75733']['rdo'] * max(p['i_aon_prev'], 0))
             i_ldo = smooth_clip((vt_ - Vo) / 0.003, 0.0, DS['TLV75733']['ilim'], 300) + 0.01 * (vt_ - Vo) * (Vs > Vo)
         I[1] -= i_ldo + (DS['TLV75733']['ignd'] if not p['f_ldo_open'] else 0); I[4] += i_ldo; info['i_ldo'] = i_ldo
+        # charger SYS->BAT: ICHG, CV 4.2 V, DPM (input headroom), TREG derating
+        i_chg = 0.0
+        if vin_ok and not p['f_chg_short'] and p['charge_en']:
+            head = max(0.0, p['ilim'] - i_tin - i_ldo)             # DPM: charge only from input headroom (same Newton iterate)
+            cv = 1 / (1 + math.exp(min(60, (Va - 4.2) / 0.005)))
+            i_chg = min(p['ichg'] * p['treg_k'], head) * cv
+        I[1] -= i_chg; I[2] += i_chg; info['i_chg'] = i_chg
         # AON loads: ESP32-S3 + LED_LOGIC (TPS22917) + misc; constant-current until ~2.4 V then resistive
         i_aon = (p['i_esp'] + 0.025 + 0.004) * (1 / (1 + math.exp(-(Vo - 2.4) / 0.08)))
         if p['f_esp_short']: i_aon += Vo / 0.2
@@ -126,21 +130,21 @@ class PowerTree:
         # tiny leak to ground keeps the matrix regular
         I -= v * 1e-4                                                      # 10 kΩ bleed per node (keeps floating nodes defined)
         return I, info
-    def solve(s, p, iters=80):
+    def solve(s, p, iters=40):
         """damped Newton with backtracking line search on ||KCL residual||; restarts from a cold
         initial guess if the warm start stalls in a non-physical local minimum."""
         r = s._solve(p, iters, s.v.copy())
-        if r[1]['residual'] > 1e-5:
+        if r[1]['residual'] > 2e-4:
             ov = p.get('ocv', 3.8); uv = p.get('usb_v', 5.0) if p.get('usb_on') else 0.0
             for guess in ([uv, min(4.5, max(uv - 0.3, ov)), ov, 4.24, 3.3], [5.0, 4.5, 3.8, 4.2, 3.3], [0.0, 3.6, 3.7, 4.2, 3.3], [0.0, 0.5, 0.5, 0.5, 0.5]):
                 r2 = s._solve(p, iters, np.array(guess))
                 if r2[1]['residual'] < r[1]['residual']: r = r2
-                if r[1]['residual'] < 1e-5: break
+                if r[1]['residual'] < 2e-4: break
         return r
     def _solve(s, p, iters, v):
         F, _ = s.branch(v, p); nf = np.abs(F).max()
         for it in range(iters):
-            if nf < 1e-7: break
+            if nf < 2e-5: break
             J = np.zeros((5, 5)); h = 1e-6
             for k in range(5):
                 dv = v.copy(); dv[k] += h; J[:, k] = (s.branch(dv, p)[0] - F) / h
@@ -173,7 +177,7 @@ class LedModel:
         short=True: column shorted to GND (no MBI regulation) -> V = Vf(I)."""
         V = np.asarray(V, float); I = np.full(V.shape, iset * 0.9)
         vk = vknee / 3.0                                                       # 95 % of Iset at Vds = Vknee
-        for _ in range(40):
+        for _ in range(14):
             if short is None: sh = np.zeros(V.shape, bool)
             else: sh = short
             Ic = np.clip(I, 1e-9, None)
@@ -186,13 +190,13 @@ class LedModel:
             I = np.where(sh, np.clip(I, 1e-9, 2.0), np.clip(I, 1e-9, iset * 0.999999))
         return np.where(V <= 0.5, 0.0, I)
 
-def solve_rows(V_led, on, r_feed, r_panel, led, T_led=25.0, iset=0.0102, vknee=0.4, short_cols=None, shorted_rows=None, gs=25):
+def solve_rows(V_led, on, r_feed, r_panel, led, T_led=25.0, iset=0.0102, vknee=0.4, short_cols=None, shorted_rows=None, gs=10, I0=None):
     """All 32 rows: feed node = V_led − I_row·r_feed[r]; the panel row bus is a 31-segment ladder with total
     resistance 2·R_eff (uniform-load equivalent of the IR analysis' effective resistance). on[r,c] bool.
     Returns (I[r,c] LED currents in the MSB plane, V at each LED anode)."""
     on = np.asarray(on, bool)
     R = (2 * np.asarray(r_panel))[:, None] / 31.0                             # per segment
-    Vn = np.full((32, 32), float(V_led)); I = np.zeros((32, 32))
+    Vn = np.full((32, 32), float(V_led)); I = np.zeros((32, 32)) if I0 is None else I0.copy()
     sc = np.zeros((32, 32), bool)
     if short_cols is not None: sc[:, short_cols] = True
     for _ in range(gs):

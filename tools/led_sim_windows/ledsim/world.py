@@ -225,6 +225,9 @@ class World:
             if b is None or b not in s.boards or not b.powered: p.duty[:] = 0; continue
             src = b.override if getattr(b, 'override', None) is not None else b.tile
             lv = lut[src.reshape(-1)].copy()
+            pf = getattr(b, 'phys_factor', None)
+            if pf is not None: lv = np.clip(lv * pf.reshape(-1), 0, 1.5)             # real LED behaviour from the lab model
+            if getattr(b, 'phys_dead', None): lv[:] = 0
             if p.open_col >= 0: lv.reshape(32, 32)[:, p.open_col] = 0
             m = panel_data(p.kind)[p.ffc]
             out = np.zeros(1024, np.float32); ok = m >= 0
