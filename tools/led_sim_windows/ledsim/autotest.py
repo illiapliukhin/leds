@@ -143,6 +143,12 @@ def script(app, t, timing):
         for i, nm in enumerate(DEMOS3D):
             cv.demo = i; f0 = timing['frame']; yield 45
             t.L('PASS', 'куб N=%d эффект %-10s 45 кадров' % (N, nm))
+    # human figures at the sizes people actually show them, timed separately
+    for N in (16, 32):
+        cv.N = N; cv._grid()
+        for nm in ('walker', 'runner', 'gogo'):
+            cv.demo = DEMOS3D.index(nm); timing['key'] = 'fig_%s_N%d' % (nm, N); yield 150
+            timing['key'] = None; t.L('PASS', 'фигура %-7s N=%d: 150 кадров без исключений' % (nm, N))
     cv.N = 8; cv._grid(); cv.demo = 0
 
     # ---------------------------------------------------------------- 6. Тест mode (bring-up), clean and with faults
@@ -264,7 +270,7 @@ def run(out=None, headless=False):
             timing['frame'] = frame
             if timing.get('throttle'): time.sleep(max(0.0, timing['throttle'] - work))
             if frame > 5:
-                timing['dt'].setdefault(a.tab, []).append(dt * 1000); timing['work'].setdefault(a.tab, []).append(work * 1000)
+                kk = timing.get('key') or a.tab; timing['dt'].setdefault(kk, []).append(dt * 1000); timing['work'].setdefault(kk, []).append(work * 1000)
             if frame % 60 == 0:
                 c, rss, peak = _proc_stats(); samples.append((time.perf_counter() - wall0, c, rss))
             if state['wait'] > 0: state['wait'] -= 1; return
