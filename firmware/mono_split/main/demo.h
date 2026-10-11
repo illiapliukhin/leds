@@ -23,3 +23,4 @@ esp_err_t demo_start(matrix_panel_t *panel, demo_mode_t mode, bool cycle);
 void demo_stop(void);
 bool demo_running(void);
 uint32_t demo_frames_rendered(void);
+const uint8_t *demo_glyph(char ch); /* 5x7 font, 5 column bytes, bit0 = top */

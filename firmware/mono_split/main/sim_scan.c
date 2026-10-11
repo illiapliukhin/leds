@@ -64,10 +64,16 @@ static void sim_stream_task(void *arg)
     uint32_t seq = 0, last_frames = matrix_refresh_frame_count();
     int64_t last_t = esp_timer_get_time();
     while (true) {
-        vTaskDelay(pdMS_TO_TICKS(50));
+        static uint32_t last_gen;
+        static int64_t last_emit;
+        vTaskDelay(pdMS_TO_TICKS(4));
         const uint16_t *f = s_frame;
         if (!f) continue;
         uint32_t gen = s_gen;
+        int64_t nowe = esp_timer_get_time();
+        /* emit each new frame generation (rate-limited to ~30/s), and at least every 100 ms */
+        if (!((gen != last_gen && nowe - last_emit > 28000) || nowe - last_emit > 100000)) continue;
+        last_gen = gen; last_emit = nowe;
         decode(f, matrix_refresh_row_samples(), d);
         uint32_t frames = matrix_refresh_frame_count();
         int64_t t = esp_timer_get_time();

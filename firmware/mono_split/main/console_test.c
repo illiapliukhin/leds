@@ -13,6 +13,7 @@
 #include "demo.h"
 #include "bmi270_probe.h"
 #include "sim_scan.h"
+#include "stack.h"
 #include "test_patterns.h"
 
 static const char *TAG = "console";
@@ -63,8 +64,10 @@ static int cmd_panel(int argc, char **argv)
 }
 
 static bool s_display_on;
+static esp_err_t display_ensure_on(void);
 
 /* LED rails are powered only on demand (first test/display/bright-set command), not at boot. */
+esp_err_t console_display_on(void) { return display_ensure_on(); }
 static esp_err_t display_ensure_on(void)
 {
     sim_scan_start(); /* MONO_SIM only: stream complete scans for the virtual board */
@@ -105,6 +108,27 @@ static int cmd_scan(int argc, char **argv)
            matrix_refresh_nominal_hz(), matrix_refresh_get_brightness(), matrix_refresh_get_gamma(),
            (unsigned long)matrix_refresh_build_cycles(), (unsigned long)matrix_refresh_frame_count(), (unsigned long)demo_frames_rendered());
     return 0;
+}
+
+static int cmd_stack(int argc, char **argv)
+{
+    if (argc < 2 || strcmp(argv[1], "status") == 0) { stack_print_status(); return 0; }
+    if (strcmp(argv[1], "start") == 0) {
+        esp_err_t e = stack_start(s_panel);
+        printf("stack start: %s\n", esp_err_to_name(e));
+        return e == ESP_OK ? 0 : 1;
+    }
+    if (strcmp(argv[1], "mode") == 0 && argc >= 3) { stack_set_mode(strcmp(argv[2], "stream") == 0 ? STACK_MODE_STREAM : STACK_MODE_GEN); return 0; }
+    if (strcmp(argv[1], "fps") == 0 && argc >= 3) { stack_set_fps(atoi(argv[2])); return 0; }
+    if (strcmp(argv[1], "demo") == 0 && argc >= 3) {
+        static const char *n[] = {"scroll", "ball", "plasma", "wipe"};
+        int d = -1;
+        for (int i = 0; i < 4; i++) if (strcmp(argv[2], n[i]) == 0) d = i;
+        stack_set_demo(d);
+        return 0;
+    }
+    printf("stack start|status|mode gen|stream|demo scroll|ball|plasma|wipe|cycle|fps N\n");
+    return 1;
 }
 
 static int cmd_i2cscan(int argc, char **argv)
@@ -286,6 +310,8 @@ esp_err_t console_test_register(matrix_panel_t *panel)
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&display_cmd));
 
+    const esp_console_cmd_t stack_cmd = {.command = "stack", .help = "Stacking: stack start|status|mode gen|stream|demo <name>|cycle|fps N", .func = &cmd_stack};
+    ESP_ERROR_CHECK(esp_console_cmd_register(&stack_cmd));
     const esp_console_cmd_t gamma_cmd = {.command = "gamma", .help = "Gamma LUT exponent: gamma [0.5..4.0] (default 2.2)", .func = &cmd_gamma};
     ESP_ERROR_CHECK(esp_console_cmd_register(&gamma_cmd));
     const esp_console_cmd_t scan_cmd = {.command = "scan", .help = "Scan engine timing and stats", .func = &cmd_scan};

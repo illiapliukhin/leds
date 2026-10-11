@@ -69,7 +69,8 @@ static float s_gamma_val = 2.2f;
 static uint8_t s_gamma[256];
 static uint16_t *s_buf[3];
 static int s_tmpl_br[3] = {-1, -1, -1};      /* brightness each buffer's control bits were built for */
-static volatile int s_ready = -1, s_sending = -1;
+static volatile int s_ready = -1, s_sending = -1, s_staged = -1;
+static volatile bool s_sync_on; static volatile int s_burst = 16;
 static volatile uint32_t s_frames, s_gen, s_ready_gen, s_sent_gen, s_build_cycles;
 static uint8_t s_levels[MATRIX_ROWS][32];
 static TaskHandle_t s_tx_task;
@@ -125,7 +126,8 @@ static void build_data(uint16_t *b)
 
 static int pick_free(void)
 {
-    for (int i = 0; i < 3; i++) if (i != s_ready && i != s_sending) return i;
+    for (int i = 0; i < 3; i++) if (i != s_ready && i != s_sending && i != s_staged) return i;
+    if (s_sync_on && s_staged >= 0) return s_staged;   /* re-render of a not-yet-shown frame */
     return -1;
 }
 
@@ -145,9 +147,27 @@ static void publish(void)
     build_data(s_buf[idx]);
     s_build_cycles = esp_cpu_get_cycle_count() - t0;
     portENTER_CRITICAL(&s_mux);
-    s_ready = idx;
-    s_ready_gen = ++s_gen;
+    if (s_sync_on) s_staged = idx;
+    else { s_ready = idx; s_ready_gen = ++s_gen; }
     portEXIT_CRITICAL(&s_mux);
+}
+
+void matrix_refresh_set_sync(bool on, int burst)
+{
+    s_burst = burst > 0 ? burst : 16;
+    s_sync_on = on;
+}
+
+void IRAM_ATTR matrix_refresh_sync_swap(void)
+{
+    bool isr = xPortInIsrContext();
+    if (isr) portENTER_CRITICAL_ISR(&s_mux); else portENTER_CRITICAL(&s_mux);
+    if (s_staged >= 0) { s_ready = s_staged; s_staged = -1; s_ready_gen = ++s_gen; }
+    if (isr) portEXIT_CRITICAL_ISR(&s_mux); else portEXIT_CRITICAL(&s_mux);
+    if (s_tx_task) {
+        if (isr) { BaseType_t hp = pdFALSE; vTaskNotifyGiveFromISR(s_tx_task, &hp); portYIELD_FROM_ISR(hp); }
+        else xTaskNotifyGive(s_tx_task);
+    }
 }
 
 static int take_next(void)
@@ -232,6 +252,13 @@ static void tx_task(void *arg)
              MATRIX_PCLK_HZ / 1000000, (unsigned long)s_row_samples, (unsigned long)s_frame_samples,
              (unsigned)(s_frame_samples * 2 / 1024), matrix_refresh_nominal_hz());
     while (s_running) {
+        if (s_sync_on) {
+            /* phase lock: wait for the FRAME_SYNC edge (free-run if it doesn't come), then a burst */
+            ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(40));
+            int i = take_next();
+            for (int k = 0; k < s_burst && i >= 0 && s_running; k++) { hw_send(s_buf[i]); s_frames++; }
+            continue;
+        }
         int i = take_next();
         if (i >= 0) {
             hw_send(s_buf[i]);

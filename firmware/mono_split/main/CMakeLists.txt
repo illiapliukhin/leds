@@ -11,8 +11,10 @@ idf_component_register(
         "console_test.c"
         "demo.c"
         "sim_scan.c"
+        "stack.c"
+        "stack_hal.c"
     INCLUDE_DIRS "."
-    REQUIRES driver esp_timer esp_driver_gpio esp_driver_spi esp_driver_i2c console nvs_flash esp_hw_support esp_lcd
+    REQUIRES driver esp_timer esp_driver_gpio esp_driver_spi esp_driver_i2c console nvs_flash esp_hw_support esp_lcd esp_driver_uart
 )
 
 if(MONO_SIM)

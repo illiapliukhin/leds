@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "esp_err.h"
@@ -36,6 +37,11 @@ void matrix_refresh_set_brightness(uint8_t level_0_255);
 uint8_t matrix_refresh_get_brightness(void);
 void matrix_refresh_set_gamma(float gamma);
 float matrix_refresh_get_gamma(void);
+/* Stack sync: when on, unlock_panel() only stages the new frame; matrix_refresh_sync_swap() (called on
+ * the FRAME_SYNC edge, ISR-safe) makes it current and restarts a burst of `burst` scan frames so the
+ * scan phase of every board is locked to the shared edge (960 Hz / 60 fps = 16 frames per edge). */
+void matrix_refresh_set_sync(bool on, int burst);
+void matrix_refresh_sync_swap(void);
 void matrix_refresh_lock_panel(void);
 void matrix_refresh_unlock_panel(void);
 

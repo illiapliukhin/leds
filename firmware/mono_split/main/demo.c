@@ -30,6 +30,11 @@ static const glyph_t FONT[] = {
     {'A', {0x7E, 0x11, 0x11, 0x11, 0x7E}},
     {'E', {0x7F, 0x49, 0x49, 0x49, 0x41}},
     {'D', {0x7F, 0x41, 0x41, 0x22, 0x1C}},
+    {'P', {0x7F, 0x09, 0x09, 0x09, 0x06}},
+    {'U', {0x3F, 0x40, 0x40, 0x40, 0x3F}},
+    {'K', {0x7F, 0x08, 0x14, 0x22, 0x41}},
+    {'H', {0x7F, 0x08, 0x08, 0x08, 0x7F}},
+    {'N', {0x7F, 0x04, 0x08, 0x10, 0x7F}},
     {' ', {0x00, 0x00, 0x00, 0x00, 0x00}},
 };
 
@@ -40,7 +45,7 @@ static const uint8_t *glyph(char c)
             return FONT[i].col;
         }
     }
-    return FONT[5].col;
+    return FONT[sizeof(FONT) / sizeof(FONT[0]) - 1].col;
 }
 
 static float s_ff[32][32]; /* float intensity 0..1 composed per frame */
@@ -261,6 +266,7 @@ static void demo_task(void *arg)
 }
 
 uint32_t demo_frames_rendered(void) { return s_frames_rendered; }
+const uint8_t *demo_glyph(char ch) { return glyph(ch); }
 
 demo_mode_t demo_from_name(const char *name)
 {
