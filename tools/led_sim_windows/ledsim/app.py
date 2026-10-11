@@ -19,7 +19,7 @@ class App:
         pygame.init(); U.LANG[0] = lang
         flags = pygame.RESIZABLE
         s.screen = pygame.display.set_mode(size, flags)
-        pygame.display.set_caption(T('title'))
+        from . import _build as B; pygame.display.set_caption('%s — сборка %s, %s' % (T('title'), B.GIT_SHA, B.BUILD_TIME))
         s.ui = U.UI(); s.tab = tab; s.shots = shots or []
         s.layout()
         s.views = {'system': SystemView(s), 'boards': PcbView(s, 'boards'), 'panels': PcbView(s, 'panels'), 'cube': CubeView(s)}

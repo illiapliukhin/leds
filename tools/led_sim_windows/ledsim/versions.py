@@ -16,7 +16,8 @@ def lib_fw():
 def short():
     """one line for the status bar / About"""
     pcb = V.get('pcb', {}).get('board_v15', {})
-    return 'FW %s (DLL %s) · HW %s · board v15 %s · panel_full %s' % (V.get('firmware_commit', '?')[:7], lib_fw()[:7], V.get('hardware_commit', '?')[:7],
+    from . import _build as B
+    return 'сборка %s %s · FW %s (DLL %s) · HW %s · board v15 %s · panel_full %s' % (B.GIT_SHA, B.BUILD_TIME, V.get('firmware_commit', '?')[:7], lib_fw()[:7], V.get('hardware_commit', '?')[:7],
                                                                     pcb.get('git', '?')[:7], V.get('pcb', {}).get('panel_full', {}).get('git', '?')[:7])
 
 def find_repo():
