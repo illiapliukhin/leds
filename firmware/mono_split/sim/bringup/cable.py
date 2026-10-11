@@ -6,8 +6,9 @@ the PCB the receptacle is soldered to. Type A = contacts exposed on the same sid
 Type B = opposite sides. Result is invariant to bends/folds/twists of the cable route."""
 import json,numpy as np
 import os
+import panels
 _D=os.path.dirname(os.path.abspath(__file__))
-B=json.load(open(os.path.join(_D,'board.json'))); P=json.load(open(os.path.join(_D,'panel.json')))
+B=json.load(open(os.path.join(_D,'board.json'))); P=panels.load()
 def fp(d,ref): return next(f for f in d['fps'] if f['ref']==ref)
 def pads(f): return {int(p['n']):np.array([p['x'],-p['y'],0.0]) for p in f['pads'] if p['n'].isdigit()}
 def side_out(f): return np.array([0,0,1.0]) if f['layer']=='F.Cu' else np.array([0,0,-1.0])
@@ -21,7 +22,7 @@ def mapping(bref,pref,out_b,out_p,ctype):
     sp={round(float(Bp@(v-cp)),2):k for k,v in pp.items()}
     return {k:sp.get(s) for k,s in sb.items()}, fb, fpn
 OUT_BOARD=np.array([1.0,0,0])                     # J_ROW1/J_COL1: cable exits east (arch doc)
-OUT_PANEL={'J_ROW':np.array([-1.0,0,0]),'J_COL':np.array([0,-1.0,0])}  # panel: west edge / south edge (KiCad +y = 3D -y)
+OUT_PANEL={k:np.array(v) for k,v in panels.CFG['exit'].items()}  # mono32: west / south edge; lattice: both south (KiCad +y = 3D -y)
 def pin_map(bref,pref,ctype): return mapping(bref,pref,OUT_BOARD,OUT_PANEL[pref],ctype)[0]
 
 def main():
@@ -33,7 +34,8 @@ def main():
             bn={int(p['n']):p['net'] for p in fb['pads'] if p['n'].isdigit()}; pn={int(p['n']):p['net'] for p in fpn['pads'] if p['n'].isdigit()}
             bad=[(k,bn[k],m[k],pn.get(m[k])) for k in range(1,33) if bn[k]!=pn.get(m[k])]
             res[f'{bref}->{pref} type{t}']={'pin1_to':m[1],'pin40_to':m[40],'straight':straight,'reversed':rev,'net_mismatches':len(bad),'first':bad[:3]}
-    print(json.dumps(res,indent=1)); json.dump(res,open(os.path.join(_D,'cable_check.json'),'w'),indent=1)
+    print(json.dumps(res,indent=1)); json.dump(res,open(os.path.join(_D,panels.CFG['cable_json']),'w'),indent=1)
+    return res
 
 if __name__=='__main__':
     main()

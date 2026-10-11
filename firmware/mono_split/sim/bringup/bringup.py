@@ -4,7 +4,7 @@ Real firmware in Espressif QEMU (MONO_SIM build) -> scan tap -> netlist-driven b
 Scripted bench session with automatic verification and one fault-injection run; ends in `demo cycle`."""
 import argparse, json, math, os, re, socket, subprocess, threading, time, queue
 import pygame
-import netmodel
+import netmodel, panels
 from gstream import parse_g, full_scale_duty, hw_cpu_pct
 
 D = os.path.dirname(os.path.abspath(__file__))
@@ -18,11 +18,20 @@ class Qemu:
     def __init__(self):
         self.proc = None; self.sock = None; self.lines = queue.Queue(); self.console = []; self.frames = queue.Queue(maxsize=4)
     def start(self):
-        subprocess.run(['pkill', '-f', 'qemu-system-xtensa.*flash_qemu'], stderr=subprocess.DEVNULL)
+        # only our own instance (port 5555): other sims (e.g. the stacking sim) run their own QEMUs concurrently
+        subprocess.run(['pkill', '-f', 'bench-bringup-xtensa-emu.*bench_bringup_fw.*tcp:127.0.0.1:5555'], stderr=subprocess.DEVNULL)
         time.sleep(0.3)
         q = open(os.path.join(SIM, 'qemu_path')).read().strip()
-        self.proc = subprocess.Popen([q, '-nographic', '-machine', 'esp32s3', '-m', '4M', '-drive', 'file=%s/flash_qemu.bin,if=mtd,format=raw' % SIM,
-                                      '-serial', 'tcp:127.0.0.1:5555,server=on,wait=on', '-monitor', 'none'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # run QEMU under a private name: concurrent sims clean up their own 'qemu-system-xtensa' processes by name
+        alias = '/tmp/bench-bringup-xtensa-emu'
+        if os.path.realpath(alias) != os.path.realpath(q):
+            if os.path.lexists(alias): os.remove(alias)
+            os.symlink(q, alias)
+        q = alias
+        flash = '/tmp/bench_bringup_fw.bin'                                  # private copy: never write the shared image
+        import shutil; shutil.copyfile(os.path.join(SIM, 'flash_qemu.bin'), flash)
+        self.proc = subprocess.Popen([q, '-nographic', '-machine', 'esp32s3', '-m', '4M', '-drive', 'file=%s,if=mtd,format=raw' % flash,
+                                      '-serial', 'tcp:127.0.0.1:5555,server=on,wait=on', '-monitor', 'none'], stdout=subprocess.DEVNULL, stderr=open('/tmp/bench_bringup_qemu.err', 'w'))
         for _ in range(50):
             try:
                 self.sock = socket.create_connection(('127.0.0.1', 5555)); break
@@ -115,7 +124,7 @@ class Scene:
     def __init__(self, model):
         pygame.init()
         self.scr = pygame.display.set_mode((W, H))
-        pygame.display.set_caption('mono_split bench bring-up - mono_electronics v11c + mono_panel_32x32 (virtual)')
+        pygame.display.set_caption('mono_split bench bring-up - mono_electronics v11c + %s (virtual)' % panels.CFG['title'])
         self.f = pygame.font.SysFont('dejavusansmono', 14); self.fs = pygame.font.SysFont('dejavusansmono', 12)
         self.fb = pygame.font.SysFont('dejavusans', 19, bold=True); self.fh = pygame.font.SysFont('dejavusans', 26, bold=True)
         self.m = model
@@ -124,12 +133,16 @@ class Scene:
         self.bs = self.bw / 148.09; self.bh = int(99.55 * self.bs)
         self.board = pygame.transform.smoothscale(img, (self.bw, self.bh))
         self.px, self.py, self.pw = 1110, 40, 600
-        self.ps = self.pw / 166.75
+        ex, ey, ew, eh = netmodel.P['edge']                                 # panel outline bbox from its .kicad_pcb
+        self.pex, self.pey = ex, ey; self.ps = self.pw / max(ew, eh); self.pph = int(eh * self.ps)
+        self.pbg = None
+        if panels.CFG['bg'] and os.path.exists(panels.CFG['bg']):
+            self.pbg = pygame.transform.smoothscale(pygame.image.load(panels.CFG['bg']), (int(ew * self.ps), self.pph))
         self.lum = [0.0] * len(model.leds)
         self.rails = {}; self.stage = ''; self.results = []; self.banner = ''; self.banner_col = (255, 255, 255); self.report = None
         self.fps = 0; self.fps_obs = 0; self.full = 0.78; self.levels = 0; self.cur = 0; self.stats = [(0, 0)] * 32; self.gen = 0; self.cable_label = ''; self.fault = None
     def bpt(self, x, y): return (self.bx + x * self.bs, self.by + y * self.bs)
-    def ppt(self, x, y): return (self.px + x * self.ps, self.py + y * self.ps)
+    def ppt(self, x, y): return (self.px + (x - self.pex) * self.ps, self.py + (y - self.pey) * self.ps)
     def ribbon(self, p0, p1, c1, c2, width, color, label, label_at):
         pts = []
         for i in range(41):
@@ -154,7 +167,7 @@ class Scene:
         return pts
     def draw(self, q, steps):
         s = self.scr; s.fill((22, 24, 28))
-        s.blit(self.fh.render('Bench bring-up: mono_electronics v11c  +  mono_panel_32x32', True, (255, 180, 60)), (20, 14))
+        s.blit(self.fh.render('Bench bring-up: mono_electronics v11c  +  %s' % panels.CFG['title'], True, (255, 180, 60)), (20, 14))
         # board
         s.blit(self.board, (self.bx, self.by))
         pygame.draw.rect(s, (90, 90, 90), (self.bx - 1, self.by - 1, self.bw + 2, self.bh + 2), 1)
@@ -167,9 +180,13 @@ class Scene:
             pygame.draw.rect(s, (160, 160, 160), (ux - 4, uy - 6, 12, 12))
             s.blit(self.fs.render('USB-C 5V', True, (230, 230, 230)), (4, uy + 12))
         # panel
-        pygame.draw.rect(s, (14, 40, 24), (self.px, self.py, self.pw, self.pw), border_radius=4)
-        pygame.draw.rect(s, (80, 120, 90), (self.px, self.py, self.pw, self.pw), 1)
-        s.blit(self.fs.render('mono_panel_32x32 (front, LED positions from its .kicad_pcb; FFC receptacles on the back)', True, (150, 170, 150)), (self.px, self.py + self.pw + 4))
+        if self.pbg is not None:                                              # lattice: see-through bars, bench shows through
+            s.blit(self.pbg, (self.px, self.py))
+            s.blit(self.fs.render('%s (front; bars + windows from its geometry, LEDs from its .kicad_pcb; FFCs on the back of the tab)' % panels.CFG['title'], True, (150, 170, 150)), (self.px - 300, self.py + self.pph + 4))
+        else:
+            pygame.draw.rect(s, (14, 40, 24), (self.px, self.py, self.pw, self.pw), border_radius=4)
+            pygame.draw.rect(s, (80, 120, 90), (self.px, self.py, self.pw, self.pw), 1)
+            s.blit(self.fs.render('mono_panel_32x32 (front, LED positions from its .kicad_pcb; FFC receptacles on the back)', True, (150, 170, 150)), (self.px, self.py + self.pw + 4))
         for name in ('J_ROW', 'J_COL'):
             f = netmodel.PF[name]; xs = [p['x'] for p in f['pads']]; ys = [p['y'] for p in f['pads']]
             a = self.ppt(min(xs) - 1, min(ys) - 1); b = self.ppt(max(xs) + 1, max(ys) + 1)
@@ -177,19 +194,26 @@ class Scene:
         # ribbons
         rb = netmodel.BF['J_ROW1']; cb = netmodel.BF['J_COL1']
         col = (150, 105, 35) if not self.fault else (170, 60, 40)
-        p_row_b = self.bpt(148.5, rb['y']); p_row_p = self.ppt(4, netmodel.PF['J_ROW']['y'])
-        self.ribbon(p_row_b, p_row_p, (p_row_b[0] + 160, p_row_b[1]), (p_row_p[0] - 160, p_row_p[1]), 34, col, 'J_ROW1 -> J_ROW  ' + self.cable_label, 4)
-        p_col_b = self.bpt(148.5, cb['y']); p_col_p = self.ppt(netmodel.PF['J_COL']['x'], 166)
-        pts = self.ribbon(p_col_b, p_col_p, (p_col_b[0] + 220, p_col_b[1] + 40), (p_col_p[0], p_col_p[1] + 260), 34, col, 'J_COL1 -> J_COL  ' + self.cable_label, 14)
+        if panels.NAME == 'lattice':                                          # both receptacles on the south tab, cables exit south
+            jr, jc = netmodel.PF['J_ROW'], netmodel.PF['J_COL']; yb = max(p['y'] for p in jr['pads']) + 1.5
+            p_row_b = self.bpt(148.5, rb['y']); p_row_p = self.ppt(jr['x'], yb)
+            self.ribbon(p_row_b, p_row_p, (p_row_b[0] + 200, p_row_b[1]), (p_row_p[0], p_row_p[1] + 200), 30, col, 'J_ROW1 -> J_ROW  ' + self.cable_label, 6)
+            p_col_b = self.bpt(148.5, cb['y']); p_col_p = self.ppt(jc['x'], yb)
+            pts = self.ribbon(p_col_b, p_col_p, (p_col_b[0] + 260, p_col_b[1] + 60), (p_col_p[0], p_col_p[1] + 300), 30, col, 'J_COL1 -> J_COL', 14)
+        else:
+            p_row_b = self.bpt(148.5, rb['y']); p_row_p = self.ppt(4, netmodel.PF['J_ROW']['y'])
+            self.ribbon(p_row_b, p_row_p, (p_row_b[0] + 160, p_row_b[1]), (p_row_p[0] - 160, p_row_p[1]), 34, col, 'J_ROW1 -> J_ROW  ' + self.cable_label, 4)
+            p_col_b = self.bpt(148.5, cb['y']); p_col_p = self.ppt(netmodel.PF['J_COL']['x'], 166)
+            pts = self.ribbon(p_col_b, p_col_p, (p_col_b[0] + 220, p_col_b[1] + 40), (p_col_p[0], p_col_p[1] + 260), 34, col, 'J_COL1 -> J_COL  ' + self.cable_label, 14)
         if self.fault and 'COL_07' in self.fault:
             x, y = pts[10]; pygame.draw.circle(s, (255, 40, 40), (int(x), int(y)), 14, 3)
             s.blit(self.fs.render('OPEN: COL_07', True, (255, 80, 80)), (x + 16, y - 6))
         # LEDs
-        r = max(3, int(self.ps * 1.15))
+        r = max(3, int(self.ps * (0.8 if self.pbg is not None else 1.15)))
         for i, l in enumerate(self.m.leds):
             v = min(1.0, max(0.0, self.lum[i]) / self.full) ** (1 / 2.2)   # LED light is linear; show it gamma-encoded
             c = (int(40 + 215 * v), int(16 + 150 * v * v), int(6 + 20 * v)) if v > 0.03 else (40, 22, 10)
-            x, y = self.ppt(l['x'], l['y'])
+            x, y = self.ppt(l['x'], l['y'] + (0.775 if self.pbg is not None else 0))   # lattice: LED body centre
             if v > 0.3: pygame.draw.circle(s, (c[0] // 3, c[1] // 4, 0), (int(x), int(y)), r + 3)
             pygame.draw.circle(s, c, (int(x), int(y)), r)
         # per-row readout
@@ -229,8 +253,10 @@ class Scene:
             c = (120, 255, 140) if l.startswith('mono>') else ((255, 120, 120) if l.startswith(('E (', 'W (')) else (200, 200, 200))
             s.blit(self.fs.render(l[:150], True, c), (cx + 10, cy + 34 + k * 17))
         if self.banner:
-            t = self.fb.render(self.banner, True, self.banner_col)
-            pygame.draw.rect(s, (0, 0, 0), (self.px, self.py + self.pw + 22, t.get_width() + 16, 30)); s.blit(t, (self.px + 8, self.py + self.pw + 26))
+            t = self.fb.render(self.banner, True, self.banner_col); yb = self.py + max(self.pw, self.pph) + 22
+            if self.pbg is not None: yb = self.by + self.bh + 80
+            bx = self.px if self.pbg is None else 20
+            pygame.draw.rect(s, (0, 0, 0), (bx, yb, t.get_width() + 16, 30)); s.blit(t, (bx + 8, yb + 4))
         if self.report:
             bw, bh = 760, 22 * len(self.report) + 20
             pygame.draw.rect(s, (12, 12, 16), (20, 70, bw, bh), border_radius=8); pygame.draw.rect(s, (255, 180, 60), (20, 70, bw, bh), 2, border_radius=8)
@@ -240,10 +266,11 @@ class Scene:
 
 # ---------------------------------------------------------------- session
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('--fast', action='store_true'); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument('--fast', action='store_true')
+    ap.add_argument('--panel', choices=sorted(panels.PANELS), default=panels.NAME, help='panel under test (read at import by panels.py)'); a = ap.parse_args()
     model = netmodel.Model(); q = Qemu(); sc = Scene(model)
     steps = []; checks = []; state = {'check': None, 'done': False}
-    log = open(os.path.join(D, 'bench_session.log'), 'w')
+    log = open(os.path.join(D, 'bench_session.log' if panels.NAME == 'mono32' else 'bench_session_%s.log' % panels.NAME), 'w')
     def step(txt, st='INFO'):
         steps.append([txt, st]); log.write('%7.2f %-5s %s\n' % (time.time() - T0, st, txt)); log.flush(); return steps[-1]
     T0 = time.time()
@@ -251,7 +278,9 @@ def main():
     def run_check(name, kind, cmd, dur, settle=0.8):
         st = step('%s: `%s`' % (name, cmd), 'RUN')
         q.send(cmd); time.sleep(settle)
-        c = Check(name, kind); state['check'] = c; time.sleep(dur); state['check'] = None
+        c = Check(name, kind); state['check'] = c; time.sleep(dur * 0.6)
+        if panels.NAME != 'mono32': state['shot'] = os.path.join(D, 'png', 'bringup_%s_%s.png' % (panels.NAME, re.sub(r'\W+', '_', name).strip('_').lower()))
+        time.sleep(dur * 0.4); state['check'] = None
         ok = c.passed(); st[1] = 'PASS' if ok else 'FAIL'
         st[0] = '%s: `%s`  %d scans, rows %d/32, cols %d/32 ok' % (name, cmd, c.snaps, sum(c.rows_ok()), sum(c.cols_ok()))
         checks.append(c); log.write('        examples: %s\n' % c.examples)
@@ -259,7 +288,7 @@ def main():
 
     def session():
         sc.cable_label = 'FFC 40P 0.5 mm, Type B (opposite-side contacts)'
-        cc = json.load(open(os.path.join(D, 'cable_check.json')))
+        import cable; cc = cable.main() if panels.NAME != 'mono32' else json.load(open(os.path.join(D, 'cable_check.json')))
         step('Cable check from pad geometry: Type A mirrors pin 1->%d (%d net errors), Type B pin 1->%d (%d)' % (
             cc['J_ROW1->J_ROW typeA']['pin1_to'], cc['J_ROW1->J_ROW typeA']['net_mismatches'], cc['J_ROW1->J_ROW typeB']['pin1_to'], cc['J_ROW1->J_ROW typeB']['net_mismatches']))
         time.sleep(1.5)
@@ -316,7 +345,7 @@ def main():
         step('Faults removed, correct Type B cables back in', 'INFO')
         sc.banner = 'Faults removed - Type B cables back in'; sc.banner_col = (170, 190, 255)
         # ---- report
-        rep = [('BENCH REPORT  mono_electronics v11c + mono_panel_32x32', (255, 190, 60))]
+        rep = [('BENCH REPORT  mono_electronics v11c + %s' % panels.CFG['title'], (255, 190, 60))]
         for c in nominal:
             if isinstance(c, Check):
                 rep.append(('%-14s %s  rows %2d/32  cols %2d/32  (%d scans)' % (c.name, 'PASS' if c.passed() else 'FAIL', sum(c.rows_ok()), sum(c.cols_ok()), c.snaps), (90, 255, 110) if c.passed() else (255, 80, 80)))
@@ -329,7 +358,7 @@ def main():
         allpass = all(c.passed() for c in nominal); caught = all(c.snaps > 0 and not c.passed() for c in f1 + f2)
         rep.append(('VERDICT: nominal %s, faults %s' % ('PASS' if allpass else 'FAIL', 'all caught' if caught else 'NOT all caught'), (90, 255, 110) if allpass and caught else (255, 80, 80)))
         sc.report = rep
-        with open(os.path.join(D, 'bench_report.md'), 'w') as f:
+        with open(os.path.join(D, 'bench_report.md' if panels.NAME == 'mono32' else 'bench_report_%s.md' % panels.NAME), 'w') as f:
             f.write('# Virtual bench report\n\n')
             for l, _ in rep: f.write('    %s\n' % l)
             f.write('\n## Details\n\n')
@@ -337,7 +366,8 @@ def main():
                 if isinstance(c, Check):
                     f.write('- **%s**: %d scans, %d LED mismatches; rows ok %s; cols ok %s; examples: %s\n' % (c.name, c.snaps, c.mism, sum(c.rows_ok()), sum(c.cols_ok()), '; '.join(c.examples) or '-'))
             f.write('\nRow chain (netlist walk): %s\n\nColumn chain: SDI -> %s -> %s, bit c -> COL_(c+1)\n' % (model.row_trace[:3] + model.row_trace[16:17], *model.chain))
-        step('Bench report written: bench_report.md', 'PASS' if allpass and caught else 'FAIL')
+        step('Bench report written: %s' % ('bench_report.md' if panels.NAME == 'mono32' else 'bench_report_%s.md' % panels.NAME), 'PASS' if allpass and caught else 'FAIL')
+        if panels.NAME != 'mono32': time.sleep(0.5); state['shot'] = os.path.join(D, 'png', 'bringup_%s_report.png' % panels.NAME)
         time.sleep(1)
         step('Demo: `demo cycle` (left running)', 'RUN'); q.send('demo cycle')
         sc.banner = 'Bring-up complete - demo cycle running'; sc.banner_col = (90, 255, 110)
@@ -367,6 +397,8 @@ def main():
             pass
         for i in range(len(act)): sc.lum[i] += (act[i] - sc.lum[i]) * k
         sc.draw(q, steps)
+        if state.get('shot'):
+            os.makedirs(os.path.dirname(state['shot']), exist_ok=True); pygame.image.save(sc.scr, state['shot']); state['shot'] = None
         clock.tick(30)
 
 if __name__ == '__main__':
