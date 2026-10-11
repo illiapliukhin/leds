@@ -40,7 +40,7 @@ def materials():
     M['wood'] = mat('frame_ply', (0.62, 0.45, 0.28, 1), rough=0.7)
     M['fr4'] = mat('fr4_green', (0.05, 0.28, 0.10, 1), rough=0.35, coat=0.6, coat_tint=(0.6, 1, 0.6, 1))
     M['black'] = mat('plastic_black', (0.02, 0.02, 0.02, 1), rough=0.35)
-    M['ribbon'] = mat('ribbon_grey', (0.55, 0.56, 0.58, 1), rough=0.5)
+    M['ribbon'] = mat('ribbon_grey', (0.22, 0.23, 0.25, 1), rough=0.45)
     M['red'] = mat('ribbon_red', (0.6, 0.05, 0.04, 1), rough=0.5)
     M['gold'] = mat('pin_gold', (1.0, 0.78, 0.35, 1), metal=1.0, rough=0.2)
     M['chip'] = mat('ic', (0.04, 0.04, 0.045, 1), rough=0.5)
@@ -188,7 +188,7 @@ def render(sc, fn, w=2560, h=1600, glare=True):
     sc.render.image_settings.file_format = 'PNG'; sc.render.image_settings.color_depth = '8'
     if glare:
         sc.use_nodes = True; nt = sc.node_tree; rl = nt.nodes['Render Layers']; comp = nt.nodes['Composite']
-        g = nt.nodes.new('CompositorNodeGlare'); g.glare_type = 'FOG_GLOW'; g.quality = 'HIGH'; g.threshold = 1.2; g.size = 8; g.mix = 0.0
+        g = nt.nodes.new('CompositorNodeGlare'); g.glare_type = 'FOG_GLOW'; g.quality = 'HIGH'; g.threshold = 1.0; g.size = 9; g.mix = 0.0
         nt.links.new(rl.outputs['Image'], g.inputs['Image']); nt.links.new(g.outputs['Image'], comp.inputs['Image'])
     sc.render.filepath = os.path.join(OUT, fn); bpy.ops.render.render(write_still=True); print('WROTE', sc.render.filepath)
 
@@ -198,10 +198,12 @@ def lit_pattern(r, c):
     return (9.0 < d < 12.5) or (abs(r - c) <= 0 and d < 7) or (abs(r + c - 31) == 0 and d < 7) or d < 2.2
 
 def shot_full():
-    sc = reset(); M = materials(); build(M, lit_fn=lit_pattern)
-    world(sc, dark=True)
-    area('key', (-250, -450, 520), (155, 155, 0), 400, 6.0e6, (1.0, 0.96, 0.9))
-    area('rim', (650, 600, 250), (155, 155, 0), 300, 2.5e6, (0.8, 0.88, 1.0))
+    sc = reset(); M = materials()
+    M['phos_on'].node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value = 900.0
+    build(M, lit_fn=lit_pattern)
+    world(sc, dark=True); sc.world.node_tree.nodes['Background'].inputs[1].default_value = 0.012
+    area('key', (-250, -450, 520), (155, 155, 0), 400, 1.2e6, (1.0, 0.96, 0.9))
+    area('rim', (650, 600, 250), (155, 155, 0), 300, 6e5, (0.8, 0.88, 1.0))
     camera((-230, -330, 360), (165, 150, -10), lens=40)
     render(sc, 'grid_full_34.png', 2560, 1600)
 
