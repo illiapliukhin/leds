@@ -1,0 +1,47 @@
+name: led_sim_windows
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/led_sim_windows/**'
+      - 'firmware/mono_split/main/demo.c'
+      - 'firmware/mono_split/main/stack.c'
+      - 'firmware/mono_split/main/patterns.c'
+      - '.github/workflows/led_sim_windows.yml'
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: tools/led_sim_windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python deps
+        run: python -m pip install pygame==2.6.1 numpy pyinstaller
+      - name: Host library (real firmware sources, MinGW gcc)
+        run: |
+          mkdir -p build
+          gcc --version
+          gcc -O2 -shared -static-libgcc -Ihost/stubs -I../../firmware/mono_split/main -o build/led_host.dll host/led_host.c -lm -w
+      - name: Stack regression (headless)
+        run: python tests/test_stack.py
+      - name: Screenshot smoke test (SDL dummy video)
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: python tests/shots.py shots_windows
+      - name: PyInstaller one-file exe
+        run: |
+          python -m PyInstaller --noconfirm --onefile --windowed --name LED_Simulator \
+            --add-data "data;data" --add-binary "build/led_host.dll;." run_sim.py
+          ls -la dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LED_Simulator
+          path: |
+            tools/led_sim_windows/dist/LED_Simulator.exe
+            tools/led_sim_windows/shots_windows/*.png
