@@ -11,7 +11,8 @@ def _proc_stats():
         if os.name == 'nt':
             import ctypes
             from ctypes import wintypes as W
-            k = ctypes.windll.kernel32; h = k.GetCurrentProcess()
+            k = ctypes.windll.kernel32; k.GetCurrentProcess.restype = W.HANDLE; h = k.GetCurrentProcess()   # 64-bit pseudo-handle (-1), not a truncated int
+            k.GetProcessTimes.argtypes = [W.HANDLE] + [ctypes.c_void_p] * 4
             ft = [W.FILETIME() for _ in range(4)]
             k.GetProcessTimes(h, *[ctypes.byref(f) for f in ft])
             v = lambda f: (f.dwHighDateTime << 32 | f.dwLowDateTime) / 1e7
@@ -19,14 +20,15 @@ def _proc_stats():
                 _fields_ = [('cb', W.DWORD), ('PageFaultCount', W.DWORD), ('PeakWorkingSetSize', ctypes.c_size_t), ('WorkingSetSize', ctypes.c_size_t),
                             ('a', ctypes.c_size_t), ('b', ctypes.c_size_t), ('c', ctypes.c_size_t), ('d', ctypes.c_size_t), ('e', ctypes.c_size_t), ('f', ctypes.c_size_t)]
             m = PMC(); m.cb = ctypes.sizeof(PMC)
-            ctypes.windll.psapi.GetProcessMemoryInfo(h, ctypes.byref(m), m.cb)
+            gm = k.K32GetProcessMemoryInfo; gm.argtypes = [W.HANDLE, ctypes.c_void_p, W.DWORD]
+            gm(h, ctypes.byref(m), m.cb)
             return v(ft[2]) + v(ft[3]), m.WorkingSetSize, m.PeakWorkingSetSize
         import resource
         r = resource.getrusage(resource.RUSAGE_SELF)
         rss = int(open('/proc/self/statm').read().split()[1]) * os.sysconf('SC_PAGE_SIZE')
         return r.ru_utime + r.ru_stime, rss, r.ru_maxrss * 1024
-    except Exception:
-        return 0.0, 0, 0
+    except Exception as e:
+        logging.warning('proc stats: %r', e); return 0.0, 0, 0
 
 class T:
     def __init__(s, out):
