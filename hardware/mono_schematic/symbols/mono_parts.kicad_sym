@@ -3,6 +3,25 @@
   (generator "mono_schematic")
   (generator_version "1.0")
   (symbol
+      "0466002.NRHF_2A_Fuse_1206_3216Metric_2"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "~")
+        (number "2")
+      )
+    )
+  (symbol
       "0R_DNP_R_0402_1005Metric_2"
       (pin
         passive
@@ -503,7 +522,7 @@
         line
         (at -5.08 0 0)
         (length 0)
-        (name "BAT_RAW")
+        (name "BAT_PACK")
         (number "1")
       )
       (pin
@@ -773,6 +792,33 @@
         (length 0)
         (name "~")
         (number "2")
+      )
+    )
+  (symbol
+      "AO3401A_SOT-23_3"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "BAT_GATE")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "BAT_RAW")
+        (number "2")
+      )
+      (pin
+        passive
+        line
+        (at -5.08 -2.54 0)
+        (length 0)
+        (name "BAT_FUSE")
+        (number "3")
       )
     )
   (symbol

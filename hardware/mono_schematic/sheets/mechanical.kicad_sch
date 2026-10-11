@@ -2,7 +2,7 @@
   (version 20260306)
   (generator "mono_schematic")
   (generator_version "1.0")
-  (uuid "9bf7eb69-e84c-484f-b20f-d98977eb29c2")
+  (uuid "35bed5a9-4623-4bac-a73f-91b780b1f486")
   (paper "A3")
   (title_block
     (title "Mechanical - M2.5 plated mounting holes (GND)")
@@ -57,7 +57,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "2b3cb6cc-a993-4476-9702-ff2b37e908d0")
+    (uuid "69caf9a7-16bc-496e-955b-6434fd6e984b")
     (property
       "Reference"
       "H1"
@@ -100,10 +100,10 @@
       )
       (hide yes)
     )
-    (pin "1" (uuid "efd4630b-7d64-4ed2-8fa5-7506fca22d96"))
+    (pin "1" (uuid "34dd4b95-34d2-4826-900c-752723b7f185"))
     (instances
       (project "mono_electronics"
-        (path "/1b1ffbf9-9c2f-45d0-a703-b4531e38c933"
+        (path "/2bdf181c-7bed-4047-8ff0-7befe9a279b9"
           (reference "H1")
           (unit 1)
         )
@@ -120,7 +120,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "0862c342-9762-40c5-bc89-c907814a822a")
+    (uuid "a6f3c039-d91b-45f5-bdae-cb22969dc305")
     (property
       "Reference"
       "H2"
@@ -163,10 +163,10 @@
       )
       (hide yes)
     )
-    (pin "1" (uuid "9d1c5786-3e47-4413-96f5-e62e95824ef0"))
+    (pin "1" (uuid "4f2f0769-9111-4c5a-b78e-a1ad90be8fd1"))
     (instances
       (project "mono_electronics"
-        (path "/1b1ffbf9-9c2f-45d0-a703-b4531e38c933"
+        (path "/2bdf181c-7bed-4047-8ff0-7befe9a279b9"
           (reference "H2")
           (unit 1)
         )
@@ -183,7 +183,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "65274a97-460f-43d9-86e8-816fdf600347")
+    (uuid "cfbfad7e-7ce1-45cb-9ed7-ac8c701641d8")
     (property
       "Reference"
       "H3"
@@ -226,10 +226,10 @@
       )
       (hide yes)
     )
-    (pin "1" (uuid "6299ee3a-68be-4c38-8276-834b4047972f"))
+    (pin "1" (uuid "6d4a29f0-0af7-4bb6-b08c-2a833895407b"))
     (instances
       (project "mono_electronics"
-        (path "/1b1ffbf9-9c2f-45d0-a703-b4531e38c933"
+        (path "/2bdf181c-7bed-4047-8ff0-7befe9a279b9"
           (reference "H3")
           (unit 1)
         )
@@ -246,7 +246,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "699704e6-cd42-499c-b796-17d44bd2d003")
+    (uuid "24ed8927-8551-4fc0-adb2-f58f91582b04")
     (property
       "Reference"
       "H4"
@@ -289,10 +289,10 @@
       )
       (hide yes)
     )
-    (pin "1" (uuid "c02a37b5-d40b-480d-909c-072e516128dc"))
+    (pin "1" (uuid "4a1d02e0-d7bf-45e8-976e-270224978227"))
     (instances
       (project "mono_electronics"
-        (path "/1b1ffbf9-9c2f-45d0-a703-b4531e38c933"
+        (path "/2bdf181c-7bed-4047-8ff0-7befe9a279b9"
           (reference "H4")
           (unit 1)
         )
@@ -308,7 +308,7 @@
       (width 0)
       (type default)
     )
-    (uuid "05e04d14-d99b-42a8-9617-9ad05043ca1b")
+    (uuid "4a12b514-0f5d-40de-975e-e8f325960e19")
   )
   (wire
     (pts
@@ -319,7 +319,7 @@
       (width 0)
       (type default)
     )
-    (uuid "64fbf653-8d8d-4ba9-ad8b-789774f8a094")
+    (uuid "3b9cd634-e08a-4761-bbd0-9871bb63e83a")
   )
   (wire
     (pts
@@ -330,7 +330,7 @@
       (width 0)
       (type default)
     )
-    (uuid "479e411a-b253-47d7-9a57-805b2f670723")
+    (uuid "460cdaba-c61a-4e89-8c6b-a1bb1086ba44")
   )
   (wire
     (pts
@@ -341,7 +341,7 @@
       (width 0)
       (type default)
     )
-    (uuid "c90274e5-4732-4baa-a22c-cac270bd483d")
+    (uuid "1a5d222b-0c76-4e77-b4ba-957b95cf37cb")
   )
   (global_label "GND"
     (shape passive)
@@ -353,7 +353,7 @@
       )
       (justify right)
     )
-    (uuid "3a80f526-78b4-46d2-a520-26c741fb5a88")
+    (uuid "70e04dfa-26f8-4040-baf4-f4b1730f0f8f")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 24.13 35.56 0)
       (effects
@@ -374,7 +374,7 @@
       )
       (justify right)
     )
-    (uuid "d3171879-92c0-41ec-8562-2748525d69c2")
+    (uuid "bec38dff-2893-4f26-8e30-abc741f21f72")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 69.85 35.56 0)
       (effects
@@ -395,7 +395,7 @@
       )
       (justify right)
     )
-    (uuid "47ee91c5-b977-4743-ab51-5f5114f45059")
+    (uuid "a186958c-2b62-471f-b93b-1a3c6d80d434")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 115.57 35.56 0)
       (effects
@@ -416,7 +416,7 @@
       )
       (justify right)
     )
-    (uuid "547edfc9-1eac-45e3-a2fb-5bee834e1bf9")
+    (uuid "76b93c7e-5b97-4475-9700-5ba8afc35fe8")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 161.29 35.56 0)
       (effects
@@ -431,52 +431,52 @@
     (at 30.48 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "38d906c0-6d92-4da0-beee-705b874f1c70")
+    (uuid "46ff016a-8c83-42bc-8a1d-50c026c03933")
   )
   (junction
     (at 24.13 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "8ce69dd1-6a5a-4d9b-be3d-c151ff6f9f75")
+    (uuid "0481e5da-ccb9-4627-9cb8-bfda52d24a36")
   )
   (junction
     (at 76.2 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "893f2789-29ce-48b9-ba62-628d34a94276")
+    (uuid "576f893f-29b2-4d40-b035-803dc2221de1")
   )
   (junction
     (at 69.85 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "b610bacc-2432-4ed6-9de4-daf844f8c1ad")
+    (uuid "595aa920-b1c2-4f2a-b42e-0cc5b6369c45")
   )
   (junction
     (at 121.92 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "e15a17de-5431-4046-a9b0-db597186de2c")
+    (uuid "99919786-be1b-4ace-b68d-f367494b9fc6")
   )
   (junction
     (at 115.57 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "ee95a188-2a3b-495c-80b6-1c8a35b143c1")
+    (uuid "001ccfcf-72d6-4245-9337-829eab2281f5")
   )
   (junction
     (at 167.64 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "c097ba2b-99af-409c-a601-270922e28493")
+    (uuid "6c1cfbc7-3889-47fc-bd23-018f1ee05ab1")
   )
   (junction
     (at 161.29 35.56)
     (diameter 0)
     (color 0 0 0 0)
-    (uuid "3e87307d-df91-41a9-9b0d-9c83530930a4")
+    (uuid "e59f01aa-88b1-4367-94f9-317975b6d269")
   )
   (sheet_instances
-    (path "/1b1ffbf9-9c2f-45d0-a703-b4531e38c933"
+    (path "/2bdf181c-7bed-4047-8ff0-7befe9a279b9"
       (page "1")
     )
   )

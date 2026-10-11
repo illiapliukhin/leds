@@ -468,6 +468,15 @@
     }
   },
   {
+    "reference": "F_BAT1",
+    "value": "0466002.NRHF 2A",
+    "footprint": "Fuse_1206_3216Metric",
+    "pad_nets": {
+      "1": "BAT_PACK",
+      "2": "BAT_FUSE"
+    }
+  },
+  {
     "reference": "H1",
     "value": "M2.5",
     "footprint": "MountingHole_2.7mm_M2.5_Pad",
@@ -513,7 +522,7 @@
     "value": "53398-0371",
     "footprint": "Molex_PicoBlade_53398-0371_1x03-1MP_P1.25mm_Vertical",
     "pad_nets": {
-      "1": "BAT_RAW",
+      "1": "BAT_PACK",
       "2": "TS_MR",
       "3": "GND"
     }
@@ -719,6 +728,16 @@
       "4": "MIC_OUT",
       "5": "GND",
       "6": "AUDIO_3V3"
+    }
+  },
+  {
+    "reference": "Q_BAT1",
+    "value": "AO3401A",
+    "footprint": "SOT-23",
+    "pad_nets": {
+      "1": "BAT_GATE",
+      "2": "BAT_RAW",
+      "3": "BAT_FUSE"
     }
   },
   {
@@ -1110,6 +1129,15 @@
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
       "1": "AUD_BIAS",
+      "2": "GND"
+    }
+  },
+  {
+    "reference": "R_BATG1",
+    "value": "10k",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "BAT_GATE",
       "2": "GND"
     }
   },
