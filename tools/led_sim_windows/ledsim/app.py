@@ -57,9 +57,10 @@ class App:
                 if e.type == pygame.QUIT: return
                 if e.type == pygame.VIDEORESIZE: s.layout(); [setattr(v, 'surf_key', None) for v in s.views.values() if hasattr(v, 'surf_key')]
             s.ui.begin(ev)
-            now = time.perf_counter(); dt = min(0.1, now - t_last); t_last = now
+            now = time.perf_counter(); dt = min(0.25, now - t_last); t_last = now
             s.fps_meas = 0.95 * s.fps_meas + 0.05 / max(dt, 1e-4)
             s.dt = dt
+            if dt > 0.2: __import__('logging').warning('slow frame %.0f ms (tab %s, %d boards)', dt * 1000, s.tab, len(s.views['system'].w.boards))
             sv = s.views['system']; sv.tick(dt)
             if not sv.w.paused: s.views['test'].tick()                 # the stack keeps running in every tab
             s.views['lab'].tick(dt)                                     # electrothermal model runs in every tab
@@ -85,11 +86,18 @@ class App:
                     if tab: s.tab = tab
                     if path: pygame.image.save(sc, path); print('shot', path, flush=True)
             if s.shots and frame > max(f for f, *_ in s.shots): return
-            clock.tick(60)
+            # idle when minimised / in the background: no need to burn a full core
+            clock.tick(60 if pygame.display.get_active() and pygame.key.get_focused() else 12)
 
 def main():
     a = sys.argv[1:]
     lang = 'en' if '--en' in a else 'ru'
     if '--shots' in a:
         from . import selftest; selftest.run(a[a.index('--shots') + 1]); return
-    App(lang=lang).run()
+    import os, traceback, logging
+    d = os.path.join(os.environ.get('LOCALAPPDATA') or os.path.expanduser('~'), 'LED_Simulator'); os.makedirs(d, exist_ok=True)
+    logging.basicConfig(filename=os.path.join(d, 'led_sim.log'), level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', force=True)
+    logging.info('start %s', sys.argv)
+    try: App(lang=lang).run()
+    except Exception:
+        logging.error('crash\n%s', traceback.format_exc()); raise

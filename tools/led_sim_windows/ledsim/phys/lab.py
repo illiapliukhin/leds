@@ -91,12 +91,16 @@ class Lab:
         boards = s.w.boards
         if not boards: return
         todo = []; s.frame = getattr(s, 'frame', 0) + 1
-        if s.sel in boards and s.frame % 2 == 0: todo.append(s.sel)          # selected board at 30 Hz
-        n = min(budget, len(boards))
+        # the electrothermal state changes on 0.1 s+ time scales: selected board at 10 Hz, one background board on
+        # the other frames, so the model costs <~4 ms/frame on a 4-core laptop CPU (was ~11 ms every frame -> 100 % core)
+        if s.frame % 6 == 0:
+            if s.sel in boards: todo.append(s.sel)
+            n = 0
+        else: n = 1 if s.frame % 2 else 0
         import time as _t; t0 = _t.perf_counter()
         for b in todo + [None] * n:
             if b is None:
-                if _t.perf_counter() - t0 > 0.006 and (todo or s.frame % 2): break                 # 8 ms budget per frame for background boards
+                if _t.perf_counter() - t0 > 0.004: break
                 s.rr = (s.rr + 1) % len(boards); b = boards[s.rr]
                 if b is s.sel: continue
             bp = s.bp(b)

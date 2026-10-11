@@ -277,7 +277,7 @@ class SystemView(Nav2D, Rulers):
         if s.w.paused: return
         s.acc += dt * 1000 * s.speed
         n = int(s.acc); s.acc -= n
-        n = min(n, 100)
+        n = min(n, 250)          # keep sim time locked to wall clock down to ~4 fps (was 100 -> boards visibly slowed/stalled below 10 fps)
         import time; t0 = time.perf_counter()
         if n: s.w.step(n)
         s.load_ms = 0.9 * s.load_ms + 0.1 * (time.perf_counter() - t0) * 1000
