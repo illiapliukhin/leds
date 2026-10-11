@@ -61,15 +61,24 @@ Loads that do not implement a function leave the pin **unconnected**, except the
 
 ## 5. Current and voltage-drop rules vs. cable length
 
-Headroom budget at 10 mA/LED, white:
+Headroom budget at 10 mA/LED, white (rail per R_FB_TOP1/R_FB_BOT1 681k/91k: VOUT = 0.5 V × (1 + 681/91) = **4.24 V**; the net is still called `LED_4V1` for history):
 
 | Item | Drop |
 |---|---:|
-| `LED_4V1` | 4.10 V |
-| P-FET + board copper at 0.32 A | −0.05 V |
-| LED Vf (white, 10 mA, worst bin) | −3.10 V |
+| `LED_4V1` (TPS63802, FB 681k/91k 0.1 %) | 4.24 V |
+| P-FET + board copper at 0.32 A (v15 worst row 17: 0.106 V) | −0.11 V |
 | MBI5124 output knee (keep ≥ 0.4 V for regulation) | −0.40 V |
-| **Left for row wiring (FFC + lead-in + net)** | **≈ 0.55 V**, design to **0.35 V** to keep margin for Vf spread and temperature |
+| Row wiring design budget (FFC + lead-in + net) | −0.35 V |
+| **Allowed LED Vf at 10 mA** | **≤ 3.38 V** |
+
+NCD0603W1 (C84265) Vf: datasheet min/typ/max 2.6/2.8/3.6 V at 5 mA, unbinned. At 10 mA expect about +0.1 V, so worst case is about 3.7 V, which exceeds the 3.38 V allowance. Fit the Vf bins up to 3.0–3.2 V @ 5 mA only (± 0.1 V bin tolerance, ≈ ≤ 3.4 V at 10 mA); see §5.1. Typical parts (2.8 V @ 5 mA ≈ 2.9 V @ 10 mA) leave ≈ 0.5 V spare.
+
+### 5.1 LED Vf bin (order note for every panel BOM)
+
+- NationStar's NCD0603W1 datasheet only defines Vf *classification ranges* at 5 mA / 25 °C: **2.6–2.8 V, 2.8–3.0 V, 3.0–3.2 V** (± 0.1 V). The bin is printed as `VF(V): xx-xx` on the reel label. There is no orderable bin suffix in the part number.
+- LCSC/JLC C84265 is sold **unbinned** (listing "2.6V~3.6V"; stock 669,871, $0.016 @500, checked 2026-10-11). JLC cannot guarantee a bin.
+- **Spec to order:** NCD0603W1, white, **Vf bin 2.8–3.0 V @ 5 mA preferred, 3.0–3.2 V acceptable; reject > 3.2 V @ 5 mA**, one Vf bin per panel (uniform brightness). For a JLC build either (a) consign reels bought from NationStar/a distributor with the bin on the label, or (b) accept the unbinned C84265 and screen on bring-up: any pixel dimmer at full white on the farthest row means a high-Vf part. Raising the rail is not an option without re-checking the 74HC154/AO3403 gate drive.
+- Only one row is lit at a time, so a high-Vf LED loses current only on its own pixel (MBI5124 out of regulation). It does not affect others.
 
 Only the row conductor counts: it carries up to 0.32 A, while each column carries just 10 mA. Drop per metre at 0.32 A (one way):
 

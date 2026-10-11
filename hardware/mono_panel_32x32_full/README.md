@@ -79,3 +79,7 @@ Bring-up sim: `firmware/mono_split/sim/bringup/bringup.py --panel full`.
 `cable.py --panel full`: Type B gives J_ROW1→J_ROW and J_COL1→J_COL pin 1→1 with 0 net mismatches (Type A mirrors 1→40, 32 errors).
 Nominal tests: I2C scan, all on, row walk, column walk, and checkerboard all **PASS** (32/32 rows and columns, 0 LED mismatches). Fault injection: F1 (Type A cable) and F2 (open COL_07) are **caught**.
 See `firmware/mono_split/sim/bringup/bench_report_full.md` and `png/bringup_full_*.png`.
+
+## LED Vf bin (order note)
+
+NCD0603W1 (C84265) is sold unbinned on LCSC/JLC (2.6–3.6 V @ 5 mA). The main board's 4.24 V rail allows ≤ 3.38 V at 10 mA, which is about ≤ 3.2 V @ 5 mA. **Order Vf bin 2.8–3.0 V @ 5 mA (preferred) or 3.0–3.2 V; reject > 3.2 V**, one bin per panel. The bin is printed as `VF(V)` on the reel label, and NationStar has no part-number suffix for it. With JLC either consign labelled reels or accept unbinned parts and screen at bring-up. Details: `hardware/common/LED_INTERFACE_STANDARD.md` §5.1.

@@ -280,6 +280,14 @@ def mech_drop(pdf):
     for i, t in enumerate(notes): ax.text(220, 150 - i * 7, t, fontsize=6.8)
     pdf.savefig(fig); fig.savefig('out/mech_3_dropcalc.png', dpi=110); plt.close(fig)
 
+HQ = os.path.join('renders', 'hq'); os.makedirs(HQ, exist_ok=True)
+_orig_save = plt.Figure.savefig
+def _save(self, fn, *a, **k):
+    _orig_save(self, fn, *a, **k)
+    if isinstance(fn, str) and fn.startswith('out/') and fn.endswith('.png'):
+        _orig_save(self, os.path.join(HQ, os.path.basename(fn).replace('.png', '_300dpi.png')), dpi=300)
+plt.Figure.savefig = _save
+
 if __name__ == '__main__':
     with PdfPages('wire_grid_32x32_schematic.pdf') as pdf:
         sch_matrix(pdf); sch_conn(pdf)

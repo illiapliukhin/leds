@@ -45,3 +45,7 @@ Everything here is generated: `gen_lattice.py` (KiCad 10 pcbnew) → `analyze.py
 
 ## Bring-up sim
 `firmware/mono_split/sim/bringup/bringup.py --panel lattice` loads this `.kicad_pcb`. It is re-dumped to `panel_lattice.json` with `pdump.py` when the board is newer. It traces J_ROW/J_COL → LED nets the same way and shows the lattice with lit LEDs. Report: `bench_report_lattice.md`, screenshots `png/bringup_lattice_*.png`.
+
+## LED Vf bin (order note)
+
+NCD0603W1 (C84265) is sold unbinned on LCSC/JLC (2.6–3.6 V @ 5 mA). The main board's 4.24 V rail allows ≤ 3.38 V at 10 mA, which is about ≤ 3.2 V @ 5 mA. **Order Vf bin 2.8–3.0 V @ 5 mA (preferred) or 3.0–3.2 V; reject > 3.2 V**, one bin per panel. The bin is printed as `VF(V)` on the reel label, and NationStar has no part-number suffix for it. With JLC either consign labelled reels or accept unbinned parts and screen at bring-up. Details: `hardware/common/LED_INTERFACE_STANDARD.md` §5.1.
