@@ -453,15 +453,15 @@ class SystemView(Nav2D, Rulers):
         lo, hi = pd['lo'], pd['hi']; pitch = (hi[0] - lo[0]) / 31
         ax, ay = s.w2s(p.x - p.size / 2 + lo[0] - pitch / 2, p.y - p.size / 2 + lo[1] - pitch / 2)
         aw = 32 * pitch * s.zoom
-        k = int(pitch * s.zoom)
+        k = int(round(aw / 32))                                            # whole-pixel LED cells: no second rescale pass
         if k >= 3:
+            if k > 40: k = int(pitch * s.zoom)
             big = pygame.transform.scale(small, (32 * k, 32 * k))
             big.blit(s.dot_mask(min(k, 40)) if k <= 40 else pygame.transform.scale(s.dot_mask(40), (32 * k, 32 * k)), (0, 0), special_flags=pygame.BLEND_MULT)
-            big = pygame.transform.scale(big, (int(aw), int(aw))) if abs(32 * k - aw) > 1 else big
-            surf.blit(big, (ax, ay), special_flags=pygame.BLEND_ADD)
+            # glow composited into the LED layer off-screen, then ONE additive blit to the screen (was two)
             gs = pygame.transform.smoothscale(small, (16, 16)); gs.fill((95, 95, 95), special_flags=pygame.BLEND_MULT)
-            glow = pygame.transform.smoothscale(gs, (int(aw * 1.06), int(aw * 1.06)))
-            surf.blit(glow, (ax - aw * 0.03, ay - aw * 0.03), special_flags=pygame.BLEND_ADD)
+            big.blit(pygame.transform.smoothscale(gs, big.get_size()), (0, 0), special_flags=pygame.BLEND_ADD)
+            surf.blit(big, (ax, ay), special_flags=pygame.BLEND_ADD)
         else:
             surf.blit(pygame.transform.smoothscale(small, (max(1, int(aw)), max(1, int(aw)))), (ax, ay))
         sel = p is s.sel
@@ -566,10 +566,18 @@ class SystemView(Nav2D, Rulers):
             if s.board_alpha >= 0.99:
                 for b in s.w.boards: s.draw_board(surf, b)
             else:
-                if getattr(s, '_blayer', None) is None or s._blayer.get_size() != surf.get_size(): s._blayer = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
-                L = s._blayer; L.fill((0, 0, 0, 0)); L.set_clip(view)
-                for b in s.w.boards: s.draw_board(L, b)
-                L.set_clip(None); L.set_alpha(int(255 * s.board_alpha)); surf.blit(L, (0, 0))
+                # dirty-rect cache: the translucent board layer is only redrawn when the camera, a board, the selection
+                # or the opacity changed; and only the boards' bounding box is blended onto the screen
+                key = (pygame.time.get_ticks() // 250, surf.get_size(), tuple(view), s.zoom, s.w2s(0, 0), id(s.sel), int(255 * s.board_alpha), getattr(s, 'xray', None),
+                       tuple((id(b), b.x, b.y, b.rot, getattr(b, 'mirror', 0), b.powered, b.node.state) for b in s.w.boards))
+                if getattr(s, '_blayer', None) is None or s._blayer.get_size() != surf.get_size(): s._blayer = pygame.Surface(surf.get_size(), pygame.SRCALPHA); s._bkey = None
+                L = s._blayer
+                if key != getattr(s, '_bkey', None):
+                    L.fill((0, 0, 0, 0)); L.set_clip(view)
+                    for b in s.w.boards: s.draw_board(L, b)
+                    L.set_clip(None); L.set_alpha(int(255 * s.board_alpha)); s._bkey = key
+                    br = L.get_bounding_rect(); s._brect = br.clip(view)
+                if s._brect.w and s._brect.h: surf.blit(L, s._brect.topleft, s._brect)
         s.draw_ropes(surf)
         if s.show['power']: s.draw_power(surf)
         now = pygame.time.get_ticks()

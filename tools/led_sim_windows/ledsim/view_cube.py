@@ -9,11 +9,12 @@ from .world import PANELS
 from .camera import OrbitCam
 from . import cube_fx, image3d
 
-DEMOS3D = ['ambigram', 'anamorph', 'image', 'tsweep', 'life', 'fireworks', 'snake', 'heart', 'ripples', 'plasma', 'dna', 'shapes', 'wave', 'rain', 'sphere', 'text', 'slices2d', 'extrude2d']
+DEMOS3D = ['walker', 'runner', 'gogo', 'ambigram', 'anamorph', 'image', 'tsweep', 'life', 'fireworks', 'snake', 'heart', 'ripples', 'plasma', 'dna', 'shapes', 'wave', 'rain', 'sphere', 'text', 'slices2d', 'extrude2d']
 DEMO_RU = {'shapes': 'Вращающиеся фигуры', 'wave': '3D-волна', 'rain': 'Дождь', 'sphere': 'Сфера', 'text': '3D-текст (проход)',
            'slices2d': '2D-демо по слоям (срезы)', 'extrude2d': '2D-демо выдавливанием',
            'ambigram': 'Амбиграмма (3 слова)', 'anamorph': 'Анаморфоз', 'image': 'Картинка → 3D', 'tsweep': 'Вращающийся 3D-текст', 'life': '3D «Жизнь»',
-           'fireworks': 'Фейерверк', 'snake': '3D-змейка', 'heart': 'Воксельное сердце', 'ripples': 'Круги на воде', 'plasma': 'Плазма', 'dna': 'ДНК (двойная спираль)'}
+           'fireworks': 'Фейерверк', 'snake': '3D-змейка', 'heart': 'Воксельное сердце', 'ripples': 'Круги на воде', 'plasma': 'Плазма', 'dna': 'ДНК (двойная спираль)', 'walker': 'Идущий человек', 'runner': 'Бегущий человек', 'gogo': 'Гоу-гоу (танцовщица)'}
+_GLUT = ((np.linspace(0, 1, 1024)[:, None] ** (1 / 2.2)) * np.array([255, 246, 228])).astype(np.uint8)
 GLYPH = {}
 def glyph_cols(ch):
     if ch not in GLYPH:
@@ -23,7 +24,7 @@ def glyph_cols(ch):
 
 class CubeView:
     def __init__(s, app):
-        s.app = app; s.N = 8; s.kind = 'lattice'; s.demo = 0; s.cam = OrbitCam()
+        s.app = app; s.N = 8; s.kind = 'lattice'; s.demo = DEMOS3D.index('ambigram'); s.cam = OrbitCam()
         s.t0 = time.time(); s.rain = None; s.d2 = 0; s.drag = False
         s.words = ['LED', 'ILLIA', 'MONO']; s.fx = cube_fx.FX(); s.amb = None; s.amb_key = None; s.ana = None; s.ana_key = None
         s.img = image3d.demo_image(); s.img2 = None; s.img_name = 'встроенная картинка'; s.imode = 0; s.igamma = 1.0; s.ithr = 0.5
@@ -56,6 +57,7 @@ class CubeView:
             m2 = image3d.preprocess(s.img2, s.igamma, s.ithr, s.idither, s.iinvert)[1] if s.img2 is not None else None
             return image3d.volume(image3d.MODES[s.imode], g, m, n, t, mask2=m2, fill=s.ifill)
         if name == 'tsweep': return cube_fx.FX.text_sweep(s.words[0], x, y, z, t, n)
+        if name in ('walker', 'runner', 'gogo'): return cube_fx.figure({'walker': 'walk', 'runner': 'run'}.get(name, name), x, y, z, t)
         if name == 'life': return s.fx.life3d(t, dt)
         if name == 'fireworks': return s.fx.fireworks(t, dt)
         if name == 'snake': return s.fx.snake3d(t, dt)
@@ -122,27 +124,33 @@ class CubeView:
         c = s.cam; c.update(s.app.dt, s.app); tx, ty, tz = c.target
         cy, sy, cp, sp = math.cos(c.yaw), math.sin(c.yaw), math.cos(c.pitch), math.sin(c.pitch); sp_cam = sp
         # world: layer axis vertical (layers stacked upward); camera looks at c.target
-        X, Y, Z = x - tx, -z - ty, y - tz
         M = c.matrix()
-        xr = M[0, 0] * X + M[0, 1] * Y + M[0, 2] * Z; yr = M[1, 0] * X + M[1, 1] * Y + M[1, 2] * Z; zr = M[2, 0] * X + M[2, 1] * Y + M[2, 2] * Z
-        zc = zr + c.dist; f = min(view.w, view.h) * 0.9 * (c.dist / 2.6 if getattr(c, 'tele', False) else 1.0)
-        W, H = view.w // 2, view.h // 2
-        px = (xr / zc * f / 2 + W / 2).astype(np.int32); py = (yr / zc * f / 2 + H / 2).astype(np.int32)
-        ok = (zc > 0.1) & (px >= 1) & (px < W - 1) & (py >= 1) & (py < H - 1)
-        buf = np.zeros((H, W), np.float32)
+        pkey = (M.tobytes(), tuple(c.target), c.dist, getattr(c, 'tele', False), view.size, s.N, s.kind)
+        if pkey != getattr(s, '_pkey', None):                              # projection only changes with the camera
+            X, Y, Z = x - tx, -z - ty, y - tz
+            xr = M[0, 0] * X + M[0, 1] * Y + M[0, 2] * Z; yr = M[1, 0] * X + M[1, 1] * Y + M[1, 2] * Z; zr = M[2, 0] * X + M[2, 1] * Y + M[2, 2] * Z
+            zc = zr + c.dist; f = min(view.w, view.h) * 0.9 * (c.dist / 2.6 if getattr(c, 'tele', False) else 1.0)
+            W, H = view.w // 2, view.h // 2
+            px = (xr / zc * f / 2 + W / 2).astype(np.int32); py = (yr / zc * f / 2 + H / 2).astype(np.int32)
+            ok = (zc > 0.1) & (px >= 1) & (px < W - 1) & (py >= 1) & (py < H - 1)
+            s._proj = (px, py, zc, ok, f, W, H, ((2.2 / np.maximum(zc, 0.1)) ** 1.2)[ok], (py * W + px)[ok]); s._pkey = pkey
+        px, py, zc, ok, f, W, H, att, idx = s._proj
         base = 0.004                                                       # unlit LED die visibility
-        w = (duty * 4.0 + base) * (2.2 / np.maximum(zc, 0.1)) ** 1.2
-        np.add.at(buf, (py[ok], px[ok]), w[ok])
-        lit = ok & (duty > 0.01)                                           # lit LEDs: 2x2 splat so they read as dots
-        for dx, dy in ((1, 0), (0, 1), (1, 1)):
-            np.add.at(buf, (py[lit] + dy, px[lit] + dx), w[lit] * 0.6)
-        img = np.clip(buf, 0, 1.5)
-        rgb = (np.clip(img, 0, 1)[..., None] ** (1 / 2.2) * np.array([255, 246, 228], np.float32)).astype(np.uint8)
-        small = pygame.surfarray.make_surface(np.ascontiguousarray(rgb.transpose(1, 0, 2)))
+        dk = duty[ok]; wk = (dk * 4.0 + base) * att
+        # bincount is ~10× faster than np.add.at for the splat
+        acc = np.bincount(idx, wk, H * W)
+        lit = dk > 0.01                                              # lit LEDs: 2x2 splat so they read as dots
+        il, wl = idx[lit], wk[lit] * 0.6
+        for d in (1, W, W + 1): acc += np.bincount(il + d, wl, H * W)
+        buf = acc.reshape(H, W).astype(np.float32)
+        # display gamma via a 1024-entry LUT (was a per-pixel float pow), built straight in (W, H, 3) order
+        q = (np.minimum(buf.T, 1.0) * 1023).astype(np.int16)
+        small = pygame.surfarray.make_surface(_GLUT[q])
         surf.fill((8, 9, 12), view); surf.set_clip(view)
-        big = pygame.transform.smoothscale(small, view.size)
-        glow = pygame.transform.smoothscale(pygame.transform.smoothscale(small, (W // 6, H // 6)), view.size)
-        surf.blit(big, view.topleft); surf.blit(glow, view.topleft, special_flags=pygame.BLEND_ADD)
+        # glow added at half resolution, then ONE upscale (was two full-size smoothscales + a full-size additive blit)
+        glow = pygame.transform.smoothscale(pygame.transform.smoothscale(small, (max(1, W // 6), max(1, H // 6))), (W, H))
+        small.blit(glow, (0, 0), special_flags=pygame.BLEND_ADD)
+        surf.blit(pygame.transform.smoothscale(small, view.size), view.topleft)
         # layer frames
         n = s.N
         for k in (0, n - 1):

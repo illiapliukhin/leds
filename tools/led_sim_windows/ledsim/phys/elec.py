@@ -219,9 +219,8 @@ class LedModel:
         short=True: column shorted to GND (no MBI regulation) -> V = Vf(I)."""
         V = np.asarray(V, float); I = np.full(V.shape, iset * 0.9)
         vk = vknee / 3.0                                                       # 95 % of Iset at Vds = Vknee
+        sh = np.zeros(V.shape, bool) if short is None else short
         for _ in range(14):
-            if short is None: sh = np.zeros(V.shape, bool)
-            else: sh = short
             Ic = np.clip(I, 1e-9, None)
             ratio = np.clip(Ic / iset, 0, 0.999999)
             vds = np.where(sh, 0.0, -vk * np.log1p(-ratio))
@@ -230,6 +229,7 @@ class LedModel:
             dvds = np.where(sh, 0.0, vk / (iset * (1 - ratio)))
             I = I - f / (dvf + dvds)
             I = np.where(sh, np.clip(I, 1e-9, 2.0), np.clip(I, 1e-9, iset * 0.999999))
+            if np.abs(f).max() < 1e-7: break                                   # converged (quadratic): usually 4–6 iterations
         return np.where(V <= 0.5, 0.0, I)
 
 def solve_rows(V_led, on, r_feed, r_panel, led, T_led=25.0, iset=0.0102, vknee=0.4, short_cols=None, shorted_rows=None, gs=10, I0=None):

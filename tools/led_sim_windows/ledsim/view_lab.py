@@ -48,9 +48,9 @@ class LabView:
         surf.blit(srf, (x0, y0)); pygame.draw.rect(surf, (90, 96, 110), (x0, y0, th.nx * sc, th.ny * sc), 1)
         text(surf, 'Плата %08X — тепловая карта (МКР %d×%d, шаг %.1f мм), %.1f…%.1f °C, время модели %.0f с' % (b.id, th.nx, th.ny, th.dx * 1e3, lo, hi, bp.t), (x0, view.y + 10), (190, 200, 215), 13)
         # colour bar
-        for k in range(200):
-            c = heat_rgb(np.array(lo + (hi - lo) * k / 199), lo, hi).tolist()
-            pygame.draw.line(surf, c, (x0 + k, y0 + th.ny * sc + 6), (x0 + k, y0 + th.ny * sc + 14))
+        if getattr(s, '_bar', None) is None:                               # the bar is lo..hi normalised: same image every frame
+            s._bar = pygame.transform.scale(pygame.surfarray.make_surface(heat_rgb(np.linspace(0, 1, 200), 0, 1)[:, None, :]), (200, 9))
+        surf.blit(s._bar, (x0, y0 + th.ny * sc + 6))
         text(surf, '%.0f °C' % lo, (x0, y0 + th.ny * sc + 16), sz=10); text(surf, '%.0f °C' % hi, (x0 + 180, y0 + th.ny * sc + 16), sz=10)
         def P(px, py): return (x0 + ((px + th.cx - th.x0) / (th.dx * 1e3)) * sc, y0 + ((py + th.cy - th.y0) / (th.dx * 1e3)) * sc)
         for part in bp.parts.values():
@@ -74,11 +74,11 @@ class LabView:
         px0 = x0 + int(th.nx * sc) + 24; cs = max(3, min(8, (view.right - px0 - 20) // 32))
         I = bp.led_I; iset = DS['MBI5124']['k'] / lab.p['rext']
         text(surf, 'Панель: ток LED (мА), %d погибших' % int(bp.led_dead.sum()), (px0, view.y + 10), (190, 200, 215), 12)
-        for r in range(32):
-            for c in range(32):
-                v = I[r, c] / max(iset, 1e-6)
-                col = (90, 0, 0) if bp.led_dead[r, c] else (int(min(255, 255 * v)), int(min(255, 230 * v)), int(min(255, 140 * v)))
-                pygame.draw.rect(surf, col, (px0 + c * cs, y0 + r * cs, cs - 1, cs - 1))
+        v = np.asarray(I, np.float32) / max(iset, 1e-6)                    # one numpy image instead of 1024 draw.rect calls
+        rgb = np.clip(v[..., None] * np.array([255, 230, 140], np.float32), 0, 255).astype(np.uint8)
+        rgb[np.asarray(bp.led_dead, bool)] = (90, 0, 0)
+        cell = np.zeros((32, cs, 32, cs, 3), np.uint8); cell[:, :cs - 1, :, :cs - 1] = rgb[:, None, :, None, :]
+        surf.blit(pygame.surfarray.make_surface(np.ascontiguousarray(cell.reshape(32 * cs, 32 * cs, 3).transpose(1, 0, 2))), (px0, y0))
         text(surf, 'макс %.1f мА, мин (горящих) %.2f мА, Iset %.2f мА' % (I.max() * 1e3, (I[I > 1e-5].min() * 1e3 if (I > 1e-5).any() else 0), iset * 1e3), (px0, y0 + 32 * cs + 4), sz=10)
         # rails and currents
         y = y0 + th.ny * sc + 36; R = bp.rails; inf = bp.info
