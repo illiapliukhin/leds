@@ -52,9 +52,10 @@ whole front, so butted panels (6-stack, 3×2, 6×1) keep one continuous pixel gr
 - `./make_fab.sh` → `mono_panel_32x32_full_fab.zip` (Gerbers F/In1/In2/B, drill, BOM + CPL JLC format).
 - **Assembly:** LEDs on top (1024 × C84265). The back has 2 × FH12 (C202114), U_ID (C2655410) and C_ID (C1525), so JLC needs **double-sided assembly**.
   A cheaper option: top-side assembly only, then hand-solder the 2 FFCs + 0402 + SOT-23 (and the standoffs).
-- **Price estimate (estimate only, JLC 2026 list prices, 5 pcs):** 4-layer 160×160 1.6 mm with 1 oz inner ≈ $60–80 for 5;
-  assembly setup + 1024 LEDs/board ≈ $12–15 parts + ≈ $8 placement per board; double-sided adds about $25 setup + extended-part fees.
-  **≈ $45–60 per assembled panel at qty 5**, about $30 at qty 30.
+- **Price (ESTIMATE, JLC/LCSC list prices, `fab/price_estimate.json`, priced BOM `fab/BOM_mono_panel_32x32_full_priced.csv`):**
+  parts ≈ $8.5/board (1024 LEDs ≈ $7.0, 2 × FH12 ≈ $1.24, EEPROM $0.27); 4L 160×160 PCB with 1 oz inner ≈ $70 for 5;
+  double-sided SMT setup ≈ $50 + 4 extended-part fees ≈ $12 → **≈ $38 per assembled panel at qty 5, ≈ $23 at qty 30**.
+  Top-only assembly with the back parts hand-soldered saves about $25 per order.
 
 ## Renders (`renders/`)
 
