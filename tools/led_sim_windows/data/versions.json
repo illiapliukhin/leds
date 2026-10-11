@@ -1,0 +1,102 @@
+{
+ "repo_head": "5702e9609eb649516ece84da5e1c744e77bbc515",
+ "pcb": {
+  "board_v15": {
+   "src": "hardware/mono_electronics/mono_electronics.kicad_pcb",
+   "git": "5702e9609eb649516ece84da5e1c744e77bbc515",
+   "src_sha256": "af67cea87ab12ff499fad12083501a982fe147914604283d3f13f56daa22ca2e",
+   "export_sha256": "627194e0cc8c81781c52d907395eb2043f581165ce3971ef3ce7b9acc596fe9c",
+   "title": "mono_electronics v15"
+  },
+  "panel_full": {
+   "src": "hardware/mono_panel_32x32_full/mono_panel_32x32_full.kicad_pcb",
+   "git": "035bd00411dc04cd88d18b20641d20c5a2690927",
+   "src_sha256": "de540ffa139767f1c01f532533cd4dadb5ed8aab452d72890b2342e1593cda72",
+   "export_sha256": "667b51dfb4182191d64208c728bc1ebfc0173663f62dd54fc1dabdb316d0e604",
+   "title": "mono_panel_32x32_full (edge-to-edge)"
+  },
+  "panel_flat": {
+   "src": "hardware/mono_panel_32x32/mono_panel_32x32.kicad_pcb",
+   "git": "b9011da15925d0562a39d45f8db545dcd41aba5f",
+   "src_sha256": "f816dc3845395c1f65bc474699662dd62a0baae6b6e95f5bb7b6a59e07763cc5",
+   "export_sha256": "8c5781b4174df3a00701e8da5301afa05fa3cad387c2291f9528e702c483fe00",
+   "title": "mono_panel_32x32 (flat, old)"
+  },
+  "panel_lattice": {
+   "src": "hardware/mono_panel_32x32_lattice/mono_panel_32x32_lattice.kicad_pcb",
+   "git": "e202f7ce1278514d68c8ff312a48733d3f862f86",
+   "src_sha256": "255a609fbc7438c8a56fb496f3ff704e66382a26db2c9bba07e65aaf7d2abdd1",
+   "export_sha256": "9493e9902a4c4d02bb52904ca4fb0bd7d06c735af290ff3c75892ce6aa9496f0",
+   "title": "mono_panel_32x32_lattice"
+  },
+  "panel_20x20": {
+   "src": "hardware/mono_panel_20x20/mono_panel_20x20.kicad_pcb",
+   "git": "b9011da15925d0562a39d45f8db545dcd41aba5f",
+   "src_sha256": "19418d63c2181002edf64b9ab4c2a56903b8470bbb978428cab085d48c289e7e",
+   "export_sha256": "d95bde794924e67b49ad61f60e428813d15b1aa66c2cb77eeb8d773a878a4796",
+   "title": "mono_panel_20x20"
+  },
+  "garland": {
+   "src": "hardware/garland_breakout/garland_breakout.kicad_pcb",
+   "git": "f4e537c2c910f6be50ef026fbfcc48cd57971f00",
+   "src_sha256": "392c68070bea16501af42e6276cab1f3d1dd2c7ad2b0b03b7084e64cf5cabb68",
+   "export_sha256": "d83dd2aafaf84484425b6fd50c8bdac99cb45ab0dc71e79497aa75a8bb829be5",
+   "title": "garland_breakout"
+  }
+ },
+ "sch": {
+  "board_v15": {
+   "src": "hardware/mono_schematic/mono_electronics.kicad_sch",
+   "git": "c1c68757cb12bd7ddf8cef37266f8d9435291019",
+   "src_sha256": "88cc168038114544f18cb48e141f7d21a40682be00cea42c901b621b664418ed",
+   "pdf": true,
+   "net": true,
+   "err": ""
+  }
+ },
+ "firmware": {
+  "firmware/mono_split/main/demo.c": {
+   "git": "dcbbfbadcc67f176b94e1088e802a301cb3090c1",
+   "sha256": "656c0a8ba53897677fb82125c1ac765bfa6e003679a5e61d122d473095a0db7f"
+  },
+  "firmware/mono_split/main/stack.c": {
+   "git": "ef911970fa1682b60fb590035f8b4b77634e1c9c",
+   "sha256": "8a56ebcf5648197e2ec590f6415f559d51f863d72ebb7634ff057bf9552e4117"
+  },
+  "firmware/mono_split/main/patterns.c": {
+   "git": "dcbbfbadcc67f176b94e1088e802a301cb3090c1",
+   "sha256": "c700ee5137398d66abab7bc4549db5a8b256c0045269ac05171d76a73affb712"
+  },
+  "firmware/mono_split/main/matrix_refresh.c": {
+   "git": "049142500e0f936e3cd81f2ea44fc9fed72edf79",
+   "sha256": "6b651f2693d74e6945a13cd2d19c535df062f1054e7ce1ecfa92a064e8e4a574"
+  },
+  "firmware/mono_split/main/matrix_refresh.h": {
+   "git": "049142500e0f936e3cd81f2ea44fc9fed72edf79",
+   "sha256": "e319571bcd4789aa866abb139e777e3b966d377488eeb2df69e65162c9dc4567"
+  },
+  "firmware/mono_split/main/stack.h": {
+   "git": "049142500e0f936e3cd81f2ea44fc9fed72edf79",
+   "sha256": "e9c4f6d9250d76e85cc9eeade6b21f25938f061dc5791bb263c1ec8ba9a58b5f"
+  },
+  "firmware/mono_split/main/demo.h": {
+   "git": "dcbbfbadcc67f176b94e1088e802a301cb3090c1",
+   "sha256": "6cd4ed7c8b0e48109cf3a3bb7170d5e658cedc181c0928ff078366251d62a245"
+  },
+  "firmware/mono_split/main/patterns.h": {
+   "git": "dcbbfbadcc67f176b94e1088e802a301cb3090c1",
+   "sha256": "ee4d59763cc50426f976c1a50985bf98777172a6b854b54b706ce0b8c54d57b3"
+  },
+  "firmware/panel_id/panel_id.c": {
+   "git": "b8af7813b5a304bae95876034071b4e253f8e45b",
+   "sha256": "2fb2ea3bde5a1bfce16e51860f67335700ac41404582858c51831ababae861b5"
+  },
+  "firmware/panel_id/panel_id.h": {
+   "git": "b8af7813b5a304bae95876034071b4e253f8e45b",
+   "sha256": "4325d02ec0415a2b84d8bf2da5ab0416a62ea9f1c03ec53bd30620b77353f6ba"
+  }
+ },
+ "firmware_commit": "ef911970fa1682b60fb590035f8b4b77634e1c9c",
+ "firmware_date": "2026-10-11T14:08:05+03:00",
+ "hardware_commit": "5702e9609eb649516ece84da5e1c744e77bbc515"
+}

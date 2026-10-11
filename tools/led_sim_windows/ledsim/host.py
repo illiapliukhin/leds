@@ -22,6 +22,10 @@ L.sim_demo_name.restype = ctypes.c_char_p
 L.sim_canvas_name.restype = ctypes.c_char_p
 L.sim_demo_render.argtypes = [ctypes.c_int, ctypes.c_uint32, U8P]
 L.sim_render_tile.argtypes = [ctypes.c_int] * 7 + [ctypes.c_uint32, U8P]
+L.sim_fw_sha.restype = ctypes.c_char_p
+L.sim_panel_id_crc16.argtypes = [U8P, ctypes.c_uint]; L.sim_panel_id_crc16.restype = ctypes.c_uint
+L.sim_panel_id_default.argtypes = [U8P]
+L.sim_panel_map.argtypes = [U8P, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
 L.sim_duty_lut.argtypes = [ctypes.c_int, ctypes.c_float, ctypes.POINTER(ctypes.c_float)]
 L.sim_compute_grid.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.POINTER(ctypes.c_uint32), ctypes.c_int,
                                ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
@@ -31,7 +35,7 @@ L.sim_demo_for_frame.argtypes = [ctypes.c_int, ctypes.c_uint32, ctypes.c_int]
 DEMOS = [L.sim_demo_name(i).decode() for i in range(1, L.sim_demo_count())]      # demo.c (single panel)
 CANVAS = [L.sim_canvas_name(i).decode() for i in range(L.sim_canvas_count())]   # stack.c (shared canvas)
 CANVAS_SECS = [L.sim_canvas_secs(i) for i in range(len(CANVAS))]
-MAXB = 16                                                                        # stack.c MAXB
+MAXB = L.sim_maxb() if hasattr(L, 'sim_maxb') else 16                          # stack.c MAXB, read from the compiled firmware (128 since ef91197)
 
 def demo_frame(mode, t):
     a = np.zeros(1024, np.uint8); L.sim_demo_render(mode, t & 0xFFFFFFFF, a.ctypes.data_as(U8P)); return a.reshape(32, 32)

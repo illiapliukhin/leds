@@ -22,6 +22,11 @@ def set_profile(name):
     global T_SETTLE, T_SEEN, T_TOKEN, T_ELECT, T_LOST, T_MEMBER_LOST, PING_FIX, PROFILE
     p = PROFILES[name]; PING_FIX = bool(p.get('PINGFIX')); PROFILE = name
     T_SETTLE, T_SEEN, T_TOKEN, T_ELECT, T_LOST, T_MEMBER_LOST = p['SETTLE'], p['SEEN'], p['TOKEN'], p['ELECT'], p['LOST'], p['MEMBER_LOST']
+from collections import namedtuple
+class LeaderChunk(namedtuple('LeaderChunk', 'total start ids')):
+    def nbytes(s): return 2 + 4 * len(s.ids)
+class MapChunk(namedtuple('MapChunk', 'W H total start tiles')):
+    def nbytes(s): return 4 + 7 * len(s.tiles)
 (T_HELLO, T_LEADER, T_TOKEN_, T_PRESHI, T_SEEN_, T_TOKDONE, T_MAP, T_TIME, T_PING, T_PONG, T_TILE) = range(1, 12)
 BCAST = 0xFFFFFFFF
 OFF, ELECT, WAIT, DISCOVER, LEAD, FOLLOW = range(6)
@@ -68,7 +73,7 @@ class Node:
     # ---- HAL
     def now(s): return s.w.now
     def send(s, type, dst, pl=()):
-        n = MSG_LEN.get(type, len(pl) if isinstance(pl, (list, tuple)) else 8)
+        n = MSG_LEN.get(type) or (pl.nbytes() if hasattr(pl, 'nbytes') else len(pl) if isinstance(pl, (list, tuple)) else 8)
         s.tx_bytes += 12 + n
         s.w.bus_send(s, Msg(type, s.id, dst, pl, s.w.now + 1))
     def pres_read(s, side): return s.w.pres_read(s, side)
@@ -120,7 +125,11 @@ class Node:
         elif t == T_TOKEN_ and m.dst == s.id:
             yield from s.probe_side(m.pl[0]); s.send(T_TOKDONE, m.src)
         elif t == T_MAP and s.state not in (LEAD, DISCOVER) and m.src == s.leader:
-            s.W, s.H, s.tiles = m.pl[0], m.pl[1], dict(m.pl[2]); s.state = FOLLOW; s.apply_map_self()
+            pl = m.pl
+            if pl.start == 0: s._map_acc = {}
+            s._map_acc = getattr(s, '_map_acc', {}); s._map_acc.update(dict(pl.tiles)); s.W, s.H = pl.W, pl.H
+            if pl.start + len(pl.tiles) >= pl.total:                     # last chunk: map complete
+                s.tiles = dict(s._map_acc); s.state = FOLLOW; s.apply_map_self()
         elif t == T_TIME and m.src == s.leader and s.state == FOLLOW:
             f = m.pl[0]; d = s.frame - f
             if d < 0 or d > 1: s.frame = f
@@ -149,7 +158,22 @@ class Node:
         s.me = (bool(t[0]), t[1], t[2], t[3]) if t and t[0] else (False, 0, 0, 0)
         s.report('%s tile %s (%d,%d) rot %d canvas %dx%d' % ('LEAD' if s.state == LEAD else 'FOLLOW', 'ok' if s.me[0] else 'UNPLACED', s.me[1], s.me[2], s.me[3] * 90, s.W * 32, s.H * 32))
 
-    def beacon(s): s.send(T_LEADER, BCAST, tuple(s.members))
+    # stack.c (ef91197): LEADER and MAP are split into chunks (LCHUNK 60 ids, MCHUNK 34 tiles) with (n_total, start)
+    LCHUNK, MCHUNK = 60, 34
+    def beacon(s):
+        n = len(s.members); st = 0
+        while True:
+            c = min(s.LCHUNK, n - st)
+            s.send(T_LEADER, BCAST, LeaderChunk(n, st, tuple(s.members[st:st + c])))
+            st += c
+            if st >= n: break
+    def send_map(s):
+        items = list(s.tiles.items()); n = len(items); st = 0
+        while True:
+            c = min(s.MCHUNK, n - st)
+            s.send(T_MAP, BCAST, MapChunk(s.W, s.H, n, st, tuple(items[st:st + c])))
+            st += c
+            if st >= n: break
 
     def discover(s):
         attempt = 0
@@ -186,9 +210,9 @@ class Node:
             if s.abort: return
             attempt += 1
         s.state = LEAD; s.leader = s.id
-        s.send(T_MAP, BCAST, (s.W, s.H, tuple(s.tiles.items())))
+        s.send_map()
         yield from s.sleep(5)
-        s.send(T_MAP, BCAST, (s.W, s.H, tuple(s.tiles.items())))
+        s.send_map()
         s.apply_map_self()
         s.report('topology: %d edges' % len(s.edges))
         for i in s.members: s.last_seen[i] = s.now()
@@ -217,7 +241,10 @@ class Node:
                     if m:
                         if m.type in (T_LEADER, T_TIME) and m.src < s.leader:
                             s.leader = m.src; s.last_leader_msg = s.now(); s.send(T_HELLO, s.leader, (1,))
-                        if m.type == T_LEADER and m.src == s.leader and s.id not in m.pl: s.send(T_HELLO, s.leader, (1,))
+                        if m.type == T_LEADER and m.src == s.leader:
+                            if m.pl.start == 0: s._listed = False
+                            if s.id in m.pl.ids: s._listed = True
+                            if m.pl.start + len(m.pl.ids) >= m.pl.total and not getattr(s, '_listed', False): s.send(T_HELLO, s.leader, (1,))
                         yield from s.handle_common(m)
                     if s.now() - s.last_leader_msg > T_LOST:
                         s.report('leader %08x lost' % s.leader); s.me = (False, 0, 0, 0); break
@@ -233,7 +260,7 @@ class Node:
                 if now >= next_ping and len(s.members) > 1:
                     ping_i = (ping_i + 1) % len(s.members)
                     if s.members[ping_i] == s.id: ping_i = (ping_i + 1) % len(s.members)
-                    s.send(T_PING, s.members[ping_i]); next_ping = now + (min(150, max(2, T_MEMBER_LOST // (2 * (len(s.members) - 1)))) if PING_FIX else 150)
+                    s.send(T_PING, s.members[ping_i]); next_ping = now + (min(150, max(1, round(T_MEMBER_LOST / (2 * (len(s.members) - 1))))) if PING_FIX else 150)   # stack.c: per = LOST/(2·(n−1)) µs
                 for i in list(s.members):
                     if i != s.id and now - s.last_seen[i] > T_MEMBER_LOST:
                         s.report('member %08x lost -> re-discovery' % i); s.remove_member(i); redo = True; break

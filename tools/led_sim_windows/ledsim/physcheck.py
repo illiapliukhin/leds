@@ -61,7 +61,7 @@ def run():
   check('TPS63802 η @0.33 A (datasheet curve ~93 %)', pout / pin * 100, 93.0, 3, '%')
   check('KCL residual of the Newton solve', info['residual'] + 1e-9, 1e-9, 1e9, 'A', 'iters %d' % info['iters'])
   # battery short without PCM: I = OCV/(Rint + Rpath + Rshort)
-  v13 = host.data_path('pcb', 'board_v13.json.gz'); Rcu = 0.0
+  v13 = host.data_path('pcb', 'board_v15.json.gz'); Rcu = 0.0
   for net_, a_, b_ in (('BAT_PACK', 'J_BAT1', 'F_BAT1'), ('BAT_FUSE', 'F_BAT1', 'Q_BAT1'), ('BAT_RAW', 'Q_BAT1', 'U_CHG1')):
       bnet = pcbnet.board_net('v13', net_, v13); Rcu += bnet.solve(a_, b_)[0]
   rpath = Rcu + 0.02 + 0.031 + 0.044                                              # contacts + F_BAT1 + Q_BAT1 (v13)
@@ -70,7 +70,7 @@ def run():
   check('Battery short current (Thevenin hand calc)', info['i_cell'], 3.9 / (0.08 + rpath + 0.005), 1.0, 'A')
   # PCB copper: BAT_RAW resistance vs hand calc of the narrowest 0.3 mm path segment set (rho L / w t)
   segs = bnet.seg
-  rows.append('%-46s sim %10.4g mΩ  (v13 BAT_PACK+BAT_FUSE+BAT_RAW nodal solve; + F_BAT1 31 mΩ + Q_BAT1 44 mΩ)  INFO' % ('Battery path J_BAT1→U_CHG1 copper R', Rcu * 1e3))
+  rows.append('%-46s sim %10.4g mΩ  (v15 BAT_PACK+BAT_FUSE+BAT_RAW nodal solve; + F_BAT1 31 mΩ + Q_BAT1 44 mΩ)  INFO' % ('Battery path J_BAT1→U_CHG1 copper R', Rcu * 1e3))
   # F_BAT1 must open before any battery-path copper melts at the short-circuit current
   i_sc = 3.9 / (0.08 + rpath + 0.005); t_f = 0.2326 / i_sc ** 2
   t_cu = min(pcbnet.onderdonk_time(i_sc, s_[3] * s_[4]) for s_ in segs if s_[3])
@@ -80,7 +80,7 @@ def run():
   check('Onderdonk t(I)/t(2I) = 4', t1 / t2, 4.0, 0.1, '')
   rows.append('%-46s %8.2f ms at 10 A, %8.2f ms at 30 A (0.3 mm × 35 µm)  INFO' % ('Onderdonk fusing time 0.3 mm trace', t1 * 1e3, pcbnet.onderdonk_time(30, a) * 1e3))
   # thermal: FD board vs TPS63802 θJA (JEDEC 81 °C/W) — our 4-layer board with planes should be lower
-  th = thermal.board_thermal(host.data_path('pcb', 'board_v12.json.gz'))
+  th = thermal.board_thermal(host.data_path('pcb', 'board_v15.json.gz'))
   theta = th.steady_theta(-40.0, -1.8, 1.0, 23.5, 1500)
   rows.append('%-46s sim %10.4g  JEDEC %6.1f °C/W  (our board: 4 layers, In2/B planes, %d×%d grid, dt %.3f s)  INFO' % ('TPS63802 θJA on mono_electronics v12 (FD)', theta, 81.0, th.nx, th.ny, th.dt_max))
   qout = float((th.h_eff(th.T) * th.G_face * (th.T - th.Ta)).sum()); check('FD energy balance: 1 W in = conv+rad out', qout, 1.0, 3, 'W')

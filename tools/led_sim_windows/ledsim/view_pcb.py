@@ -8,10 +8,17 @@ from .camera import Nav2D
 
 LAYER_NAMES = ['F.Cu', 'In1.Cu', 'In2.Cu', 'B.Cu']
 LAYER_COL = [(200, 60, 50), (200, 170, 60), (70, 170, 90), (60, 110, 220)]
-BOARDS = [('board_v15', 'mono_electronics v15 (текущая)'), ('board_v13', 'mono_electronics v13'), ('board_v12', 'mono_electronics v12'), ('board_v11b', 'mono_electronics v11b'), ('board_v10', 'mono_electronics v10')]
-PANELS = [('panel_full', 'mono_panel_32x32_full'), ('panel_flat', 'mono_panel_32x32'), ('panel_lattice', 'mono_panel_32x32_lattice'),
+BOARDS = [('board_v15', 'mono_electronics v15 (текущая)'), ('board_v13', 'v13 (УСТАРЕЛА, архив)'), ('board_v12', 'v12 (УСТАРЕЛА, архив)'), ('board_v11b', 'v11b (УСТАРЕЛА, архив)'), ('board_v10', 'v10 (УСТАРЕЛА, архив)')]
+PANELS = [('panel_full', 'mono_panel_32x32_full (текущая, edge-to-edge)'), ('panel_flat', 'mono_panel_32x32 (старая плоская)'), ('panel_lattice', 'mono_panel_32x32_lattice'),
           ('panel_20x20', 'mono_panel_20x20'), ('garland', 'garland_breakout')]
 FFC = {'panel_full': 'ffc_full.json', 'panel_flat': 'ffc_mono32.json', 'panel_lattice': 'ffc_lattice.json'}
+
+def open_file(path):
+    import subprocess, sys
+    try:
+        if os.name == 'nt': os.startfile(path)
+        else: subprocess.Popen(['xdg-open', path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception: pass
 
 class Pcb:
     def __init__(s, key):
@@ -202,6 +209,13 @@ class PcbView(Nav2D, Rulers):
         for i, (k, lab) in enumerate(s.list):
             if ui.button(surf, (x, y, W, 24), lab, on=i == s.cur, sz=12): s.cur = i; s.zoom = None; s.lock = None; s.trace = None; s.surf_key = None
             y += 27
+        key = s.list[s.cur][0]; pdf = host.data_path('sch', key + '.pdf')
+        if os.path.exists(pdf):
+            if ui.button(surf, (x, y, W, 24), 'Схема (PDF, из текущего .kicad_sch) — открыть', sz=11): open_file(pdf)
+            y += 27
+        from . import versions
+        e = versions.V.get('pcb', {}).get(key)
+        text(surf, ('данные: %s @ %s' % (e['src'].split('/')[-1], e['git'][:7])) if e else 'данные: архивная версия (не из HEAD)', (x, y), (130, 140, 160), 10); y += 14
         y += 6; text(surf, T('layers'), (x, y), (170, 180, 200), 12); y += 18
         bw = (W - 12) // 4
         for li in range(4):

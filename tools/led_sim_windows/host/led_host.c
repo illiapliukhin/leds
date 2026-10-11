@@ -54,9 +54,22 @@ void shal_report(const char *fmt, ...) { (void)fmt; }
 #include "stack.c"
 #undef TAG
 #include "patterns.c"
+#include "panel_id.c"                 /* firmware/panel_id: EEPROM record CRC + logical->physical mapping */
 
 /* ---------------- exported API */
-API int sim_api_version(void) { return 1; }
+API int sim_api_version(void) { return 2; }
+API int sim_maxb(void) { return MAXB; }
+#ifndef FW_SHA
+#define FW_SHA "unknown"
+#endif
+API const char *sim_fw_sha(void) { return FW_SHA; }      /* git SHA of firmware/mono_split + panel_id this library was compiled from */
+API unsigned sim_panel_id_crc16(const uint8_t *p, unsigned n) { return panel_id_crc16(p, (uint16_t)n); }
+API int sim_panel_map(const uint8_t *rec64, int x, int y, int *row, int *col)
+{
+    uint8_t r = 0, c = 0; bool ok = panel_map((const panel_id_t *)rec64, (uint8_t)x, (uint8_t)y, &r, &c);
+    *row = r; *col = c; return ok;
+}
+API void sim_panel_id_default(uint8_t *rec64) { panel_id_default((panel_id_t *)rec64); }
 API int sim_demo_count(void) { return DEMO_COUNT; }
 API const char *sim_demo_name(int i) { return demo_name((demo_mode_t)i); }
 API int sim_canvas_count(void) { return D_N; }

@@ -41,6 +41,8 @@ class App:
             return None
     def draw_status(s, sc):
         pygame.draw.rect(sc, (18, 20, 26), s.status); lab = s.views['lab'].get(); sp = lab.system_power()
+        if not hasattr(s, '_ver'): from . import versions; s._ver = versions.short()
+        vr = U.font(11).size(s._ver)[0]; text(sc, s._ver, (sc.get_width() - vr - 8, s.status.y + 5), (110, 116, 130), 11)
         if not getattr(lab, 'running', False):
             text(sc, 'Питание/тепло: модель остановлена — «Лаборатория» → «Запустить» (в фоне ничего не считается)', (8, s.status.y + 4), (150, 156, 170), 12); return
         if not sp: text(sc, 'Питание: модель ещё считает…', (8, s.status.y + 4), (150, 156, 170), 12); return

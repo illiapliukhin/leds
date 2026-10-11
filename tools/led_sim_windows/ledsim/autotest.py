@@ -86,6 +86,29 @@ def script(app, t, timing):
         else: t.L('INFO', r_.strip())
     yield 90
 
+    # ---------------------------------------------------------------- 0. embedded data / firmware provenance (stale-data guard)
+    t.sec = 'versions'
+    from . import versions, host as H, bom
+    from .phys.elec import DS, bq_ilim
+    from .world import BOARD_W, BOARD_H, BOARD_CONN, Panel
+    t.L('INFO', 'встроено: ' + versions.short())
+    ok_, bad_ = versions.check()
+    for l in ok_: t.L('PASS', l)
+    for l in bad_: t.L('FAIL', 'устаревшие данные: ' + l)
+    import numpy as _np
+    rec = _np.zeros(64, _np.uint8); rp = rec.ctypes.data_as(H.U8P); H.L.sim_panel_id_default(rp)
+    tv = _np.frombuffer(b'123456789', _np.uint8).copy(); crc = H.L.sim_panel_id_crc16(tv.ctypes.data_as(H.U8P), 9)
+    r_ = __import__('ctypes').c_int(); c_ = __import__('ctypes').c_int(); mp = H.L.sim_panel_map(rp, 3, 5, __import__('ctypes').byref(r_), __import__('ctypes').byref(c_))
+    t.check(crc == 0x29B1 and mp and (r_.value, c_.value) == (5, 3), 'panel_id.c в DLL: CRC-16/CCITT-FALSE("123456789") = %04X (эталон 29B1), карта default32 (x3,y5) → строка %d, столбец %d' % (crc, r_.value, c_.value))
+    il = bq_ilim(DS['BQ25185']['r_ilim'])[0]; ef = DS['TPS259531']['k_ilim'] / DS['TPS259531']['r_ilim']; ich = DS['BQ25185']['k_iset'] / DS['BQ25185']['r_iset']
+    t.check(abs(il - 0.475) < 1e-6, 'BOM v15: R_ILIM1 %s → вход BQ25185 %.3f А (ILIM500)' % (bom.BOM.get('R_ILIM1'), il))
+    t.check(abs(ef - 0.80) < 0.02, 'BOM v15: R_ILM1 %s → предел eFuse %.2f А' % (bom.BOM.get('R_ILM1'), ef))
+    t.check(abs(ich - 0.5) < 0.01, 'BOM v15: R_ISET1 %s → заряд %.2f А' % (bom.BOM.get('R_ISET1'), ich))
+    t.check(DS['F466_2A']['i_n'] == 2.0 and 'PH' in bom.J_BAT1, 'BOM v15: F_BAT1 %s, J_BAT1 %s (JST PH, %.0f А/контакт)' % (bom.BOM.get('F_BAT1'), bom.J_BAT1, DS['JST_PH']['i_contact']))
+    t.check(abs(BOARD_W - 148.0) < 0.1 and abs(BOARD_H - 99.5) < 0.1 and 'J_PORT_E' in BOARD_CONN, 'плата v15 %.2f×%.2f мм, разъёмы из .kicad_pcb: %s' % (BOARD_W, BOARD_H, ', '.join(sorted(BOARD_CONN))))
+    t.check(Panel('full', 0, 0).ffc_len == 120, 'FFC по умолчанию 120 мм (C5371276)')
+    yield 5
+
     # ---------------------------------------------------------------- 1. stack discovery / election
     t.sec = 'stack'; tab('system')
     for (c, r) in ((1, 1), (3, 2), (4, 4), (10, 10)):

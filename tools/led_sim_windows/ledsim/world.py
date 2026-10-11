@@ -4,7 +4,7 @@ import numpy as np
 from . import host
 from .stack_model import Node, OFF, LEAD, FOLLOW, WAIT, STATE_NAMES
 
-BOARD_W, BOARD_H = 148.0, 99.5
+BOARD_W, BOARD_H = 148.04, 99.5
 PANELS = {   # kind -> (size mm, cable/LED data file, title)
     'full': (160.0, 'cable_full.json', 'mono_panel_32x32_full 160 мм, шаг 5.0'),
     'flat': (166.7, 'cable_mono32.json', 'mono_panel_32x32 166.7 мм, шаг 2.54'),
@@ -25,12 +25,17 @@ def panel_data(kind):
 SIDE_OFF = [(52.0, -46.6), (70.9, -5.8), (-10.0, 46.6), (-70.9, 38.2)]          # J_PORT_N1/E1/S1/W1
 # mono_electronics v15 (hardware/mono_electronics/mono_electronics.kicad_pcb, origin = board corner, centre 74, 49.75):
 # J_ROW1 129.54,22 · J_COL1 129.54,68.6 (v15: 13.5 mm west) · J_USB1 6.5,18 · J_BAT1 7,57 · ports N 126,3.125 E 144.915,44 S 64,96.375 W 3.125,88
-BOARD_CONN = {'J_ROW': (55.54, -27.75), 'J_COL': (55.54, 18.85), 'J_USB': (-67.5, -31.75), 'J_BAT': (-67.0, 7.25)}
+BOARD_CONN = {'J_ROW': (55.52, -27.75), 'J_COL': (55.52, 18.85), 'J_USB': (-67.52, -31.75), 'J_BAT': (-67.02, 7.25)}
+try:                                    # exported from the current .kicad_pcb by tools/refresh_data.py (v15)
+    import json as _json
+    _bc = _json.load(open(host.data_path('board_conn.json')))
+    BOARD_CONN.update({k: tuple(v) for k, v in _bc['conn'].items()}); BOARD_W, BOARD_H = _bc['size_mm']
+except Exception: pass
 MOUNT_GAP = 8.0            # mm, panel back to board (standoff) — assumption; FFC path = planar distance + 2·gap
 PANEL_CONN = {'full': {'J_ROW': (-7.2, 0.0), 'J_COL': (27.8, 0.0)},              # back side receptacles
               'flat': {'J_ROW': (-75.3, 0.0), 'J_COL': (0.0, 75.1)},
               'lattice': {'J_ROW': (-14.0, 81.0), 'J_COL': (14.0, 81.0)}}
-FFC_LENGTHS = [80, 100, 150, 200]          # 40P 0.5 mm Type B FFC (C2857750 = 100 mm)
+FFC_LENGTHS = [80, 100, 120, 150, 200]     # 40P 0.5 mm Type B FFC; v15 default 120 mm (C5371276)
 JST_LENGTHS = [50, 100, 150, 200, 300]     # JST-SH 5P stacking cables
 def pick_len(d, options): return next((L for L in options if L >= d * 1.12), options[-1])
 def rotv(x, y, r):
@@ -56,7 +61,7 @@ class Board:
 class Panel:
     def __init__(s, kind, x, y, rot=0):
         s.kind, s.x, s.y, s.rot = kind, x, y, rot
-        s.board = None; s.ffc = 'B'; s.open_col = -1; s.ffc_len = 100
+        s.board = None; s.ffc = 'B'; s.open_col = -1; s.ffc_len = 120
         s.duty = np.zeros(1024, np.float32)
     @property
     def size(s): return PANELS[s.kind][0]
@@ -72,7 +77,7 @@ class Cable:
 class World:
     def __init__(s):
         s.boards, s.panels, s.cables = [], [], []
-        s.now = 0; s.maxb = 16; s._comp = None; s.brightness = 128; s.gamma = 2.2
+        s.now = 0; s.maxb = host.MAXB; s._comp = None; s.brightness = 128; s.gamma = 2.2
         s.bus_bytes = 0; s.paused = False; s.rng = random.Random(7)
         s.pd_cache = {}
         s.mirror_mount = False      # True: board's B side faces the panel (seen mirrored from the front); False: components (F.Cu) face the panel
@@ -127,7 +132,7 @@ class World:
             if q.board is b: q.board = None
         if b.mount is not None and b.mount is not p: b.mount = None
         p.board = b; b.mount = None; b.mirror = s.mirror_mount           # separate objects: board stays put, the FFC follows
-        need = s.ffc_need(p); p.ffc_len = 100 if need <= 100 else pick_len(need, FFC_LENGTHS); s.dirty()
+        need = s.ffc_need(p); p.ffc_len = 120 if need <= 120 else pick_len(need, FFC_LENGTHS); s.dirty()
     def auto_panels(s, kind):
         for b in s.boards:
             if not any(p.board is b for p in s.panels):
@@ -337,11 +342,10 @@ class World:
             if c: c.plugged = e.get('plugged', True)
         for c, L in zip(s.cables, d.get('cable_len', [])): c.length = L
         for p, L in zip(s.panels, d.get('ffc_len', [])): p.ffc_len = L
-        s.mirror_mount = d.get('mirror_mount', False); s.maxb = d.get('maxb', 16); s.brightness = d.get('brightness', 128); s.gamma = d.get('gamma', 2.2)
+        s.mirror_mount = d.get('mirror_mount', False); s.maxb = host.MAXB; s.brightness = d.get('brightness', 128); s.gamma = d.get('gamma', 2.2)
     def preset(s, cols, rows, kind='full', pitch=None):
         mm = s.mirror_mount; s.__init__(); s.mirror_mount = mm
         P = pitch or PANELS[kind][0]
-        if cols * rows > 16: s.maxb = 256
         for r in range(rows):
             for c in range(cols):
                 b = s.add_board(c * P, r * P); b.mirror = s.mirror_mount

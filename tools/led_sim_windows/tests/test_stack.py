@@ -30,7 +30,7 @@ b = w.boards[0]; w.set_power(b, False); settle(w, 3000); res.append(check(w, 1, 
 w.set_power(b, True); settle(w, 4000); res.append(check(w, 1, '96x64', 'replug board 0'))
 c = w.cables[0]; c.plugged = False; w.dirty(); settle(w, 3000); res.append(check(w, 1, '96x64', 'unplug one cable (ring)'))
 w = World(); w.preset(6, 1); settle(w); w.cables[2].type = 'A'; w.dirty(); settle(w, 4000); res.append(check(w, 2, None, 'Type A stack cable 6x1'))
-w = World(); w.preset(10, 10); t = time.time(); settle(w, 12000); res.append(check(w, 1, '320x320', '10x10 MAXB=256 (%.1fs wall)' % (time.time() - t)))
+w = World(); w.preset(10, 10); t = time.time(); settle(w, 12000); res.append(check(w, 1, '320x320', '10x10 MAXB=%d' % __import__('ledsim.host', fromlist=['MAXB']).MAXB + '  (%.1fs wall)' % (time.time() - t)))
 # C vs Python compute_grid
 w = World(); w.preset(4, 4); settle(w); L = [b for b in w.boards if b.node.state == LEAD][0].node
 a = host.compute_grid(L.id, L.members, L.edges); p = compute_grid_py(L.id, L.members, L.edges)
