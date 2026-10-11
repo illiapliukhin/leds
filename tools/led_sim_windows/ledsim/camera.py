@@ -76,9 +76,23 @@ class OrbitCam:
     def __init__(s): s.reset()
     def reset(s):
         s.yaw, s.pitch, s.dist = 0.6, 0.45, 2.6; s.target = [0.0, 0.0, 0.0]; s.wy = s.wp = 0.0
-        s.goal = None; s.drag = None; s.dist_t = s.dist; s._last_click = 0; s.tele = False
-    def preset(s, name): s.goal = s.PRESETS[name] + (2.6,); s.target = [0.0, 0.0, 0.0]; s.tele = False
+        s.goal = None; s.drag = None; s.dist_t = s.dist; s._last_click = 0; s.tele = False; s.R = None
+    def matrix(s):
+        """world→camera rotation: free trackball matrix if set (middle-drag), else turntable yaw/pitch"""
+        if getattr(s, 'R', None) is not None: return s.R
+        cy, sy, cp, sp = math.cos(s.yaw), math.sin(s.yaw), math.cos(s.pitch), math.sin(s.pitch)
+        import numpy as _np
+        return _np.array([[cy, 0.0, -sy], [-sy * sp, cp, -cy * sp], [sy * cp, sp, cy * cp]])
+    def trackball(s, dx, dy):
+        """free rotation about the screen axes (no gimbal lock): left-multiply the incremental rotation"""
+        import numpy as _np
+        R = s.matrix().copy(); a, b = dx * 0.008, dy * 0.008
+        ry = _np.array([[math.cos(a), 0, -math.sin(a)], [0, 1, 0], [math.sin(a), 0, math.cos(a)]])
+        rx = _np.array([[1, 0, 0], [0, math.cos(b), math.sin(b)], [0, -math.sin(b), math.cos(b)]])
+        R = rx @ ry @ R; u, _, vt = _np.linalg.svd(R); s.R = u @ vt                     # re-orthonormalise
+    def preset(s, name): s.R = None; s.goal = s.PRESETS[name] + (2.6,); s.target = [0.0, 0.0, 0.0]; s.tele = False
     def basis(s):
+        if getattr(s, 'R', None) is not None: return tuple(s.R[0]), tuple(-s.R[1])
         cy, sy, cp, sp = math.cos(s.yaw), math.sin(s.yaw), math.cos(s.pitch), math.sin(s.pitch)
         right = (cy, 0.0, -sy); up = (-sy * sp, cp, -cy * sp)
         return right, up
@@ -87,12 +101,14 @@ class OrbitCam:
             if e.button == 1:
                 t = pygame.time.get_ticks()
                 if t - s._last_click < 350: s.target = [0.0, 0.0, 0.0]; s.dist_t = 1.9; s._last_click = 0; return
-                s._last_click = t; s.drag = 'orbit'; s.wy = s.wp = 0; s.goal = None
-            elif e.button in (2, 3): s.drag = 'pan'
+                s._last_click = t; s.drag = 'orbit'; s.wy = s.wp = 0; s.goal = None; s.R = None
+            elif e.button == 2: s.drag = 'track'; s.wy = s.wp = 0; s.goal = None
+            elif e.button == 3: s.drag = 'pan'
         elif e.type == pygame.MOUSEBUTTONUP: s.drag = None
         elif e.type == pygame.MOUSEMOTION and s.drag == 'orbit':
             s.wy = e.rel[0] * 0.6; s.wp = e.rel[1] * 0.6
             s.yaw += e.rel[0] * 0.01; s.pitch = max(-1.55, min(1.55, s.pitch + e.rel[1] * 0.01))
+        elif e.type == pygame.MOUSEMOTION and s.drag == 'track': s.trackball(e.rel[0], e.rel[1])
         elif e.type == pygame.MOUSEMOTION and s.drag == 'pan':
             r, u = s.basis(); k = s.dist * 0.0012
             for i in range(3): s.target[i] -= (r[i] * e.rel[0] - u[i] * e.rel[1]) * k

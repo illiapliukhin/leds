@@ -120,11 +120,11 @@ class CubeView:
         duty = host.duty_lut(sv.brightness, sv.gamma)[lv]                # same 8-bit gamma/BCM as the firmware
         x, y, z = s.ncoords()
         c = s.cam; c.update(s.app.dt, s.app); tx, ty, tz = c.target
-        cy, sy, cp, sp = math.cos(c.yaw), math.sin(c.yaw), math.cos(c.pitch), math.sin(c.pitch)
+        cy, sy, cp, sp = math.cos(c.yaw), math.sin(c.yaw), math.cos(c.pitch), math.sin(c.pitch); sp_cam = sp
         # world: layer axis vertical (layers stacked upward); camera looks at c.target
         X, Y, Z = x - tx, -z - ty, y - tz
-        xr = X * cy - Z * sy; zr = X * sy + Z * cy
-        yr = Y * cp - zr * sp; zr = Y * sp + zr * cp
+        M = c.matrix()
+        xr = M[0, 0] * X + M[0, 1] * Y + M[0, 2] * Z; yr = M[1, 0] * X + M[1, 1] * Y + M[1, 2] * Z; zr = M[2, 0] * X + M[2, 1] * Y + M[2, 2] * Z
         zc = zr + c.dist; f = min(view.w, view.h) * 0.9 * (c.dist / 2.6 if getattr(c, 'tele', False) else 1.0)
         W, H = view.w // 2, view.h // 2
         px = (xr / zc * f / 2 + W / 2).astype(np.int32); py = (yr / zc * f / 2 + H / 2).astype(np.int32)
@@ -139,7 +139,7 @@ class CubeView:
         img = np.clip(buf, 0, 1.5)
         rgb = (np.clip(img, 0, 1)[..., None] ** (1 / 2.2) * np.array([255, 246, 228], np.float32)).astype(np.uint8)
         small = pygame.surfarray.make_surface(np.ascontiguousarray(rgb.transpose(1, 0, 2)))
-        surf.fill((8, 9, 12), view)
+        surf.fill((8, 9, 12), view); surf.set_clip(view)
         big = pygame.transform.smoothscale(small, view.size)
         glow = pygame.transform.smoothscale(pygame.transform.smoothscale(small, (W // 6, H // 6)), view.size)
         surf.blit(big, view.topleft); surf.blit(glow, view.topleft, special_flags=pygame.BLEND_ADD)
@@ -150,12 +150,92 @@ class CubeView:
             pts = []
             for (a, b) in [(-1.03, -1.03), (1.03, -1.03), (1.03, 1.03), (-1.03, 1.03)]:
                 Xx, Yy, Zz = a - tx, -zz - ty, b - tz
-                xr2 = Xx * cy - Zz * sy; zr2 = Xx * sy + Zz * cy; yr2 = Yy * cp - zr2 * sp; zr2 = Yy * sp + zr2 * cp + c.dist
+                xr2 = M[0, 0] * Xx + M[0, 1] * Yy + M[0, 2] * Zz; yr2 = M[1, 0] * Xx + M[1, 1] * Yy + M[1, 2] * Zz; zr2 = M[2, 0] * Xx + M[2, 1] * Yy + M[2, 2] * Zz + c.dist
                 pts.append((view.x + (xr2 / zr2 * f / 2 + W / 2) * 2, view.y + (yr2 / zr2 * f / 2 + H / 2) * 2))
             pygame.draw.lines(surf, (60, 70, 90), True, pts, 1)
+        # dimension lines (mm): W along columns, D along rows, H along the layer axis + layer spacing
+        from .world import panel_data
+        from .rulers import dim_line
+        pd = panel_data('lattice' if s.kind == 'lattice' else 'full'); pitch = (pd['hi'][0] - pd['lo'][0]) / 31
+        sp = pitch * s.zpitch()                                                   # layer spacing in mm
+        def P3(a, b, zz):
+            Xx, Yy, Zz = a - tx, -zz - ty, b - tz
+            xr2 = M[0, 0] * Xx + M[0, 1] * Yy + M[0, 2] * Zz; yr2 = M[1, 0] * Xx + M[1, 1] * Yy + M[1, 2] * Zz; zr2 = M[2, 0] * Xx + M[2, 1] * Yy + M[2, 2] * Zz + c.dist
+            if zr2 < 0.15: return None
+            return (view.x + (xr2 / zr2 * f / 2 + W / 2) * 2, view.y + (yr2 / zr2 * f / 2 + H / 2) * 2)
+        sp_ = sp_cam
+        zb = -(n - 1) / 2 / 16 * s.zpitch(); zt = -zb
+        e = 31 / 32
+        dl = lambda a_, b_, *r: (a_ and b_) and dim_line(surf, a_, b_, *r)
+        dl(P3(-e, 1.12, zb), P3(e, 1.12, zb), 'W %.1f мм (32 × %.2f)' % (31 * pitch, pitch), (255, 210, 120))
+        dl(P3(1.12, -e, zb), P3(1.12, e, zb), 'D %.1f мм' % (31 * pitch), (255, 210, 120))
+        dl(P3(-1.12, 1.0, zb), P3(-1.12, 1.0, zt), 'H %.1f мм, %d слоёв × %.2f мм' % ((n - 1) * sp, n, sp), (255, 210, 120))
+        if getattr(s, 'show_hw', True): s.draw_hw(surf, P3, zb, pitch, sp)
         text(surf, '%d × 32 × 32  (%d LED)  —  %s' % (n, n * 1024, DEMO_RU[DEMOS3D[s.demo]]), (view.x + 10, view.y + 8), (255, 220, 140), 16)
         text(surf, T('hint_cube'), (view.x + 8, view.bottom - 20), (140, 146, 160), 11)
+        surf.set_clip(None)
 
+    def draw_hw(s, surf, P3, zb, pitch, lsp):
+        """our electronics under the cube: per layer one mono_electronics board + one garland breakout lying on the
+        floor in front of the cube, FFC board→breakout, stacking cables board→board, USB-C power, and the garland strands
+        from the breakout IDC headers to the layer's row / column wire ends. Real connector positions (mm, v13 board,
+        garland breakout .kicad_pcb)."""
+        from .world import BOARD_CONN, SIDE_OFF, BOARD_W, BOARD_H
+        show = s.app.views['system'].show; n = s.N
+        class SD:
+            @staticmethod
+            def line(sf, c, a, b, w=1):
+                if a and b: pygame.draw.line(sf, c, a, b, w)
+            @staticmethod
+            def lines(sf, c, cl, pts, w=1):
+                if all(pts): pygame.draw.lines(sf, c, cl, pts, w)
+            @staticmethod
+            def polygon(sf, c, pts, w=0):
+                if all(pts): pygame.draw.polygon(sf, c, pts, w)
+        U = 1.0 / (16 * pitch)                                                   # mm -> cube units
+        zf = zb - 0.45                                                           # floor plane below the bottom layer
+        GB = {'J_ROW': (-24.0, -20.2), 'J_COL': (-24.0, 45.8), 'J_R1': (14.0, -64.5), 'J_R2': (14.0, -34.5), 'J_C1': (14.0, 1.5), 'J_C2': (14.0, 31.5)}
+        pair_w = (BOARD_W + 12 + 60) * U; row_d = (150) * U
+        lod = 1 if n <= 8 else 2 if n <= 16 else 4
+        boards = []
+        for k in range(n):
+            col, row = k % 2, k // 2
+            bx = (-0.5 if col == 0 else 0.5) * (pair_w + 0.25) - (60 + 12) * U / 2
+            by = 1.35 + row_d / 2 + row * (row_d + 0.15)
+            gx = bx + (BOARD_W / 2 + 12 + 30) * U
+            boards.append((bx, by, gx))
+            def rect(cx, cy, w, h, colr):
+                pts = [P3(cx + dx * w / 2, cy + dy * h / 2, zf) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+                SD.polygon(surf, colr, pts, 1)
+            rect(bx, by, BOARD_W * U, BOARD_H * U, (80, 180, 110)); rect(gx, by, 60 * U, 145 * U, (180, 150, 80))
+            q = P3(bx - BOARD_W * U / 2, by - BOARD_H * U / 2, zf); q and text(surf, 'L%d' % k, q, (150, 200, 160), 9)
+            B = lambda nm: (bx + BOARD_CONN[nm][0] * U, by + BOARD_CONN[nm][1] * U)
+            G = lambda nm: (gx + GB[nm][0] * U, by + GB[nm][1] * U)
+            if show.get('ffc', True):
+                for nm in ('J_ROW', 'J_COL'):
+                    a, b = B(nm), G(nm); SD.line(surf, (120, 150, 220), P3(a[0], a[1], zf), P3(b[0], b[1], zf), 3)
+            if show.get('power', True):
+                a = B('J_USB'); SD.line(surf, (210, 210, 220), P3(a[0], a[1], zf), P3(-2.6, a[1], zf), 1)
+            if show.get('led', True) and k % lod == 0:
+                zl = (k - (n - 1) / 2) / 16 * s.zpitch()
+                for hdr, kind, base in (('J_R1', 'r', 0), ('J_R2', 'r', 16), ('J_C1', 'c', 0), ('J_C2', 'c', 16)):
+                    hx, hy = G(hdr)
+                    for i in range(0, 16, 2 if lod > 1 else 1):
+                        px_ = hx + ((i // 8) * 2.54) * U; py_ = hy + ((i % 8) * 2.54 - 8.9) * U   # IDC 2×8, 2.54 mm pitch
+                        idx = base + i
+                        tgt = (-1.06, (idx - 15.5) / 16, zl) if kind == 'r' else ((idx - 15.5) / 16, 1.06, zl)
+                        mid = (tgt[0] if kind == 'c' else -1.06, 1.15, (zf + zl) / 2)
+                        colr = (200, 120, 90) if kind == 'r' else (110, 170, 220)
+                        SD.lines(surf, colr, False, [P3(px_, py_, zf), P3(*mid), P3(*tgt)], 1)
+        if show.get('stack', True):
+            for k in range(n - 1):
+                (ax, ay, _), (cx_, cy_, _) = boards[k], boards[k + 1]
+                a = (ax + SIDE_OFF[2][0] * U, ay + SIDE_OFF[2][1] * U); b = (cx_ + SIDE_OFF[0][0] * U, cy_ + SIDE_OFF[0][1] * U)
+                SD.line(surf, (90, 220, 120), P3(a[0], a[1], zf), P3(b[0], b[1], zf), 2)
+        if show.get('power', True):
+            q = P3(-2.6, 1.6, zf)
+            if q: pygame.draw.rect(surf, (90, 90, 110), (q[0] - 18, q[1] - 10, 36, 20), 1);
+            if q: text(surf, 'БП 5 В', (q[0] - 16, q[1] - 6), (200, 200, 210), 9)
     READ = {'w1': (0.0, 0.0), 'w2': (-math.pi / 2, 0.0), 'w3': (0.0, 1.55), 'ana': (0.62, 0.42)}
     def snap(s, k): s.cam.goal = s.READ[k] + (8.0,); s.cam.target = [0.0, 0.0, 0.0]; s.cam.tele = True       # far + long lens ≈ orthographic reading view
     def frames_for_export(s):
@@ -232,6 +312,11 @@ class CubeView:
         sv = s.app.views['system'].w
         sv.brightness = int(ui.slider(surf, (x, y, bw, 8), T('brightness'), sv.brightness, 0, 255))
         sv.gamma = round(ui.slider(surf, (x + bw + 4, y, bw, 8), T('gamma'), sv.gamma, 1.0, 3.0, '%.2f'), 2); y += 14
+        show = s.app.views['system'].show; tb = (W - 16) // 5
+        for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'), ('led', 'Гирлянды'))):
+            if ui.button(surf, (x + i * (tb + 4), y, tb, 20), lab, on=show.get(k, True), sz=9): show[k] = not show.get(k, True)
+        if ui.button(surf, (x + 4 * (tb + 4), y, tb, 20), 'Платы', on=getattr(s, 'show_hw', True), sz=9): s.show_hw = not getattr(s, 'show_hw', True)
+        y += 24
         lim = s.limits()
         for ln in lim:
             text(surf, ln, (x, y), (150, 160, 180), 10); y += 13

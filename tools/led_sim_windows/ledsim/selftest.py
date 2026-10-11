@@ -23,10 +23,18 @@ def run(out):
              (292, 'lab', None, short), (340, 'lab', P('12_lab_batshort.png'), None), (342, 'models', None, models), (350, 'models', P('13_models.png'), None),
              (352, 'test', None, test), (900, 'test', P('14_test.png'), None)]
     old = [(240, None, P('01_system_3x2.png'), None), (300, None, None, fault), (560, None, P('02_faults.png'), None),
-             (570, 'boards', None, pcbsel), (600, 'boards', P('03_pcb_board_v12.png'), None),
+             (570, 'boards', None, pcbsel), (600, 'boards', P('03_pcb_board_v13.png'), None),
              (610, 'panels', None, panelsel), (640, 'panels', P('04_pcb_panel_full.png'), None),
              (650, 'cube', None, cube), (720, 'cube', P('05_cube_shapes.png'), None), (725, 'cube', None, cube2), (790, 'cube', P('06_cube_sphere.png'), None),
              (800, 'system', None, big), (1300, 'system', P('07_system_10x10.png'), None)]
+    def amb(a):
+        c = a.views['cube']; c.N = 16; c._grid(); c.demo = 0; c.show_hw = False; c.snap('w2'); c.cam.yaw, c.cam.pitch = c.READ['w2']; c.cam.goal = None; c.cam.dist = c.cam.dist_t = 8.0
+    def hw(a):
+        c = a.views['cube']; c.N = 8; c._grid(); c.demo = 7; c.show_hw = True; c.cam.reset(); c.cam.dist = c.cam.dist_t = 7.0; c.cam.pitch = 0.5
+    def rul(a):
+        sv = a.views['system']; sv._st(); sv.r_grid = True; sv.r_meas = 'armed'; sv.r_pts = [(0, 0), (320, 160)]
+    shots += [(2400, 'cube', None, amb), (2460, 'cube', P('15_cube_ambigram_side.png'), None), (2462, 'cube', None, hw), (2540, 'cube', P('16_cube_electronics.png'), None),
+              (2542, 'system', None, rul), (2600, 'system', P('17_system_rulers.png'), None)]
     shots += [(f + 1000, t, pth, act) for (f, t, pth, act) in old]
     App(shots=shots).run()
 

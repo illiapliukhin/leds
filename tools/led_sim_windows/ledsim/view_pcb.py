@@ -8,7 +8,7 @@ from .camera import Nav2D
 
 LAYER_NAMES = ['F.Cu', 'In1.Cu', 'In2.Cu', 'B.Cu']
 LAYER_COL = [(200, 60, 50), (200, 170, 60), (70, 170, 90), (60, 110, 220)]
-BOARDS = [('board_v12', 'mono_electronics v12'), ('board_v11b', 'mono_electronics v11b'), ('board_v10', 'mono_electronics v10')]
+BOARDS = [('board_v13', 'mono_electronics v13 (текущая)'), ('board_v12', 'mono_electronics v12'), ('board_v11b', 'mono_electronics v11b'), ('board_v10', 'mono_electronics v10')]
 PANELS = [('panel_full', 'mono_panel_32x32_full'), ('panel_flat', 'mono_panel_32x32'), ('panel_lattice', 'mono_panel_32x32_lattice'),
           ('panel_20x20', 'mono_panel_20x20'), ('garland', 'garland_breakout')]
 FFC = {'panel_full': 'ffc_full.json', 'panel_flat': 'ffc_mono32.json', 'panel_lattice': 'ffc_lattice.json'}
@@ -78,7 +78,9 @@ class Pcb:
         k, i = it
         return s.pads[i][9] if k == 'pad' else s.vias[i][3] if k == 'via' else s.tracks[i][2]
 
-class PcbView(Nav2D):
+from .rulers import Rulers
+
+class PcbView(Nav2D, Rulers):
     def __init__(s, app, kind):
         s.app, s.kind = app, kind
         s.list = BOARDS if kind == 'boards' else PANELS
@@ -100,6 +102,7 @@ class PcbView(Nav2D):
 
     def event(s, e, view):
         if s.zoom is None: s.fit(view)
+        if s.ruler_event(e, view): return
         if s.nav_event(e, view): return
         if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and view.collidepoint(e.pos) and not s.app.ui.consumed:
             it = s.pcb().hit(*s.s2w(*e.pos), s.layers)
@@ -182,10 +185,20 @@ class PcbView(Nav2D):
                 pygame.draw.rect(surf, (255, 255, 255), (c[0] - w / 2 - 1, c[1] - h / 2 - 1, max(3, w + 2), max(3, h + 2)), 2)
         text(surf, p.d['title'], (view.x + 10, view.y + 8), (255, 220, 140), 16)
         text(surf, T('hint_pcb'), (view.x + 8, view.bottom - 20), (140, 146, 160), 11)
+        try:
+            from .rulers import dim_line
+            ol = p.outline if hasattr(p, 'outline') else p.d['outline']
+            xs = [q[0] for sg in ol for q in sg]; ys = [q[1] for sg in ol for q in sg]
+            x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+            dim_line(surf, s.w2s(x0, y1), s.w2s(x1, y1), '%.2f мм' % (x1 - x0), (255, 210, 120), (0, 18))
+            dim_line(surf, s.w2s(x1, y0), s.w2s(x1, y1), '%.2f мм' % (y1 - y0), (255, 210, 120), (18, 0))
+        except Exception: pass
+        s.draw_rulers(surf, view)
         surf.set_clip(None)
 
     def panel(s, surf, ui, r):
         x, y, W = r.x + 10, r.y + 8, r.w - 20
+        y = s.ruler_buttons(surf, ui, x, y, W)
         for i, (k, lab) in enumerate(s.list):
             if ui.button(surf, (x, y, W, 24), lab, on=i == s.cur, sz=12): s.cur = i; s.zoom = None; s.lock = None; s.trace = None; s.surf_key = None
             y += 27

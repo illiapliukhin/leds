@@ -120,13 +120,13 @@ class World:
     def ffc_need(s, p):
         b = p.board
         if b is None: return 0.0
-        return max(math.hypot(b.conn_pos(n)[0] - p.conn_pos(n)[0], b.conn_pos(n)[1] - p.conn_pos(n)[1]) + (2 * MOUNT_GAP if b.mount is p else 0) for n in ('J_ROW', 'J_COL'))
+        return max(math.hypot(b.conn_pos(n)[0] - p.conn_pos(n)[0], b.conn_pos(n)[1] - p.conn_pos(n)[1]) + (2 * MOUNT_GAP if (abs(b.x - p.x) < p.size / 2 and abs(b.y - p.y) < p.size / 2) else 0) for n in ('J_ROW', 'J_COL'))
     def mount(s, b, p):
         """rigid assembly: board b behind panel p (centred, same rotation, mirrored as seen from the front)"""
         for q in s.panels:
             if q.board is b: q.board = None
         if b.mount is not None and b.mount is not p: b.mount = None
-        p.board = b; b.mount = p; b.mirror = s.mirror_mount; b.x, b.y, b.rot = p.x, p.y, p.rot
+        p.board = b; b.mount = None; b.mirror = s.mirror_mount           # separate objects: board stays put, the FFC follows
         need = s.ffc_need(p); p.ffc_len = 100 if need <= 100 else pick_len(need, FFC_LENGTHS); s.dirty()
     def auto_panels(s, kind):
         for b in s.boards:

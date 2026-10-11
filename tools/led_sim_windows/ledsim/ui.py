@@ -29,7 +29,7 @@ S = {
  'hint_pcb': ('Наведите на контакт/дорожку/переходное — подсветка цепи · клик = закрепить · колесо: зум к курсору · ПКМ/СКМ: сдвиг · двойной клик: фокус · F: всё · клик по J_ROW1/J_COL1 = трассировка через FFC',
               'Hover pad/track/via to highlight the net · click = pin · wheel/RMB: zoom/pan · click J_ROW1/J_COL1 pin = trace through the FFC'),
  'layers_n': ('Слоёв', 'Layers'), 'cube_demo': ('Объёмная анимация', 'Volumetric demo'), 'cube_panel': ('Тип слоёв', 'Layer type'),
- 'hint_cube': ('ЛКМ: вращать (инерция) · ПКМ/СКМ: сдвиг · колесо/щипок: зум к курсору · двойной клик: фокус · WASD/стрелки, Q/E · 1 спереди 2 сверху 3 изо · R/Home сброс',
+ 'hint_cube': ('ЛКМ: вращать (инерция) · СКМ (колесо, зажать): свободное вращение по любой оси · ПКМ: сдвиг · колесо/щипок: зум к курсору · двойной клик: фокус · WASD/стрелки, Q/E · 1 спереди 2 сверху 3 изо · R/Home сброс',
                'LMB: orbit (inertia) · RMB/MMB: pan · wheel/pinch: zoom to cursor · double-click: focus · WASD/arrows, Q/E · 1 front 2 top 3 iso · R/Home reset'),
  'maxb': ('MAXB', 'MAXB'), 'selected': ('Выбрано', 'Selected'), 'saved': ('Сохранено', 'Saved'), 'loaded': ('Загружено', 'Loaded'),
  'faults': ('Неисправности', 'Faults'), 'lang': ('EN', 'RU'),

@@ -19,13 +19,15 @@ def layout_dir():
     d = os.path.join(os.path.expanduser('~'), 'Documents', 'LED_Simulator')
     os.makedirs(d, exist_ok=True); return d
 
-class SystemView(Nav2D):
+from .rulers import Rulers, dim_line
+
+class SystemView(Nav2D, Rulers):
     def __init__(s, app):
         s.app = app; s.w = World(); s.w.preset(3, 2)
         s.zoom = 1.2; s.pan = [260, 200]; s.sel = None; s.drag = None; s.wire = None; s.kind = 'full'
         s.snap = 10.0; s.demo_i = 0; s.fps = 60; s.speed = 1.0; s.acc = 0.0; s.msg = ''; s.msg_t = 0
         s.masks = {}; s.ropes = Ropes(); s.rope_idx = {}; s.scroll = 0; s.show_topo = True; s.load_ms = 0.0
-        s.show = {'ffc': True, 'stack': True, 'power': True}; s.xray = False; s.checks = []; s.check_t = 0
+        s.show = {'ffc': True, 'stack': True, 'power': True, 'led': True}; s.xray = False; s.checks = []; s.check_t = 0
 
     # ------------------------------------------------ coords
     def focus_at(s, wx, wy):
@@ -87,6 +89,7 @@ class SystemView(Nav2D):
 
     # ------------------------------------------------ events
     def event(s, e, view):
+        if s.ruler_event(e, view): return
         if s.nav_event(e, view): return
         if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and view.collidepoint(e.pos) and not s.app.ui.consumed:
             wx, wy = s.s2w(*e.pos)
@@ -226,7 +229,7 @@ class SystemView(Nav2D):
                 w = max(2, int(1.6 * s.zoom)) if c is not s.sel else max(3, int(2.4 * s.zoom))
                 pygame.draw.lines(surf, (20, 20, 20), False, pts, w + 2); pygame.draw.lines(surf, col, False, pts, w)
                 m = pts[len(pts) // 2]; pygame.draw.circle(surf, col, (int(m[0]), int(m[1])), 5 if c is s.sel else 4, 0 if c.plugged else 1)
-                if s.zoom > 1.2: text(surf, '%d мм' % c.length, (m[0] + 6, m[1] - 6), (170, 175, 185), 10)
+                if s.zoom > 0.6: text(surf, '%d мм' % c.length, (m[0] + 6, m[1] - 6), (170, 175, 185), 10)
             else:
                 p = next((p for p in s.w.panels if id(p) == k[1]), None)
                 if p is None: continue
@@ -369,6 +372,24 @@ class SystemView(Nav2D):
                 text(surf, '%s  %s' % (inf['state'], inf['pos']), (r.x + 4, r.y + 18), (220, 220, 220), 11)
                 if r.w > 150: text(surf, '%d fps  skew %.1f µs  Δf %d' % (inf['fps'], inf['skew'], inf['dframe']), (r.x + 4, r.y + 32), (180, 190, 200), 10)
 
+    def draw_dims(surf_s, surf):
+        s = surf_s
+        if s.zoom < 0.35: return
+        for p in s.w.panels:
+            h = p.size / 2; a = s.w2s(p.x - h, p.y + h); b = s.w2s(p.x + h, p.y + h)
+            pd = panel_data(p.kind); pitch = (pd['hi'][0] - pd['lo'][0]) / 31
+            if s.zoom > 0.6: dim_line(surf, a, b, '%g×%g мм · шаг LED %.2f мм' % (p.size, p.size, pitch), (150, 200, 150), (0, -10))
+        if s.xray or s.zoom > 1.6:
+            for b in s.w.boards:
+                hw, hh = (BOARD_W / 2, BOARD_H / 2) if b.rot % 2 == 0 else (BOARD_H / 2, BOARD_W / 2)
+                dim_line(surf, s.w2s(b.x - hw, b.y - hh), s.w2s(b.x + hw, b.y - hh), '%g×%g мм' % (BOARD_W, BOARD_H), (140, 200, 160), (0, 10))
+        objs = s.w.panels or s.w.boards
+        if objs:
+            ex = [(o.x - (o.size / 2 if hasattr(o, 'kind') else BOARD_W / 2), o.y - (o.size / 2 if hasattr(o, 'kind') else BOARD_H / 2),
+                   o.x + (o.size / 2 if hasattr(o, 'kind') else BOARD_W / 2), o.y + (o.size / 2 if hasattr(o, 'kind') else BOARD_H / 2)) for o in objs]
+            x0, y0, x1, y1 = min(e[0] for e in ex), min(e[1] for e in ex), max(e[2] for e in ex), max(e[3] for e in ex)
+            dim_line(surf, s.w2s(x0, y1), s.w2s(x1, y1), 'сборка %.0f × %.0f мм' % (x1 - x0, y1 - y0), (255, 210, 120), (0, 22))
+            dim_line(surf, s.w2s(x1, y0), s.w2s(x1, y1), '%.0f мм' % (y1 - y0), (255, 210, 120), (22, 0))
     def draw_power(s, surf):
         lab = getattr(s.w, 'lab', None); p = lab.p if lab else {'usb_on': True, 'src': 'battery'}
         for b in s.w.boards:
@@ -417,6 +438,8 @@ class SystemView(Nav2D):
         if s.wire:
             st = s.w2s(*(s.wire[1][0].port_pos(s.wire[1][1]) if s.wire[0] == 'port' else s.ffc_handle(s.wire[1])))
             pygame.draw.line(surf, (255, 255, 255), st, pygame.mouse.get_pos(), 2)
+        s.draw_dims(surf)
+        s.draw_rulers(surf, view)
         text(surf, T('hint_sys'), (view.x + 8, view.bottom - 20), (140, 146, 160), 11)
         if s.w.paused: text(surf, T('pause').upper(), (view.x + 10, view.y + 8), (255, 200, 60), 18)
         if s.msg and pygame.time.get_ticks() - s.msg_t < 2500: text(surf, s.msg, (view.centerx, view.y + 20), (255, 230, 150), 16, center=True)
@@ -456,6 +479,7 @@ class SystemView(Nav2D):
             cols = sorted({round(b.x) for b in s.w.boards}); rows = sorted({round(b.y) for b in s.w.boards})
             s.w.preset(max(1, len(cols)), max(1, len(rows)), s.kind); s.fit(s.app.view); s.apply_global()
         y += 26
+        y = s.ruler_buttons(surf, ui, x, y, W)
         for lvl, msg, _ in s.checks[:3]: text(surf, msg[:64], (x, y), (255, 110, 110), 10); y += 13
         hb = (W - 4) // 2
         if ui.button(surf, (x, y, hb, 26), T('save')): s.save()
