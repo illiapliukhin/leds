@@ -448,6 +448,15 @@
     }
   },
   {
+    "reference": "D_VBUS1",
+    "value": "SMF12A",
+    "footprint": "D_SOD-123F",
+    "pad_nets": {
+      "1": "VBUS_CONN",
+      "2": "GND"
+    }
+  },
+  {
     "reference": "D_W_AB1",
     "value": "SM712",
     "footprint": "SOT-23",
@@ -683,18 +692,18 @@
     "footprint": "USB_C_Receptacle_HRO_TYPE-C-31-M-12",
     "pad_nets": {
       "A1": "GND",
-      "A4": "VBUS",
+      "A4": "VBUS_CONN",
       "A5": "USB_CC1",
       "A6": "USB_D_P",
       "A7": "USB_D_N",
-      "A9": "VBUS",
+      "A9": "VBUS_CONN",
       "A12": "GND",
       "B1": "GND",
-      "B4": "VBUS",
+      "B4": "VBUS_CONN",
       "B5": "USB_CC2",
       "B6": "USB_D_P",
       "B7": "USB_D_N",
-      "B9": "VBUS",
+      "B9": "VBUS_CONN",
       "B12": "GND",
       "SH": "GND"
     }
@@ -1214,6 +1223,15 @@
     }
   },
   {
+    "reference": "R_EN_BOT1",
+    "value": "39k",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "OVP_EN",
+      "2": "GND"
+    }
+  },
+  {
     "reference": "R_EN_PD1",
     "value": "100k",
     "footprint": "R_0402_1005Metric",
@@ -1229,6 +1247,15 @@
     "pad_nets": {
       "1": "LED_EN",
       "2": "LED_EN_RC"
+    }
+  },
+  {
+    "reference": "R_EN_TOP1",
+    "value": "100k",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "VBUS_CONN",
+      "2": "OVP_EN"
     }
   },
   {
@@ -1651,6 +1678,15 @@
     "footprint": "R_0402_1005Metric",
     "pad_nets": {
       "1": "ILIM_VSET",
+      "2": "GND"
+    }
+  },
+  {
+    "reference": "R_ILM1",
+    "value": "1.78k",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "OVP_ILM",
       "2": "GND"
     }
   },
@@ -2460,6 +2496,20 @@
       "9": "SW_L1",
       "10": "SYS",
       "11": "GND"
+    }
+  },
+  {
+    "reference": "U_OVP1",
+    "value": "TPS259531DSGR",
+    "footprint": "Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm",
+    "pad_nets": {
+      "2": "OVP_EN",
+      "3": "VBUS_CONN",
+      "4": "VBUS_CONN",
+      "5": "VBUS",
+      "7": "OVP_ILM",
+      "8": "GND",
+      "9": "GND"
     }
   },
   {

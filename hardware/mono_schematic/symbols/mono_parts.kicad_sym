@@ -41,6 +41,25 @@
       )
     )
   (symbol
+      "1.78k_R_0402_1005Metric_2"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "~")
+        (number "2")
+      )
+    )
+  (symbol
       "1.82k_R_0402_1005Metric_2"
       (pin
         passive
@@ -422,6 +441,25 @@
     )
   (symbol
       "33R_R_0402_1005Metric_2"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "~")
+        (number "2")
+      )
+    )
+  (symbol
+      "39k_R_0402_1005Metric_2"
       (pin
         passive
         line
@@ -2570,6 +2608,25 @@
       )
     )
   (symbol
+      "SMF12A_D_SOD-123F_2"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "~")
+        (number "2")
+      )
+    )
+  (symbol
       "SN74LV125A_TSSOP-14_4.4x5mm_P0.65mm_14"
       (pin
         power_in
@@ -3114,6 +3171,65 @@
       )
     )
   (symbol
+      "TPS259531DSGR_Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm_7"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "OVP_EN")
+        (number "2")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "VBUS_CONN")
+        (number "3")
+      )
+      (pin
+        passive
+        line
+        (at -5.08 -2.54 0)
+        (length 0)
+        (name "VBUS_CONN")
+        (number "4")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 -2.54 180)
+        (length 0)
+        (name "VBUS")
+        (number "5")
+      )
+      (pin
+        passive
+        line
+        (at -5.08 -5.08 0)
+        (length 0)
+        (name "OVP_ILM")
+        (number "7")
+      )
+      (pin
+        power_in
+        line
+        (at 5.08 -5.08 180)
+        (length 0)
+        (name "GND")
+        (number "8")
+      )
+      (pin
+        power_in
+        line
+        (at -5.08 -7.62 0)
+        (length 0)
+        (name "GND")
+        (number "9")
+      )
+    )
+  (symbol
       "TPS63802DLAR_TDFN-10-1EP_2x3mm_P0.5mm_EP0.9x2mm_10"
       (pin
         passive
@@ -3219,7 +3335,7 @@
         line
         (at -5.08 -2.54 0)
         (length 0)
-        (name "VBUS")
+        (name "VBUS_CONN")
         (number "A4")
       )
       (pin
@@ -3251,7 +3367,7 @@
         line
         (at -5.08 -7.62 0)
         (length 0)
-        (name "VBUS")
+        (name "VBUS_CONN")
         (number "A9")
       )
       (pin
@@ -3275,7 +3391,7 @@
         line
         (at 5.08 -10.16 180)
         (length 0)
-        (name "VBUS")
+        (name "VBUS_CONN")
         (number "B4")
       )
       (pin
@@ -3307,7 +3423,7 @@
         line
         (at 5.08 -15.24 180)
         (length 0)
-        (name "VBUS")
+        (name "VBUS_CONN")
         (number "B9")
       )
       (pin

@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-11T14:07:41",
+    "date": "2026-10-11T14:10:23",
     "ignored_checks": [
         {
             "description": "Global label only appears once in the schematic",
@@ -29,52 +29,52 @@
     "sheets": [
         {
             "path": "/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce",
             "violations": []
         },
         {
             "path": "/power/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/c62cbd6b-6ea9-45b6-98a3-132e5c60e6d5",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/6575ca85-7fed-437d-a9df-12e71c17f511",
             "violations": []
         },
         {
             "path": "/mcu/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/694566d0-45f3-4d37-a1b7-666503079bfc",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/4616998c-1fe4-4cdf-ac77-640b83856ae0",
             "violations": []
         },
         {
             "path": "/imu/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/3247964c-7c51-4ece-8800-abfd7f03552d",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/8cdc8c8c-1e39-48ad-af9c-2652bfb95f31",
             "violations": []
         },
         {
             "path": "/led_drive/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/b0811911-86d1-4994-83d2-6cfaf42dde32",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/0d224ce2-c621-4338-b4b8-97d5aeecacdf",
             "violations": []
         },
         {
             "path": "/row_farm/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/0b4da619-6cbc-469e-a10d-6c18b66645cc",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/f7b59c8f-191e-4619-958e-84519d5e7586",
             "violations": []
         },
         {
             "path": "/audio/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/27ccd07c-8b69-498d-8b75-ea74a03df82e",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/9e6f1dc3-5d00-4ab2-8703-75e818cf04f0",
             "violations": []
         },
         {
             "path": "/stacking/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/f86c6e8b-e246-4105-9bfc-1c2085cd4cce",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/7620c4ce-beab-4d87-9dfd-09a02b9ad555",
             "violations": []
         },
         {
             "path": "/led_interface/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/cacb922f-5f3a-4684-ab1a-d829d3d0f45b",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/2759fdf7-af53-41c9-ad32-c5286f0375d9",
             "violations": []
         },
         {
             "path": "/mechanical/",
-            "uuid_path": "/dd8528be-b82e-4559-b82e-5640d088a7bd/52e6e288-58ab-4b3e-b3c2-ed387d7a1be2",
+            "uuid_path": "/6227015c-7b79-43cd-9dbd-b0f8ffadcbce/24698b12-55c2-408c-afb9-396545ab1e24",
             "violations": []
         }
     ],
