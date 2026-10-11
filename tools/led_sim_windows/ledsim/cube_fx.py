@@ -149,112 +149,211 @@ class FX:
         return m[31 - lay, col] * thick * ((np.abs(u) <= 1))
 
 
-# ---------------------------------------------------------------- skeletal volume figures (walk / run / go-go)
-# A figure is a set of capsules (bone segments with radii) + spheres, voxelised as a signed distance with a
-# one-voxel anti-aliased edge: brightness = clip(0.5 − d/voxel, 0, 1). Body frame: f = forward, u = up, l = lateral.
-# The figure stands along the panel's 32-LED rows (up = −y), so it fits a flat 32×32×8 lattice cube as well as a full cube.
+# ---------------------------------------------------------------- anatomical volume figures (walk / run / go-go)
+# Bodies are smooth signed-distance fields: ellipsoids (head, chest, waist, pelvis, hands, feet) and tapered capsules
+# (neck, limbs), blended with a polynomial smooth-min so joints read as one organic surface, then voxelised with a
+# one-voxel anti-aliased edge (brightness = clip(0.5 − d/voxel)). Pose = forward kinematics from mocap-like keyframes
+# (cyclic Catmull-Rom). Secondary motion (hair, ponytail, skirt hem) is a damped spring system integrated per frame.
+# Body frame: x = right, y = up, z = forward (towards the viewer for the dancer). Units: cube half-size = 1.
 VOX = 1 / 16.0
 
-def _seg_dist(P, a, b):
-    """distance from points P (..., 3) to segment a-b"""
-    ab = b - a; t = np.clip(((P - a) @ ab) / max(1e-9, ab @ ab), 0, 1)
-    return np.linalg.norm(P - a - t[..., None] * ab, axis=-1)
+def _smin(a, b, k):
+    h = np.clip(0.5 + 0.5 * (b - a) / k, 0, 1)
+    return b + (a - b) * h - k * h * (1 - h)
 
-def _rot(a): c, s = math.cos(a), math.sin(a); return np.array([s, c])      # unit vector at angle a from "down" in the f-u plane
+def _ell(P, c, r):
+    """ellipsoid SDF (first-order bound, good near the surface): r = (rx, ry, rz)"""
+    q = (P - c) / r; k = np.linalg.norm(q, axis=-1)
+    return (k - 1) * min(r)
 
-def _limb(root, a1, a2, L1, L2):
-    """2-bone limb in the f-u plane: a1 = upper angle from straight down (forward +), a2 = lower bone's extra bend"""
-    d1 = np.array([math.sin(a1), -math.cos(a1)]); d2 = np.array([math.sin(a1 + a2), -math.cos(a1 + a2)])
-    j = root + d1 * L1; return j, j + d2 * L2
+def _cone(P, a, b, ra, rb):
+    """tapered capsule a→b with radii ra→rb"""
+    ab = b - a; L2 = max(1e-9, ab @ ab); t = np.clip(((P - a) @ ab) / L2, 0, 1)
+    return np.linalg.norm(P - a - t[..., None] * ab, axis=-1) - (ra + (rb - ra) * t)
 
-def _gait(t, hz, run):
-    """smooth keyframe-like gait (Fourier-shaped cycle). Returns joints in (f, u, l) and segment list."""
-    ph = 2 * math.pi * hz * t
-    sw, kn, arm, el, lean, bob = (0.75, 1.5, 0.95, 1.4, 0.22, 0.06) if run else (0.42, 0.65, 0.42, 0.35, 0.03, 0.025)
-    hip_u = -0.02 + bob * math.cos(2 * ph) - (0.06 if run else 0.0)
-    segs = []
-    H = np.array([0.0, hip_u])
-    T = H + np.array([math.sin(lean), math.cos(lean)]) * 0.52                 # neck base
-    for side, s in ((1, 0.0), (-1, math.pi)):
-        p = ph + s
-        a1 = sw * math.sin(p)
-        a2 = -kn * max(0.0, math.sin(p + (1.9 if run else 1.6))) ** (1.0 if run else 1.4) - 0.05
-        k, f = _limb(H, a1, a2, 0.42, 0.42)
-        toe = f + np.array([0.11, -0.02])
-        l = 0.09 * side
-        segs += [((H, l), (k, l), 0.07), ((k, l), (f, l), 0.06), ((f, l), (toe, l), 0.045)]
-        sh = T - np.array([math.sin(lean), math.cos(lean)]) * 0.06
-        b1 = -arm * math.sin(p) + lean; b2 = el + (0.25 * math.sin(p) if run else 0.15 * (1 + math.sin(p)))
-        e, w = _limb(sh, b1, b2, 0.29, 0.27)
-        la = 0.2 * side
-        segs += [((sh, la), (e, la), 0.05), ((e, la), (w, la), 0.042)]
-    segs += [((H, 0.0), (T, 0.0), 0.11), ((T - np.array([0, 0.02]), -0.17), (T - np.array([0, 0.02]), 0.17), 0.06)]
-    head = T + np.array([math.sin(lean) * 0.2, 0.2])
-    return segs, [(head, 0.0, 0.12)], None
+def _catmull(keys, u):
+    """cyclic Catmull-Rom through equally spaced keyframes, u in [0, 1)"""
+    n = len(keys); f = (u % 1.0) * n; i = int(f); t = f - i
+    p0, p1, p2, p3 = (np.asarray(keys[(i + k) % n], float) for k in (-1, 0, 1, 2))
+    return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3)
 
-def _gogo(t):
-    """go-go dancer facing the viewer (f = depth): hip sway, alternating arm pumps, knee bends, flared dress"""
-    bpm = 128; ph = 2 * math.pi * bpm / 60 / 2 * t                          # one sway cycle = 2 beats
-    sway = 0.11 * math.sin(ph); bounce = 0.035 * abs(math.sin(ph))
-    segs = []
-    # here the f-u plane is the FRONT plane: "f" is the lateral screen axis, l is depth
-    H = np.array([sway, -0.05 - bounce])
-    tilt = -0.25 * math.sin(ph)                                               # torso leans against the hips
-    T = H + np.array([math.sin(tilt), math.cos(tilt)]) * 0.5
-    for side in (1, -1):
-        kb = 0.25 + 0.25 * max(0.0, math.sin(ph * side))                      # the leg on the sway side straightens
-        hp = H + np.array([0.08 * side, 0]); foot = np.array([0.13 * side, -0.88])
-        mid = (hp + foot) / 2 + np.array([0, 0]); knee = mid + np.array([0, 0]) ; knee = mid + np.array([0.0, 0.0])
-        knee = mid + np.array([0.0, 0.0]); knee[0] += 0.0
-        kneeF = kb * 0.25                                                     # knee comes forward (depth)
-        segs += [((hp, 0.0), (knee, kneeF), 0.06), ((knee, kneeF), (foot, 0.0), 0.05), ((foot, 0.0), (foot + np.array([0, -0.02]), 0.1), 0.04)]
-        # arms: alternate "pump up" / "down by the hip" with a twist of the wrist
-        a = ph * 2 + (0 if side > 0 else math.pi)
-        up = 0.5 + 0.5 * math.sin(a)
-        sh = T + np.array([0.17 * side, -0.05])
-        e = sh + np.array([0.18 * side, -0.12 + 0.3 * up])
-        w = e + np.array([(0.05 - 0.12 * up) * side, -0.18 + 0.48 * up])
-        segs += [((sh, 0.0), (e, 0.05 * up), 0.045), ((e, 0.05 * up), (w, 0.0), 0.038)]
-    segs += [((H, 0.0), (T, 0.0), 0.085), ((T + np.array([-0.17, -0.05]), 0.0), (T + np.array([0.17, -0.05]), 0.0), 0.05)]
-    head = T + np.array([0.04 * math.sin(ph + 0.6), 0.2])
-    sph = [(head, 0.0, 0.11), (head + np.array([0, 0.06]), -0.08, 0.08)]   # head + hair bun
-    # dress: cone shell from the waist down, axis swings with the hips, hem flares with the sway speed
-    waist = H + np.array([0, 0.17]); ax = np.array([0.35 * math.sin(ph - 0.5), -1.0]); ax /= np.linalg.norm(ax)
-    flare = 0.36 + 0.08 * abs(math.cos(ph))
-    return segs, sph, (waist, ax, 0.42, 0.1, flare, ph)
+def _dir(flex, abd, side):
+    """limb direction from flexion (forward +) and abduction (outward +) angles, rad"""
+    return np.array([side * math.sin(abd) * math.cos(flex), -math.cos(flex) * math.cos(abd), math.sin(flex) * math.cos(abd)])
 
-def figure(kind, x, y, z, t):
-    """voxelised figure. kind: 'walk' | 'run' | 'gogo'"""
-    zext = float(np.abs(z).max()) if z.size else 1.0
-    ls = min(1.0, max(0.35, zext / 0.3))                                     # lateral/depth squeeze for a flat 8-layer cube
-    if kind == 'gogo':
-        segs, sph, dress = _gogo(t); spin = 0.35 * math.sin(2 * math.pi * 0.1 * t)
-    else:
-        segs, sph, dress = _gait(t, 1.0 if kind == 'walk' else 1.5, kind == 'run'); spin = 0.0
-    # tall cube (layers span the height): stand upright along the layer axis (up = +z: the renderer maps world-up to +z);
-    # flat lattice slab (32×32×N, N small): lie in the 32×32 plane (up = −y) with depth squeezed into the layers
-    if zext >= 0.6: F, U, Lz = x, z, y
-    else: F, U, Lz = x, -y, z / ls
-    if spin: F, Lz = F * math.cos(spin) - Lz * math.sin(spin), F * math.sin(spin) + Lz * math.cos(spin)
-    # narrow band: only voxels inside the figure's bounding box are evaluated (≈ 10 % of a 32³ cube)
-    pts = [np.array([a[0], a[1], la]) for (a, la), _, _ in segs] + [np.array([b[0], b[1], lb]) for _, (b, lb), _ in segs] + [np.array([c[0], c[1], l]) for c, l, _ in sph]
-    lo = np.min(pts, 0) - 0.2; hi = np.max(pts, 0) + 0.2
-    if dress is not None: lo = np.minimum(lo, [-0.62, -0.45, -0.5]); hi = np.maximum(hi, [0.62, 0.3, 0.5])
-    sel = np.flatnonzero((F >= lo[0]) & (F <= hi[0]) & (U >= lo[1]) & (U <= hi[1]) & (Lz >= lo[2]) & (Lz <= hi[2]))
-    P = np.stack([F.ravel()[sel], U.ravel()[sel], Lz.ravel()[sel]], -1)
-    d = np.full(len(sel), 9.0)
-    for (a, la), (b, lb), r in segs:
-        d = np.minimum(d, _seg_dist(P, np.array([a[0], a[1], la]), np.array([b[0], b[1], lb])) - r * 1.3)   # ×1.3: limbs ≥ 2 voxels thick
-    for c, l, r in sph:
-        d = np.minimum(d, np.linalg.norm(P - np.array([c[0], c[1], l]), axis=-1) - r)
-    vs = np.clip(0.5 - d / VOX, 0, 1)
-    if dress is not None:
-        W, ax, L, r0, r1, ph = dress; A = np.array([ax[0], ax[1], 0.0])
-        q = P - np.array([W[0], W[1], 0.0]); h = q @ A
-        rad = np.linalg.norm(q - h[..., None] * A, axis=-1)
-        ang = np.arctan2(q[..., 2], q[..., 0])
-        R = r0 + (r1 - r0) * np.clip(h / L, 0, 1) * (1 + 0.18 * np.sin(3 * ang + ph * 2))   # pleats ripple
-        dd = np.maximum(np.abs(rad - R) - 0.025, np.maximum(-h, h - L))
-        vs = np.maximum(vs, np.clip(0.5 - dd / VOX, 0, 1) * 0.85)
-    v = np.zeros(x.size, np.float32); v[sel] = vs
-    return v.reshape(x.shape)
+def _yaw(v, a):
+    c, s_ = math.cos(a), math.sin(a); return np.array([v[0] * c + v[2] * s_, v[1], -v[0] * s_ + v[2] * c])
+
+def _roll(v, a):
+    c, s_ = math.cos(a), math.sin(a); return np.array([v[0] * c - v[1] * s_, v[0] * s_ + v[1] * c, v[2]])
+
+# go-go: 8 beats (one 2-bar phrase at 128 BPM ≈ 3.75 s). Channels (degrees / units):
+#  px  py  pyaw proll tyaw tside  shLa shLf elL  shRa shRf elR  hLf kL  hRf kR  hLa hRa  head
+GOGO_KEYS = [
+    # 1-2: twist down (knees bent, pelvis twists, chest counter-twists, bent arms pump)
+    [0.00, -0.06,  35, 0,  -25,  0,   35, 50, 95,   35, 20, 95,   25, 45, 10, 35,  8, 8,   0],
+    [0.00, -0.03, -35, 0,   25,  0,   35, 20, 95,   35, 50, 95,   10, 35, 25, 45,  8, 8,   0],
+    # 3-4: side step right + hip sway, right arm waves over the head
+    [0.10, -0.02,  10, 9,   -5, -9,   40, 10, 60,  165, 10, 25,    5, 15, 20, 35,  6, 16, -10],
+    [0.14,  0.00, -10, -9,   5,  9,   30, 10, 70,  170, 20, 10,   18, 30,  5, 10,  4, 20,  10],
+    # 5-6: twist again, both hands framing the face
+    [0.04, -0.06,  30, 0,  -22,  0,   60, 80, 120,  60, 80, 120,  25, 45, 10, 35,  8, 8,   0],
+    [-0.04,-0.03, -30, 0,   22,  0,   60, 80, 120,  60, 80, 120,  10, 35, 25, 45,  8, 8,   0],
+    # 7-8: side step left, left arm waves over the head
+    [-0.10,-0.02, -10, -9,   5,  9,  165, 10, 25,   40, 10, 60,   20, 35,  5, 15, 16, 6,  10],
+    [-0.14, 0.00,  10, 9,   -5, -9,  170, 20, 10,   30, 10, 70,    5, 10, 18, 30, 20, 4, -10],
+]
+
+class Figure:
+    def __init__(s, kind):
+        s.kind = kind; s.t_prev = None
+        s.hair = None; s.hem = np.zeros(16); s.hem_v = np.zeros(16); s.hem_c = np.zeros(2); s.hem_cv = np.zeros(2); s.yaw_prev = 0.0
+
+    # ------------------------------------------------ poses
+    def pose(s, t):
+        d = math.radians
+        if s.kind == 'gogo':
+            beat = 128 / 60.0; u = (t * beat / 8.0) % 1.0
+            k = _catmull(GOGO_KEYS, u)
+            px, py, pyaw, proll, tyaw, tside, shLa, shLf, elL, shRa, shRf, elR, hLf, kL, hRf, kR, hLa, hRa, hd = k
+            wrist = 0.5 * math.sin(2 * math.pi * beat * t)                      # wrists flick on every beat
+            return dict(px=px, py=py, pz=0.0, pyaw=d(pyaw), proll=d(proll), tyaw=d(tyaw), tside=d(tside), lean=d(4),
+                        arms=[(d(shLa), d(shLf), d(elL), wrist), (d(shRa), d(shRf), d(elR), -wrist)],
+                        legs=[(d(hLf), d(kL), d(hLa)), (d(hRf), d(kR), d(hRa))], head=d(hd), female=True)
+        run = s.kind == 'run'; hz = 1.5 if run else 1.0; ph = 2 * math.pi * hz * t
+        # gait channels shaped like mocap curves (hip flexion leads, knee double-hump on walk, big knee drive on run)
+        def leg(p):
+            hip = (d(42) * math.sin(p) + d(8)) if run else (d(24) * math.sin(p) + d(4))
+            sw = max(0.0, math.sin(p + 1.75))                                   # swing phase
+            knee = (d(25) + d(95) * sw ** 1.2) if run else (d(6) + d(55) * sw ** 1.6 + d(12) * max(0.0, math.sin(2 * p - 0.6)) * (1 - sw))
+            return (hip, knee, d(3))
+        def arm(p):
+            return (d(6), -(d(55) if run else d(22)) * math.sin(p) + (d(10) if run else d(4)), d(95) + d(10) * math.sin(p) if run else d(14) + d(10) * (1 + math.sin(p)), 0.0)
+        bob = (0.05 if run else 0.022) * math.cos(2 * ph)
+        return dict(px=0.0, py=bob - (0.05 if run else 0.0), pz=0.0, pyaw=d(9 if run else 6) * math.sin(ph), proll=d(3) * math.sin(ph),
+                    tyaw=-d(14 if run else 8) * math.sin(ph), tside=0.0, lean=d(14 if run else 3),
+                    arms=[arm(ph), arm(ph + math.pi)], legs=[leg(ph + math.pi), leg(ph)], head=0.0, female=False)
+
+    # ------------------------------------------------ skeleton + primitives
+    def build(s, t, dt):
+        q = s.pose(t); S = 1.08; fem = q['female']
+        P0 = np.array([q['px'], 0.05 * S + q['py'], q['pz']])
+        def pel(v): return P0 + _yaw(_roll(np.asarray(v, float) * S, q['proll']), q['pyaw'])
+        def tor(v):
+            v = np.asarray(v, float) * S
+            v = np.array([v[0], v[1] * math.cos(q['lean']) - v[2] * math.sin(q['lean']), v[1] * math.sin(q['lean']) + v[2] * math.cos(q['lean'])])
+            return P0 + _yaw(_roll(_roll(v, q['tside']), q['proll']), q['pyaw'] + q['tyaw'])
+        E, C = [], []                                                          # ellipsoids (c, r), cones (a, b, ra, rb)
+        # torso: pelvis, waist, ribcage, bust/chest, shoulders
+        E += [(pel([0, 0.0, 0]), np.array([0.165 if fem else 0.15, 0.11, 0.11]) * S),
+              (tor([0, 0.16, 0]), np.array([0.105 if fem else 0.13, 0.11, 0.085]) * S),
+              (tor([0, 0.32, 0]), np.array([0.15 if fem else 0.175, 0.13, 0.10]) * S)]
+        if fem: E += [(tor([sx * 0.065, 0.33, 0.07]), np.array([0.06, 0.055, 0.05]) * S) for sx in (-1, 1)]
+        neck = tor([0, 0.46, 0]); head_c = tor([0, 0.60, 0.01]) + np.array([0.0, 0.0, 0.0])
+        head_c = head_c + _yaw(np.array([math.sin(q['head']) * 0.04, 0, 0]), q['pyaw'] + q['tyaw'])
+        C += [(tor([0, 0.40, 0]), neck, 0.045 * S, 0.04 * S)]
+        E += [(head_c, np.array([0.085, 0.115, 0.10]) * S),                    # skull
+              (head_c + _yaw(np.array([0, -0.07, 0.035]) * S, q['pyaw'] + q['tyaw']), np.array([0.06, 0.05, 0.065]) * S)]   # jaw
+        # arms
+        for (abd, flex, el, wr), side in zip(q['arms'], (-1, 1)):
+            sh = tor([side * 0.17, 0.41, 0]); E.append((sh, np.array([0.055, 0.05, 0.05]) * S))   # deltoid
+            ua = _yaw(_roll(_dir(flex, abd, side), q['tside'] + q['proll']), q['pyaw'] + q['tyaw'])
+            el_ = sh + ua * 0.28 * S
+            fa = _yaw(_roll(_dir(flex + el * math.cos(abd), abd + el * math.sin(abd) * 0.3, side), q['tside'] + q['proll']), q['pyaw'] + q['tyaw'])
+            wr_ = el_ + fa * 0.25 * S
+            hd = _yaw(_roll(_dir(flex + el + wr, abd, side), q['tside']), q['pyaw'] + q['tyaw'])
+            C += [(sh, el_, 0.048 * S, 0.036 * S), (el_, wr_, 0.036 * S, 0.026 * S)]
+            E.append((wr_ + hd * 0.05 * S, np.array([0.03, 0.055, 0.03]) * S))   # hand
+        # legs
+        feet = []
+        for (hf, kn, ha), side in zip(q['legs'], (-1, 1)):
+            hp = pel([side * 0.09, -0.04, 0])
+            th = _yaw(_roll(_dir(hf, ha, side), q['proll']), q['pyaw']); kn_ = hp + th * 0.43 * S
+            sh_ = _yaw(_roll(_dir(hf - kn, ha * 0.6, side), q['proll']), q['pyaw']); an = kn_ + sh_ * 0.42 * S
+            fwd = _yaw(np.array([0, 0, 1.0]), q['pyaw'])
+            C += [(hp, kn_, (0.085 if fem else 0.08) * S, 0.052 * S), (kn_, an, 0.05 * S, 0.034 * S)]
+            E.append((kn_ + fwd * 0.01, np.array([0.05, 0.05, 0.05]) * S))     # knee
+            if fem: C.append((kn_ - sh_ * 0.06 * S, an, 0.056 * S, 0.044 * S))  # go-go boot shaft up to the knee
+            E.append((an + fwd * 0.065 * S - np.array([0, 0.03, 0]) * S, np.array([0.045, 0.035, 0.11]) * S))   # foot / boot
+            feet.append(an)
+        # hair: cap + long hair that swings (spring chain); ponytail for the dancer
+        hair_E = [(head_c + np.array([0, 0.025, -0.012]) * S, np.array([0.098, 0.12, 0.112]) * S)]
+        if fem:
+            root = head_c + _yaw(np.array([0, 0.02, -0.09]) * S, q['pyaw'] + q['tyaw'])
+            s.step_hair(root, dt)
+            for i in range(len(s.hair) - 1):
+                C.append((s.hair[i], s.hair[i + 1], (0.07 - 0.012 * i) * S, (0.058 - 0.012 * i) * S))
+        E += hair_E
+        skirt = None
+        if fem:
+            waist = tor([0, 0.10, 0]); s.step_skirt(waist, q, dt); skirt = (waist, q)
+        return E, C, skirt
+
+    def step_hair(s, root, dt):
+        n = 5; seg = 0.085
+        if s.hair is None: s.hair = [root - np.array([0, i * seg, 0.0]) for i in range(n)]; s.hair_p = [h.copy() for h in s.hair]
+        dt = min(max(dt, 1e-3), 0.05)
+        new = [root.copy()]
+        for i in range(1, n):
+            p, pp = s.hair[i], s.hair_p[i]
+            v = (p - pp) * 0.9                                                  # damping
+            new.append(p + v + np.array([0, -4.0, 0]) * dt * dt)                # gravity
+        for _ in range(4):                                                      # length constraints + head collision
+            for i in range(1, n):
+                d_ = new[i] - new[i - 1]; L = np.linalg.norm(d_) or 1
+                new[i] = new[i - 1] + d_ * (seg / L)
+                off = new[i] - (root + np.array([0, -0.02, 0.09])); r = np.linalg.norm(off)
+                if r < 0.13: new[i] = new[i] + off / max(r, 1e-6) * (0.13 - r)
+        s.hair_p = s.hair; s.hair = new
+
+    def step_skirt(s, waist, q, dt):
+        """hem: 16 radial springs. Twist angular velocity flares the hem (centripetal), hip acceleration makes the
+        hem centre lag (inertia), each pleat has its own damped spring -> secondary motion / wave around the hem"""
+        dt = min(max(dt, 1e-3), 0.05); yaw = q['pyaw']
+        w = (yaw - s.yaw_prev) / dt; s.yaw_prev = yaw
+        ang = np.linspace(0, 2 * math.pi, 16, endpoint=False)
+        target = 0.05 * min(w * w, 30.0) / 30.0 * 2.2 + 0.025 * np.sin(ang * 2 + yaw * 3)
+        acc = 70.0 * (target - s.hem) - 7.0 * s.hem_v
+        acc += 6.0 * (np.roll(s.hem, 1) + np.roll(s.hem, -1) - 2 * s.hem)       # fabric couples neighbouring pleats
+        s.hem_v += acc * dt; s.hem += s.hem_v * dt
+        c = np.array([waist[0], waist[2]])
+        if not hasattr(s, 'hem_cp'): s.hem_cp = c.copy(); s.hem_c = c.copy()
+        a = 40.0 * (c - s.hem_c) - 6.0 * s.hem_cv
+        s.hem_cv += a * dt; s.hem_c += s.hem_cv * dt
+
+    # ------------------------------------------------ voxelise
+    def volume(s, x, y, z, t, dt):
+        E, C, skirt = s.build(t, dt)
+        zext = float(np.abs(z).max()) if z.size else 1.0
+        if s.kind == 'gogo': X, Y, Z = x, z, -y                                   # faces the front panel (−y)
+        else: X, Y, Z = -y, z, x                                                 # side view: walks towards +x
+        if zext < 0.6:                                                           # flat 32×32×N lattice slab: lie in the panel plane
+            sq = min(1.0, max(0.35, zext / 0.3))
+            X, Y, Z = (x, -y, z / sq) if s.kind == 'gogo' else (z / sq, -y, x)
+        pts = [c for c, _ in E] + [a for a, *_ in C] + [b for _, b, *_ in C]
+        lo = np.min(pts, 0) - 0.16; hi = np.max(pts, 0) + 0.16
+        if skirt is not None: lo = np.minimum(lo, skirt[0] - [0.5, 0.5, 0.5]); hi = np.maximum(hi, skirt[0] + [0.5, 0.05, 0.5])
+        sel = np.flatnonzero((X >= lo[0]) & (X <= hi[0]) & (Y >= lo[1]) & (Y <= hi[1]) & (Z >= lo[2]) & (Z <= hi[2]))
+        P = np.stack([X.ravel()[sel], Y.ravel()[sel], Z.ravel()[sel]], -1).astype(np.float32)
+        d = np.full(len(sel), 9.0, np.float32); k = 0.035
+        for c, r in E: d = _smin(d, _ell(P, c, r), k)
+        for a, b, ra, rb in C: d = _smin(d, _cone(P, a, b, ra, rb), k)
+        v = np.clip(0.5 - d / VOX, 0, 1)
+        if skirt is not None:
+            W, q = skirt; L = 0.36
+            h = np.clip((W[1] - P[:, 1]) / L, -1, 2)
+            cx = W[0] + (s.hem_c[0] - W[0]) * np.clip(h, 0, 1) ** 1.5 * 1.6 + (s.hem_c[0] - W[0]) * 0
+            cz = W[2] + (s.hem_c[1] - W[2]) * np.clip(h, 0, 1) ** 1.5 * 1.6
+            th = np.arctan2(P[:, 2] - cz, P[:, 0] - cx)
+            hem = np.interp((th - q['pyaw']) % (2 * math.pi), np.linspace(0, 2 * math.pi, 17), np.r_[s.hem, s.hem[:1]])
+            R = 0.13 + (0.21 + hem) * np.clip(h, 0, 1) ** 0.85 + 0.012 * np.sin(th * 10 - q['pyaw'] * 4) * np.clip(h, 0, 1)
+            rad = np.hypot(P[:, 0] - cx, P[:, 2] - cz)
+            dd = np.maximum(np.abs(rad - R) - 0.022, np.maximum(-h * L, (h - 1) * L))
+            v = np.maximum(v, np.clip(0.5 - dd / VOX, 0, 1) * 0.9)
+        out = np.zeros(x.size, np.float32); out[sel] = v
+        return out.reshape(x.shape)
+
+def figure(kind, x, y, z, t, dt=1 / 60, _cache={}):
+    f = _cache.get(kind)
+    if f is None: f = _cache[kind] = Figure(kind)
+    return f.volume(x, y, z, t, dt)

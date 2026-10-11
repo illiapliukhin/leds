@@ -57,7 +57,7 @@ class CubeView:
             m2 = image3d.preprocess(s.img2, s.igamma, s.ithr, s.idither, s.iinvert)[1] if s.img2 is not None else None
             return image3d.volume(image3d.MODES[s.imode], g, m, n, t, mask2=m2, fill=s.ifill)
         if name == 'tsweep': return cube_fx.FX.text_sweep(s.words[0], x, y, z, t, n)
-        if name in ('walker', 'runner', 'gogo'): return cube_fx.figure({'walker': 'walk', 'runner': 'run'}.get(name, name), x, y, z, t)
+        if name in ('walker', 'runner', 'gogo'): return cube_fx.figure({'walker': 'walk', 'runner': 'run'}.get(name, name), x, y, z, t, dt)
         if name == 'life': return s.fx.life3d(t, dt)
         if name == 'fireworks': return s.fx.fireworks(t, dt)
         if name == 'snake': return s.fx.snake3d(t, dt)
