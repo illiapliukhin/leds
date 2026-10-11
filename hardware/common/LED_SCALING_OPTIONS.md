@@ -19,7 +19,7 @@ Baseline: one electronics board drives 32 rows × 32 columns at 1/32 duty. The r
 
 ## Main-board changes (none required for the recommended option)
 
-To make the standard complete (ID + expansion-ready), the next main-board revision should:
+**Status: items 1 and 2 are applied in mono_electronics v12** (see hardware/mono_electronics/REWORK_LOG.md). The TVS is a PESD5V0S2BT (35 pF), not a PESD3V3S2UT (200 pF), to keep the I²C rise time in spec. Item 3 (row bleeds) was not applied. Original list:
 
 1. `J_ROW1` pins 33, 38, 40 → `GND`; pin 35 → `IMU_SDA`, pin 36 → `IMU_SCL` (each through 33 Ω series, plus a PESD3V3S2UT dual TVS at the connector); pin 37 → `AON_3V3` through 100 Ω (limits ID supply and short-circuit current); pin 39 (`ID_PRESENT_N`) → optional, firmware uses EEPROM ACK instead (no free GPIO); pin 34 (`VLED_SENSE`) → optional ADC divider, NC is acceptable.
 2. `J_COL1` pins 33, 38, 40 → `GND`. Pins 34–37 → `U_LED2` SDO (`LED_SDO2`, today open), `LED_CLK_Y`, `LED_LE_Y`, `LED_OE_Y` through 33 Ω, with DNP options so they can stay unloaded. Pin 39 → `LED_LOGIC_3V3` through a 0 Ω / polyfuse (DNP).

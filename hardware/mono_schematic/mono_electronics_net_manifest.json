@@ -398,6 +398,16 @@
     }
   },
   {
+    "reference": "D_ID1",
+    "value": "PESD5V0S2BT",
+    "footprint": "SOT-23",
+    "pad_nets": {
+      "1": "IMU_SDA",
+      "2": "IMU_SCL",
+      "3": "GND"
+    }
+  },
+  {
     "reference": "D_N_AB1",
     "value": "SM712",
     "footprint": "SOT-23",
@@ -545,14 +555,14 @@
       "30": "COL_30",
       "31": "COL_31",
       "32": "COL_32",
-      "33": "COL_SPARE_33",
-      "34": "COL_SPARE_34",
-      "35": "COL_SPARE_35",
-      "36": "COL_SPARE_36",
-      "37": "COL_SPARE_37",
-      "38": "COL_SPARE_38",
-      "39": "COL_SPARE_39",
-      "40": "COL_SPARE_40"
+      "33": "GND",
+      "34": "EXP_SDI",
+      "35": "EXP_CLK",
+      "36": "EXP_LE",
+      "37": "EXP_OE",
+      "38": "GND",
+      "39": "EXP_3V3",
+      "40": "GND"
     }
   },
   {
@@ -648,14 +658,14 @@
       "30": "ROW_30_ANODE",
       "31": "ROW_31_ANODE",
       "32": "ROW_32_ANODE",
-      "33": "ROW_SPARE_33",
+      "33": "GND",
       "34": "ROW_SPARE_34",
-      "35": "ROW_SPARE_35",
-      "36": "ROW_SPARE_36",
-      "37": "ROW_SPARE_37",
-      "38": "ROW_SPARE_38",
+      "35": "ID_SDA",
+      "36": "ID_SCL",
+      "37": "ID_3V3",
+      "38": "GND",
       "39": "ROW_SPARE_39",
-      "40": "ROW_SPARE_40"
+      "40": "GND"
     }
   },
   {
@@ -1194,6 +1204,51 @@
     }
   },
   {
+    "reference": "R_EXP_3V1",
+    "value": "0R DNP",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "LED_LOGIC_3V3",
+      "2": "EXP_3V3"
+    }
+  },
+  {
+    "reference": "R_EXP_CLK1",
+    "value": "33R DNP",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "LED_CLK_Y",
+      "2": "EXP_CLK"
+    }
+  },
+  {
+    "reference": "R_EXP_LE1",
+    "value": "33R DNP",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "LED_LE_Y",
+      "2": "EXP_LE"
+    }
+  },
+  {
+    "reference": "R_EXP_OE1",
+    "value": "33R DNP",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "LED_OE_Y",
+      "2": "EXP_OE"
+    }
+  },
+  {
+    "reference": "R_EXP_SDI1",
+    "value": "33R DNP",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "LED_SDO2",
+      "2": "EXP_SDI"
+    }
+  },
+  {
     "reference": "R_EXT1",
     "value": "1.82k",
     "footprint": "R_0402_1005Metric",
@@ -1533,6 +1588,33 @@
     "pad_nets": {
       "1": "AUD_FB",
       "2": "AUD_GC"
+    }
+  },
+  {
+    "reference": "R_ID_3V1",
+    "value": "100R",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "AON_3V3",
+      "2": "ID_3V3"
+    }
+  },
+  {
+    "reference": "R_ID_SCL1",
+    "value": "33R",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "IMU_SCL",
+      "2": "ID_SCL"
+    }
+  },
+  {
+    "reference": "R_ID_SDA1",
+    "value": "33R",
+    "footprint": "R_0402_1005Metric",
+    "pad_nets": {
+      "1": "IMU_SDA",
+      "2": "ID_SDA"
     }
   },
   {
@@ -2297,6 +2379,7 @@
       "19": "COL_31",
       "20": "COL_32",
       "21": "LED_OE_Y",
+      "22": "LED_SDO2",
       "23": "REXT2",
       "24": "LED_LOGIC_3V3"
     }

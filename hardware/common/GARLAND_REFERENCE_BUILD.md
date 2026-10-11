@@ -65,10 +65,19 @@ Per row line the capacitance is the LEDs plus the wire: 32 × ~20 pF (small LED 
 
 ### Firmware mitigation (parameters come from the EEPROM)
 
-1. **Blanking:** `LED_OE_N` high → deselect rows (both `DEC_x_EN_N` high) → change address → re-enable the decoder → wait → `LED_OE_N` low. Defaults: `blank_ns` = 2 µs for panels, **8 µs** for garlands (`garland32` preset).
-2. **Pre-discharge slot:** with *no* row selected, latch all-ones into the MBI5124s and pulse OE for `predischarge_ns` (1.5 µs garland preset). The previous row's line capacitance drains through the column sinks down to the LED knee. The energy is ~nJ, which is not visible. Then latch the next row's data while still blanked.
+1. **Blanking:** `LED_OE_N` high → deselect rows (both `DEC_x_EN_N` high) → change address → re-enable the decoder → wait → `LED_OE_N` low. Defaults: `blank_ns` = 2 µs for panels, **3 µs** for garlands (`garland32` preset). 3 µs is plenty: the 74HC154 outputs drive the AO3403 gates push-pull through 33 Ω, so the FET edge is well under 100 ns, and a 3 m ribbon's round trip is about 30 ns. The margin covers ringing and the MBI5124 OE delay.
+2. **Pre-discharge slot:** with *no* row selected, latch all-ones into the MBI5124s and pulse OE for `predischarge_ns` (1 µs garland preset; draining ~1.5 nC through up to 32 × 10 mA sinks takes well under 1 µs). The previous row's line capacitance drains through the column sinks down to the LED knee. The energy is ~nJ, which is not visible. Then latch the next row's data while still blanked.
 3. **Order:** OE off → rows off → pre-discharge pulse → latch next data → address → row on → wait `blank_ns` → OE on.
-4. **Brightness cost:** with 32 rows at 200 Hz the row slot is 156 µs. 8 + 1.5 µs of overhead loses ~6 %.
+4. **Scan rate and brightness cost.** The v13 firmware scans 32 rows at **960 Hz**, so each row slot is **32.55 µs**. Blank and pre-discharge overhead comes straight out of the slot:
+
+   | Mode | Frame rate | Row slot | Overhead per row | Brightness loss |
+   |---|---:|---:|---:|---:|
+   | Panel (default) | 960 Hz | 32.55 µs | 2 µs blank | 6.1 % |
+   | Garland at panel rate (not recommended) | 960 Hz | 32.55 µs | 3 + 1 µs | 12.3 % |
+   | Old garland preset at 960 Hz (8 + 1.5 µs) | 960 Hz | 32.55 µs | 9.5 µs | 29.2 % |
+   | **Garland scan mode (proposed)** | **480 Hz** | **65.1 µs** | **3 + 1 µs** | **6.1 %** |
+
+   **Garland scan mode: 480 Hz.** The EEPROM field `scan_div` = 2 asks firmware to halve the LCD_CAM row clock. That gives each row 65.1 µs, so the long-wire overhead costs the same 6.1 % as a panel at 960 Hz. Peak current and the 8-bit BCM depth are unchanged. The BCM LSB doubles to ≈0.25 µs, which is easier for 3 m wires with ~1 nF per line. 480 Hz is still far above visible flicker. Phone cameras with fast shutters may show faint banding, which is the reason to keep 960 Hz for panels. Average brightness per LED stays the same, since duty is still 1/32 minus overhead.
 5. If ghosting persists: add 10 kΩ row bleed resistors (listed as an optional main-board change in LED_SCALING_OPTIONS.md), or lower the frame rate so the row slot gets longer.
 
 ## Bigger installations: tiling over the stacking ports

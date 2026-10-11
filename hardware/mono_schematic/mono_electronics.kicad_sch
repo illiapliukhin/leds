@@ -2,7 +2,7 @@
   (version 20260306)
   (generator "mono_schematic")
   (generator_version "1.0")
-  (uuid "bab72d69-67dc-4690-874d-4691510d769e")
+  (uuid "55c5bcf9-5559-4b06-ae2a-bda7dd86358e")
   (paper "A4")
   (title_block
     (title "Mono electronics - sheet index")
@@ -46,7 +46,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "2cc22ac7-da9c-4412-a060-79cd4f05dd4c")
+    (uuid "388add54-b242-4c1f-80e5-11bf4ec8688e")
     (property
       "Reference"
       "#PWR01"
@@ -109,7 +109,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "ca062742-a8d0-47c3-83ac-f66ce58e9cb7")
+    (uuid "3bd1aa47-103a-42b4-80d0-9790dfe4f885")
     (property
       "Reference"
       "#FLG01"
@@ -172,7 +172,7 @@
     (on_board yes)
     (in_pos_files yes)
     (dnp no)
-    (uuid "fa79a10b-2f09-477d-a514-0243ee8f1916")
+    (uuid "a2d613d5-ccff-43d1-93b6-064bf5e81efe")
     (property
       "Reference"
       "#FLG02"
@@ -234,7 +234,7 @@
       (width 0)
       (type default)
     )
-    (uuid "b3a27c37-acca-40cf-8a6c-bd1c70223e88")
+    (uuid "1b11943c-b98f-4ed6-ae30-d19089403773")
   )
   (wire
     (pts
@@ -245,7 +245,7 @@
       (width 0)
       (type default)
     )
-    (uuid "dcd065c2-7a94-4b21-865d-32a2c59d2b10")
+    (uuid "e2877490-866d-4a1b-a0c9-7705f93e6f4c")
   )
   (wire
     (pts
@@ -256,7 +256,7 @@
       (width 0)
       (type default)
     )
-    (uuid "08762f30-6ab6-4388-9031-b6992c01a57f")
+    (uuid "f7e7dc66-451f-4078-9f03-c87edaf788c0")
   )
   (global_label "GND"
     (shape passive)
@@ -268,7 +268,7 @@
       )
       (justify right)
     )
-    (uuid "bd59513a-db34-47b4-8f3c-23c1a89d227c")
+    (uuid "85ec6bcd-44bf-47a0-8bb8-c3162bf52a97")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 3.81 15.24 0)
       (effects
@@ -289,7 +289,7 @@
       )
       (justify left)
     )
-    (uuid "9db950e5-757e-4b4d-badf-ed0463c075ce")
+    (uuid "6dcc33f6-4726-4b7e-ab8c-f5b7ddd39ade")
     (property "Intersheetrefs" "${INTERSHEET_REFS}"
       (at 35.56 15.24 0)
       (effects
@@ -311,7 +311,7 @@
     (fill
       (type none)
     )
-    (uuid "9561acb3-83ec-4d39-a75e-b544f6dd0663")
+    (uuid "0481e10c-8d66-44f7-a907-ad76017facb4")
     (property "Sheetname" "power"
       (at 74.93 58.42 0)
       (effects
@@ -342,7 +342,7 @@
     (fill
       (type none)
     )
-    (uuid "d8eeeacc-bf9e-4e48-9f8a-86c31ce3feaa")
+    (uuid "ccd91850-54e8-481a-a341-076947f21c4c")
     (property "Sheetname" "mcu"
       (at 119.38 58.42 0)
       (effects
@@ -373,7 +373,7 @@
     (fill
       (type none)
     )
-    (uuid "92f2a767-9dcc-4598-8f68-1da355abd88f")
+    (uuid "e81e6612-e464-41fe-9b1b-d77cef607b74")
     (property "Sheetname" "imu"
       (at 165.1 58.42 0)
       (effects
@@ -404,7 +404,7 @@
     (fill
       (type none)
     )
-    (uuid "e8b921fd-05db-4030-a52f-54220ddf6143")
+    (uuid "600e32a5-697b-43d4-b3ce-283d57764346")
     (property "Sheetname" "led_drive"
       (at 209.55 58.42 0)
       (effects
@@ -435,7 +435,7 @@
     (fill
       (type none)
     )
-    (uuid "ae5d9647-0b21-448c-bcec-ebea3ed9bea1")
+    (uuid "6ecc2453-a0e0-4392-8ff3-3e99c6bf0a10")
     (property "Sheetname" "row_farm"
       (at 255.27 58.42 0)
       (effects
@@ -466,7 +466,7 @@
     (fill
       (type none)
     )
-    (uuid "bad35f0b-8cca-4ad4-b7ca-838fc44bafbd")
+    (uuid "07ec5a6e-322c-4fc3-8ec4-71cd826cbed7")
     (property "Sheetname" "audio"
       (at 299.72 58.42 0)
       (effects
@@ -497,7 +497,7 @@
     (fill
       (type none)
     )
-    (uuid "810cd266-1b50-425c-b96d-d60d1f2a0a98")
+    (uuid "6bb41434-5c21-4bd2-8a57-c0d5a01362c1")
     (property "Sheetname" "stacking"
       (at 345.44 58.42 0)
       (effects
@@ -528,8 +528,8 @@
     (fill
       (type none)
     )
-    (uuid "9f9fe7a0-3a04-40d0-a7cb-96ad6c5f2b2b")
-    (property "Sheetname" "mechanical"
+    (uuid "5307fb10-5ce5-4e26-8cfc-f5b67f8fdb0a")
+    (property "Sheetname" "led_interface"
       (at 389.89 58.42 0)
       (effects
         (font
@@ -538,8 +538,39 @@
         (justify left bottom)
       )
     )
-    (property "Sheetfile" "sheets/mechanical.kicad_sch"
+    (property "Sheetfile" "sheets/led_interface.kicad_sch"
       (at 389.89 91.44 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+  )
+  (sheet
+    (at 435.61 59.69)
+    (size 40 30)
+    (fields_autoplaced yes)
+    (stroke
+      (width 0.1524)
+      (type solid)
+    )
+    (fill
+      (type none)
+    )
+    (uuid "694a3602-14e8-4183-ab1c-3cb86b07b822")
+    (property "Sheetname" "mechanical"
+      (at 435.61 58.42 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        (justify left bottom)
+      )
+    )
+    (property "Sheetfile" "sheets/mechanical.kicad_sch"
+      (at 435.61 91.44 0)
       (effects
         (font
           (size 1.27 1.27)

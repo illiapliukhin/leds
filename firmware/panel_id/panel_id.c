@@ -12,7 +12,7 @@ void panel_id_default(panel_id_t *o) {
     o->magic = PANEL_ID_MAGIC; o->version = 1; o->rec_len = PANEL_ID_REC_LEN;
     o->panel_class = PANEL_FLAT; o->led_type = LED_WHITE; o->rows = 32; o->cols = 32;
     o->pitch_um = 4000; o->i_led_ua = 10000; o->i_row_ma = 320; o->vf_mv = 3000;
-    o->mapping = MAP_IDENTITY; o->blank_ns = 2000; o->row_mask = o->col_mask = 0xFFFFFFFFu;
+    o->mapping = MAP_IDENTITY; o->blank_ns = 2000; o->scan_div = 1; o->row_mask = o->col_mask = 0xFFFFFFFFu;
     strncpy(o->name, "default32", sizeof o->name);
 }
 
@@ -22,6 +22,8 @@ bool panel_id_read(panel_i2c_read_fn rd, panel_id_t *out) {
     if (r.magic != PANEL_ID_MAGIC || r.version != 1 || r.rec_len != PANEL_ID_REC_LEN) goto dflt;
     if (panel_id_crc16((const uint8_t *)&r, 0x3E) != r.crc16) goto dflt;
     if (!r.rows || r.rows > 32 || !r.cols || r.cols > 64) goto dflt;
+    if (r.scan_div == 0) r.scan_div = 1;
+    if (r.scan_div > 4) goto dflt;
     if (!(r.flags & PANEL_FLAG_PARTIAL)) {
         r.row_mask = r.rows == 32 ? 0xFFFFFFFFu : ((1u << r.rows) - 1);
         r.col_mask = r.cols >= 32 ? 0xFFFFFFFFu : ((1u << r.cols) - 1);

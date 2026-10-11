@@ -221,3 +221,13 @@ Step 5 (TPS63802 hot loop) not done.
 - J_USB1 value → TYPE-C-31-M-12 (matches the HRO footprint).
 - All 93 references without a trailing number got a "1" (map in REF_RENAME_v11b.json) so the schematic annotates cleanly.
 - Gates: DRC 0 errors / 0 warnings / 0 unconnected, copcheck 0 < 0.127 mm, no copper renames, no parts on B, dangling 0. Schematic: ERC 0, netlist vs PCB 226/226, 0 pin differences, no annotation notice.
+
+## v12 — LED interface standard v1: FFC spare pins (ID EEPROM bus + column-expansion taps)
+Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (main-board changes 1 + 2).
+- J_ROW1: pins 33/38/40 → GND (F stub east to a 0.45 mm GND via at x 146.6). Pin 35 `ID_SDA` → R_ID_SDA1 33 R → IMU_SDA. Pin 36 `ID_SCL` → R_ID_SCL1 33 R → IMU_SCL. Pin 37 `ID_3V3` → R_ID_3V1 100 R → AON_3V3. D_ID1 PESD5V0S2BT (dual bidirectional ESD, 35 pF, SOT-23) on IMU_SDA/IMU_SCL at the resistors, GND to the D_E_SP1 GND via. Pins 34 and 39 stay unconnected (ROW_SPARE_34/39).
+- J_COL1: pins 33/38/40 → GND. Pins 34–37 `EXP_SDI`/`EXP_CLK`/`EXP_LE`/`EXP_OE` → R_EXP_SDI1/CLK1/LE1/OE1 33 R **DNP** → `LED_SDO2` (U_LED2 pad 22 SDO, previously open), LED_CLK_Y, LED_LE_Y, LED_OE_Y. Pin 39 `EXP_3V3` → R_EXP_3V1 0 R **DNP** → LED_LOGIC_3V3.
+- Parts placed at x 134–137.6, east of the PRES_E diagonal and outside the J_ROW1/J_COL1 courtyards. All on F, refs hidden (small-label policy); R_EXP_* carry the KiCad DNP attribute and are excluded from the CPL.
+- Routing: gated point-to-point octilinear A* on F/In1 (B only for the 5 mm IMU_SCL hop to its existing via), one net per step, clearance 0.14 mm, DRC + copper check after each step. Added copper: F 288 mm, In1 205 mm, B 5 mm, In2 0, plus 20 vias (0.40/0.20; GND 0.45/0.20). The ID bus runs on F along the north-east diagonal between the row fan and the RS-485 pair, then on In1 west to the IMU pull-ups. Expansion taps run on F/In1 from U_LED2 east to the R_EXP column.
+- Optional item 3 (32 × 10 k row bleed) **not applied**: the anode band (F/B, x 120–138) has no via room and no clean placement.
+- Gates: KiCad DRC 0 errors / 0 warnings / 0 unconnected, 0 dangling; copper check 0 spots < 0.127 mm between different nets (< 0.15: 115, was 113); no copper renamed (netcheck 0); no parts on B; worst LED drop 92.5 mV (row 17, unchanged); all 8 B GND pieces ≥ 2 stitching vias. Schematic regenerated (new sheet `led_interface`): ERC 0, sch netlist vs PCB 235/235 refs, 0 pin differences.
+- Images: img/v12_id_bus.png, img/v12_col_exp.png. Fab: manufacturing/mono_electronics/v12/, mono_electronics_v12_fab.zip.

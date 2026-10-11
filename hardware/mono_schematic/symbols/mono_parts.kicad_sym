@@ -3,7 +3,45 @@
   (generator "mono_schematic")
   (generator_version "1.0")
   (symbol
+      "0R_DNP_R_0402_1005Metric_2"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "~")
+        (number "2")
+      )
+    )
+  (symbol
       "1.82k_R_0402_1005Metric_2"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "~")
+        (number "2")
+      )
+    )
+  (symbol
+      "100R_R_0402_1005Metric_2"
       (pin
         passive
         line
@@ -327,6 +365,25 @@
     )
   (symbol
       "24nH_L_0402_1005Metric_2"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "~")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "~")
+        (number "2")
+      )
+    )
+  (symbol
+      "33R_DNP_R_0402_1005Metric_2"
       (pin
         passive
         line
@@ -1523,11 +1580,11 @@
         (number "32")
       )
       (pin
-        passive
+        power_in
         line
         (at -5.08 -40.64 0)
         (length 0)
-        (name "COL_SPARE_33")
+        (name "GND")
         (number "33")
       )
       (pin
@@ -1535,7 +1592,7 @@
         line
         (at 5.08 -40.64 180)
         (length 0)
-        (name "COL_SPARE_34")
+        (name "EXP_SDI")
         (number "34")
       )
       (pin
@@ -1543,7 +1600,7 @@
         line
         (at -5.08 -43.18 0)
         (length 0)
-        (name "COL_SPARE_35")
+        (name "EXP_CLK")
         (number "35")
       )
       (pin
@@ -1551,7 +1608,7 @@
         line
         (at 5.08 -43.18 180)
         (length 0)
-        (name "COL_SPARE_36")
+        (name "EXP_LE")
         (number "36")
       )
       (pin
@@ -1559,15 +1616,15 @@
         line
         (at -5.08 -45.72 0)
         (length 0)
-        (name "COL_SPARE_37")
+        (name "EXP_OE")
         (number "37")
       )
       (pin
-        passive
+        power_in
         line
         (at 5.08 -45.72 180)
         (length 0)
-        (name "COL_SPARE_38")
+        (name "GND")
         (number "38")
       )
       (pin
@@ -1575,15 +1632,15 @@
         line
         (at -5.08 -48.26 0)
         (length 0)
-        (name "COL_SPARE_39")
+        (name "EXP_3V3")
         (number "39")
       )
       (pin
-        passive
+        power_in
         line
         (at 5.08 -48.26 180)
         (length 0)
-        (name "COL_SPARE_40")
+        (name "GND")
         (number "40")
       )
     )
@@ -1846,11 +1903,11 @@
         (number "32")
       )
       (pin
-        passive
+        power_in
         line
         (at -5.08 -40.64 0)
         (length 0)
-        (name "ROW_SPARE_33")
+        (name "GND")
         (number "33")
       )
       (pin
@@ -1866,7 +1923,7 @@
         line
         (at -5.08 -43.18 0)
         (length 0)
-        (name "ROW_SPARE_35")
+        (name "ID_SDA")
         (number "35")
       )
       (pin
@@ -1874,7 +1931,7 @@
         line
         (at 5.08 -43.18 180)
         (length 0)
-        (name "ROW_SPARE_36")
+        (name "ID_SCL")
         (number "36")
       )
       (pin
@@ -1882,15 +1939,15 @@
         line
         (at -5.08 -45.72 0)
         (length 0)
-        (name "ROW_SPARE_37")
+        (name "ID_3V3")
         (number "37")
       )
       (pin
-        passive
+        power_in
         line
         (at 5.08 -45.72 180)
         (length 0)
-        (name "ROW_SPARE_38")
+        (name "GND")
         (number "38")
       )
       (pin
@@ -1902,11 +1959,11 @@
         (number "39")
       )
       (pin
-        passive
+        power_in
         line
         (at 5.08 -48.26 180)
         (length 0)
-        (name "ROW_SPARE_40")
+        (name "GND")
         (number "40")
       )
     )
@@ -2110,193 +2167,6 @@
         (length 0)
         (name "GND")
         (number "9")
-      )
-    )
-  (symbol
-      "MBI5124GP-B_SSOP-24_3.9x8.7mm_P0.635mm_23"
-      (pin
-        power_in
-        line
-        (at -5.08 0 0)
-        (length 0)
-        (name "GND")
-        (number "1")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 0 180)
-        (length 0)
-        (name "LED_SDO")
-        (number "2")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -2.54 0)
-        (length 0)
-        (name "LED_CLK_Y")
-        (number "3")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -2.54 180)
-        (length 0)
-        (name "LED_LE_Y")
-        (number "4")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -5.08 0)
-        (length 0)
-        (name "COL_17")
-        (number "5")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -5.08 180)
-        (length 0)
-        (name "COL_18")
-        (number "6")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -7.62 0)
-        (length 0)
-        (name "COL_19")
-        (number "7")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -7.62 180)
-        (length 0)
-        (name "COL_20")
-        (number "8")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -10.16 0)
-        (length 0)
-        (name "COL_21")
-        (number "9")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -10.16 180)
-        (length 0)
-        (name "COL_22")
-        (number "10")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -12.7 0)
-        (length 0)
-        (name "COL_23")
-        (number "11")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -12.7 180)
-        (length 0)
-        (name "COL_24")
-        (number "12")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -15.24 0)
-        (length 0)
-        (name "COL_25")
-        (number "13")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -15.24 180)
-        (length 0)
-        (name "COL_26")
-        (number "14")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -17.78 0)
-        (length 0)
-        (name "COL_27")
-        (number "15")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -17.78 180)
-        (length 0)
-        (name "COL_28")
-        (number "16")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -20.32 0)
-        (length 0)
-        (name "COL_29")
-        (number "17")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -20.32 180)
-        (length 0)
-        (name "COL_30")
-        (number "18")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -22.86 0)
-        (length 0)
-        (name "COL_31")
-        (number "19")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -22.86 180)
-        (length 0)
-        (name "COL_32")
-        (number "20")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -25.4 0)
-        (length 0)
-        (name "LED_OE_Y")
-        (number "21")
-      )
-      (pin
-        passive
-        line
-        (at 5.08 -25.4 180)
-        (length 0)
-        (name "REXT2")
-        (number "23")
-      )
-      (pin
-        passive
-        line
-        (at -5.08 -27.94 0)
-        (length 0)
-        (name "LED_LOGIC_3V3")
-        (number "24")
       )
     )
   (symbol
@@ -2529,6 +2399,33 @@
         (at 5.08 0 180)
         (length 0)
         (name "PRES_E")
+        (number "2")
+      )
+      (pin
+        power_in
+        line
+        (at -5.08 -2.54 0)
+        (length 0)
+        (name "GND")
+        (number "3")
+      )
+    )
+  (symbol
+      "PESD5V0S2BT_SOT-23_3"
+      (pin
+        passive
+        line
+        (at -5.08 0 0)
+        (length 0)
+        (name "IMU_SDA")
+        (number "1")
+      )
+      (pin
+        passive
+        line
+        (at 5.08 0 180)
+        (length 0)
+        (name "IMU_SCL")
         (number "2")
       )
       (pin

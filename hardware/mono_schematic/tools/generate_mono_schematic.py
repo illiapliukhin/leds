@@ -165,6 +165,12 @@ SHEET_SPECS: list[SheetSpec] = [
         reference_exact=frozenset({"U_485", "C_485", "R_TERM", "JP_TERM"}),
     ),
     SheetSpec(
+        "led_interface",
+        "sheets/led_interface.kicad_sch",
+        "LED interface standard v1 - FFC spares: panel ID I2C (33R/100R, PESD3V3S2UT), column-expansion taps (DNP)",
+        reference_prefixes=("R_ID_", "D_ID", "R_EXP_"),
+    ),
+    SheetSpec(
         "mechanical",
         "sheets/mechanical.kicad_sch",
         "Mechanical - M2.5 plated mounting holes (GND)",

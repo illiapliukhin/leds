@@ -44,7 +44,8 @@ typedef struct __attribute__((packed)) {
     uint32_t row_mask;       /* 0x30 populated rows (bit0 = ROW_01), valid with PARTIAL */
     uint32_t col_mask;       /* 0x34 populated cols */
     uint16_t table_id;       /* 0x38 firmware built-in LUT id when mapping == MAP_TABLE */
-    uint8_t  reserved[4];    /* 0x3A */
+    uint8_t  scan_div;       /* 0x3A frame-rate divider: 0/1 = 960 Hz (32.55 us/row), 2 = 480 Hz garland mode (65.1 us/row) */
+    uint8_t  reserved[3];    /* 0x3B */
     uint16_t crc16;          /* 0x3E CRC-16/CCITT-FALSE over 0x00..0x3D */
 } panel_id_t;
 _Static_assert(sizeof(panel_id_t) == PANEL_ID_REC_LEN, "panel_id_t size");
