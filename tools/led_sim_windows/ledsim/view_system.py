@@ -24,7 +24,7 @@ from .rulers import Rulers, dim_line
 class SystemView(Nav2D, Rulers):
     def __init__(s, app):
         s.app = app; s.w = World(); s.w.preset(3, 2)
-        s.zoom = 1.2; s.pan = [260, 200]; s.sel = None; s.drag = None; s.wire = None; s.kind = 'full'
+        s.zoom = 1.2; s.pan = [260, 200]; s.sel = None; s.drag = None; s.wire = None; s.menu = None; s.kind = 'full'
         s.snap = 10.0; s.demo_i = 0; s.fps = 60; s.speed = 1.0; s.acc = 0.0; s.msg = ''; s.msg_t = 0
         s.masks = {}; s.ropes = Ropes(); s.rope_idx = {}; s.scroll = 0; s.show_topo = True; s.load_ms = 0.0
         s.show = {'ffc': True, 'stack': True, 'power': True, 'led': True, 'bundle': True}; s.bundle_sel = None; s.xray = False; s.checks = []; s.check_t = 0
@@ -75,7 +75,60 @@ class SystemView(Nav2D, Rulers):
                 px, py = b.port_pos(side)
                 if math.hypot(wx - px, wy - py) < r: return b, side
     def ffc_handle(s, p): return p.conn_pos('J_ROW')
+    SNAP_MM = 10.0
+    def snap_port(s, wx, wy, exclude=None):
+        """nearest FREE compatible stacking port within ~10 mm (or 10 px when zoomed out)"""
+        best, bd = None, max(s.SNAP_MM, 10 / s.zoom)
+        for b in s.w.boards:
+            if b is exclude: continue
+            for side in range(4):
+                if s.w.cable_at(b, side): continue
+                px, py = b.port_pos(side); d = math.hypot(wx - px, wy - py)
+                if d < bd: best, bd = (b, side), d
+        return best
+    def snap_board(s, wx, wy):
+        """FFC end: snaps to a board's J_ROW1/J_COL1 within ~10 mm, or anywhere over a board"""
+        for b in s.w.boards:
+            for nm in ('J_ROW', 'J_COL'):
+                q = b.conn_pos(nm)
+                if math.hypot(wx - q[0], wy - q[1]) < max(s.SNAP_MM, 10 / s.zoom): return b
+        return s.board_at(wx, wy)
+    def cable_menu(s, c, pos):
+        s.menu = (c, pos)
+    def menu_event(s, e):
+        if not getattr(s, 'menu', None): return False
+        c, (mx, my) = s.menu
+        if e.type == pygame.MOUSEBUTTONDOWN:
+            items = s.menu_items(c)
+            for i, (lab, fn) in enumerate(items):
+                if pygame.Rect(mx, my + i * 22, 170, 22).collidepoint(e.pos): fn(); break
+            s.menu = None; return True
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE: s.menu = None; return True
+        return False
+    def menu_items(s, c):
+        if hasattr(c, 'kind'):                                         # a panel's FFC
+            p = c; out = []
+            if p.board is not None: out.append(('Отключить FFC', lambda: (setattr(p, '_last_board', p.board), setattr(p, 'board', None), s.w.dirty())))
+            elif getattr(p, '_last_board', None) in s.w.boards: out.append(('Подключить FFC', lambda: (setattr(p, 'board', p._last_board), s.w.dirty())))
+            out.append(('Удалить FFC', lambda: (setattr(p, 'board', None), setattr(p, '_last_board', None), s.w.dirty())))
+            return out
+        return [('Отключить' if c.plugged else 'Подключить', lambda: (setattr(c, 'plugged', not c.plugged), s.w.dirty())),
+                ('Удалить кабель', lambda: (s.w.remove_cable(c), setattr(s, 'sel', None)))]
+    def ffc_at(s, wx, wy):
+        r = max(4, 14 / s.zoom)
+        for p in s.w.panels:
+            for k in (('F', id(p)), ('f', id(p), 'J_ROW'), ('f', id(p), 'J_COL')):
+                i = s.rope_idx.get(k)
+                if i is not None and np.hypot(s.ropes.pts(i)[:, 0] - wx, s.ropes.pts(i)[:, 1] - wy).min() < r: return p
+        return None
     def cable_at(s, wx, wy):
+        r = max(3, 14 / s.zoom)                                       # ~14 px grab radius along the drawn rope
+        for c in s.w.cables:
+            i = s.rope_idx.get(('c', id(c)))
+            if i is None: continue
+            P = s.ropes.pts(i)
+            d = np.hypot(P[:, 0] - wx, P[:, 1] - wy).min()
+            if d < r: return c
         r = max(5, 8 / s.zoom)
         for c in s.w.cables:
             ax, ay = c.a.port_pos(c.as_); bx, by = c.b.port_pos(c.bs)
@@ -89,15 +142,24 @@ class SystemView(Nav2D, Rulers):
 
     # ------------------------------------------------ events
     def event(s, e, view):
+        if s.menu_event(e): return
+        if e.type == pygame.MOUSEBUTTONDOWN and e.button == 3 and view.collidepoint(e.pos):
+            wx, wy = s.s2w(*e.pos); o = s.cable_at(wx, wy) or (s.ffc_at(wx, wy) if s.show['ffc'] else None)
+            if o is not None: s.sel = o; s.cable_menu(o, e.pos); return
         if s.ruler_event(e, view): return
         if s.nav_event(e, view): return
         if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and view.collidepoint(e.pos) and not s.app.ui.consumed:
             wx, wy = s.s2w(*e.pos)
             pt = s.port_at(wx, wy)
-            if pt: s.wire = ('port', pt); return
+            if pt:
+                c0 = s.w.cable_at(*pt) or next((c for c in s.w.cables if (c.a, c.as_) == pt or (c.b, c.bs) == pt), None)
+                if c0 is not None:                                     # grab the cable END at this port (drag = move it, click = toggle)
+                    far = (c0.b, c0.bs) if (c0.a, c0.as_) == pt else (c0.a, c0.as_)
+                    s.wire = ('end', c0, far, pt, e.pos); return
+                s.wire = ('port', pt, e.pos); return
             for p in reversed(s.w.panels):
                 hx, hy = s.ffc_handle(p)
-                if math.hypot(wx - hx, wy - hy) < max(6, 9 / s.zoom): s.wire = ('ffc', p); s.sel = p; return
+                if math.hypot(wx - hx, wy - hy) < max(6, 12 / s.zoom): s.wire = ('ffc', p, e.pos); s.sel = p; return
             for p in s.w.panels:
                 i = s.rope_idx.get(('F', id(p)))
                 if i is not None and s.show['ffc'] and any(math.hypot(wx - x, wy - y) < max(12, 14 / s.zoom) for x, y in s.ropes.pts(i)):
@@ -116,16 +178,30 @@ class SystemView(Nav2D, Rulers):
         elif e.type == pygame.MOUSEBUTTONUP and e.button == 1:
             if s.wire:
                 wx, wy = s.s2w(*e.pos)
-                if s.wire[0] == 'port':
-                    pt = s.port_at(wx, wy)
-                    if pt and pt[0] is not s.wire[1][0]:
-                        s.w.connect(s.wire[1][0], s.wire[1][1], pt[0], pt[1])
-                else:
-                    b = s.board_at(wx, wy)
-                    if b:
-                        for p in s.w.panels:
-                            if p.board is b: p.board = None
-                        s.wire[1].board = b
+                moved = math.hypot(e.pos[0] - s.wire[-1][0], e.pos[1] - s.wire[-1][1]) > 4 if s.wire[0] in ('port', 'end') else True
+                if s.wire[0] == 'end':
+                    c0, far, near = s.wire[1], s.wire[2], s.wire[3]
+                    if not moved:
+                        c0.plugged = not c0.plugged; s.w.dirty(); s.sel = c0; s.note(T('plug') if c0.plugged else T('unplug'))
+                    else:
+                        tgt = s.snap_port(wx, wy, exclude=far[0])
+                        if tgt:
+                            s.w.remove_cable(c0); nc = s.w.connect(far[0], far[1], tgt[0], tgt[1], c0.type)
+                            if nc: nc.length = c0.length; s.sel = nc; s.note(T('plug'))
+                        else: c0.plugged = False; s.w.dirty(); s.note(T('unplug'))
+                elif s.wire[0] == 'port':
+                    pt = s.snap_port(wx, wy, exclude=s.wire[1][0])
+                    if pt and moved: s.w.connect(s.wire[1][0], s.wire[1][1], pt[0], pt[1])
+                elif s.wire[0] == 'ffc':
+                    b = s.snap_board(wx, wy); p = s.wire[1]
+                    if math.hypot(e.pos[0] - s.wire[2][0], e.pos[1] - s.wire[2][1]) <= 4:      # click on the panel connector = toggle
+                        if p.board is not None: p._last_board = p.board; p.board = None; s.note(T('unplug'))
+                        elif getattr(p, '_last_board', None) in s.w.boards: p.board = p._last_board; s.note(T('plug'))
+                        s.w.dirty()
+                    elif b:
+                        for q in s.w.panels:
+                            if q.board is b: q.board = None
+                        p.board = b; s.w.dirty()
                 s.wire = None
             if s.drag: s.w.dirty()
             s.drag = None
@@ -499,8 +575,27 @@ class SystemView(Nav2D, Rulers):
                         pa, pb = s.w2s(*bm[a].port_pos(as_)), s.w2s(*bm[bid].port_pos(bs))
                         pygame.draw.line(surf, (255, 200, 60), pa, pb, 1)
         if s.wire:
-            st = s.w2s(*(s.wire[1][0].port_pos(s.wire[1][1]) if s.wire[0] == 'port' else s.ffc_handle(s.wire[1])))
-            pygame.draw.line(surf, (255, 255, 255), st, pygame.mouse.get_pos(), 2)
+            if s.wire[0] == 'port': st = s.w2s(*s.wire[1][0].port_pos(s.wire[1][1]))
+            elif s.wire[0] == 'end': st = s.w2s(*s.wire[2][0].port_pos(s.wire[2][1]))
+            else: st = s.w2s(*s.ffc_handle(s.wire[1]))
+            mp = pygame.mouse.get_pos(); wx, wy = s.s2w(*mp)
+            if s.wire[0] == 'ffc':
+                b = s.snap_board(wx, wy)
+                if b:
+                    for nm in ('J_ROW', 'J_COL'):
+                        q = s.w2s(*b.conn_pos(nm)); pygame.draw.circle(surf, (120, 255, 160), (int(q[0]), int(q[1])), max(8, int(10 * s.zoom)), 2)
+            else:
+                tgt = s.snap_port(wx, wy, exclude=(s.wire[1] if s.wire[0] == 'port' else s.wire[2])[0])
+                if tgt:
+                    q = s.w2s(*tgt[0].port_pos(tgt[1])); mp = q
+                    pygame.draw.circle(surf, (120, 255, 160), (int(q[0]), int(q[1])), max(8, int(s.SNAP_MM * s.zoom)), 2)
+            pygame.draw.line(surf, (255, 255, 255), st, mp, 2)
+        if getattr(s, 'menu', None):
+            c, (mx, my) = s.menu; mpos = pygame.mouse.get_pos()
+            for i, (lab, fn) in enumerate(s.menu_items(c)):
+                rr = pygame.Rect(mx, my + i * 22, 170, 22)
+                pygame.draw.rect(surf, (60, 70, 95) if rr.collidepoint(mpos) else (36, 40, 52), rr); pygame.draw.rect(surf, (90, 100, 130), rr, 1)
+                text(surf, lab, (rr.x + 8, rr.y + 4), (230, 230, 240), 12)
         s.draw_dims(surf)
         s.draw_rulers(surf, view)
         text(surf, T('hint_sys'), (view.x + 8, view.bottom - 20), (140, 146, 160), 11)

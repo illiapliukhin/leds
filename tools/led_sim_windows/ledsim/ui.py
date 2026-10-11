@@ -21,7 +21,7 @@ S = {
  'connect_near': ('FFC к ближайшей плате', 'FFC to nearest board'), 'disconnect_ffc': ('Отсоединить FFC', 'Disconnect FFC'),
  'groups': ('Группы (стеки)', 'Groups (stacks)'), 'leader': ('лидер', 'leader'), 'members': ('плат', 'boards'),
  'canvas_size': ('холст', 'canvas'), 'boards': ('Платы', 'Boards'), 'timing': ('Тайминги', 'Timing'),
- 'hint_sys': ('ЛКМ: выбрать/тащить · тянуть от порта к порту = кабель · от квадрата панели к плате = FFC · клик по кабелю = вкл/выкл · колесо: зум к курсору · ПКМ/СКМ: сдвиг · двойной клик: фокус · F/Home: всё · WASD · R поворот · Del · Пробел пауза',
+ 'hint_sys': ('ЛКМ: выбрать/тащить · клик по разъёму = подкл./откл. · тянуть конец кабеля/от порта — прилипает к свободному порту в 10 мм · ПКМ по кабелю = меню · от квадрата панели к плате = FFC · клик по кабелю = вкл/выкл · колесо: зум к курсору · ПКМ/СКМ: сдвиг · двойной клик: фокус · F/Home: всё · WASD · R поворот · Del · Пробел пауза',
               'LMB: select/drag · drag port->port = cable · panel square->board = FFC · click cable = plug/unplug · RMB/wheel: view · R rotate · Del delete · Space pause'),
  'layers': ('Слои', 'Layers'), 'search': ('Поиск (цепь или позиционное обозн.)', 'Search (net or reference)'),
  'net': ('Цепь', 'Net'), 'pads': ('Контакты', 'Pads'), 'length': ('Длина', 'Length'), 'width': ('Ширина', 'Width'), 'vias': ('Переходные', 'Vias'),

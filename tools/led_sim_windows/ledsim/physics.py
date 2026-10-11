@@ -27,13 +27,18 @@ class Ropes:
         s.Bfix = np.array([specs[k][1] is not None for k in keys], bool)
         s.B = np.array([specs[k][1] if specs[k][1] is not None else (0, 0) for k in keys], float).reshape(n, 2)
         s.L = np.array([specs[k][2] for k in keys], float)
-    def step(s, dt, iters=24):
+        # bending stiffness: FFC = semi-stiff ribbon, JST/power wires = soft but well damped
+        s.K = np.array([0.45 if str(k[0]) in 'fF' else 0.12 for k in keys], float)
+    def step(s, dt, iters=16):
         if not len(s.keys): return
         h = min(dt, 1 / 30); sub = 2
         for _ in range(sub):
             hs = h / sub
-            V = (s.P - s.Q) * 0.985
-            s.Q = s.P.copy(); s.P = s.P + V + G * hs * hs
+            # heavy damping: velocity retained per substep ~0.72 -> settles in ~0.3 s; sleep threshold kills residual sway
+            dmp = np.where(s.Bfix, 0.6, 0.8)[:, None, None]         # a free (unplugged) end drops quickly, then stops
+            V = (s.P - s.Q) * dmp
+            V[np.abs(V).max(axis=(1, 2)) < 0.05] = 0
+            s.Q = s.P.copy(); s.P = s.P + V + G * hs * hs * np.where(s.Bfix, 1.0, 4.0)[:, None, None]
             rest = (s.L / SEG)[:, None]
             for _ in range(iters):
                 s.P[:, 0] = s.A; s.P[s.Bfix, -1] = s.B[s.Bfix]
@@ -42,6 +47,8 @@ class Ropes:
                 c = np.maximum(ln - rest, 0) / ln * 0.5                 # stretch-only (ropes go slack)
                 corr = d * c[..., None]
                 s.P[:, :-1] += corr; s.P[:, 1:] -= corr
+                mid = 0.5 * (s.P[:, :-2] + s.P[:, 2:])                     # bending: pull toward neighbours' midpoint
+                s.P[:, 1:-1] += (mid - s.P[:, 1:-1]) * (s.K[:, None, None] * 0.25)
             s.P[:, 0] = s.A; s.P[s.Bfix, -1] = s.B[s.Bfix]
     def tension(s):
         """end-to-end distance / cable length (>1 = stretched beyond its length)"""
