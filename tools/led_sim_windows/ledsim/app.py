@@ -101,6 +101,20 @@ def main():
     if '--autotest' in a:
         i = a.index('--autotest'); out = a[i + 1] if i + 1 < len(a) and not a[i + 1].startswith('--') else None
         from . import autotest; sys.exit(autotest.run(out, headless='--headless' in a))
+    if '--cubecheck' in a:                                   # quick self-check on the user's PC: every cube effect animates
+        i = a.index('--cubecheck'); out = a[i + 1] if i + 1 < len(a) and not a[i + 1].startswith('--') else 'cubecheck.txt'
+        from . import autotest; import logging
+        app = App(); g = autotest.cube_motion(app); st = {'n': 0, 'res': None}
+        def hook(ap, frame, dt, work):
+            if st['n'] > 0: st['n'] -= 1; return
+            try: st['n'] = next(g)
+            except StopIteration as e:
+                st['res'] = e.value; return 'quit'
+        app.hook = hook; app.run()
+        lines = ['%s %s' % ('PASS' if ok else 'FAIL', ln) for ln, ok in (st['res'] or [])]
+        open(out, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
+        for l in lines: logging.info('cubecheck %s', l)
+        sys.exit(0 if all(l.startswith('PASS') for l in lines) else 1)
     if '--shots' in a:
         from . import selftest; selftest.run(a[a.index('--shots') + 1]); return
     import os, traceback, logging

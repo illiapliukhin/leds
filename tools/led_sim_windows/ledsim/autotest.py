@@ -187,6 +187,10 @@ def script(app, t, timing):
                 'вышиванка 3D N=%d: стежки на всех 6 гранях %s, ядро-звезда %.2f, %d уровней яркости из 256, расчёт %.1f мс' % (N, lit, core, lv, ms))
     cv.N = 8; cv._grid(); cv.demo = 0
 
+    # ---------------------------------------------------------------- 5a. every cube effect actually animates in the drawn view
+    t.sec = 'cubemotion'
+    for ln, ok in (yield from cube_motion(app)): t.check(ok, ln)
+
     # ---------------------------------------------------------------- 5b. hardware feasibility of every effect on the real board
     t.sec = 'feasibility'
     from . import feasibility as FZ
@@ -303,6 +307,24 @@ def script(app, t, timing):
     for l in lost[:10]: t.L('INFO', '  ' + l)
     lab.running = False
     tab('system'); yield 30
+
+def cube_motion(app, N=8, frames=40):
+    """generator (yields frame counts to the app hook): select every cube effect in the real UI path, draw `frames`
+    frames and compare the volume the view actually drew at 1/3 and at the end. -> [(line, ok)]"""
+    from .view_cube import DEMOS3D, STATIC3D
+    import numpy as _np
+    app.tab = 'cube'; cv = app.views['cube']; cv.N = N; cv._grid(); res = []
+    for nm in DEMOS3D:
+        cv.demo = DEMOS3D.index(nm); f0 = getattr(cv, 'frames_drawn', 0)
+        yield frames // 3; a = _np.array(getattr(cv, 'last_vol', _np.zeros(1)), copy=True)
+        yield frames - frames // 3; b = _np.array(getattr(cv, 'last_vol', _np.zeros(1)), copy=True)
+        drawn = getattr(cv, 'frames_drawn', 0) - f0
+        ch = int((_np.abs(a - b) > 1 / 255).sum()) if a.shape == b.shape else -1
+        lit = int((b > 0.02).sum())
+        if nm in STATIC3D: ok = drawn >= frames // 2 and lit > 0; why = 'статичная скульптура (так задумано)'
+        else: ok = drawn >= frames // 2 and ch > 0 and lit > 0; why = 'изменилось %d вокселей' % ch
+        res.append(('куб N=%d «%s»: отрисовано %d кадров, светится %d, %s' % (N, nm, drawn, lit, why), ok))
+    return res
 
 def run(out=None, headless=False):
     if headless: os.environ.setdefault('SDL_VIDEODRIVER', 'dummy'); os.environ.setdefault('SDL_AUDIODRIVER', 'dummy')

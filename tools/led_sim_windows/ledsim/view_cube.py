@@ -21,6 +21,7 @@ GLYPH = {}
 PERSIST = {'rain': 0.55, 'fireworks': 0.6, 'snake': 0.4, 'tsweep': 0.35, 'shapes': 0.3, 'sphere': 0.3, 'dna': 0.35, 'wave': 0.25,
            'walker': 0.25, 'runner': 0.35, 'gogo': 0.3, 'text': 0.3, 'ripples': 0.2, 'heart': 0.2, 'vysh3d': 0.15}
 
+STATIC3D = ('ambigram', 'anamorph')         # read-from-an-angle sculptures: deliberately still
 FIG_LOOP = {'walker': 60, 'runner': 40, 'gogo': 225}     # loop length in frames @ 60 fps (flash clip)
 
 def glyph_cols(ch):
@@ -31,7 +32,7 @@ def glyph_cols(ch):
 
 class CubeView:
     def __init__(s, app):
-        s.app = app; s.clips = {}; s.N = 8; s.kind = 'lattice'; s.demo = DEMOS3D.index('ambigram'); s.cam = OrbitCam()
+        s.app = app; s.clips = {}; s.N = 8; s.kind = 'lattice'; s.demo = DEMOS3D.index('vysh3d'); s.cam = OrbitCam()
         s.t0 = time.time(); s.rain = None; s.d2 = 0; s.drag = False
         s.words = ['LED', 'ILLIA', 'MONO']; s.fx = cube_fx.FX(); s.amb = None; s.amb_key = None; s.ana = None; s.ana_key = None
         s.img = image3d.demo_image(); s.img2 = None; s.img_name = 'встроенная картинка'; s.imode = 0; s.igamma = 1.0; s.ithr = 0.5
@@ -142,12 +143,12 @@ class CubeView:
         RAM: one float layer per board (4 KB)."""
         name = DEMOS3D[s.demo]; key = (name, s.N)
         prev = getattr(s, '_pv', None)
-        if prev is not None and prev.shape == vol.shape and getattr(s, '_pkey', None) == key:
+        if prev is not None and prev.shape == vol.shape and getattr(s, '_post_key', None) == key:
             d = PERSIST.get(name, 0.0)
             if d: vol = np.maximum(vol, prev * d)
         elif prev is not None and prev.shape == vol.shape:
             s._fade = (prev.copy(), t)                                       # effect switched: cross-fade from the last frame
-        s._pkey = key
+        s._post_key = key
         fd = getattr(s, '_fade', None)
         if fd is not None:
             a = (t - fd[1]) / 0.6
@@ -161,6 +162,7 @@ class CubeView:
         sv = s.app.views['system'].w
         vol = s.post(np.clip(s.volume(t), 0, 1).astype(np.float32), t)
         s.qframe = getattr(s, 'qframe', 0) + 1
+        s.last_vol = vol; s.frames_drawn = getattr(s, 'frames_drawn', 0) + 1
         lv = hwquant.quantize(vol, s.qframe, sv.gamma); s.last_lv = lv      # firmware demo.c gamma-aware dither
         duty = host.duty_lut(sv.brightness, sv.gamma)[lv]                # same 8-bit gamma/BCM as the firmware
         x, y, z = s.ncoords()
