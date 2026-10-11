@@ -494,7 +494,7 @@ class SystemView(Nav2D, Rulers):
             ov = pygame.Surface(r.size, pygame.SRCALPHA); ov.fill((20, 70, 40, a) if b.powered else (70, 20, 20, a)); s.masks[k] = ov
         if (not behind or s.xray) and r.w > 40:                       # the real PCB: mask, copper, pads, parts, silkscreen
             from . import pcbtex
-            tex = pcbtex.scaled('board_v13', r.size, b.rot, b.mirror, 'B' if b.mirror else 'F')
+            tex = pcbtex.scaled('board_v15', r.size, b.rot, b.mirror, 'B' if b.mirror else 'F')
             if behind: tex = tex.copy(); tex.set_alpha(150)
             surf.blit(tex, r.topleft)
             if not b.powered: surf.blit(s.masks[k], r.topleft)

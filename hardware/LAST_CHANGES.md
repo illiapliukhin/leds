@@ -1,6 +1,7 @@
 # Latest changes
 
 ## mono_electronics v12
+- mono_electronics v15: FFC shift. J_ROW1/J_COL1 moved 13.5 mm west, the header/TVS strip is at x 136.8–148 and J_PORT_E1 at y 44, so the board is back to 148.0 × 99.5 mm. ID/EXP/port TVS parts were re-placed. RS-485 was re-routed as a matched pair (skew ≤ 0.03 mm). The default FFC is now 120 mm (C5371276). All gates are clean. Fab v15 has wearable and installation BOM/CPL; the sims were updated (board_v15).
 - mono_electronics v14b: installation headers are now XFCN BH127VS-40P-H49 2×20 1.27 mm shrouded, keyed box headers (C42462832; mate IDC3-40232A1EUB1 C49232620 + 0.635 mm ribbon); board 159.45 mm wide (+11.4); gates clean; fab v14 regen.
 - mono_electronics v14: installation headers J_RH1/J_CH1 (2×20 1.27 mm SMD, pin n = FFC pin n) + 64 PESD5V0S1BL, all DNP in the wearable build; board 148 → 160.5 mm wide; wearable and installation BOM/CPL; gates clean (DRC 0/0/0, ERC 0, 0 diffs, прозвонка 309/309); fab v14.
 - mono_electronics v13d: R_ILM1 reverted to 2.7k (C25885, 0.78 A eFuse limit, under the BQ25185 1.1 A abs max); v13c U_OVP1 thermal copper kept; gates clean; fab v13 regen.

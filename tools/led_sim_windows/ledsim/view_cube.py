@@ -217,7 +217,7 @@ class CubeView:
                 pts = [P3(cx + dx * w / 2, cy + dy * h / 2, zk) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
                 SD.polygon(surf, colr, pts, 1)
             from . import pcbtex
-            for (cx_, cy_, ww, hh, key_) in ((bx, by, BOARD_W, BOARD_H, 'board_v13'), (gx, by, 60, 145, 'garland')):
+            for (cx_, cy_, ww, hh, key_) in ((bx, by, BOARD_W, BOARD_H, 'board_v15'), (gx, by, 60, 145, 'garland')):
                 pts = [P3(cx_ + dx * ww * U / 2, cy_ + dy * hh * U / 2, zk) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
                 SD.polygon(surf, pcbtex.MASK, pts)                               # solder mask
                 if lod == 1:

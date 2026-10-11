@@ -107,15 +107,15 @@ The main board carries two DNP **shrouded, keyed 40-pin IDC box headers** wired 
 
 | Ref | Part | Pins | Position (board mm) |
 |---|---|---|---|
-| `J_RH1` | XFCN **BH127VS-40P-H49**, 2×20 1.27 mm SMD vertical box header, shrouded with key slot (LCSC C42462832); body 31.75 × 6.0 × 4.9 mm, pads 0.6 × 2.6 mm on ±2.2 mm | **header pin n = J_ROW1 pin n**, n = 1…40: rows 1–32, 33 GND, 34 VLED_SENSE (`ROW_SPARE_34`, no connection on the main board), 35/36 ID_SDA/ID_SCL, 37 ID_3V3, 38 GND, 39 ID_PRESENT_N (`ROW_SPARE_39`, no connection), 40 GND | centre (151.9, 21.68), key/pin 1 north |
-| `J_CH1` | same | **header pin n = J_COL1 pin n**: cols 1–32, 33 GND, 34–37 EXP_SDI/CLK/LE/OE (DNP taps), 38 GND, 39 EXP_3V3, 40 GND | centre (151.9, 68.28) |
+| `J_RH1` | XFCN **BH127VS-40P-H49**, 2×20 1.27 mm SMD vertical box header, shrouded with key slot (LCSC C42462832); body 31.75 × 6.0 × 4.9 mm, pads 0.6 × 2.6 mm on ±2.2 mm | **header pin n = J_ROW1 pin n**, n = 1…40: rows 1–32, 33 GND, 34 VLED_SENSE (`ROW_SPARE_34`, no connection on the main board), 35/36 ID_SDA/ID_SCL, 37 ID_3V3, 38 GND, 39 ID_PRESENT_N (`ROW_SPARE_39`, no connection), 40 GND | centre (140.4, 22.78) (v15; v14b: 151.9), key/pin 1 north |
+| `J_CH1` | same | **header pin n = J_COL1 pin n**: cols 1–32, 33 GND, 34–37 EXP_SDI/CLK/LE/OE (DNP taps), 38 GND, 39 EXP_3V3, 40 GND | centre (140.4, 68.28) (v15; v14b: 151.9) |
 | `D_R01…D_R32`, `D_C01…D_C32` | PESD5V0S1BL (C84374), SOD-882 | one per LED line to GND | two columns east of each header |
 
 - **Mating cable:** XFCN **IDC3-40232A1EUB1** 2×20 1.27 mm IDC socket (LCSC C49232620, polarised to the header key) crimped on 40-way **0.635 mm** flat ribbon (3M 3365/40 or 3756/40 class; stocked by Digi-Key/Mouser, not LCSC). Ribbon conductor n = line n, exactly like the FFC, so the panel ID EEPROM, VLED sense and GND pins ride along.
 - **Wearable build:** FFC fitted; headers and TVS DNP. The unpopulated strip is flat; the FFC cables and the `J_PORT_E1` plug lie over it.
 - **Installation build:** headers + TVS fitted; FFCs optional. Never plug an FFC panel and a header load at the same time.
 - **Row copper:** 0.2 mm in the ≤ 2.7 mm 0.5→0.635 mm fan, 0.25 mm to the TVS; ≈ +11 mV at 0.32 A to the header pins.
-- **Board size:** 148.0 → **159.45 mm** wide (+11.4 mm). Why growth is unavoidable: every connector has to reach the 64 lines where they exist at 0.5 mm pitch, which is only at the FFC pads; the area west of the FFCs (x 120–138) is the dense row/col fan-in on all four layers, and the FFCs' own footprints cannot be shared (pad pitches differ and the FFC is needed in the wearable build). The east edge between the FFCs belongs to `J_PORT_E1` (y 37–47), which must keep its east-facing cable entry, so the headers go in a strip beyond x = 148: 2.7 mm fan + 7.2 mm header pads/courtyard + 1.5 mm for two TVS columns and their GND vias.
+- **Board size (v15):** back to **148.0 × 99.5 mm**. J_ROW1/J_COL1 moved 13.5 mm west to x 129.54. The header + TVS strip now sits at x 136.8–148, and J_PORT_E1 is at y 44. FFC rows 17/21–32 and cols 1–13 reach the shifted pads through In1. The ID/EXP/port TVS parts and the RS-485 N→E→W pair were re-placed and re-routed (pair skew ≤ 0.03 mm per leg). Default FFC is now **120 mm** (C5371276). v14/v14b were 160.5/159.45 mm wide.
 - **Rejected:** 2×20 2.54 mm (56 mm long) or 2.0 mm (≈ 46 mm) box headers do not fit the ≈ 36 mm of edge above `J_PORT_E1`; fitting them would mean moving `J_PORT_E1` and re-routing the RS-485 port, and/or two header columns (≥ +20 mm). The v14 draft's unshrouded pin header was replaced as requested. The garland breakout's 2×8 2.54 mm wiring needs a passive 2×20 1.27 → 4× 2×8 adapter.
 
 ## 7. Compliance checklist for a new load

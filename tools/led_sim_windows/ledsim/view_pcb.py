@@ -8,7 +8,7 @@ from .camera import Nav2D
 
 LAYER_NAMES = ['F.Cu', 'In1.Cu', 'In2.Cu', 'B.Cu']
 LAYER_COL = [(200, 60, 50), (200, 170, 60), (70, 170, 90), (60, 110, 220)]
-BOARDS = [('board_v13', 'mono_electronics v13 (текущая)'), ('board_v12', 'mono_electronics v12'), ('board_v11b', 'mono_electronics v11b'), ('board_v10', 'mono_electronics v10')]
+BOARDS = [('board_v15', 'mono_electronics v15 (текущая)'), ('board_v13', 'mono_electronics v13'), ('board_v12', 'mono_electronics v12'), ('board_v11b', 'mono_electronics v11b'), ('board_v10', 'mono_electronics v10')]
 PANELS = [('panel_full', 'mono_panel_32x32_full'), ('panel_flat', 'mono_panel_32x32'), ('panel_lattice', 'mono_panel_32x32_lattice'),
           ('panel_20x20', 'mono_panel_20x20'), ('garland', 'garland_breakout')]
 FFC = {'panel_full': 'ffc_full.json', 'panel_flat': 'ffc_mono32.json', 'panel_lattice': 'ffc_lattice.json'}

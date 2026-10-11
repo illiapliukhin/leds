@@ -22,10 +22,10 @@ def panel_data(kind):
     return _pd[kind]
 
 # real connector positions (mm from the outline centre, KiCad view) from mono_electronics v12 / the panel .kicad_pcb
-SIDE_OFF = [(52.0, -46.6), (70.9, -7.8), (-10.0, 46.6), (-70.9, 38.2)]          # J_PORT_N1/E1/S1/W1
-# mono_electronics v13 (hardware/mono_electronics/mono_electronics.kicad_pcb, origin = board corner, centre 74, 49.75):
-# J_ROW1 143.04,22 · J_COL1 143.04,68.6 · J_USB1 6.5,18 · J_BAT1 7,57 · ports N 126,3.125 E 144.915,42 S 64,96.375 W 3.125,88
-BOARD_CONN = {'J_ROW': (69.04, -27.75), 'J_COL': (69.04, 18.85), 'J_USB': (-67.5, -31.75), 'J_BAT': (-67.0, 7.25)}
+SIDE_OFF = [(52.0, -46.6), (70.9, -5.8), (-10.0, 46.6), (-70.9, 38.2)]          # J_PORT_N1/E1/S1/W1
+# mono_electronics v15 (hardware/mono_electronics/mono_electronics.kicad_pcb, origin = board corner, centre 74, 49.75):
+# J_ROW1 129.54,22 · J_COL1 129.54,68.6 (v15: 13.5 mm west) · J_USB1 6.5,18 · J_BAT1 7,57 · ports N 126,3.125 E 144.915,44 S 64,96.375 W 3.125,88
+BOARD_CONN = {'J_ROW': (55.54, -27.75), 'J_COL': (55.54, 18.85), 'J_USB': (-67.5, -31.75), 'J_BAT': (-67.0, 7.25)}
 MOUNT_GAP = 8.0            # mm, panel back to board (standoff) — assumption; FFC path = planar distance + 2·gap
 PANEL_CONN = {'full': {'J_ROW': (-7.2, 0.0), 'J_COL': (27.8, 0.0)},              # back side receptacles
               'flat': {'J_ROW': (-75.3, 0.0), 'J_COL': (0.0, 75.1)},
