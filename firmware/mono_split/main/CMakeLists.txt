@@ -12,7 +12,7 @@ idf_component_register(
         "demo.c"
         "sim_scan.c"
     INCLUDE_DIRS "."
-    REQUIRES driver esp_timer esp_driver_gpio esp_driver_spi esp_driver_i2c console nvs_flash esp_hw_support
+    REQUIRES driver esp_timer esp_driver_gpio esp_driver_spi esp_driver_i2c console nvs_flash esp_hw_support esp_lcd
 )
 
 if(MONO_SIM)

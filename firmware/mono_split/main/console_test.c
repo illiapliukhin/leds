@@ -83,6 +83,30 @@ static esp_err_t display_ensure_on(void)
     return err;
 }
 
+static int cmd_gamma(int argc, char **argv)
+{
+    if (argc >= 2) {
+        float g = strtof(argv[1], NULL);
+        if (g < 0.5f || g > 4.0f) {
+            printf("gamma 0.5..4.0\n");
+            return 1;
+        }
+        matrix_refresh_set_gamma(g);
+    }
+    printf("Gamma: %.2f\n", matrix_refresh_get_gamma());
+    return 0;
+}
+
+static int cmd_scan(int argc, char **argv)
+{
+    (void)argc; (void)argv;
+    printf("scan: LCD_CAM i80 %d MHz, %lu samples/row, %lu/frame, nominal %.1f Hz, 8-bit BCM, bright %u, gamma %.2f, last build %lu cycles, frames %lu, demo frames %lu\n",
+           MATRIX_PCLK_HZ / 1000000, (unsigned long)matrix_refresh_row_samples(), (unsigned long)matrix_refresh_frame_samples(),
+           matrix_refresh_nominal_hz(), matrix_refresh_get_brightness(), matrix_refresh_get_gamma(),
+           (unsigned long)matrix_refresh_build_cycles(), (unsigned long)matrix_refresh_frame_count(), (unsigned long)demo_frames_rendered());
+    return 0;
+}
+
 static int cmd_i2cscan(int argc, char **argv)
 {
     (void)argc; (void)argv;
@@ -261,6 +285,11 @@ esp_err_t console_test_register(matrix_panel_t *panel)
         .func = &cmd_display,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&display_cmd));
+
+    const esp_console_cmd_t gamma_cmd = {.command = "gamma", .help = "Gamma LUT exponent: gamma [0.5..4.0] (default 2.2)", .func = &cmd_gamma};
+    ESP_ERROR_CHECK(esp_console_cmd_register(&gamma_cmd));
+    const esp_console_cmd_t scan_cmd = {.command = "scan", .help = "Scan engine timing and stats", .func = &cmd_scan};
+    ESP_ERROR_CHECK(esp_console_cmd_register(&scan_cmd));
 
     const esp_console_cmd_t i2c_cmd = {
         .command = "i2cscan",

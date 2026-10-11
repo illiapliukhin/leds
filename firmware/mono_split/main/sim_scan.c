@@ -9,125 +9,85 @@
 #include "freertos/task.h"
 #include "matrix_refresh.h"
 
-#define SIM_ROWS 32
+static const uint16_t *volatile s_frame;
+static volatile uint32_t s_gen;
+static volatile uint32_t s_cpu_busy_us;      /* time spent in this decoder (not part of the HW scan) */
 
-/* One complete scan: per row the two latched column words, the commanded OE slot (timer-based,
- * nominal) and the measured OE-low time; all rows belong to framebuffer generation `gen`. */
+void sim_scan_note_buffer(const uint16_t *frame, uint32_t gen)
+{
+    s_frame = frame;
+    s_gen = gen;
+}
+
+/* Decode one frame the way the panel hardware sees it. */
 typedef struct {
-    uint32_t bits[SIM_ROWS][2];
-    uint16_t slot[SIM_ROWS][2];
-    uint16_t meas[SIM_ROWS][2];
-    uint8_t n[SIM_ROWS];
-    uint32_t gen;
-    uint32_t rows_seen;
-} scan_t;
+    int row;                 /* decoded from A3..A0 + which decoder was enabled while OE_N was low, -1 = none */
+    uint32_t bits[8];        /* 32-bit shift register contents latched at each LE */
+    uint16_t on[8];          /* OE_N-low samples following that LE */
+    uint8_t n;
+} drow_t;
 
-static scan_t s_live, s_done;
-static volatile bool s_done_valid;
-static volatile uint32_t s_done_seq;
-static uint8_t s_row;
-static uint32_t s_shift;
-static int64_t s_oe_t0, s_row_t_prev;
-/* row-period statistics since the last emit */
-static int64_t s_rp_min = 1 << 30, s_rp_max, s_rp_sum, s_rp_sq;
-static uint32_t s_rp_n;
-static portMUX_TYPE s_mux = portMUX_INITIALIZER_UNLOCKED;
-
-void sim_scan_note_frame(uint32_t gen)
+static int decode(const uint16_t *f, uint32_t nrow_samples, drow_t *out)
 {
-    /* called before row 0: the previous scan is complete -> publish it if it was whole */
-    portENTER_CRITICAL(&s_mux);
-    if (s_live.rows_seen == SIM_ROWS) {
-        memcpy(&s_done, &s_live, sizeof(s_done));
-        s_done_valid = true;
-        s_done_seq++;
+    int rows = 0;
+    uint32_t sr = 0;
+    int cur = -1;
+    for (uint32_t r = 0; r < 32; r++) {
+        drow_t *d = &out[r];
+        memset(d, 0, sizeof(*d));
+        d->row = -1;
+        cur = -1;
+        const uint16_t *p = f + r * nrow_samples;
+        for (uint32_t i = 0; i < nrow_samples; i++) {
+            uint16_t s = p[i];
+            sr = (sr << 1) | (s & MBUS_SDI);              /* rising PCLK edge shifts SDI in: first bit ends at bit 31 */
+            if (s & MBUS_LE) {                            /* latch the shift register */
+                if (d->n < 8) { cur = d->n++; d->bits[cur] = sr; d->on[cur] = 0; }
+            }
+            if (!(s & MBUS_OE_N) && cur >= 0) {
+                d->on[cur]++;
+                int a = (s >> 3) & 15;
+                bool deca = !(s & MBUS_DECA_N), decb = !(s & MBUS_DECB_N);
+                d->row = (deca && !decb) ? a : (decb && !deca) ? 16 + a : -2;  /* -2 = both/none on: fault */
+            }
+        }
+        rows++;
     }
-    memset(&s_live, 0, sizeof(s_live));
-    s_live.gen = gen;
-    portEXIT_CRITICAL(&s_mux);
-}
-
-void sim_scan_note_row(uint8_t row)
-{
-    int64_t now = esp_timer_get_time();
-    portENTER_CRITICAL(&s_mux);
-    if (s_row_t_prev) {
-        int64_t p = now - s_row_t_prev;
-        if (p < s_rp_min) s_rp_min = p;
-        if (p > s_rp_max) s_rp_max = p;
-        s_rp_sum += p; s_rp_sq += p * p; s_rp_n++;
-    }
-    s_row_t_prev = now;
-    s_row = row % SIM_ROWS;
-    s_live.n[s_row] = 0;
-    s_live.rows_seen++;
-    portEXIT_CRITICAL(&s_mux);
-}
-
-void sim_scan_note_shift(uint32_t bits) { s_shift = bits; }
-
-void sim_scan_note_latch(void)
-{
-    portENTER_CRITICAL(&s_mux);
-    uint8_t k = s_live.n[s_row];
-    if (k < 2) {
-        s_live.bits[s_row][k] = s_shift;
-        s_live.slot[s_row][k] = 0;
-        s_live.meas[s_row][k] = 0;
-        s_live.n[s_row] = k + 1;
-    }
-    portEXIT_CRITICAL(&s_mux);
-}
-
-void sim_scan_note_slot(uint32_t us)
-{
-    uint8_t k = s_live.n[s_row];
-    if (k) s_live.slot[s_row][k - 1] = (uint16_t)us;
-}
-
-void sim_scan_note_oe(bool lit)
-{
-    int64_t now = esp_timer_get_time();
-    if (lit) { s_oe_t0 = now; return; }
-    if (!s_oe_t0) return;
-    portENTER_CRITICAL(&s_mux);
-    uint8_t k = s_live.n[s_row];
-    if (k) s_live.meas[s_row][k - 1] += (uint16_t)(now - s_oe_t0);
-    portEXIT_CRITICAL(&s_mux);
-    s_oe_t0 = 0;
+    return rows;
 }
 
 static void sim_stream_task(void *arg)
 {
     (void)arg;
-    static scan_t snap;
-    static char line[SIM_ROWS * 48 + 160];
-    uint32_t last_seq = 0, last_frames = matrix_refresh_frame_count(), out = 0;
+    static drow_t d[32];
+    static char line[32 * 80 + 256];
+    uint32_t seq = 0, last_frames = matrix_refresh_frame_count();
     int64_t last_t = esp_timer_get_time();
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(50));
-        portENTER_CRITICAL(&s_mux);
-        bool fresh = s_done_valid && s_done_seq != last_seq;
-        if (fresh) { memcpy(&snap, &s_done, sizeof(snap)); last_seq = s_done_seq; }
-        int64_t mn = s_rp_min, mx = s_rp_max, sum = s_rp_sum, sq = s_rp_sq; uint32_t n = s_rp_n;
-        s_rp_min = 1 << 30; s_rp_max = s_rp_sum = s_rp_sq = 0; s_rp_n = 0;
-        uint8_t cur = s_row;
-        portEXIT_CRITICAL(&s_mux);
-        if (!fresh) continue;
+        const uint16_t *f = s_frame;
+        if (!f) continue;
+        uint32_t gen = s_gen;
+        decode(f, matrix_refresh_row_samples(), d);
         uint32_t frames = matrix_refresh_frame_count();
         int64_t t = esp_timer_get_time();
         uint32_t fps_x10 = (uint32_t)((frames - last_frames) * 10000000LL / (t - last_t + 1));
         last_frames = frames; last_t = t;
-        uint32_t mean_x10 = n ? (uint32_t)(sum * 10 / n) : 0;
-        uint32_t var_x100 = n ? (uint32_t)((sq * 100 / n) - (int64_t)mean_x10 * mean_x10) : 0;
-        /* @F seq fps_x10 cur_row gen rp_min rp_max rp_mean_x10 rp_var_x100 | 32 x b0:slot0:meas0:b1:slot1:meas1 */
-        int k = snprintf(line, sizeof(line), "@F %lu %lu %u %lu %lld %lld %lu %lu", (unsigned long)out++, (unsigned long)fps_x10, cur,
-            (unsigned long)snap.gen, (long long)(n ? mn : 0), (long long)mx, (unsigned long)mean_x10, (unsigned long)var_x100);
-        for (int r = 0; r < SIM_ROWS; r++) {
-            k += snprintf(line + k, sizeof(line) - k, " %lx:%u:%u:%lx:%u:%u", (unsigned long)snap.bits[r][0], snap.slot[r][0], snap.meas[r][0],
-                (unsigned long)snap.bits[r][1], snap.slot[r][1], snap.meas[r][1]);
+        /* @G seq obs_fps_x10 nominal_hz_x10 gen sample_ns row_samples build_cycles brightness gamma_x100
+         *    slots(row0, samples) s0..s7 | 32 x row:w0,w1,..,w7 (hex) [:on0,..,on7 if a row's slots differ] */
+        int n = snprintf(line, sizeof(line), "@G %lu %lu %lu %lu %d %lu %lu %u %u",
+            (unsigned long)seq++, (unsigned long)fps_x10, (unsigned long)(matrix_refresh_nominal_hz() * 10), (unsigned long)gen,
+            MATRIX_SAMPLE_NS, (unsigned long)matrix_refresh_row_samples(), (unsigned long)matrix_refresh_build_cycles(),
+            matrix_refresh_get_brightness(), (unsigned)(matrix_refresh_get_gamma() * 100));
+        for (int k = 0; k < 8; k++) n += snprintf(line + n, sizeof(line) - n, " %u", d[0].on[k]);
+        for (int r = 0; r < 32; r++) {
+            n += snprintf(line + n, sizeof(line) - n, " %d", d[r].row);
+            for (int k = 0; k < 8; k++) n += snprintf(line + n, sizeof(line) - n, "%c%lx", k ? ',' : ':', (unsigned long)d[r].bits[k]);
+            if (memcmp(d[r].on, d[0].on, sizeof(d[0].on)) != 0) {
+                for (int k = 0; k < 8; k++) n += snprintf(line + n, sizeof(line) - n, "%c%u", k ? ',' : ':', d[r].on[k]);
+            }
         }
-        line[k++] = '\n'; line[k] = 0;
+        line[n++] = '\n'; line[n] = 0;
         fputs(line, stdout);
         fflush(stdout);
     }

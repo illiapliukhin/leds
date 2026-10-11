@@ -22,3 +22,4 @@ const char *demo_name(demo_mode_t mode);
 esp_err_t demo_start(matrix_panel_t *panel, demo_mode_t mode, bool cycle);
 void demo_stop(void);
 bool demo_running(void);
+uint32_t demo_frames_rendered(void);

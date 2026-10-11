@@ -2,90 +2,27 @@
 
 #include "board_pins.h"
 #include "driver/gpio.h"
-#include "driver/spi_master.h"
 #include "esp_log.h"
-#include "sim_scan.h"
 
+/* v13: the shift/latch/OE stream is produced by the LCD_CAM scan engine (matrix_refresh.c).
+ * This driver only parks the pins in a safe GPIO state while the engine is not running. */
 static const char *TAG = "mbi5124";
-static spi_device_handle_t s_spi_device;
 
 esp_err_t mbi5124_driver_init(void)
 {
-#ifdef MONO_SIM
-    /* QEMU: GPSPI2 is not emulated for ESP32-S3; shift register is stubbed. */
-    gpio_set_direction(BOARD_PIN_GPIO_LED_LE, GPIO_MODE_OUTPUT);
-    gpio_set_direction(BOARD_PIN_GPIO_LED_OE_N, GPIO_MODE_OUTPUT);
-    mbi5124_set_blank(true);
-    ESP_LOGW(TAG, "MONO_SIM: SPI shift stubbed, LE/OE on GPIO");
-    return ESP_OK;
-#endif
-    spi_bus_config_t bus_config = {
-        .mosi_io_num = BOARD_PIN_GPIO_LED_SDI,
-        .miso_io_num = -1,
-        .sclk_io_num = BOARD_PIN_GPIO_LED_CLK,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .max_transfer_sz = 4,
-    };
-
-    esp_err_t err = spi_bus_initialize(SPI2_HOST, &bus_config, SPI_DMA_DISABLED);
-    if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-        return err;
+    const gpio_num_t outs[] = {BOARD_PIN_GPIO_LED_CLK, BOARD_PIN_GPIO_LED_SDI, BOARD_PIN_GPIO_LED_LE, BOARD_PIN_GPIO_LED_OE_N};
+    const int lvl[] = {0, 0, 0, 1};
+    for (int i = 0; i < 4; i++) {
+        gpio_set_level(outs[i], lvl[i]);
+        gpio_config_t c = {.pin_bit_mask = 1ULL << outs[i], .mode = GPIO_MODE_OUTPUT};
+        gpio_config(&c);
+        gpio_set_level(outs[i], lvl[i]);
     }
-
-    spi_device_interface_config_t device_config = {
-        .clock_speed_hz = MBI5124_SHIFT_CLOCK_HZ,
-        .mode = 0,
-        .spics_io_num = -1,
-        .queue_size = 1,
-        .flags = SPI_DEVICE_NO_DUMMY,
-    };
-
-    err = spi_bus_add_device(SPI2_HOST, &device_config, &s_spi_device);
-    if (err != ESP_OK) {
-        return err;
-    }
-
-    gpio_set_direction(BOARD_PIN_GPIO_LED_LE, GPIO_MODE_OUTPUT);
-    gpio_set_direction(BOARD_PIN_GPIO_LED_OE_N, GPIO_MODE_OUTPUT);
-    gpio_set_level(BOARD_PIN_GPIO_LED_LE, 0);
-    mbi5124_set_blank(true);
-
-    ESP_LOGI(TAG, "SPI shift @ %d Hz, LE/OE on GPIO", MBI5124_SHIFT_CLOCK_HZ);
+    ESP_LOGI(TAG, "pins parked: CLK/SDI/LE low, OE_N high (scan engine owns them while running)");
     return ESP_OK;
-}
-
-void mbi5124_shift_columns(const uint32_t column_bits)
-{
-    uint8_t bytes[4] = {
-        (uint8_t)((column_bits >> 24) & 0xFF),
-        (uint8_t)((column_bits >> 16) & 0xFF),
-        (uint8_t)((column_bits >> 8) & 0xFF),
-        (uint8_t)(column_bits & 0xFF),
-    };
-
-    sim_scan_note_shift(column_bits);
-#ifdef MONO_SIM
-    (void)bytes;
-    return;
-#endif
-    spi_transaction_t transaction = {
-        .length = 32,
-        .tx_buffer = bytes,
-    };
-    spi_device_polling_transmit(s_spi_device, &transaction);
-}
-
-void mbi5124_latch(void)
-{
-    gpio_set_level(BOARD_PIN_GPIO_LED_LE, 1);
-    esp_rom_delay_us(1);
-    gpio_set_level(BOARD_PIN_GPIO_LED_LE, 0);
-    sim_scan_note_latch();
 }
 
 void mbi5124_set_blank(bool blanked)
 {
     gpio_set_level(BOARD_PIN_GPIO_LED_OE_N, blanked ? 1 : 0);
-    sim_scan_note_oe(!blanked);
 }

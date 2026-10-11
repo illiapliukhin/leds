@@ -63,23 +63,25 @@ class Model:
         return self.ppin_net.get(('J_ROW' if ref == 'J_ROW1' else 'J_COL', ppin)) or None
 
     def light(self, rows, period):
-        """rows: 32 x (b0, slot0, b1, slot1). Returns (actual, expected) duty per LED and per-row stats."""
+        """rows: 32 x (decoded_row, [(bits, on_samples) x 8]) from the decoded LCD_CAM stream; period = row samples.
+        Expected = design intent (frame row i x COL c+1); actual = what lights through the decoded address,
+        board copper, cable and panel copper. Returns (actual, expected) duty per LED and per-row (I, drop)."""
         act = [0.0] * len(self.leds); exp = [0.0] * len(self.leds); stats = []
-        for r, (b0, s0, b1, s1) in enumerate(rows):
-            an_panel = self.through_cable(self.row_net[r])
+        for i, (drow, planes) in enumerate(rows):
+            an_panel = self.through_cable(self.row_net[drow]) if 0 <= drow < 32 else None
             n_lit = 0
-            for bits, slot in ((b0, s0), (b1, s1)):
-                if not bits or not slot: continue
+            for bits, on in planes:
+                if not bits or not on: continue
                 lit_here = 0
                 for c in range(32):
                     if not (bits >> c) & 1: continue
-                    exp[self.by_rc[(r, c)]] += slot / period          # design intent: ROW r+1 x COL c+1
+                    exp[self.by_rc[(i, c)]] += on / period
                     ca_panel = self.through_cable(self.col_net[c])
-                    i = self.by_nets.get((an_panel, ca_panel)) if an_panel and ca_panel else None
-                    if i is not None:
-                        act[i] += slot / period; lit_here += 1
+                    j = self.by_nets.get((an_panel, ca_panel)) if an_panel and ca_panel else None
+                    if j is not None:
+                        act[j] += on / period; lit_here += 1
                 n_lit = max(n_lit, lit_here)
             i_row = n_lit * I_COL
-            a, b = IR.get(str(r + 1), [0, 0])
+            a, b = IR.get(str(i + 1), [0, 0])
             stats.append((i_row, i_row * (a + b)))
         return act, exp, stats

@@ -121,3 +121,69 @@ Fault injection:
 - **COL_07 open:** caught; only column 7 fails, dark in every row.
 
 **Design finding (cable).** Board (F.Cu, exit east) and panel (B.Cu, exit west/south) with FH12 bottom-contact receptacles map pin 1→1 only with a **Type B (opposite-side contacts) FFC**. A stock Type A (same-side) cable mirrors pins 1↔40, so the panel would show nothing correct. The cable type has to be specified in the BOM/architecture doc. Firmware additions for this: a MONO_SIM-only I2C mock, an `i2cscan` console command, and the scan stream starting with the first display power-up.
+
+## v13 — hardware scan engine, 8-bit BCM, 60 fps demos
+
+### Output path
+- **Peripheral:** LCD_CAM i80 bus with DMA, not SPI. Each DMA transaction is one full frame. PCLK (WR) drives **LED_CLK** (GPIO13). A 16-bit data bus carries **SDI** (GPIO14), **LE** (GPIO15), **OE_N** (GPIO16), **ROW_A0..A3** and **DEC_A/B_EN_N**. All of these go through the GPIO matrix, which allows any output pin (the limit is about 40 MHz, and 20 MHz is used).
+  - `esp_lcd` requires 16 data pins plus DC. The 7 unused bits and DC are first pointed at DEC_B_EN_N. Each real pin is then reconnected to its own data signal, and in the GPIO matrix the last connect wins.
+- **Why not SPI with a timer for OE:** LE, OE and the row address are in the same sample stream as the data. Every edge therefore lands exactly on the 50 ns grid with no ISR jitter, and the CPU does no per-row or per-plane work.
+- **Continuous PCLK:** the MBI5124 latches the last 32 bits clocked in before LE falls, so shifting during OE is harmless.
+- **Before LCD_CAM starts:** `mbi5124_driver_init()` parks the pins as GPIOs: CLK, SDI and LE low, OE_N high.
+- **Frame boundaries:** every frame ends with OE_N=1 and both decoders off, so the bus is blanked during the gap between transactions.
+- **Clock check:** the MBI5124 is rated for 25 MHz max and needs at least 50 ns OE. The engine runs at 20 MHz with an LSB of 100 ns at brightness 255 (50 ns at 128).
+  - SN74LV125A at 3.3 V: tpd is 4.8 ns typ and 11.5 ns max (50 pF). CLK and SDI pass through the same buffer, so their skew is a few ns. Data changes on the PCLK falling edge, which leaves about 25 ns of setup and hold margin.
+- **Signal integrity:** the buffered LED_CLK_Y trace is 49 mm with 5 vias and drives 2 loads. That is about 0.33 ns of delay, far shorter than the roughly 150 mm critical length for 2–3 ns edges, so it behaves as a lumped load.
+  - **Recommendation for the next board spin:** add a 22–33 Ω 0402 series resistor at the U_LED_BUF CLK output to damp overshoot and reduce EMI. It is not required at 20 MHz.
+  - **Board unchanged in this step.**
+
+### Timing math (20 MHz, 50 ns samples)
+Per row:
+- **Guard:** 4 samples.
+- **Shift plane 0:** 32 samples (LE on the last one).
+- **Planes k = 0..7:** each plane gets a window `W_k` with OE low for `slot_k` samples. During the window, plane k+1 shifts in and is latched by one LE sample with OE high.
+  - Full scale: `slot_k = 2^(k+1)` samples.
+  - `W_k = max(slot_k, 31)` for k<7, and `W_7 = 256`.
+  - Window sum: 31·4 + 32 + 64 + 128 = 348. With the 7 LE samples and plane 7's 256 samples, that gives 611.
+- **Guard:** 4 samples.
+
+Totals:
+- **Row:** 4 + 32 + 611 + 4 = **651 samples = 32.55 µs**.
+- **Frame:** 32 rows = 1041.6 µs, so refresh is **960 Hz**.
+- **Max duty:** 510/651 = 78%.
+- **Brightness:** global brightness scales the OE slots, and the row time stays fixed.
+- **Grey levels:** 256 at brightness ≥128. Below that, the LSB planes round away.
+- **Gamma:** a 256-entry LUT, default 2.2. Change it with `gamma <x>` and brightness with `bright <n>`. `scan` prints the stats.
+- **DMA buffers:** 3 frame buffers of 40.7 KB each in internal RAM. The writer builds a free buffer and the DMA picks up the newest complete one at a frame boundary.
+
+### CPU (real hardware, estimated from cycle counts at 240 MHz)
+- **Frame build:** only the SDI bits change, since the control-bit template is cached per brightness. That is 8192 read-modify-writes at about 6 cycles plus 1024 gamma lookups, about 53 k cycles per content frame. At 60 fps this is 3.2 M cycles/s.
+- **DMA hand-off:** `tx_color`, the done-ISR and a task switch cost about 5 k cycles per scan frame. At 960 Hz this is 4.8 M cycles/s.
+- **Total:** about **3.3 % of core 1**. In v12 the busy-wait refresh used 100 % of core 1.
+- QEMU's cycle counter is not usable for this; it reported about 4 k cycles per build.
+
+### Before → after
+| | v12 (bit-bang + busy-wait BCM) | v13 (LCD_CAM DMA) |
+|---|---|---|
+| Refresh | 400 Hz target (≈390 Hz in QEMU) | **960 Hz** (HW timing) |
+| Grey | 2-bit BCM, 4 levels | **8-bit BCM, 256 levels** + gamma 2.2 LUT |
+| Content frame rate | 25 fps | **60 fps** (16/17/17 ms) |
+| Scan CPU | ~100 % of core 1 | **≈3.3 % of core 1** (est.) |
+| Row-period jitter | ISR/loop dependent | **0**: every edge sits on the 50 ns DMA sample grid |
+
+### Demos (all 8-bit)
+- **Ball:** antialiased with a fading trail.
+- **Rings:** smooth expanding cosine rings.
+- **Plasma:** full 8 bits.
+- **Scrolling text:** 14 px/s with subpixel box-filter shift.
+- **Smiley and star:** antialiased (4×4 supersampled star).
+- **Life:** cells fade in and out.
+- **Mode changes:** 0.6 s smoothstep cross-fade between modes.
+
+### Simulation
+- **No LCD_CAM in QEMU:** the MONO_SIM backend builds the identical DMA sample buffer and hands it to `sim_scan`.
+- **Tap decoding:** every 50 ms the tap decodes the buffer the same way the panel would see it: the 32 bits clocked before each LE, the OE_N-low samples per plane, and the row from A3..A0 plus whichever decoder is enabled during OE. It streams the result as `@G` lines.
+- **Viewer:** duty = Σ bit·on/row, shown gamma-encoded (256 levels). The panel shows refresh, grey levels in the frame, gamma/brightness and the HW CPU estimate.
+- **Bring-up bench re-run on the new engine:** all-on, row walk, column walk and checkerboard all PASS. The Type A cable fault and the COL_07 open fault are both CAUGHT (`sim/bringup/bench_report.md`).
+- **Recording:** `sim/matrix/matrix_demo_v13.mp4` is a 30 s recording of smiley → logo → scroll → ball → life → ring. Plasma comes next in the cycle, after the recorded 30 s. The grid image is `sim/matrix/v13_demo_grid.png`.
+- **What is real and what is simulated:** the sample stream and its decoding are real firmware output. The pacing in QEMU is about 200–300 Hz (1 ms ticks plus emulation), not the 960 Hz of real hardware. QEMU does not execute LCD_CAM, so `hw_init` and `tx_color` are verified to compile only.

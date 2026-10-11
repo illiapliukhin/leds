@@ -79,7 +79,6 @@ void app_main(void)
 
     ESP_LOGI(
         TAG,
-        "Ready. Target refresh %d Hz, row rate %d Hz",
-        MATRIX_TARGET_REFRESH_HZ,
-        MATRIX_TARGET_REFRESH_HZ * 32);
+        "Ready. Scan engine: LCD_CAM i80 %d MHz, 32 rows x 8-bit BCM (rails off until first use)",
+        MATRIX_PCLK_HZ / 1000000);
 }

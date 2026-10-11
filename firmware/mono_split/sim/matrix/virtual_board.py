@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Virtual 32x32 LED panel for the mono_split firmware running in Espressif QEMU.
 
-Reads the firmware's sim scan tap ("@F" lines on the QEMU UART, TCP socket) and lights the
+Reads the firmware's v13 sim tap ("@G" lines = decoded LCD_CAM frames, 8-bit BCM; on the QEMU UART, TCP socket) and lights the
 matrix the way the real panel would: every row holds the column words that were latched into
 the MBI5124 chain while that row's decoder output was active, and each LED's brightness is the
 time OE_N was low with its bit set, divided by the row period (binary-code modulation, 2 planes).
@@ -10,6 +10,8 @@ Eye/LED persistence is modelled as a ~40 ms exponential filter.
 import argparse, math, os, socket, subprocess, sys, time
 
 import pygame
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gstream import parse_g, full_scale_duty, hw_cpu_pct
 
 ROWS = COLS = 32
 ROW_PERIOD_US = (1_000_000 // 400) // 32       # nominal row period (78 us), as in the firmware
@@ -59,7 +61,7 @@ def main():
     lum = [[0.0] * COLS for _ in range(ROWS)]
     target = [[0.0] * COLS for _ in range(ROWS)]
     buf = b''; sent = False; fps = 0.0; cur_row = 0; seq = 0; last_seq_t = time.time(); stream_hz = 0.0
-    demo = '-'; gen = 0; last_gen = -1; rp = (0, 0, 0, 0); row_peak = [0.0] * ROWS; avg_ma = 0.0
+    demo = '-'; gen = 0; fps_obs = 0; full = 0.78; levels = 0; bright = 128; gam = 2.2; row_peak = [0.0] * ROWS; avg_ma = 0.0
     rec = None; rec_t0 = None; png_n = 0; last_png = 0
     clock = pygame.time.Clock()
     while True:
@@ -81,40 +83,37 @@ def main():
         while b'\n' in buf:
             line, buf = buf.split(b'\n', 1)
             s = line.decode(errors='replace').strip().replace('mono>', '').strip()
-            if logf and not s.startswith('@F'):
+            if logf and not s.startswith('@G'):
                 logf.write(s + '\n'); logf.flush()
             if 'demo: demo: ' in s:
                 demo = s.split('demo: demo: ')[1].split('\x1b')[0]
-            if not s.startswith('@F'):
+            if not s.startswith('@G'):
                 continue
-            r = parse(s)
+            r = parse_g(s)
             if not r:
                 continue
-            seq, fps, cur_row, gen, rp, rows = r
-            if gen == last_gen and gen != 0:
-                pass  # same image again: still a valid complete scan
-            last_gen = gen
+            seq, gen, rows, RS = r['seq'], r['gen'], r['rows'], r['row_samples']
+            fps, fps_obs, full = r['fps_nom'], r['fps_obs'], full_scale_duty(RS)
+            bright, gam = r['bright'], r['gamma']
             now = time.time(); stream_hz = 0.8 * stream_hz + 0.2 / max(now - last_seq_t, 1e-3); last_seq_t = now
-            tot = 0.0
-            for y, (b0, o0, b1, o1) in enumerate(rows):
-                lit_on = 0
+            tot = 0.0; duties = set()
+            for y, (drow, planes) in enumerate(rows):
+                yy = drow if 0 <= drow < 32 else y        # light the row the decoded address actually selects
                 for x in range(COLS):
-                    t_on = (o0 if (b0 >> x) & 1 else 0) + (o1 if (b1 >> x) & 1 else 0)
-                    target[y][x] = min(1.0, t_on / ROW_PERIOD_US)
-                n0 = bin(b0).count('1') if o0 else 0; n1 = bin(b1).count('1') if o1 else 0
-                row_peak[y] = max(n0, n1) * I_COL_MA                      # mA while OE is low
-                tot += (n0 * o0 + n1 * o1) * I_COL_MA / ROW_PERIOD_US       # time-averaged mA of this row slot
-            avg_ma = tot / ROWS * 1.0 * ROWS / ROWS                         # all rows share the frame -> average current
-            avg_ma = tot / ROWS
+                    t_on = sum(on for bits, on in planes if (bits >> x) & 1)
+                    target[yy][x] = t_on / RS; duties.add(t_on)
+                peak = max((bin(bits).count('1') for bits, on in planes if on), default=0)
+                row_peak[yy] = peak * I_COL_MA
+                tot += sum(bin(bits).count('1') * on for bits, on in planes) * I_COL_MA / RS
+            avg_ma = tot / ROWS; levels = len(duties)
+            cur_row = max(range(32), key=lambda q: row_peak[q])
         # persistence (~40 ms) and drawing
         k = 1 - math.exp(-(1 / 30) / 0.04)
         screen.fill((8, 8, 8))
-        max_duty = (ROW_PERIOD_US - 12) * 64 / 255.0 / ROW_PERIOD_US
         for y in range(ROWS):
             for x in range(COLS):
                 lum[y][x] += (target[y][x] - lum[y][x]) * k
-                v = min(1.0, lum[y][x] / max_duty)                        # full brightness = the firmware's "bright 64" on-time
-                v = v ** 1.15
+                v = min(1.0, max(0.0, lum[y][x]) / full) ** (1 / 2.2)     # linear LED light, shown gamma-encoded (256 levels)
                 col = (int(30 + 225 * v), int(12 + 140 * v * v), int(4 + 20 * v)) if v > 0.02 else (28, 14, 6)
                 cx, cy = 20 + x * CELL + CELL // 2, 20 + y * CELL + CELL // 2
                 if v > 0.3:
@@ -130,8 +129,12 @@ def main():
         txt('ESP32-S3 firmware in QEMU', (150, 150, 150))
         txt('')
         txt('demo:        %s' % demo, (255, 200, 80))
-        txt('scan FPS:    %.0f Hz' % fps)
-        txt('  (target 400 Hz, QEMU-paced)', (130, 130, 130))
+        txt('refresh:     %.0f Hz (HW timing)' % fps)
+        txt('  QEMU-paced %.0f Hz' % fps_obs, (130, 130, 130))
+        txt('grey:        8-bit BCM, %d levels' % levels)
+        txt('gamma %.1f  bright %d' % (gam, bright), (150, 150, 150))
+        txt('scan CPU:    %.1f%% core1 (HW est.)' % hw_cpu_pct())
+        txt('  was 100%% (busy-wait, v12)', (130, 130, 130))
         txt('stream:      %.0f snapshots/s' % stream_hz)
         txt('current row: %2d  (A3..A0=%d%d%d%d %s)' % (cur_row, cur_row >> 3 & 1, cur_row >> 2 & 1, cur_row >> 1 & 1, cur_row & 1, 'DEC_A' if cur_row < 16 else 'DEC_B'))
         txt('row peak I:  %.0f mA' % row_peak[cur_row])
@@ -139,7 +142,6 @@ def main():
         txt('avg LED I:   %.1f mA' % avg_ma)
         txt('  est. %.1f mA/col (1.24V/1k82 x15)' % I_COL_MA, (130, 130, 130))
         txt('frame gen %d  seq %d' % (gen, seq), (150, 150, 150))
-        txt('row period %.1f us (jit %.1f)' % (rp[2], rp[3]), (150, 150, 150))
         # per-row bars
         for yy in range(ROWS):
             w = int(min(1.0, row_peak[yy] / (32 * I_COL_MA)) * (PANEL_W - 40))

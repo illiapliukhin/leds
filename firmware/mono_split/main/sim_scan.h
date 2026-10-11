@@ -1,27 +1,16 @@
 #pragma once
-/* Sim-only scan tap. QEMU's ESP32-S3 GPIO/SPI models do not expose pin levels, so the
- * low-level drivers report what they put on the pins: row address (row_select), the 32
- * column bits shifted into the MBI5124 chain, the LE latch, and the OE_N low time.
- * A low-priority task streams one snapshot of the last full scan per ~50 ms on the console
- * UART as "@F ..." lines for the host-side virtual board (sim/virtual_board.py).
- * In non-MONO_SIM builds all hooks compile to nothing. */
+/* Sim-only scan tap (MONO_SIM). The v13 scan engine builds the exact LCD_CAM DMA sample stream it
+ * would clock out on hardware; in QEMU (no LCD_CAM model) the sim backend hands each frame buffer
+ * here. A low-priority task decodes the most recent frame every 50 ms exactly like the panel would
+ * see it - bits clocked on SDI before each LE, OE_N low time per plane, row address and decoder
+ * enable during OE - and streams it as "@G ..." lines on UART0 for the host-side viewers. */
 #include <stdbool.h>
 #include <stdint.h>
 
 #ifdef MONO_SIM
-void sim_scan_note_row(uint8_t row);
-void sim_scan_note_shift(uint32_t bits);
-void sim_scan_note_latch(void);
-void sim_scan_note_oe(bool lit);
-void sim_scan_note_frame(uint32_t gen);
-void sim_scan_note_slot(uint32_t us);
+void sim_scan_note_buffer(const uint16_t *frame, uint32_t gen);
 void sim_scan_start(void);
 #else
-static inline void sim_scan_note_row(uint8_t row) { (void)row; }
-static inline void sim_scan_note_shift(uint32_t bits) { (void)bits; }
-static inline void sim_scan_note_latch(void) {}
-static inline void sim_scan_note_oe(bool lit) { (void)lit; }
-static inline void sim_scan_note_frame(uint32_t gen) { (void)gen; }
-static inline void sim_scan_note_slot(uint32_t us) { (void)us; }
+static inline void sim_scan_note_buffer(const uint16_t *frame, uint32_t gen) { (void)frame; (void)gen; }
 static inline void sim_scan_start(void) {}
 #endif

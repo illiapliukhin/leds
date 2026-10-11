@@ -5,6 +5,7 @@ Scripted bench session with automatic verification and one fault-injection run; 
 import argparse, json, math, os, re, socket, subprocess, threading, time, queue
 import pygame
 import netmodel
+from gstream import parse_g, full_scale_duty, hw_cpu_pct
 
 D = os.path.dirname(os.path.abspath(__file__))
 SIM = '/workspace/sim'
@@ -37,15 +38,15 @@ class Qemu:
             while b'\n' in buf:
                 l, buf = buf.split(b'\n', 1)
                 s = ANSI.sub('', l.decode(errors='replace')).replace('\r', '')
-                if '@F' in s:
-                    pre, f = s.split('@F', 1)
+                if '@G' in s:
+                    pre, f = s.split('@G', 1)
                     if pre.strip(): self._log(pre)
                     try:
-                        self.frames.put_nowait('@F' + f)
+                        self.frames.put_nowait('@G' + f)
                     except queue.Full:
                         try: self.frames.get_nowait()
                         except queue.Empty: pass
-                        self.frames.put_nowait('@F' + f)
+                        self.frames.put_nowait('@G' + f)
                 else:
                     self._log(s)
     def _log(self, s):
@@ -126,7 +127,7 @@ class Scene:
         self.ps = self.pw / 166.75
         self.lum = [0.0] * len(model.leds)
         self.rails = {}; self.stage = ''; self.results = []; self.banner = ''; self.banner_col = (255, 255, 255); self.report = None
-        self.fps = 0; self.cur = 0; self.stats = [(0, 0)] * 32; self.gen = 0; self.cable_label = ''; self.fault = None
+        self.fps = 0; self.fps_obs = 0; self.full = 0.78; self.levels = 0; self.cur = 0; self.stats = [(0, 0)] * 32; self.gen = 0; self.cable_label = ''; self.fault = None
     def bpt(self, x, y): return (self.bx + x * self.bs, self.by + y * self.bs)
     def ppt(self, x, y): return (self.px + x * self.ps, self.py + y * self.ps)
     def ribbon(self, p0, p1, c1, c2, width, color, label, label_at):
@@ -186,7 +187,7 @@ class Scene:
         # LEDs
         r = max(3, int(self.ps * 1.15))
         for i, l in enumerate(self.m.leds):
-            v = min(1.0, self.lum[i] / 0.235)
+            v = min(1.0, max(0.0, self.lum[i]) / self.full) ** (1 / 2.2)   # LED light is linear; show it gamma-encoded
             c = (int(40 + 215 * v), int(16 + 150 * v * v), int(6 + 20 * v)) if v > 0.03 else (40, 22, 10)
             x, y = self.ppt(l['x'], l['y'])
             if v > 0.3: pygame.draw.circle(s, (c[0] // 3, c[1] // 4, 0), (int(x), int(y)), r + 3)
@@ -201,7 +202,9 @@ class Scene:
             pygame.draw.rect(s, (200, 120, 30), (x0 + 128, y + 3, int(min(1, i_row / 0.33) * 40), 7))
         s.blit(self.fs.render('I = lit cols x 10.2 mA (est.)', True, (120, 120, 120)), (x0, self.py + 20 + 32 * 17.5 + 2))
         s.blit(self.fs.render('drop = I x R(row) ir_v3.json', True, (120, 120, 120)), (x0, self.py + 36 + 32 * 17.5 + 2))
-        s.blit(self.fs.render('scan %3.0f Hz  gen %d' % (self.fps, self.gen), True, (150, 150, 150)), (x0, self.py + 56 + 32 * 17.5))
+        s.blit(self.fs.render('scan %.0f Hz HW (QEMU %.0f)' % (self.fps, self.fps_obs), True, (150, 150, 150)), (x0, self.py + 56 + 32 * 17.5))
+        s.blit(self.fs.render('8-bit BCM, %d levels shown' % self.levels, True, (150, 150, 150)), (x0, self.py + 72 + 32 * 17.5))
+        s.blit(self.fs.render('scan CPU %.1f%% (HW est.)' % hw_cpu_pct(), True, (150, 150, 150)), (x0, self.py + 88 + 32 * 17.5))
         # rails
         y0 = self.by + self.bh + 14
         s.blit(self.fb.render('Power rails', True, (255, 200, 90)), (20, y0))
@@ -221,7 +224,7 @@ class Scene:
         cx, cy, cw, ch = 800, 690, 1080, 445
         pygame.draw.rect(s, (8, 8, 10), (cx, cy, cw, ch), border_radius=6)
         s.blit(self.fb.render('ESP32-S3 console (QEMU UART0)', True, (255, 200, 90)), (cx + 10, cy + 6))
-        lines = [l for l in q.console if not l.startswith('@F')][-24:]
+        lines = [l for l in q.console if not l.startswith('@G')][-24:]
         for k, l in enumerate(lines):
             c = (120, 255, 140) if l.startswith('mono>') else ((255, 120, 120) if l.startswith(('E (', 'W (')) else (200, 200, 200))
             s.blit(self.fs.render(l[:150], True, c), (cx + 10, cy + 34 + k * 17))
@@ -351,10 +354,13 @@ def main():
                 return
         try:
             while True:
-                fr = parse(q.frames.get_nowait())
+                fr = parse_g(q.frames.get_nowait())
                 if not fr: continue
-                act, exp, stats = model.light(fr['rows'], ROW_PERIOD)
-                sc.stats, sc.fps, sc.cur, sc.gen = stats, fr['fps'], fr['cur'], fr['gen']
+                act, exp, stats = model.light(fr['rows'], fr['row_samples'])
+                sc.stats, sc.fps, sc.gen = stats, fr['fps_nom'], fr['gen']
+                sc.fps_obs, sc.full = fr['fps_obs'], full_scale_duty(fr['row_samples'])
+                sc.cur = max(range(32), key=lambda r: stats[r][0])
+                sc.levels = len(set(round(a * fr['row_samples']) for a in act))
                 c = state['check']
                 if c: c.feed(model, act, exp)
         except queue.Empty:
