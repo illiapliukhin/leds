@@ -8,7 +8,16 @@ MASK = (22, 92, 48)            # KiCad default (no stackup colour set in the .ki
 COPPER_UNDER_MASK = (36, 122, 62)
 PAD = (205, 175, 90)           # ENIG / HASL finish (gold-ish)
 SILK = (235, 235, 230)
-_data, _tex, _scaled = {}, {}, {}
+from collections import OrderedDict
+_data, _tex, _scaled = {}, OrderedDict(), OrderedDict()
+_TEX_MB, _SCALED_MB = 48, 32                     # byte budgets (LRU): bounded RAM whatever the zoom history
+
+def _nbytes(sf): return sf.get_width() * sf.get_height() * 4
+
+def _put(cache, k, sf, budget_mb):
+    cache[k] = sf; cache.move_to_end(k)
+    while len(cache) > 1 and sum(_nbytes(v) for v in cache.values()) > budget_mb * 2**20: cache.popitem(last=False)
+    return sf
 
 def data(key):
     if key not in _data: _data[key] = json.load(gzip.open(host.data_path('pcb', key + '.json.gz'), 'rt', encoding='utf-8'))
@@ -32,7 +41,7 @@ def body_col(ref, val):
 
 def render(key, ppmm=8.0, side='F'):
     k = (key, ppmm, side)
-    if k in _tex: return _tex[k]
+    if k in _tex: _tex.move_to_end(k); return _tex[k]
     d = data(key); x0, y0, x1, y1 = bbox(d); W, H = int((x1 - x0) * ppmm) + 2, int((y1 - y0) * ppmm) + 2
     sf = pygame.Surface((W, H), pygame.SRCALPHA); sf.fill((0, 0, 0, 0))
     P = lambda x, y: ((x - x0) * ppmm, (y - y0) * ppmm)
@@ -84,19 +93,18 @@ def render(key, ppmm=8.0, side='F'):
             if f[5] != fside or not f[0] or f[0].startswith(('LED', 'D')) and len(d['fps']) > 500: continue
             t = fn.render(f[0], True, SILK); x, y = P(f[2], f[3])
             if t.get_width() < 60 * ppmm: sf.blit(t, (x - t.get_width() / 2, y - t.get_height() / 2 - ppmm * 1.2))
-    _tex[k] = sf; return sf
+    return _put(_tex, k, sf, _TEX_MB)
 
 def scaled(key, size, rot=0, mirror=False, side='F'):
     """board texture fitted to an on-screen size (w, h) after rotation; cached (LOD: 4/8/16 px/mm sources)"""
     k = (key, size, rot & 3, mirror, side)
-    if k in _scaled: return _scaled[k]
-    if len(_scaled) > 64: _scaled.clear()
+    if k in _scaled: _scaled.move_to_end(k); return _scaled[k]
     ppmm_need = max(size) / 160.0
-    src = render(key, next(q for q in (2.0, 4.0, 8.0, 14.0, 99) if q >= ppmm_need * 0.9) if ppmm_need < 14 else 14.0, side)
+    src = render(key, next(q for q in (2.0, 4.0, 8.0, 99) if q >= ppmm_need * 0.9) if ppmm_need < 8 else 8.0, side)
     if mirror: src = pygame.transform.flip(src, True, False)
     if rot & 3: src = pygame.transform.rotate(src, -90 * (rot & 3))
     out = pygame.transform.scale(src, (max(1, int(size[0])), max(1, int(size[1]))))
-    _scaled[k] = out; return out
+    return _put(_scaled, k, out, _SCALED_MB)
 
 _parts = {}
 def parts(key):

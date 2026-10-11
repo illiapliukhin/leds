@@ -90,10 +90,12 @@ def script(app, t, timing):
     t.sec = 'stack'; tab('system')
     for (c, r) in ((1, 1), (3, 2), (4, 4), (10, 10)):
         layout(c, r); f0 = timing['frame']; ts = W().now
+        timing['key'] = 'system_%dboards' % (c * r) if c * r > 6 else None   # big layouts: own timing bucket
         yield from settle_stack(1800 if c * r > 20 else 600)
         ok = stack_ok(label='%dx%d' % (c, r))
         t.L('INFO', '%dx%d: сходимость за %.2f с симуляции (%d кадров)' % (c, r, (W().now - ts) / 1000, timing['frame'] - f0))
         if c * r == 100: yield 240                                  # timing sample for the big layout
+        timing['key'] = None
     # ---------------------------------------------------------------- 2. cable unplug / replug, power off/on
     t.sec = 'cables'; layout(3, 2); yield from settle_stack(); stack_ok(label='3x2 исходно')
     w = W(); b0 = min(w.boards, key=lambda b: b.id)
@@ -238,9 +240,10 @@ def script(app, t, timing):
     d0 = getattr(w, 'link_drops', 0); t0 = w.now
     logs0 = {b.id: len(b.node.log) for b in w.boards}
     tabs = ['system', 'lab', 'cube']; k = 0
+    timing['key'] = 'soak_15fps'                                       # throttled frames: own timing bucket, not the tabs'
     while w.now - t0 < 600_000:
         tab(tabs[k % 3]); k += 1; yield 150
-    timing['throttle'] = None; sv.speed = 1.0
+    timing['throttle'] = None; sv.speed = 1.0; timing['key'] = None
     drops = getattr(w, 'link_drops', 0) - d0
     lost = [l for b in w.boards for l in list(b.node.log) if float(l.split()[0]) * 1000 > t0 and ('lost' in l or 'dropped' in l or 'silent' in l)]
     roles = sorted(b.node.state for b in w.boards)

@@ -423,7 +423,9 @@ class SystemView(Nav2D, Rulers):
 
     # ------------------------------------------------ drawing
     def dot_mask(s, k):
-        if k not in s.masks:
+        if k in s.masks: s.masks[k] = s.masks.pop(k)                     # LRU order
+        else:
+            while len(s.masks) >= 4: s.masks.pop(next(iter(s.masks)))         # each is a (32k)² surface: keep 4
             m = pygame.Surface((k, k)); m.fill((0, 0, 0))
             if k >= 4:
                 for rr in range(k):

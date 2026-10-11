@@ -47,7 +47,7 @@ def text(surf, s, pos, col=(220, 225, 235), sz=13, mono=False, center=False):
     k = (str(s), tuple(col), sz, mono)                                  # glyph rendering is the costly part: cache the surfaces
     img = _tcache.get(k)
     if img is None:
-        if len(_tcache) > 4000: _tcache.clear()
+        if len(_tcache) > 1500: _tcache.clear()
         img = _tcache[k] = font(sz, mono).render(k[0], True, col)
     r = img.get_rect(center=pos) if center else img.get_rect(topleft=pos)
     surf.blit(img, r); return r
