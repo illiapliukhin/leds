@@ -197,7 +197,7 @@ class CubeView:
         GB = {'J_ROW': (-24.0, -20.2), 'J_COL': (-24.0, 45.8), 'J_R1': (14.0, -64.5), 'J_R2': (14.0, -34.5), 'J_C1': (14.0, 1.5), 'J_C2': (14.0, 31.5)}
         pair_w = (BOARD_W + 12 + 60) * U; row_d = (150) * U
         lod = 1 if n <= 8 else 2 if n <= 16 else 4
-        boards = []
+        boards = []; pw_taps = []
         for k in range(n):
             col, row = k % 2, k // 2
             bx = (-0.5 if col == 0 else 0.5) * (pair_w + 0.25) - (60 + 12) * U / 2
@@ -212,10 +212,18 @@ class CubeView:
             B = lambda nm: (bx + BOARD_CONN[nm][0] * U, by + BOARD_CONN[nm][1] * U)
             G = lambda nm: (gx + GB[nm][0] * U, by + GB[nm][1] * U)
             if show.get('ffc', True):
-                for nm in ('J_ROW', 'J_COL'):
-                    a, b = B(nm), G(nm); SD.line(surf, (120, 150, 220), P3(a[0], a[1], zf), P3(b[0], b[1], zf), 3)
+                if show.get('bundle', True):                                   # one 2×40P ribbon, fanning out at both ends
+                    am = ((B('J_ROW')[0] + B('J_COL')[0]) / 2 + 6 * U, (B('J_ROW')[1] + B('J_COL')[1]) / 2)
+                    gm = ((G('J_ROW')[0] + G('J_COL')[0]) / 2 - 6 * U, (G('J_ROW')[1] + G('J_COL')[1]) / 2)
+                    for nm in ('J_ROW', 'J_COL'):
+                        SD.line(surf, (120, 150, 220), P3(*B(nm), zf), P3(*am, zf), 2); SD.line(surf, (120, 150, 220), P3(*gm, zf), P3(*G(nm), zf), 2)
+                    SD.line(surf, (120, 150, 220), P3(*am, zf), P3(*gm, zf), 6)
+                else:
+                    for nm in ('J_ROW', 'J_COL'):
+                        a, b = B(nm), G(nm); SD.line(surf, (120, 150, 220), P3(a[0], a[1], zf), P3(b[0], b[1], zf), 3)
             if show.get('power', True):
-                a = B('J_USB'); SD.line(surf, (210, 210, 220), P3(a[0], a[1], zf), P3(-2.6, a[1], zf), 1)
+                a = B('J_USB'); SD.line(surf, (210, 210, 220), P3(a[0], a[1], zf), P3(-2.6 if not show.get('bundle', True) else bx - (BOARD_W / 2 + 15) * U, a[1], zf), 1)
+                pw_taps.append((bx - (BOARD_W / 2 + 15) * U, a[1]))
             if show.get('led', True) and k % lod == 0:
                 zl = (k - (n - 1) / 2) / 16 * s.zpitch()
                 for hdr, kind, base in (('J_R1', 'r', 0), ('J_R2', 'r', 16), ('J_C1', 'c', 0), ('J_C2', 'c', 16)):
@@ -226,12 +234,20 @@ class CubeView:
                         tgt = (-1.06, (idx - 15.5) / 16, zl) if kind == 'r' else ((idx - 15.5) / 16, 1.06, zl)
                         mid = (tgt[0] if kind == 'c' else -1.06, 1.15, (zf + zl) / 2)
                         colr = (200, 120, 90) if kind == 'r' else (110, 170, 220)
-                        SD.lines(surf, colr, False, [P3(px_, py_, zf), P3(*mid), P3(*tgt)], 1)
+                        if show.get('bundle', True):           # 16 strands leave the header as one loom, split near the cube edge
+                            hub = ((-1.06 - 0.12) if kind == 'r' else (base / 16 - 0.5 + 0.25), 1.22, (zf + zl) / 2)
+                            if i == 0: SD.lines(surf, colr, False, [P3(hx, hy, zf), P3(*hub)], 4)
+                            SD.lines(surf, colr, False, [P3(*hub), P3(*mid), P3(*tgt)], 1)
+                        else: SD.lines(surf, colr, False, [P3(px_, py_, zf), P3(*mid), P3(*tgt)], 1)
         if show.get('stack', True):
             for k in range(n - 1):
                 (ax, ay, _), (cx_, cy_, _) = boards[k], boards[k + 1]
                 a = (ax + SIDE_OFF[2][0] * U, ay + SIDE_OFF[2][1] * U); b = (cx_ + SIDE_OFF[0][0] * U, cy_ + SIDE_OFF[0][1] * U)
                 SD.line(surf, (90, 220, 120), P3(a[0], a[1], zf), P3(b[0], b[1], zf), 2)
+        if show.get('power', True) and show.get('bundle', True) and pw_taps:   # power harness: one trunk per board column -> PSU
+            for xx in sorted({round(t[0], 3) for t in pw_taps}):
+                ys = [t[1] for t in pw_taps if abs(t[0] - xx) < 1e-3]
+                SD.lines(surf, (210, 210, 220), False, [P3(xx, max(ys), zf), P3(xx, 1.6, zf), P3(-2.6, 1.6, zf)], 3)
         if show.get('power', True):
             q = P3(-2.6, 1.6, zf)
             if q: pygame.draw.rect(surf, (90, 90, 110), (q[0] - 18, q[1] - 10, 36, 20), 1);
@@ -312,11 +328,11 @@ class CubeView:
         sv = s.app.views['system'].w
         sv.brightness = int(ui.slider(surf, (x, y, bw, 8), T('brightness'), sv.brightness, 0, 255))
         sv.gamma = round(ui.slider(surf, (x + bw + 4, y, bw, 8), T('gamma'), sv.gamma, 1.0, 3.0, '%.2f'), 2); y += 14
-        show = s.app.views['system'].show; tb = (W - 16) // 4; hw = getattr(s, 'show_hw', False)
+        show = s.app.views['system'].show; tb = (W - 20) // 5; hw = getattr(s, 'show_hw', False)
         if ui.button(surf, (x, y, W - 16, 20), 'Электроника, кабели и размеры: ' + ('вкл' if hw else 'выкл'), on=hw, sz=10): s.show_hw = not hw
         y += 24
         if hw:
-            for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'), ('led', 'Гирлянды'))):
+            for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'), ('led', 'Гирлянды'), ('bundle', 'Жгуты'))):
                 if ui.button(surf, (x + i * (tb + 4), y, tb, 20), lab, on=show.get(k, True), sz=9): show[k] = not show.get(k, True)
             y += 24
         lim = s.limits()

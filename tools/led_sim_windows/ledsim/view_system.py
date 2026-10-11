@@ -27,7 +27,7 @@ class SystemView(Nav2D, Rulers):
         s.zoom = 1.2; s.pan = [260, 200]; s.sel = None; s.drag = None; s.wire = None; s.kind = 'full'
         s.snap = 10.0; s.demo_i = 0; s.fps = 60; s.speed = 1.0; s.acc = 0.0; s.msg = ''; s.msg_t = 0
         s.masks = {}; s.ropes = Ropes(); s.rope_idx = {}; s.scroll = 0; s.show_topo = True; s.load_ms = 0.0
-        s.show = {'ffc': True, 'stack': True, 'power': True, 'led': True}; s.xray = False; s.checks = []; s.check_t = 0
+        s.show = {'ffc': True, 'stack': True, 'power': True, 'led': True, 'bundle': True}; s.bundle_sel = None; s.xray = False; s.checks = []; s.check_t = 0
 
     # ------------------------------------------------ coords
     def focus_at(s, wx, wy):
@@ -98,6 +98,10 @@ class SystemView(Nav2D, Rulers):
             for p in reversed(s.w.panels):
                 hx, hy = s.ffc_handle(p)
                 if math.hypot(wx - hx, wy - hy) < max(6, 9 / s.zoom): s.wire = ('ffc', p); s.sel = p; return
+            for p in s.w.panels:
+                i = s.rope_idx.get(('F', id(p)))
+                if i is not None and s.show['ffc'] and any(math.hypot(wx - x, wy - y) < max(12, 14 / s.zoom) for x, y in s.ropes.pts(i)):
+                    s.bundle_sel = p; s.sel = p; return
             c = s.cable_at(wx, wy)
             if c:
                 c.plugged = not c.plugged; s.w.dirty(); s.sel = c
@@ -192,11 +196,31 @@ class SystemView(Nav2D, Rulers):
         for c in s.w.cables:
             sp[('c', id(c))] = (c.a.port_pos(c.as_), c.b.port_pos(c.bs) if c.plugged else None, c.length)
         for p in s.w.panels:
+            if p.board is not None and p.board.mount is not p and p.board in s.w.boards and s.ffc_merged(p):
+                a = s.mid(p.board.conn_pos('J_ROW'), p.board.conn_pos('J_COL')); b = s.mid(p.conn_pos('J_ROW'), p.conn_pos('J_COL'))
+                sp[('F', id(p))] = (a, b, p.ffc_len); continue
             for n in ('J_ROW', 'J_COL'):
                 if p.board is not None and p.board.mount is p: continue                # mounted: FFC folded flat in the 8 mm gap (drawn straight)
                 if p.board is not None and p.board in s.w.boards: sp[('f', id(p), n)] = (p.board.conn_pos(n), p.conn_pos(n), p.ffc_len)
                 else: sp[('f', id(p), n)] = (p.conn_pos(n), None, p.ffc_len)
         return sp
+    MERGE_MM = 60.0          # both connector pairs closer than this -> the two 40P FFCs share one route (drawn as one ribbon)
+    @staticmethod
+    def mid(a, b): return ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+    def ffc_merged(s, p):
+        if not s.show.get('bundle', True) or p.board is None: return False
+        b = p.board; d = lambda f: math.hypot(f('J_ROW')[0] - f('J_COL')[0], f('J_ROW')[1] - f('J_COL')[1])
+        return d(b.conn_pos) <= s.MERGE_MM and d(p.conn_pos) <= s.MERGE_MM
+    def bundle_nets(s, p):
+        """member conductors of a merged FFC: board J_ROW1/J_COL1 pin -> net (from the board .kicad_pcb export)"""
+        out = []
+        try:
+            pc = s.app.views['boards'].pcb()
+            for ref in ('J_ROW1', 'J_COL1'):
+                pads = sorted(((int(q[1]) if str(q[1]).isdigit() else 0, q[9]) for q in pc.pads if pc.fps[q[0]][0] == ref), key=lambda t: t[0])
+                out.append((ref, pads))
+        except Exception: pass
+        return out
     def physics(s, dt):
         s.move_smooth(dt)
         s.ropes.sync(s.rope_specs()); s.rope_idx = {k: i for i, k in enumerate(s.ropes.keys)}
@@ -209,6 +233,7 @@ class SystemView(Nav2D, Rulers):
                 c.plugged = False; s.w.dirty(); s.note('Кабель %08X.%s перерастянут (%.0f > %d мм) — отключён' % (c.a.id, SIDES[c.as_], ten[i] * c.length, c.length))
         for p in s.w.panels:
             i = s.rope_idx.get(('f', id(p), 'J_ROW')); j = s.rope_idx.get(('f', id(p), 'J_COL'))
+            if i is None: i = j = s.rope_idx.get(('F', id(p)))
             if p.board is not None and i is not None and max(ten[i], ten[j]) > 1.12:
                 s.note('FFC перерастянут (%.0f > %d мм) — панель отключена' % (max(ten[i], ten[j]) * p.ffc_len, p.ffc_len)); p.board = None
     def tcol(s, t, base):
@@ -218,9 +243,30 @@ class SystemView(Nav2D, Rulers):
     def draw_ropes(s, surf):
         ten = s.ropes.tension()
         ov = None
+        # stacking cables between the same two boards -> one harness (trunk = mean path), fanning out near the ports
+        groups = {}
+        for c in s.w.cables:
+            if ('c', id(c)) in s.rope_idx and c.plugged and s.show.get('bundle', True): groups.setdefault(frozenset((c.a.id, c.b.id)), []).append(c)
+        bundled = set()
+        for g in groups.values():
+            if len(g) < 2 or not s.show['stack']: continue
+            Ps = [s.ropes.pts(s.rope_idx[('c', id(c))]) for c in g]; n = min(len(P) for P in Ps)
+            if any(c.a.id != g[0].a.id for c in g): Ps = [P if c.a.id == g[0].a.id else P[::-1] for P, c in zip(Ps, g)]
+            tr = [(sum(P[j][0] for P in Ps) / len(Ps), sum(P[j][1] for P in Ps) / len(Ps)) for j in range(n)]
+            j0, j1 = max(1, n // 6), n - 1 - max(1, n // 6)
+            trunk = [s.w2s(*q) for q in tr[j0:j1 + 1]]
+            w = max(3, int((1.6 + 0.9 * len(g)) * s.zoom))
+            pygame.draw.lines(surf, (20, 20, 20), False, trunk, w + 2); pygame.draw.lines(surf, (70, 190, 110), False, trunk, w)
+            for P, c in zip(Ps, g):
+                bundled.add(('c', id(c))); col = (255, 80, 80) if c.type == 'A' else (90, 220, 120)
+                pygame.draw.lines(surf, col, False, [s.w2s(*q) for q in P[:j0 + 1]] , max(2, int(1.4 * s.zoom)))
+                pygame.draw.lines(surf, col, False, [s.w2s(*q) for q in P[j1:]], max(2, int(1.4 * s.zoom)))
+            m = trunk[len(trunk) // 2]
+            if s.zoom > 0.5: text(surf, 'жгут: %d кабеля' % len(g), (m[0] + 6, m[1] - 6), (170, 220, 180), 10)
         for k, i in s.rope_idx.items():
             P = s.ropes.pts(i); pts = [s.w2s(x, y) for x, y in P]
-            if (k[0] == 'c' and not s.show['stack']) or (k[0] == 'f' and not s.show['ffc']): continue
+            if (k[0] == 'c' and not s.show['stack']) or (k[0] in 'fF' and not s.show['ffc']): continue
+            if k[0] == 'c' and k in bundled: continue
             if k[0] == 'c':
                 c = next((c for c in s.w.cables if id(c) == k[1]), None)
                 if c is None: continue
@@ -236,6 +282,13 @@ class SystemView(Nav2D, Rulers):
                 if ov is None: ov = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
                 twist = math.pi if p.ffc == 'A' else 0.0
                 half = 10.5 * s.zoom                                   # 40P x 0.5 mm ribbon ~ 21 mm wide
+                if k[0] == 'F':                                        # two 40P ribbons laid side by side = one 42 mm band
+                    half = 21.5 * s.zoom
+                    for nm in ('J_ROW', 'J_COL'):                      # fan-outs: band end -> each real connector
+                        pygame.draw.line(ov, (120, 150, 200, 170), pts[0], s.w2s(*p.board.conn_pos(nm)), max(2, int(8 * s.zoom)))
+                        pygame.draw.line(ov, (120, 150, 200, 170), pts[-1], s.w2s(*p.conn_pos(nm)), max(2, int(8 * s.zoom)))
+                    if p is s.sel or getattr(s, 'bundle_sel', None) is p:
+                        pygame.draw.lines(surf, (255, 230, 120), False, pts, max(2, int(2 * s.zoom)))
                 n = len(P); col = s.tcol(ten[i], (120, 150, 200)) if p.board else (110, 110, 120)
                 L, R = [], []
                 for j in range(n):
@@ -249,7 +302,8 @@ class SystemView(Nav2D, Rulers):
                     shade = 0.65 + 0.35 * abs(math.cos(twist * (j + 0.5) / (n - 1)))
                     pygame.draw.polygon(ov, tuple(int(c * shade) for c in col) + (150,), q)
                 pygame.draw.lines(ov, (230, 70, 70, 220), False, L, max(1, int(s.zoom * 0.8)))    # pin-1 stripe
-                if s.zoom > 1.5 and k[2] == 'J_ROW': text(surf, 'FFC %s %d мм' % (p.ffc, p.ffc_len), (pts[n // 2][0] + 8, pts[n // 2][1]), (170, 190, 230), 10)
+                if k[0] == 'F' and s.zoom > 0.6: text(surf, 'FFC J_ROW+J_COL (2×40P) %s %d мм' % (p.ffc, p.ffc_len), (pts[n // 2][0] + 8, pts[n // 2][1]), (170, 190, 230), 10)
+                if k[0] == 'f' and s.zoom > 1.5 and k[2] == 'J_ROW': text(surf, 'FFC %s %d мм' % (p.ffc, p.ffc_len), (pts[n // 2][0] + 8, pts[n // 2][1]), (170, 190, 230), 10)
         if s.show['ffc']:
             for p in s.w.panels:
                 b = p.board
@@ -469,11 +523,23 @@ class SystemView(Nav2D, Rulers):
         tb = (W - 16) // 5
         for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'))):
             if ui.button(surf, (x + i * (tb + 4), y, tb, 22), lab, on=s.show[k], sz=10): s.show[k] = not s.show[k]
-        allon = all(s.show.values())
+        cats = ('ffc', 'stack', 'power', 'led'); allon = all(s.show[k] for k in cats)
         if ui.button(surf, (x + 3 * (tb + 4), y, tb, 22), 'Все', on=allon, sz=10):
-            for k in s.show: s.show[k] = not allon
+            for k in cats: s.show[k] = not allon
         if ui.button(surf, (x + 4 * (tb + 4), y, tb, 22), 'Рентген', on=s.xray, sz=10): s.xray = not s.xray
         y += 26
+        if ui.button(surf, (x, y, W, 22), 'Объединять параллельные кабели в жгуты/ленты: ' + ('да' if s.show['bundle'] else 'нет'), on=s.show['bundle'], sz=10):
+            s.show['bundle'] = not s.show['bundle']; s.bundle_sel = None
+        y += 26
+        bp = s.bundle_sel if (s.bundle_sel in s.w.panels and ('F', id(s.bundle_sel)) in s.rope_idx) else None
+        if bp is not None:
+            text(surf, 'Лента FFC J_ROW+J_COL → панель (%s): проводники' % bp.kind, (x, y), (255, 230, 120), 11); y += 14
+            for ref, pads in s.bundle_nets(bp):
+                nets = [n for _, n in pads if n]; uniq = []
+                [uniq.append(n) for n in nets if n not in uniq]
+                line = '%s (%d конт.): %s' % (ref, len(pads), ', '.join(uniq))
+                for k0 in range(0, min(len(line), 3 * 70), 70): text(surf, line[k0:k0 + 70], (x, y), (200, 200, 170), 9); y += 11
+            y += 4
         if ui.button(surf, (x, y, W, 22), 'Плата к панели: ' + ('обратной стороной (зеркально)' if s.w.mirror_mount else 'компонентами (F.Cu)'), on=s.w.mirror_mount, sz=10):
             s.w.mirror_mount = not s.w.mirror_mount; n = max(1, len(s.w.boards)); c = int(round(n ** 0.5))
             cols = sorted({round(b.x) for b in s.w.boards}); rows = sorted({round(b.y) for b in s.w.boards})
