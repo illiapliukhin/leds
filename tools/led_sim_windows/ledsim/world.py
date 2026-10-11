@@ -276,7 +276,7 @@ class World:
             if k in prev and prev[k][1] != v and ((k[0] == 'role' and prev[k][1] in (4, 5) and v not in (4, 5)) or (k[0] != 'role' and not v)):
                 if k[0] == 'role':
                     b = next(b for b in s.boards if b.id == k[1])
-                    why = cause or ('протокол: ' + '; '.join(list(b.node.log)[-2:]))
+                    why = cause or ('плата выключена/сброшена (питание, пересборка схемы или Лаборатория)' if v == 0 else 'протокол: ' + '; '.join(list(b.node.log)[-2:]))
                 elif k[0] == 'cab':
                     c = next(c for c in s.cables if id(c) == k[1])
                     why = cause or ('кабель отключён' if not c.plugged else 'плата %08X обесточена/сброшена' % (c.a.id if not c.a.powered else c.b.id))
