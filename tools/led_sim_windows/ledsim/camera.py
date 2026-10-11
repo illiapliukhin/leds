@@ -76,8 +76,8 @@ class OrbitCam:
     def __init__(s): s.reset()
     def reset(s):
         s.yaw, s.pitch, s.dist = 0.6, 0.45, 2.6; s.target = [0.0, 0.0, 0.0]; s.wy = s.wp = 0.0
-        s.goal = None; s.drag = None; s.dist_t = s.dist; s._last_click = 0
-    def preset(s, name): s.goal = s.PRESETS[name] + (2.6,); s.target = [0.0, 0.0, 0.0]
+        s.goal = None; s.drag = None; s.dist_t = s.dist; s._last_click = 0; s.tele = False
+    def preset(s, name): s.goal = s.PRESETS[name] + (2.6,); s.target = [0.0, 0.0, 0.0]; s.tele = False
     def basis(s):
         cy, sy, cp, sp = math.cos(s.yaw), math.sin(s.yaw), math.cos(s.pitch), math.sin(s.pitch)
         right = (cy, 0.0, -sy); up = (-sy * sp, cp, -cy * sp)
