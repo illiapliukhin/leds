@@ -61,18 +61,24 @@ def run():
   check('TPS63802 η @0.33 A (datasheet curve ~93 %)', pout / pin * 100, 93.0, 3, '%')
   check('KCL residual of the Newton solve', info['residual'] + 1e-9, 1e-9, 1e9, 'A', 'iters %d' % info['iters'])
   # battery short without PCM: I = OCV/(Rint + Rpath + Rshort)
-  bnet = pcbnet.board_net('v12', 'BAT_RAW', host.data_path('pcb', 'board_v12.json.gz'))
-  Rcu = bnet.solve('J_BAT1', 'U_CHG1')[0]; rpath = Rcu + 0.02
+  v13 = host.data_path('pcb', 'board_v13.json.gz'); Rcu = 0.0
+  for net_, a_, b_ in (('BAT_PACK', 'J_BAT1', 'F_BAT1'), ('BAT_FUSE', 'F_BAT1', 'Q_BAT1'), ('BAT_RAW', 'Q_BAT1', 'U_CHG1')):
+      bnet = pcbnet.board_net('v13', net_, v13); Rcu += bnet.solve(a_, b_)[0]
+  rpath = Rcu + 0.02 + 0.031 + 0.044                                              # contacts + F_BAT1 + Q_BAT1 (v13)
   p3 = dict(base, src='battery', ocv=3.9, rint=0.08, r_path=rpath, f_bat_short=True, batfet_on=False)
   V, info = t.solve(p3)
   check('Battery short current (Thevenin hand calc)', info['i_cell'], 3.9 / (0.08 + rpath + 0.005), 1.0, 'A')
   # PCB copper: BAT_RAW resistance vs hand calc of the narrowest 0.3 mm path segment set (rho L / w t)
-  segs = bnet.seg; L03 = sum(s_[7] for s_ in segs if s_[3] and abs(s_[3] - 0.3e-3) < 1e-6)
-  rows.append('%-46s sim %10.4g mΩ  (nodal solve over %d segments + %d via barrels)  INFO' % ('BAT_RAW J_BAT1→U_CHG1 copper R', Rcu * 1e3, len(segs), len(bnet.vias)))
+  segs = bnet.seg
+  rows.append('%-46s sim %10.4g mΩ  (v13 BAT_PACK+BAT_FUSE+BAT_RAW nodal solve; + F_BAT1 31 mΩ + Q_BAT1 44 mΩ)  INFO' % ('Battery path J_BAT1→U_CHG1 copper R', Rcu * 1e3))
+  # F_BAT1 must open before any battery-path copper melts at the short-circuit current
+  i_sc = 3.9 / (0.08 + rpath + 0.005); t_f = 0.2326 / i_sc ** 2
+  t_cu = min(pcbnet.onderdonk_time(i_sc, s_[3] * s_[4]) for s_ in segs if s_[3])
+  check('F_BAT1 opens before copper (t_fuse < t_melt)', t_f / t_cu, 0.0, 1e9, '', 't_fuse %.2f ms, t_melt %.1f ms at %.1f A' % (t_f * 1e3, t_cu * 1e3, i_sc)) if t_f < t_cu else rows.append('F_BAT1 slower than copper  FAIL')
   # Onderdonk scaling check t ∝ 1/I² and absolute value vs formula
   a = 0.3e-3 * 35e-6; t1 = pcbnet.onderdonk_time(10, a); t2 = pcbnet.onderdonk_time(20, a)
   check('Onderdonk t(I)/t(2I) = 4', t1 / t2, 4.0, 0.1, '')
-  rows.append('%-46s %8.2f ms at 10 A, %8.2f ms at 30 A (0.3 mm × 35 µm)  INFO' % ('Onderdonk fusing time BAT_RAW trace', t1 * 1e3, pcbnet.onderdonk_time(30, a) * 1e3))
+  rows.append('%-46s %8.2f ms at 10 A, %8.2f ms at 30 A (0.3 mm × 35 µm)  INFO' % ('Onderdonk fusing time 0.3 mm trace', t1 * 1e3, pcbnet.onderdonk_time(30, a) * 1e3))
   # thermal: FD board vs TPS63802 θJA (JEDEC 81 °C/W) — our 4-layer board with planes should be lower
   th = thermal.board_thermal(host.data_path('pcb', 'board_v12.json.gz'))
   theta = th.steady_theta(-40.0, -1.8, 1.0, 23.5, 1500)

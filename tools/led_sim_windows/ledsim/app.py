@@ -80,6 +80,7 @@ class App:
             s.draw_status(sc)
             pygame.display.flip()
             frame += 1
+            if getattr(s, 'hook', None) and s.hook(s, frame, dt, time.perf_counter() - now) == 'quit': return
             for (fr, tab, path, act) in list(s.shots):
                 if frame == fr:
                     if act: act(s)
@@ -87,11 +88,14 @@ class App:
                     if path: pygame.image.save(sc, path); print('shot', path, flush=True)
             if s.shots and frame > max(f for f, *_ in s.shots): return
             # idle when minimised / in the background: no need to burn a full core
-            clock.tick(60 if pygame.display.get_active() and pygame.key.get_focused() else 12)
+            clock.tick(60 if getattr(s, 'hook', None) or (pygame.display.get_active() and pygame.key.get_focused()) else 12)
 
 def main():
     a = sys.argv[1:]
     lang = 'en' if '--en' in a else 'ru'
+    if '--autotest' in a:
+        i = a.index('--autotest'); out = a[i + 1] if i + 1 < len(a) and not a[i + 1].startswith('--') else None
+        from . import autotest; sys.exit(autotest.run(out, headless='--headless' in a))
     if '--shots' in a:
         from . import selftest; selftest.run(a[a.index('--shots') + 1]); return
     import os, traceback, logging

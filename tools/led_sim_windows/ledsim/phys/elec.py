@@ -27,6 +27,11 @@ DS = {
  'USBLC6': dict(vbr=6.0, rdyn=0.6, theta_ja=250.0, tj_fail=200.0, S='ST USBLC6-2SC6: VBR ≥ 6 В (VBUS-GND); Rdyn 0.6 Ом, RθJA 250 °C/W, отказ при TJ>200 °C — допущение'),
  'ESP32S3': dict(vdd_abs=3.6, bod=2.7, modes={'deep_sleep': 8e-6, 'idle': 0.025, 'active': 0.050, 'wifi_rx': 0.095, 'wifi_tx': 0.250, 'wifi_tx_peak': 0.355},
                  S='Espressif ESP32-S3 datasheet (типовые токи режимов; TX средний 250 мА — SIM_REPORT R1); BOD 2.7 В — допущение (уровень в sdkconfig)'),
+ 'TPS259531': dict(vin_abs=20.0, vovc=5.7, ron=0.034, k_ilim=2156.0, r_ilim=2700.0, uvlo=1.2 * (100 + 39) / 39, theta_ja=60.0, tsd=150.0,
+                   S='TI TPS2595xx Rev.C: IN abs max 20 В, OVC-клампа 5.7 В тип. (5.5–5.9), RON 34 мОм, ILIM = 2156/R_ILM (R_ILM1 2.7 кОм → 0.80 А), EN-UVLO 100k/39k → 4.28 В, OTP авто-повтор; RθJA 60 °C/W — допущение'),
+ 'SMF12A': dict(vbr=13.3, vc=19.9, ipp=10.1, ppk=200.0, p_cont=0.5, S='SMF12A: VBR 13.3 В мин, VC 19.9 В при IPP 10.1 А (10/1000 мкс), PPK 200 Вт; длительно ~0.5 Вт (допущение). Rdyn = (VC−VBR)/IPP'),
+ 'F466_2A': dict(i_n=2.0, r=0.031, i2t=0.2326, S='Littelfuse 0466002.NRHF: 2 А, 63 В, R_хол 0.031 Ом, I²t плавл. 0.2326 А²с; 200 % ≤ 5 с, 300 % ≤ 0.2 с'),
+ 'AO3401A': dict(rds=0.044, vds_abs=-30.0, S='AOS AO3401A: RDS(on) 44 мОм тип. при VGS −4.5 В; VDS −30 В. Реверс батареи: затвор/исток обратны → FET закрыт, ток не течёт'),
  'PicoBlade': dict(i_contact=1.0, r_contact=0.010, S='Molex 53398 PicoBlade: 1 А/контакт (SIM_REPORT R5); 10 мОм контакт — допущение'),
 }
 
@@ -63,9 +68,15 @@ class PowerTree:
         Vb, Vs, Va, Vl, Vo = v
         I = np.zeros(5); info = {}
         # USB adapter: Thevenin (V, R cable) with constant-current limit
-        if p['usb_on'] and not p['f_esd_short']:
-            i_usb = smooth_clip((p['usb_v'] - Vb) / p['usb_r'], 0.0, p['usb_ilim'], 400)
-        elif p['usb_on']: i_usb = 0.0
+        # v13: USB-C VBUS_CONN (SMF12A TVS) -> U_OVP1 TPS259531 eFuse (OVC clamp 5.7 V, ILIM 0.8 A, UVLO 4.28 V) -> VBUS
+        ef = p.get('efuse', 'ok'); vc = p.get('vconn', p['usb_v'])
+        if p['usb_on'] and not p['f_esd_short'] and ef != 'open' and not p.get('efuse_otp') and vc > 0.5:
+            if ef == 'short': v_src, r_src, ilim = vc, p['usb_r'], p['usb_ilim']
+            elif vc >= DS['TPS259531']['uvlo']:
+                v_src = min(vc, DS['TPS259531']['vovc']); r_src = p['usb_r'] + DS['TPS259531']['ron']
+                ilim = min(p['usb_ilim'], DS['TPS259531']['k_ilim'] / DS['TPS259531']['r_ilim'])
+            else: v_src, r_src, ilim = 0.0, 1.0, 0.0
+            i_usb = smooth_clip((v_src - Vb) / r_src, 0.0, ilim, 400) if ilim > 0 else 0.0
         else: i_usb = 0.0
         I[0] += i_usb; info['i_usb'] = i_usb
         # USBLC6 VBUS clamp (or failed short)
@@ -87,10 +98,12 @@ class PowerTree:
         else: i_bf = 0.0
         I[2] -= i_bf; I[1] += i_bf; info['i_batfet'] = i_bf
         # battery / bench supply into BAT node through J_BAT contacts + BAT_RAW copper (R_path from PCB)
-        if p['src'] == 'battery' and p['bat_conn'] and not p['pcm_open']:
-            e = -p['ocv'] if p['reverse'] else p['ocv']
-            i_cell = (e - Va) / (p['rint'] + p['r_path'])
-        elif p['src'] == 'bench' and p['bat_conn']:
+        if p['src'] == 'battery' and p['bat_conn'] and not p['pcm_open'] and not p.get('fuse_open'):
+            if p['reverse'] and p.get('q_bat', 'ok') == 'ok': i_cell = 0.0                  # v13: AO3401A blocks a reversed cell
+            else:
+                e = -p['ocv'] if p['reverse'] else p['ocv']
+                i_cell = (e - Va) / (p['rint'] + p['r_path'])
+        elif p['src'] == 'bench' and p['bat_conn'] and not p.get('fuse_open'):
             i_cell = smooth_clip((p['bench_v'] - Va) / (0.02 + p['r_path']), -p['bench_ilim'], p['bench_ilim'], 300)
         else: i_cell = 0.0
         I[2] += i_cell; info['i_cell'] = i_cell
@@ -130,16 +143,27 @@ class PowerTree:
         # tiny leak to ground keeps the matrix regular
         I -= v * 1e-4                                                      # 10 kΩ bleed per node (keeps floating nodes defined)
         return I, info
+    def envelope(s, p):
+        """no node of this passive+regulator network can exceed the highest source (adapter/TVS, cell, bench, LED boost
+        set-point) or go below the most negative one — used to bound every Newton iterate"""
+        hi = max(p.get('vconn', p['usb_v']) if p['usb_on'] else 0.0, abs(p['ocv']), p['bench_v'], 4.3) + 0.5
+        lo = -abs(p['ocv']) - 0.5 if p.get('reverse') else -0.7
+        return lo, hi
     def solve(s, p, iters=40):
         """damped Newton with backtracking line search on ||KCL residual||; restarts from a cold
-        initial guess if the warm start stalls in a non-physical local minimum."""
-        r = s._solve(p, iters, s.v.copy())
+        initial guess if the warm start stalls in a non-physical local minimum. A non-converged result is
+        REJECTED (previous operating point kept, info['nonconv']=True) instead of being fed to the failure checks."""
+        s._env = s.envelope(p); prev = s.v.copy()
+        r = s._solve(p, iters, np.clip(s.v.copy(), *s._env))
         if r[1]['residual'] > 2e-4:
             ov = p.get('ocv', 3.8); uv = p.get('usb_v', 5.0) if p.get('usb_on') else 0.0
             for guess in ([uv, min(4.5, max(uv - 0.3, ov)), ov, 4.24, 3.3], [5.0, 4.5, 3.8, 4.2, 3.3], [0.0, 3.6, 3.7, 4.2, 3.3], [0.0, 0.5, 0.5, 0.5, 0.5]):
                 r2 = s._solve(p, iters, np.array(guess))
                 if r2[1]['residual'] < r[1]['residual']: r = r2
                 if r[1]['residual'] < 2e-4: break
+        if r[1]['residual'] > 5e-3:                                   # still not a solution: keep the last good point
+            s.v = prev; F, info = s.branch(prev, p); info['residual'] = float(np.max(np.abs(F))); info['nonconv'] = True
+            s.info = info; return dict(zip(s.NODES, prev.tolist())), info
         return r
     def _solve(s, p, iters, v):
         F, _ = s.branch(v, p); nf = np.abs(F).max()
@@ -154,7 +178,7 @@ class PowerTree:
             if m > 1.0: step *= 1.0 / m
             a = 1.0
             while a > 1e-4:
-                vn = v + a * step; Fn, _ = s.branch(vn, p); nn = np.abs(Fn).max()
+                vn = np.clip(v + a * step, *getattr(s, '_env', (-50, 50))); Fn, _ = s.branch(vn, p); nn = np.abs(Fn).max()
                 if nn <= nf * (1 + 1e-9) or a <= 1.5e-4: break
                 a *= 0.5
             v, F, nf = vn, Fn, min(nn, nf) if nn <= nf else nn

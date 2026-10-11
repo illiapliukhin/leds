@@ -47,7 +47,7 @@ class TestView:
         if len(ids) > maxr: text(surf, 'строки %d–%d из %d (колесо — прокрутка)' % (s.mscroll + 1, min(len(ids), s.mscroll + maxr), len(ids)), (x0, y), (140, 146, 160), 10)
         y = view.y + int(view.h * 0.45) + 6
         pygame.draw.line(surf, (50, 55, 66), (view.x, y - 4), (view.right, y - 4))
-        lines = [e for e in r.log if LEVELS.index(e['level']) >= s.lvl if e['level'] in LEVELS] + [e for e in r.log if e['level'] == 'SKIP' and s.lvl <= 3]
+        lines = [e for e in r.log if e['level'] in LEVELS and LEVELS.index(e['level']) >= s.lvl] + [e for e in r.log if e['level'] == 'SKIP' and s.lvl <= 3]
         lines.sort(key=lambda e: e['t'])
         if s.bfilter: lines = [e for e in lines if e['board'] in ('%08X' % s.bfilter, '--------')]
         n = max(1, (view.bottom - y - 24) // 14)
