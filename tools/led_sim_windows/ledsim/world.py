@@ -101,7 +101,7 @@ class World:
         c = Cable(a, as_, b, bs, ctype); s.cables.append(c); s.dirty(); return c
     def remove_cable(s, c): s.cables.remove(c); s.dirty()
     def set_power(s, b, on):
-        b.powered = on
+        b.powered = on; s.cause = 'питание платы %08X %s' % (b.id, 'вкл' if on else 'выкл')
         if not on: b.node.reset(); b.tile[:] = 0
         s.dirty()
     def auto_connect(s, pitch=None, tol=45):
@@ -256,7 +256,39 @@ class World:
             s.pd_cache[key] = t
         b.tile = t
 
+    def link_state(s):
+        st = {}
+        for c in s.cables:
+            if c.type == 'B': st[('cab', id(c))] = ('%08X.%s↔%08X.%s' % (c.a.id, 'NESW'[c.as_], c.b.id, 'NESW'[c.bs]), c.plugged and c.a.powered and c.b.powered)
+        for i, p in enumerate(s.panels): st[('ffc', id(p))] = ('панель %d FFC → %s' % (i, '%08X' % p.board.id if p.board else '—'), p.board is not None and p.board in s.boards and p.board.powered)
+        for b in s.boards: st[('role', b.id)] = ('%08X роль' % b.id, b.node.state)
+        return st
+
+    def audit_links(s):
+        """log every link loss with its cause to led_sim.log (cable unplugged/unpowered, FFC removed, board reset/role change)"""
+        import logging
+        cur = s.link_state(); prev = getattr(s, '_links', None); s._links = cur
+        if s.now < getattr(s, '_links_t', 0) or getattr(s, '_links_n', None) != (len(s.boards), len(s.panels)) and s.now < 1000: prev = None   # layout reloaded: new baseline
+        s._links_t = s.now; s._links_n = (len(s.boards), len(s.panels))
+        cause = getattr(s, 'cause', None); s.cause = None
+        if prev is None: return
+        for k, (nm, v) in cur.items():
+            if k in prev and prev[k][1] != v and ((k[0] == 'role' and prev[k][1] in (4, 5) and v not in (4, 5)) or (k[0] != 'role' and not v)):
+                if k[0] == 'role':
+                    b = next(b for b in s.boards if b.id == k[1])
+                    why = cause or ('протокол: ' + '; '.join(list(b.node.log)[-2:]))
+                elif k[0] == 'cab':
+                    c = next(c for c in s.cables if id(c) == k[1])
+                    why = cause or ('кабель отключён' if not c.plugged else 'плата %08X обесточена/сброшена' % (c.a.id if not c.a.powered else c.b.id))
+                else:
+                    why = cause or 'FFC отключён / плата обесточена'
+                s.link_drops = getattr(s, 'link_drops', 0) + 1
+                logging.warning('link: %s: %s -> %s (t=%.3f s; причина: %s)', nm, prev[k][1], v, s.now / 1000, why or 'неизвестна')
+        for k, (nm, v) in prev.items():
+            if k not in cur and k[0] != 'role': logging.warning('link: %s удалён (t=%.3f s; причина: %s)', nm, s.now / 1000, cause or 'объект удалён')
+
     def update_panels(s):
+        s.audit_links()
         lut = host.duty_lut(s.brightness, s.gamma)
         for b in s.boards:
             if getattr(b, 'dirty', False): b.dirty = False; s.render_board(b)

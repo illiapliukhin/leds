@@ -165,9 +165,11 @@ class SystemView(Nav2D, Rulers):
                 if i is not None and s.show['ffc'] and any(math.hypot(wx - x, wy - y) < max(12, 14 / s.zoom) for x, y in s.ropes.pts(i)):
                     s.bundle_sel = p; s.sel = p; return
             c = s.cable_at(wx, wy)
-            if c:
-                c.plugged = not c.plugged; s.w.dirty(); s.sel = c
-                s.note(T('plug') if c.plugged else T('unplug')); return
+            if c and not (s.panel_at(wx, wy) or s.board_at(wx, wy)):
+                # a click on a cable body only SELECTS it (it used to toggle it: cables lie over boards/panels with a 14 px
+                # hit band, so clicking/dragging a panel silently unplugged the stack cable -> "panels lose connection").
+                # Unplug/plug: click its connector, right-click menu, or Delete/U.
+                s.sel = c; s.note('Кабель выбран: ПКМ — меню, U — отключить/подключить'); return
             o = s.board_at(wx, wy) if s.xray else None
             o = o or s.panel_at(wx, wy) or s.board_at(wx, wy)
             s.sel = o
@@ -183,19 +185,20 @@ class SystemView(Nav2D, Rulers):
                     c0, far, near = s.wire[1], s.wire[2], s.wire[3]
                     if not moved:
                         c0.plugged = not c0.plugged; s.w.dirty(); s.sel = c0; s.note(T('plug') if c0.plugged else T('unplug'))
+                        s.w.cause = 'клик по разъёму %08X.%s (пользователь)' % (s.wire[3][0].id, SIDES[s.wire[3][1]])
                     else:
                         tgt = s.snap_port(wx, wy, exclude=far[0])
                         if tgt:
                             s.w.remove_cable(c0); nc = s.w.connect(far[0], far[1], tgt[0], tgt[1], c0.type)
                             if nc: nc.length = c0.length; s.sel = nc; s.note(T('plug'))
-                        else: c0.plugged = False; s.w.dirty(); s.note(T('unplug'))
+                        else: s.note('Кабель не перенесён: рядом нет свободного порта — остаётся подключённым')   # was: silently unplugged
                 elif s.wire[0] == 'port':
                     pt = s.snap_port(wx, wy, exclude=s.wire[1][0])
                     if pt and moved: s.w.connect(s.wire[1][0], s.wire[1][1], pt[0], pt[1])
                 elif s.wire[0] == 'ffc':
                     b = s.snap_board(wx, wy); p = s.wire[1]
                     if math.hypot(e.pos[0] - s.wire[2][0], e.pos[1] - s.wire[2][1]) <= 4:      # click on the panel connector = toggle
-                        if p.board is not None: p._last_board = p.board; p.board = None; s.note(T('unplug'))
+                        if p.board is not None: p._last_board = p.board; p.board = None; s.note(T('unplug')); s.w.cause = 'клик по разъёму FFC панели (пользователь)'
                         elif getattr(p, '_last_board', None) in s.w.boards: p.board = p._last_board; s.note(T('plug'))
                         s.w.dirty()
                     elif b:
@@ -211,6 +214,8 @@ class SystemView(Nav2D, Rulers):
             if t: o.tx, o.ty = t
         elif e.type == pygame.KEYDOWN and s.app.ui.focus is None:
             if e.key == pygame.K_SPACE: s.w.paused = not s.w.paused
+            elif e.key == pygame.K_u and s.sel is not None and hasattr(s.sel, 'plugged'):
+                s.sel.plugged = not s.sel.plugged; s.w.dirty(); s.w.cause = 'клавиша U (пользователь)'; s.note(T('plug') if s.sel.plugged else T('unplug'))
             elif e.key == pygame.K_r and s.sel is not None and hasattr(s.sel, 'rot'):
                 s.sel.rot = (s.sel.rot + 1) & 3
                 if hasattr(s.sel, 'kind') and s.sel.board is not None and s.sel.board.mount is s.sel: s.sel.board.rot = s.sel.rot

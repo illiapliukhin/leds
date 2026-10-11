@@ -226,6 +226,25 @@ def script(app, t, timing):
     t.L('INFO', 'журнал Лаборатории: %d событий, из них FAIL %d (внесённые неисправности)' % (len(lab.events), nfail_ev))
     tab('system'); yield 60
 
+    # ---------------------------------------------------------------- 8. soak: 6 boards, 10 min of sim time at 15 fps, zero link drops
+    t.sec = 'soak'; layout(3, 2); yield from settle_stack(); lab = LV.get(); lab.apply_preset('Норма')
+    w = W(); timing['throttle'] = 1 / 15.0; sv.speed = 3.5          # 15 fps frames, each advancing ~233 ms of sim time (slow-laptop case)
+    d0 = getattr(w, 'link_drops', 0); t0 = w.now
+    logs0 = {b.id: len(b.node.log) for b in w.boards}
+    tabs = ['system', 'lab', 'cube']; k = 0
+    while w.now - t0 < 600_000:
+        tab(tabs[k % 3]); k += 1; yield 150
+    timing['throttle'] = None; sv.speed = 1.0
+    drops = getattr(w, 'link_drops', 0) - d0
+    lost = [l for b in w.boards for l in list(b.node.log) if float(l.split()[0]) * 1000 > t0 and ('lost' in l or 'dropped' in l or 'silent' in l)]
+    roles = sorted(b.node.state for b in w.boards)
+    t.check(drops == 0 and not lost and roles.count(4) == 1 and roles.count(5) == 5,
+            'soak 6 плат, %.0f с модельного времени при 15 fps (шаг кадра ~233 мс): потерь связи %d, потерь в протоколе %d, роли %s' %
+            ((w.now - t0) / 1000, drops, len(lost), roles))
+    for l in lost[:10]: t.L('INFO', '  ' + l)
+    lab.running = False
+    tab('system'); yield 30
+
 def run(out=None, headless=False):
     if headless: os.environ.setdefault('SDL_VIDEODRIVER', 'dummy'); os.environ.setdefault('SDL_AUDIODRIVER', 'dummy')
     out = out or os.path.join(os.environ.get('LOCALAPPDATA') or os.path.expanduser('~'), 'LED_Simulator', 'autotest_' + time.strftime('%Y%m%d_%H%M%S'))
@@ -243,6 +262,7 @@ def run(out=None, headless=False):
         gen = script(app, t, timing); state = {'wait': 0, 'done': False}
         def hook(a, frame, dt, work):
             timing['frame'] = frame
+            if timing.get('throttle'): time.sleep(max(0.0, timing['throttle'] - work))
             if frame > 5:
                 timing['dt'].setdefault(a.tab, []).append(dt * 1000); timing['work'].setdefault(a.tab, []).append(work * 1000)
             if frame % 60 == 0:

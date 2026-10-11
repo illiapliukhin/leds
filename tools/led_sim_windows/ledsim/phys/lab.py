@@ -410,14 +410,14 @@ class Lab:
                     bp.fires.append(dict(panel=panel, led=int(rr[0] * 32 + cc[0]), t0=s.w.now, fire=False, ref='LED'))
         # brown-out
         if Vo < DS['ESP32S3']['bod'] and b.powered and not bp.flags['bod'] and P['U1'].state == 'ok':
-            bp.flags['bod'] = True; s.log(b, 'WARN', 'ESP32-S3 brown-out: AON %.2f В < %.1f В → сброс' % (Vo, DS['ESP32S3']['bod'])); b.node.reset()
+            bp.flags['bod'] = True; s.log(b, 'WARN', 'ESP32-S3 brown-out: AON %.2f В < %.1f В → сброс' % (Vo, DS['ESP32S3']['bod'])); s.w.cause = 'Лаборатория: brown-out ESP32 (AON %.2f В)' % Vo; b.node.reset()
         elif Vo > DS['ESP32S3']['bod'] + 0.1 and bp.flags['bod']: bp.flags['bod'] = False; s.log(b, 'INFO', 'AON восстановлен %.2f В — загрузка' % Vo)
         # board dead?
         dead = None
         if P['U1'].state != 'ok': dead = 'U1 вышел из строя'
         elif Vo < 1.0: dead = 'нет AON_3V3'
         if dead and bp.dead is None:
-            bp.dead = dead; s.log(b, 'FAIL', 'Плата не работает: %s' % dead); b.phys_dead = dead; b.node.reset()
+            bp.dead = dead; s.log(b, 'FAIL', 'Плата не работает: %s' % dead); b.phys_dead = dead; s.w.cause = 'Лаборатория: плата не работает (%s)' % dead; b.node.reset()
         elif not dead and bp.dead: bp.dead = None; b.phys_dead = None
 
     def system_power(s):
