@@ -6,6 +6,7 @@ import pygame
 from . import host
 from .ui import T, text
 from .world import PANELS
+from .camera import OrbitCam
 
 DEMOS3D = ['shapes', 'wave', 'rain', 'sphere', 'text', 'slices2d', 'extrude2d']
 DEMO_RU = {'shapes': 'Вращающиеся фигуры', 'wave': '3D-волна', 'rain': 'Дождь', 'sphere': 'Сфера', 'text': '3D-текст (проход)',
@@ -19,7 +20,7 @@ def glyph_cols(ch):
 
 class CubeView:
     def __init__(s, app):
-        s.app = app; s.N = 8; s.kind = 'lattice'; s.demo = 0; s.yaw, s.pitch, s.dist = 0.6, 0.45, 2.6
+        s.app = app; s.N = 8; s.kind = 'lattice'; s.demo = 0; s.cam = OrbitCam()
         s.t0 = time.time(); s.rain = None; s.d2 = 0; s.drag = False
         s._grid()
     def _grid(s):
@@ -81,12 +82,7 @@ class CubeView:
             return np.stack([img * (0.4 + 0.6 * (k == 0 or k == n - 1)) for k in range(n)])
         return np.zeros_like(x)
 
-    def event(s, e, view):
-        if e.type == pygame.MOUSEBUTTONDOWN and e.button in (1, 3) and view.collidepoint(e.pos) and not s.app.ui.consumed: s.drag = True
-        elif e.type == pygame.MOUSEBUTTONUP: s.drag = False
-        elif e.type == pygame.MOUSEMOTION and s.drag:
-            s.yaw += e.rel[0] * 0.01; s.pitch = max(-1.5, min(1.5, s.pitch + e.rel[1] * 0.01))
-        elif e.type == pygame.MOUSEWHEEL: s.dist = max(1.2, min(8, s.dist * (0.9 ** e.y)))
+    def event(s, e, view): s.cam.event(e, view, s.app)
 
     def draw(s, surf, view):
         t = time.time() - s.t0
@@ -95,12 +91,13 @@ class CubeView:
         lv = (vol * 255 + 0.5).astype(np.uint8)
         duty = host.duty_lut(sv.brightness, sv.gamma)[lv]                # same 8-bit gamma/BCM as the firmware
         x, y, z = s.ncoords()
-        cy, sy, cp, sp = math.cos(s.yaw), math.sin(s.yaw), math.cos(s.pitch), math.sin(s.pitch)
-        # world: layer axis vertical (layers stacked upward)
-        X, Y, Z = x, -z, y
+        c = s.cam; c.update(s.app.dt, s.app); tx, ty, tz = c.target
+        cy, sy, cp, sp = math.cos(c.yaw), math.sin(c.yaw), math.cos(c.pitch), math.sin(c.pitch)
+        # world: layer axis vertical (layers stacked upward); camera looks at c.target
+        X, Y, Z = x - tx, -z - ty, y - tz
         xr = X * cy - Z * sy; zr = X * sy + Z * cy
         yr = Y * cp - zr * sp; zr = Y * sp + zr * cp
-        zc = zr + s.dist; f = min(view.w, view.h) * 0.9
+        zc = zr + c.dist; f = min(view.w, view.h) * 0.9
         W, H = view.w // 2, view.h // 2
         px = (xr / zc * f / 2 + W / 2).astype(np.int32); py = (yr / zc * f / 2 + H / 2).astype(np.int32)
         ok = (zc > 0.1) & (px >= 1) & (px < W - 1) & (py >= 1) & (py < H - 1)
@@ -124,8 +121,8 @@ class CubeView:
             zz = (k - (n - 1) / 2) / 16 * s.zpitch()
             pts = []
             for (a, b) in [(-1.03, -1.03), (1.03, -1.03), (1.03, 1.03), (-1.03, 1.03)]:
-                Xx, Yy, Zz = a, -zz, b
-                xr2 = Xx * cy - Zz * sy; zr2 = Xx * sy + Zz * cy; yr2 = Yy * cp - zr2 * sp; zr2 = Yy * sp + zr2 * cp + s.dist
+                Xx, Yy, Zz = a - tx, -zz - ty, b - tz
+                xr2 = Xx * cy - Zz * sy; zr2 = Xx * sy + Zz * cy; yr2 = Yy * cp - zr2 * sp; zr2 = Yy * sp + zr2 * cp + c.dist
                 pts.append((view.x + (xr2 / zr2 * f / 2 + W / 2) * 2, view.y + (yr2 / zr2 * f / 2 + H / 2) * 2))
             pygame.draw.lines(surf, (60, 70, 90), True, pts, 1)
         text(surf, '%d × 32 × 32  (%d LED)  —  %s' % (n, n * 1024, DEMO_RU[DEMOS3D[s.demo]]), (view.x + 10, view.y + 8), (255, 220, 140), 16)
@@ -149,6 +146,11 @@ class CubeView:
             if ui.button(surf, (x, y, W, 24), lab, on=s.kind == k, sz=11): s.kind = k
             y += 27
         y += 8
+        bw = (W - 12) // 4
+        for i, (k, lab) in enumerate((('front', 'Спереди'), ('top', 'Сверху'), ('iso', 'Изо'), ('reset', 'Сброс'))):
+            if ui.button(surf, (x + i * (bw + 4), y, bw, 24), lab, sz=11):
+                s.cam.reset() if k == 'reset' else s.cam.preset(k)
+        y += 32
         sv = s.app.views['system'].w
         sv.brightness = int(ui.slider(surf, (x, y + 16, W, 10), T('brightness'), sv.brightness, 0, 255)); y += 50
         sv.gamma = round(ui.slider(surf, (x, y, W, 10), T('gamma'), sv.gamma, 1.0, 3.0, '%.2f'), 2)

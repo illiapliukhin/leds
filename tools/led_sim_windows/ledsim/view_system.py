@@ -6,6 +6,9 @@ from . import host, stack_model
 from .ui import T, text, font
 from .world import World, PANELS, BOARD_W, BOARD_H, rotv, panel_data
 from .stack_model import LEAD, FOLLOW, STATE_NAMES
+from .camera import Nav2D
+from .physics import Ropes
+from .world import FFC_LENGTHS, JST_LENGTHS
 
 SIDES = 'NESW'
 LED_RGB = np.array([255, 246, 228], np.float32)
@@ -16,16 +19,20 @@ def layout_dir():
     d = os.path.join(os.path.expanduser('~'), 'Documents', 'LED_Simulator')
     os.makedirs(d, exist_ok=True); return d
 
-class SystemView:
+class SystemView(Nav2D):
     def __init__(s, app):
         s.app = app; s.w = World(); s.w.preset(3, 2)
         s.zoom = 1.2; s.pan = [260, 200]; s.sel = None; s.drag = None; s.wire = None; s.kind = 'full'
         s.snap = 10.0; s.demo_i = 0; s.fps = 60; s.speed = 1.0; s.acc = 0.0; s.msg = ''; s.msg_t = 0
-        s.masks = {}; s.scroll = 0; s.show_topo = True; s.load_ms = 0.0
+        s.masks = {}; s.ropes = Ropes(); s.rope_idx = {}; s.scroll = 0; s.show_topo = True; s.load_ms = 0.0
 
     # ------------------------------------------------ coords
-    def w2s(s, x, y): return (s.pan[0] + x * s.zoom, s.pan[1] + y * s.zoom)
-    def s2w(s, x, y): return ((x - s.pan[0]) / s.zoom, (y - s.pan[1]) / s.zoom)
+    def focus_at(s, wx, wy):
+        o = s.board_at(wx, wy) or s.panel_at(wx, wy)
+        if not o: return False
+        v = s.app.view; size = getattr(o, 'size', 170) * 1.6
+        s._zt = min(v.w, v.h) / size; s._anchor = None
+        s.zoom = s._zt; s._zt = None; s.pan = [v.centerx - o.x * s.zoom, v.centery - o.y * s.zoom]; return True
     def fit(s, rect):
         bs = s.w.boards + s.w.panels
         if not bs: return
@@ -64,12 +71,14 @@ class SystemView:
             for side in range(4):
                 px, py = b.port_pos(side)
                 if math.hypot(wx - px, wy - py) < r: return b, side
-    def ffc_handle(s, p): return p.x, p.y + p.size * 0.32
+    def ffc_handle(s, p): return p.conn_pos('J_ROW')
     def cable_at(s, wx, wy):
         r = max(5, 8 / s.zoom)
         for c in s.w.cables:
             ax, ay = c.a.port_pos(c.as_); bx, by = c.b.port_pos(c.bs)
-            mx, my = (ax + bx) / 2, (ay + by) / 2
+            i = s.rope_idx.get(('c', id(c)))
+            mx, my = s.ropes.pts(i)[len(s.ropes.pts(i)) // 2] if i is not None else ((ax + bx) / 2, (ay + by) / 2)
+            if not c.plugged and i is not None: bx, by = s.ropes.pts(i)[-1]
             if math.hypot(wx - mx, wy - my) < r * 1.6: return c
             dx, dy = bx - ax, by - ay; L2 = dx * dx + dy * dy or 1
             t = max(0, min(1, ((wx - ax) * dx + (wy - ay) * dy) / L2))
@@ -77,12 +86,8 @@ class SystemView:
 
     # ------------------------------------------------ events
     def event(s, e, view):
-        if e.type == pygame.MOUSEWHEEL and view.collidepoint(pygame.mouse.get_pos()):
-            mx, my = pygame.mouse.get_pos(); wx, wy = s.s2w(mx, my)
-            s.zoom = max(0.05, min(30, s.zoom * (1.15 ** e.y))); s.pan = [mx - wx * s.zoom, my - wy * s.zoom]
-        elif e.type == pygame.MOUSEMOTION and (e.buttons[2] or e.buttons[1]):
-            s.pan[0] += e.rel[0]; s.pan[1] += e.rel[1]
-        elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and view.collidepoint(e.pos) and not s.app.ui.consumed:
+        if s.nav_event(e, view): return
+        if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and view.collidepoint(e.pos) and not s.app.ui.consumed:
             wx, wy = s.s2w(*e.pos)
             pt = s.port_at(wx, wy)
             if pt: s.wire = ('port', pt); return
@@ -114,9 +119,8 @@ class SystemView:
             s.drag = None
         elif e.type == pygame.MOUSEMOTION and s.drag:
             o, ox, oy, carry = s.drag; wx, wy = s.s2w(*e.pos)
-            nx, ny = round((wx - ox) / s.snap) * s.snap, round((wy - oy) / s.snap) * s.snap
-            for p in carry: p.x, p.y = nx, ny
-            o.x, o.y = nx, ny
+            t = s.place(o, wx - ox, wy - oy)
+            if t: o.tx, o.ty = t
         elif e.type == pygame.KEYDOWN and s.app.ui.focus is None:
             if e.key == pygame.K_SPACE: s.w.paused = not s.w.paused
             elif e.key == pygame.K_r and s.sel is not None and hasattr(s.sel, 'rot'):
@@ -126,6 +130,114 @@ class SystemView:
                         if p.board is s.sel and abs(p.x - s.sel.x) < 1 and abs(p.y - s.sel.y) < 1: p.rot = s.sel.rot
                 s.w.dirty()
             elif e.key == pygame.K_DELETE: s.delete_sel()
+    # ------------------------------------------------ placement physics: grid snap, magnetic edges, no overlap
+    def extent(s, o):
+        if hasattr(o, 'node'): return (BOARD_W / 2, BOARD_H / 2) if o.rot % 2 == 0 else (BOARD_H / 2, BOARD_W / 2)
+        return (o.size / 2, o.size / 2)
+    def overlaps(s, o, x, y):
+        hx, hy = s.extent(o)
+        for q in (s.w.boards if hasattr(o, 'node') else s.w.panels):
+            if q is o: continue
+            qx, qy = s.extent(q); X, Y = getattr(q, 'tx', q.x), getattr(q, 'ty', q.y)
+            if abs(x - X) < hx + qx - 0.5 and abs(y - Y) < hy + qy - 0.5: return q
+    def place(s, o, x, y):
+        isb = hasattr(o, 'node')
+        P = 160.0 if isb else o.size
+        if isb:
+            pp = [p for p in s.w.panels if p.board is o]
+            if pp: P = pp[0].size
+        best, bd = None, 30.0                                       # magnetic: one pitch from a neighbour
+        for q in (s.w.boards if isb else s.w.panels):
+            if q is o: continue
+            for dx, dy in ((P, 0), (-P, 0), (0, P), (0, -P)):
+                cx, cy = q.x + dx, q.y + dy; d = math.hypot(x - cx, y - cy)
+                if d < bd: bd, best = d, (cx, cy)
+        if best: x, y = best
+        else: x, y = round(x / s.snap) * s.snap, round(y / s.snap) * s.snap
+        q = s.overlaps(o, x, y)
+        if q:                                                       # slide out along the shallower axis
+            hx, hy = s.extent(o); qx, qy = s.extent(q)
+            px_ = hx + qx - abs(x - q.x); py_ = hy + qy - abs(y - q.y)
+            if px_ < py_: x += px_ * (1 if x >= q.x else -1)
+            else: y += py_ * (1 if y >= q.y else -1)
+            if s.overlaps(o, x, y): return None
+        return x, y
+    def move_smooth(s, dt):
+        k = 1 - math.exp(-dt * 18)
+        for o in s.w.boards + s.w.panels:
+            if not hasattr(o, 'tx'): continue
+            ox, oy = o.x, o.y
+            o.x += (o.tx - o.x) * k; o.y += (o.ty - o.y) * k
+            if abs(o.tx - o.x) + abs(o.ty - o.y) < 0.05: o.x, o.y = o.tx, o.ty; del o.tx; del o.ty
+            if hasattr(o, 'node'):
+                for p in s.w.panels:
+                    if p.board is o and abs(p.x - ox) < 1 and abs(p.y - oy) < 1 and not hasattr(p, 'tx'): p.x, p.y = o.x, o.y
+                s.w.dirty()
+
+    # ------------------------------------------------ cables as ropes
+    def rope_specs(s):
+        sp = {}
+        for c in s.w.cables:
+            sp[('c', id(c))] = (c.a.port_pos(c.as_), c.b.port_pos(c.bs) if c.plugged else None, c.length)
+        for p in s.w.panels:
+            for n in ('J_ROW', 'J_COL'):
+                if p.board is not None and p.board in s.w.boards: sp[('f', id(p), n)] = (p.board.conn_pos(n), p.conn_pos(n), p.ffc_len)
+                else: sp[('f', id(p), n)] = (p.conn_pos(n), None, p.ffc_len)
+        return sp
+    def physics(s, dt):
+        s.move_smooth(dt)
+        s.ropes.sync(s.rope_specs()); s.rope_idx = {k: i for i, k in enumerate(s.ropes.keys)}
+        s.ropes.step(dt)
+        ten = s.ropes.tension()
+        if s.drag is None: return                                    # only a user drag can over-stretch
+        for c in s.w.cables:
+            i = s.rope_idx.get(('c', id(c)))
+            if i is not None and c.plugged and ten[i] > 1.12:
+                c.plugged = False; s.w.dirty(); s.note('Кабель %08X.%s перерастянут (%.0f > %d мм) — отключён' % (c.a.id, SIDES[c.as_], ten[i] * c.length, c.length))
+        for p in s.w.panels:
+            i = s.rope_idx.get(('f', id(p), 'J_ROW')); j = s.rope_idx.get(('f', id(p), 'J_COL'))
+            if p.board is not None and i is not None and max(ten[i], ten[j]) > 1.12:
+                s.note('FFC перерастянут (%.0f > %d мм) — панель отключена' % (max(ten[i], ten[j]) * p.ffc_len, p.ffc_len)); p.board = None
+    def tcol(s, t, base):
+        if t > 1.0: return (255, 60, 60)
+        if t > 0.92: return (255, 200, 60)
+        return base
+    def draw_ropes(s, surf):
+        ten = s.ropes.tension()
+        ov = None
+        for k, i in s.rope_idx.items():
+            P = s.ropes.pts(i); pts = [s.w2s(x, y) for x, y in P]
+            if k[0] == 'c':
+                c = next((c for c in s.w.cables if id(c) == k[1]), None)
+                if c is None: continue
+                base = ((255, 80, 80) if c.type == 'A' else (90, 220, 120)) if c.plugged else (120, 120, 120)
+                col = s.tcol(ten[i], base) if c.plugged else base
+                w = max(2, int(1.6 * s.zoom)) if c is not s.sel else max(3, int(2.4 * s.zoom))
+                pygame.draw.lines(surf, (20, 20, 20), False, pts, w + 2); pygame.draw.lines(surf, col, False, pts, w)
+                m = pts[len(pts) // 2]; pygame.draw.circle(surf, col, (int(m[0]), int(m[1])), 5 if c is s.sel else 4, 0 if c.plugged else 1)
+                if s.zoom > 1.2: text(surf, '%d мм' % c.length, (m[0] + 6, m[1] - 6), (170, 175, 185), 10)
+            else:
+                p = next((p for p in s.w.panels if id(p) == k[1]), None)
+                if p is None: continue
+                if ov is None: ov = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
+                twist = math.pi if p.ffc == 'A' else 0.0
+                half = 10.5 * s.zoom                                   # 40P x 0.5 mm ribbon ~ 21 mm wide
+                n = len(P); col = s.tcol(ten[i], (120, 150, 200)) if p.board else (110, 110, 120)
+                L, R = [], []
+                for j in range(n):
+                    a = P[max(j - 1, 0)]; b = P[min(j + 1, n - 1)]
+                    dx, dy = b[0] - a[0], b[1] - a[1]; ln = math.hypot(dx, dy) or 1
+                    nx, ny = -dy / ln, dx / ln
+                    f = math.cos(twist * j / (n - 1)); w = half * max(0.12, abs(f))
+                    x, y = pts[j]; L.append((x + nx * w * (1 if f >= 0 else -1), y + ny * w * (1 if f >= 0 else -1))); R.append((x - nx * w * (1 if f >= 0 else -1), y - ny * w * (1 if f >= 0 else -1)))
+                for j in range(n - 1):
+                    q = [L[j], L[j + 1], R[j + 1], R[j]]
+                    shade = 0.65 + 0.35 * abs(math.cos(twist * (j + 0.5) / (n - 1)))
+                    pygame.draw.polygon(ov, tuple(int(c * shade) for c in col) + (150,), q)
+                pygame.draw.lines(ov, (230, 70, 70, 220), False, L, max(1, int(s.zoom * 0.8)))    # pin-1 stripe
+                if s.zoom > 1.5 and k[2] == 'J_ROW': text(surf, 'FFC %s %d мм' % (p.ffc, p.ffc_len), (pts[n // 2][0] + 8, pts[n // 2][1]), (170, 190, 230), 10)
+        if ov: surf.blit(ov, (0, 0))
+
     def delete_sel(s):
         o = s.sel
         if o is None: return
@@ -136,6 +248,7 @@ class SystemView:
 
     # ------------------------------------------------ time
     def tick(s, dt):
+        s.physics(dt)
         if s.w.paused: return
         s.acc += dt * 1000 * s.speed
         n = int(s.acc); s.acc -= n
@@ -196,9 +309,6 @@ class SystemView:
             hx, hy = s.w2s(*s.ffc_handle(p))
             col = (255, 80, 80) if p.ffc == 'A' else (90, 200, 255) if p.board else (140, 140, 140)
             pygame.draw.rect(surf, col, (hx - 5, hy - 5, 10, 10))
-            if p.board:
-                bx, by = s.w2s(p.board.x, p.board.y)
-                if abs(bx - hx) + abs(by - hy) > 4: pygame.draw.line(surf, col, (hx, hy), (bx, by), 2)
             if p.open_col >= 0 or p.ffc == 'A':
                 text(surf, ('FFC A ' if p.ffc == 'A' else '') + ('col %d open' % (p.open_col + 1) if p.open_col >= 0 else ''), (r.x + 4, r.bottom - 16), (255, 100, 100), 11)
 
@@ -227,6 +337,7 @@ class SystemView:
                 if r.w > 150: text(surf, '%d fps  skew %.1f µs  Δf %d' % (inf['fps'], inf['skew'], inf['dframe']), (r.x + 4, r.y + 32), (180, 190, 200), 10)
 
     def draw(s, surf, view):
+        s.nav_update(s.app.dt, view)
         surf.set_clip(view); surf.fill((14, 15, 19), view)
         g = 160 * s.zoom
         if g > 20:
@@ -236,16 +347,7 @@ class SystemView:
             while y < view.bottom: pygame.draw.line(surf, (24, 26, 32), (view.x, y), (view.right, y)); y += g
         for p in s.w.panels: s.draw_panel(surf, p)
         for b in s.w.boards: s.draw_board(surf, b)
-        for c in s.w.cables:
-            a = s.w2s(*c.a.port_pos(c.as_)); bb = s.w2s(*c.b.port_pos(c.bs))
-            col = ((255, 80, 80) if c.type == 'A' else (90, 220, 120)) if c.plugged else (110, 110, 110)
-            if c.plugged: pygame.draw.line(surf, col, a, bb, 3 if c is s.sel else 2)
-            else:
-                m = ((a[0] + bb[0]) / 2, (a[1] + bb[1]) / 2)
-                pygame.draw.line(surf, col, a, (a[0] * 0.6 + m[0] * 0.4, a[1] * 0.6 + m[1] * 0.4), 2)
-                pygame.draw.line(surf, col, bb, (bb[0] * 0.6 + m[0] * 0.4, bb[1] * 0.6 + m[1] * 0.4), 2)
-            m = ((a[0] + bb[0]) / 2, (a[1] + bb[1]) / 2)
-            pygame.draw.circle(surf, col, (int(m[0]), int(m[1])), 5 if c is s.sel else 4, 0 if c.plugged else 1)
+        s.draw_ropes(surf)
         if s.show_topo:                              # discovered topology (leader's edges)
             bm = {b.id: b for b in s.w.boards}
             for b in s.w.boards:
@@ -334,11 +436,19 @@ class SystemView:
                 if ui.button(surf, (x, y, hb, 24), T('connect_near')):
                     if s.w.boards: o.board = min(s.w.boards, key=lambda b: math.hypot(b.x - o.x, b.y - o.y))
                 if ui.button(surf, (x + hb + 4, y, hb, 24), T('disconnect_ffc')): o.board = None
+                y += 28
+                text(surf, 'FFC, мм:', (x, y + 4), sz=12)
+                for i, L in enumerate(FFC_LENGTHS):
+                    if ui.button(surf, (x + 70 + i * 52, y, 48, 22), str(L), on=o.ffc_len == L, sz=11): o.ffc_len = L
                 y += 30
             else:
                 text(surf, '%s: %s.%s — %s.%s' % (T('selected'), '%08X' % o.a.id, SIDES[o.as_], '%08X' % o.b.id, SIDES[o.bs]), (x, y), (255, 220, 140), 12); y += 20
                 if ui.button(surf, (x, y, hb, 24), T('unplug') if o.plugged else T('plug')): o.plugged = not o.plugged; s.w.dirty()
                 if ui.button(surf, (x + hb + 4, y, hb, 24), T('cable_a') if o.type == 'A' else T('cable_b'), col=(130, 50, 50) if o.type == 'A' else None): o.type = 'B' if o.type == 'A' else 'A'; s.w.dirty()
+                y += 28
+                text(surf, 'JST-SH, мм:', (x, y + 4), sz=12)
+                for i, L in enumerate(JST_LENGTHS):
+                    if ui.button(surf, (x + 80 + i * 46, y, 42, 22), str(L), on=o.length == L, sz=11): o.length = L
                 y += 30
         # groups
         y += 4; text(surf, T('groups'), (x, y), (170, 180, 200), 13); y += 18

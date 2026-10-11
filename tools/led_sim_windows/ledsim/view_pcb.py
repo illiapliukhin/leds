@@ -4,6 +4,7 @@ import gzip, json, math, os
 import pygame
 from . import host
 from .ui import T, text
+from .camera import Nav2D
 
 LAYER_NAMES = ['F.Cu', 'In1.Cu', 'In2.Cu', 'B.Cu']
 LAYER_COL = [(200, 60, 50), (200, 170, 60), (70, 170, 90), (60, 110, 220)]
@@ -77,7 +78,7 @@ class Pcb:
         k, i = it
         return s.pads[i][9] if k == 'pad' else s.vias[i][3] if k == 'via' else s.tracks[i][2]
 
-class PcbView:
+class PcbView(Nav2D):
     def __init__(s, app, kind):
         s.app, s.kind = app, kind
         s.list = BOARDS if kind == 'boards' else PANELS
@@ -92,17 +93,15 @@ class PcbView:
         x0, y0, x1, y1 = s.pcb().bbox
         s.zoom = min(view.w / (x1 - x0 + 10), view.h / (y1 - y0 + 10))
         s.pan = [view.centerx - (x0 + x1) / 2 * s.zoom, view.centery - (y0 + y1) / 2 * s.zoom]
-    def w2s(s, x, y): return (s.pan[0] + x * s.zoom, s.pan[1] + y * s.zoom)
-    def s2w(s, x, y): return ((x - s.pan[0]) / s.zoom, (y - s.pan[1]) / s.zoom)
+    def focus_at(s, wx, wy):
+        it = s.pcb().hit(wx, wy, s.layers)
+        if not it: return False
+        s.zoom_at(2.5, *s.w2s(wx, wy)); return True
 
     def event(s, e, view):
         if s.zoom is None: s.fit(view)
-        if e.type == pygame.MOUSEWHEEL and view.collidepoint(pygame.mouse.get_pos()):
-            mx, my = pygame.mouse.get_pos(); wx, wy = s.s2w(mx, my)
-            s.zoom = max(0.5, min(400, s.zoom * (1.2 ** e.y))); s.pan = [mx - wx * s.zoom, my - wy * s.zoom]
-        elif e.type == pygame.MOUSEMOTION and (e.buttons[2] or e.buttons[1]):
-            s.pan[0] += e.rel[0]; s.pan[1] += e.rel[1]
-        elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and view.collidepoint(e.pos) and not s.app.ui.consumed:
+        if s.nav_event(e, view): return
+        if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and view.collidepoint(e.pos) and not s.app.ui.consumed:
             it = s.pcb().hit(*s.s2w(*e.pos), s.layers)
             s.lock = s.pcb().item_net(it) if it else None
             s.trace = s.do_trace(it) if it else None
@@ -157,6 +156,7 @@ class PcbView:
 
     def draw(s, surf, view):
         if s.zoom is None: s.fit(view)
+        s.nav_update(s.app.dt, view)
         s.render_static(view)
         surf.blit(s.surf, view.topleft)
         p = s.pcb()

@@ -6,10 +6,11 @@ from .ui import T, text
 from .view_system import SystemView
 from .view_pcb import PcbView
 from .view_cube import CubeView
+from .view_test import TestView
 
 SIDE_W = 400
-TABS = ['system', 'boards', 'panels', 'cube']
-TAB_KEYS = {'system': 'tab_sys', 'boards': 'tab_boards', 'panels': 'tab_panels', 'cube': 'tab_cube'}
+TABS = ['system', 'test', 'boards', 'panels', 'cube']
+TAB_KEYS = {'system': 'tab_sys', 'boards': 'tab_boards', 'panels': 'tab_panels', 'cube': 'tab_cube', 'test': 'tab_test'}
 
 class App:
     def __init__(s, size=(1600, 920), shots=None, lang='ru', tab='system', preset=None):
@@ -20,9 +21,10 @@ class App:
         s.ui = U.UI(); s.tab = tab; s.shots = shots or []
         s.layout()
         s.views = {'system': SystemView(s), 'boards': PcbView(s, 'boards'), 'panels': PcbView(s, 'panels'), 'cube': CubeView(s)}
+        s.views['test'] = TestView(s)
         if preset: c, r = preset; s.views['system'].w.preset(c, r)
         s.views['system'].fit(s.view); s.views['system'].apply_global()
-        s.fps_meas = 60.0
+        s.fps_meas = 60.0; s.dt = 1 / 60
     def layout(s):
         W, H = s.screen.get_size()
         s.view = pygame.Rect(0, 36, W - SIDE_W, H - 36); s.side = pygame.Rect(W - SIDE_W, 36, SIDE_W, H - 36)
@@ -45,7 +47,9 @@ class App:
             s.ui.begin(ev)
             now = time.perf_counter(); dt = min(0.1, now - t_last); t_last = now
             s.fps_meas = 0.95 * s.fps_meas + 0.05 / max(dt, 1e-4)
-            sv = s.views['system']; sv.tick(dt)                 # the stack keeps running in every tab
+            s.dt = dt
+            sv = s.views['system']; sv.tick(dt)
+            if not sv.w.paused: s.views['test'].tick()                 # the stack keeps running in every tab
             v = s.views[s.tab]
             sc = s.screen; sc.fill((24, 26, 32))
             # side panel + top bar first (they consume clicks), then the view gets the events
@@ -53,8 +57,8 @@ class App:
             v.panel(sc, s.ui, s.side)
             x = 8
             for t in TABS:
-                if s.ui.button(sc, (x, 4, 120, 28), T(TAB_KEYS[t]), on=s.tab == t): s.tab = t
-                x += 126
+                if s.ui.button(sc, (x, 4, 106, 28), T(TAB_KEYS[t]), on=s.tab == t): s.tab = t
+                x += 112
             if s.ui.button(sc, (x + 10, 4, 44, 28), T('lang')): U.LANG[0] = 'en' if U.LANG[0] == 'ru' else 'ru'
             text(sc, '%s   %.0f fps' % (T('title'), s.fps_meas), (x + 70, 11), (150, 156, 170), 13)
             for e in ev: v.event(e, s.view)

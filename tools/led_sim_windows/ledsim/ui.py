@@ -5,7 +5,7 @@ from . import host
 LANG = ['ru']
 S = {
  'title': ('Симулятор LED-системы mono_split', 'mono_split LED system simulator'),
- 'tab_sys': ('Система', 'System'), 'tab_boards': ('Платы', 'Boards'), 'tab_panels': ('Панели', 'Panels'), 'tab_cube': ('Куб', 'Cube'),
+ 'tab_sys': ('Система', 'System'), 'tab_boards': ('Платы', 'Boards'), 'tab_panels': ('Панели', 'Panels'), 'tab_cube': ('Куб', 'Cube'), 'tab_test': ('Тест', 'Test'),
  'add_board': ('+ Плата', '+ Board'), 'add_panel': ('+ Панель', '+ Panel'), 'delete': ('Удалить', 'Delete'),
  'autocable': ('Авто-кабели', 'Auto-cable'), 'autopanel': ('Авто-панели', 'Auto-panels'),
  'presets': ('Пресеты:', 'Presets:'), 'save': ('Сохранить', 'Save'), 'load': ('Загрузить', 'Load'),
@@ -21,15 +21,16 @@ S = {
  'connect_near': ('FFC к ближайшей плате', 'FFC to nearest board'), 'disconnect_ffc': ('Отсоединить FFC', 'Disconnect FFC'),
  'groups': ('Группы (стеки)', 'Groups (stacks)'), 'leader': ('лидер', 'leader'), 'members': ('плат', 'boards'),
  'canvas_size': ('холст', 'canvas'), 'boards': ('Платы', 'Boards'), 'timing': ('Тайминги', 'Timing'),
- 'hint_sys': ('ЛКМ: выбрать/тащить · тянуть от порта к порту = кабель · от квадрата панели к плате = FFC · клик по кабелю = вкл/выкл · ПКМ/колесо: обзор · R поворот · Del удалить · Пробел пауза',
+ 'hint_sys': ('ЛКМ: выбрать/тащить · тянуть от порта к порту = кабель · от квадрата панели к плате = FFC · клик по кабелю = вкл/выкл · колесо: зум к курсору · ПКМ/СКМ: сдвиг · двойной клик: фокус · F/Home: всё · WASD · R поворот · Del · Пробел пауза',
               'LMB: select/drag · drag port->port = cable · panel square->board = FFC · click cable = plug/unplug · RMB/wheel: view · R rotate · Del delete · Space pause'),
  'layers': ('Слои', 'Layers'), 'search': ('Поиск (цепь или позиционное обозн.)', 'Search (net or reference)'),
  'net': ('Цепь', 'Net'), 'pads': ('Контакты', 'Pads'), 'length': ('Длина', 'Length'), 'width': ('Ширина', 'Width'), 'vias': ('Переходные', 'Vias'),
  'trace_to': ('FFC → панель', 'FFC → panel'), 'open_on_panel': ('Показать на панели', 'Show on panel'),
- 'hint_pcb': ('Наведите на контакт/дорожку/переходное — подсветка цепи · клик = закрепить · колесо/ПКМ: зум/сдвиг · клик по J_ROW1/J_COL1 = трассировка через FFC',
+ 'hint_pcb': ('Наведите на контакт/дорожку/переходное — подсветка цепи · клик = закрепить · колесо: зум к курсору · ПКМ/СКМ: сдвиг · двойной клик: фокус · F: всё · клик по J_ROW1/J_COL1 = трассировка через FFC',
               'Hover pad/track/via to highlight the net · click = pin · wheel/RMB: zoom/pan · click J_ROW1/J_COL1 pin = trace through the FFC'),
  'layers_n': ('Слоёв', 'Layers'), 'cube_demo': ('Объёмная анимация', 'Volumetric demo'), 'cube_panel': ('Тип слоёв', 'Layer type'),
- 'hint_cube': ('ЛКМ: вращать камеру · колесо: зум', 'LMB: orbit · wheel: zoom'),
+ 'hint_cube': ('ЛКМ: вращать (инерция) · ПКМ/СКМ: сдвиг · колесо/щипок: зум к курсору · двойной клик: фокус · WASD/стрелки, Q/E · 1 спереди 2 сверху 3 изо · R/Home сброс',
+               'LMB: orbit (inertia) · RMB/MMB: pan · wheel/pinch: zoom to cursor · double-click: focus · WASD/arrows, Q/E · 1 front 2 top 3 iso · R/Home reset'),
  'maxb': ('MAXB', 'MAXB'), 'selected': ('Выбрано', 'Selected'), 'saved': ('Сохранено', 'Saved'), 'loaded': ('Загружено', 'Loaded'),
  'faults': ('Неисправности', 'Faults'), 'lang': ('EN', 'RU'),
 }

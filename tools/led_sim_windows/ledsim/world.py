@@ -21,7 +21,15 @@ def panel_data(kind):
         _pd[kind] = {'lo': pos.min(0).tolist(), 'hi': pos.max(0).tolist(), 'A': np.array(d['A'], np.int32).reshape(-1), 'B': np.array(d['B'], np.int32).reshape(-1), 'pos': pos, 'size': size}
     return _pd[kind]
 
-SIDE_OFF = [(0, -BOARD_H / 2), (BOARD_W / 2, 0), (0, BOARD_H / 2), (-BOARD_W / 2, 0)]
+# real connector positions (mm from the outline centre, KiCad view) from mono_electronics v12 / the panel .kicad_pcb
+SIDE_OFF = [(52.0, -46.6), (70.9, -7.8), (-10.0, 46.6), (-70.9, 38.2)]          # J_PORT_N1/E1/S1/W1
+BOARD_CONN = {'J_ROW': (69.0, -27.8), 'J_COL': (69.0, 18.8)}                     # J_ROW1, J_COL1 (40P FFC)
+PANEL_CONN = {'full': {'J_ROW': (-7.2, 0.0), 'J_COL': (27.8, 0.0)},              # back side receptacles
+              'flat': {'J_ROW': (-75.3, 0.0), 'J_COL': (0.0, 75.1)},
+              'lattice': {'J_ROW': (-14.0, 81.0), 'J_COL': (14.0, 81.0)}}
+FFC_LENGTHS = [80, 100, 150, 200]          # 40P 0.5 mm Type B FFC (C2857750 = 100 mm)
+JST_LENGTHS = [50, 100, 150, 200, 300]     # JST-SH 5P stacking cables
+def pick_len(d, options): return next((L for L in options if L >= d * 1.12), options[-1])
 def rotv(x, y, r):
     for _ in range(r & 3): x, y = -y, x
     return x, y
@@ -31,22 +39,28 @@ class Board:
         s.x, s.y, s.rot, s.powered = x, y, rot, True
         s.id = bid if bid is not None else world.new_id()
         s.node = Node(world, s.id)
-        s.tile = np.zeros((32, 32), np.uint8); s.pdemo = 0; s.pdemo_t = 0
+        s.tile = np.zeros((32, 32), np.uint8); s.pdemo = 0; s.pdemo_t = 0; s.override = None
     def port_pos(s, side):
         dx, dy = rotv(*SIDE_OFF[side], s.rot); return s.x + dx, s.y + dy
     def world_dir(s, side): return (side + s.rot) & 3
+    def conn_pos(s, name):
+        dx, dy = rotv(*BOARD_CONN[name], s.rot); return s.x + dx, s.y + dy
 
 class Panel:
     def __init__(s, kind, x, y, rot=0):
         s.kind, s.x, s.y, s.rot = kind, x, y, rot
-        s.board = None; s.ffc = 'B'; s.open_col = -1
+        s.board = None; s.ffc = 'B'; s.open_col = -1; s.ffc_len = 100
         s.duty = np.zeros(1024, np.float32)
     @property
     def size(s): return PANELS[s.kind][0]
+    def conn_pos(s, name):
+        dx, dy = rotv(*PANEL_CONN[s.kind][name], s.rot); return s.x + dx, s.y + dy
 
 class Cable:
     def __init__(s, a, as_, b, bs, ctype='B'):
         s.a, s.as_, s.b, s.bs, s.type, s.plugged = a, as_, b, bs, ctype, True
+        d = ((a.port_pos(as_)[0] - b.port_pos(bs)[0]) ** 2 + (a.port_pos(as_)[1] - b.port_pos(bs)[1]) ** 2) ** 0.5
+        s.length = pick_len(d, JST_LENGTHS)
 
 class World:
     def __init__(s):
@@ -99,6 +113,8 @@ class World:
         for b in s.boards:
             if not any(p.board is b for p in s.panels):
                 p = s.add_panel(kind, b.x, b.y, b.rot); p.board = b
+                d = max(((b.conn_pos(n)[0] - p.conn_pos(n)[0]) ** 2 + (b.conn_pos(n)[1] - p.conn_pos(n)[1]) ** 2) ** 0.5 for n in ('J_ROW', 'J_COL'))
+                p.ffc_len = pick_len(d, FFC_LENGTHS)
 
     # ------------------------------------------------ wires
     def comps(s):
@@ -207,7 +223,8 @@ class World:
         for p in s.panels:
             b = p.board
             if b is None or b not in s.boards or not b.powered: p.duty[:] = 0; continue
-            lv = lut[b.tile.reshape(-1)].copy()
+            src = b.override if getattr(b, 'override', None) is not None else b.tile
+            lv = lut[src.reshape(-1)].copy()
             if p.open_col >= 0: lv.reshape(32, 32)[:, p.open_col] = 0
             m = panel_data(p.kind)[p.ffc]
             out = np.zeros(1024, np.float32); ok = m >= 0
@@ -227,7 +244,7 @@ class World:
     # ------------------------------------------------ save / load / presets
     def to_json(s):
         bi = {b: i for i, b in enumerate(s.boards)}
-        return {'boards': [dict(id=b.id, x=b.x, y=b.y, rot=b.rot, powered=b.powered, pdemo=b.pdemo, demo=b.node.demo) for b in s.boards],
+        return {'cable_len': [c.length for c in s.cables], 'ffc_len': [p.ffc_len for p in s.panels], 'boards': [dict(id=b.id, x=b.x, y=b.y, rot=b.rot, powered=b.powered, pdemo=b.pdemo, demo=b.node.demo) for b in s.boards],
                 'panels': [dict(kind=p.kind, x=p.x, y=p.y, rot=p.rot, board=bi.get(p.board, -1), ffc=p.ffc, open_col=p.open_col) for p in s.panels],
                 'cables': [dict(a=bi[c.a], as_=c.as_, b=bi[c.b], bs=c.bs, type=c.type, plugged=c.plugged) for c in s.cables],
                 'maxb': s.maxb, 'brightness': s.brightness, 'gamma': s.gamma}
@@ -241,6 +258,8 @@ class World:
         for e in d['cables']:
             c = s.connect(s.boards[e['a']], e['as_'], s.boards[e['b']], e['bs'], e.get('type', 'B'))
             if c: c.plugged = e.get('plugged', True)
+        for c, L in zip(s.cables, d.get('cable_len', [])): c.length = L
+        for p, L in zip(s.panels, d.get('ffc_len', [])): p.ffc_len = L
         s.maxb = d.get('maxb', 16); s.brightness = d.get('brightness', 128); s.gamma = d.get('gamma', 2.2)
     def preset(s, cols, rows, kind='full', pitch=None):
         s.__init__()
