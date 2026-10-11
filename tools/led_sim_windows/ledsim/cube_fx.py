@@ -357,3 +357,125 @@ def figure(kind, x, y, z, t, dt=1 / 60, _cache={}):
     f = _cache.get(kind)
     if f is None: f = _cache[kind] = Figure(kind)
     return f.volume(x, y, z, t, dt)
+
+
+# ---------------------------------------------------------------- volumetric vyshyvanka (from firmware patterns.c vysh())
+RED_T, BLK_T = 1.0, 0.42             # thread "colours" as brightness, same as patterns.c (red 1.0, black 0.42, linen 0.035)
+def _hash2(x, y):
+    h = (x.astype(np.uint32) * np.uint32(374761393) + y.astype(np.uint32) * np.uint32(668265263)) & np.uint32(0xFFFFFFFF)
+    h = ((h ^ (h >> np.uint32(13))) * np.uint32(1274126177)) & np.uint32(0xFFFFFFFF)
+    return ((h ^ (h >> np.uint32(16))) & np.uint32(0xFFFF)).astype(np.float32) / 65535.0
+def _smooth(e0, e1, x):
+    t = np.clip((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t)
+
+def _motif(m, dx, dy, u, v):
+    """patterns.c motif(), vectorized: dx,dy 0..7 from the rapport centre, u,v 0..15 in the rapport"""
+    ax, ay = np.maximum(dx, dy), np.minimum(dx, dy); o = np.zeros(dx.shape, np.float32)
+    def put(c, val):
+        nonlocal o; o = np.where((o == 0) & c, val, o)
+    if m == 0:                                                   # Alatyr 8-point star / rose
+        put(ax + ay <= 1, RED_T); put((ay == 0) & (ax <= 6), BLK_T)
+        put((ax - ay <= 1) & (ax + ay <= 9) & (ax >= 2), RED_T); put((ax + ay == 7) & (ay >= 1) & (ax - ay >= 3), BLK_T)
+        put((ax == 7) & (ay == 7), RED_T)
+    elif m == 1:                                                 # nested rhombuses
+        r = dx + dy; put(r == 0, RED_T); put(r % 4 == 2, RED_T); put((r % 4 == 0) & (r <= 12), BLK_T)
+    elif m == 2:                                                 # oblique crosses
+        put((dx == dy) & (dx <= 5), RED_T); put(((dx == 0) & (dy == 7)) | ((dy == 0) & (dx == 7)), RED_T)
+        put(np.abs(dx - dy) == 7, BLK_T); put(((dx == 3) & (dy == 0)) | ((dy == 3) & (dx == 0)) | ((dx == 0) & (dy == 0)), BLK_T)
+        put((dx + dy == 7) & ((dx == 2) | (dy == 2)), BLK_T)
+    else:                                                        # tree of life
+        cx = np.abs(u - 7) + np.where(u > 7, -1, 0)
+        put((cx == 0) & (v >= 2) & (v <= 14), BLK_T)
+        put((v >= 3) & (v <= 12) & (cx >= 1) & (cx <= 5) & ((v + cx) % 4 == 0) & (cx <= (13 - v) // 2 + 2), RED_T)
+        put((cx == 0) & (v == 1), RED_T); put((v == 14) & (cx <= 3) & (cx >= 1), BLK_T)
+        put((v == 15) & ((cx == 2) | (cx == 4)), RED_T)
+        put(((cx == 5) & (v == 4)) | ((cx == 6) & (v == 8)) | ((cx == 4) & (v == 1)), RED_T)
+    return o
+
+def vysh_face(W, H, t, m, seed=0, T=14.0):
+    """one embroidered face W x H (array [H, W]) — patterns.c vysh(): zigzag borders top/bottom, a 16x16 (8x8 on small
+    faces) mirrored rapport field that is sewn stitch by stitch from each rapport centre and later unpicked, alternate
+    rapports swap red/black thread, a breathing pulse runs through the red thread, needle flash on the newest stitch."""
+    Y, X = np.mgrid[0:H, 0:W]; Xs, Ys = X + seed * 37, Y + seed * 11
+    ph = (t / T) % 1.0
+    linen = 0.035 + 0.012 * np.where((X + Y) & 1, 1, -1) + 0.008 * _hash2(Xs, Ys)
+    pulse = 0.82 + 0.18 * np.sin(t * 1.7 - (X + Y) * 0.16)
+    out = linen.astype(np.float32)
+    bh = 0 if H < 8 else (3 if H < 64 else 5)
+    if bh:                                                       # running zigzag borders
+        yy = np.where(Y < bh, Y, H - 1 - Y); z = np.abs(((X + int(t * 2.0)) % 8) - 4)
+        v = np.where(yy == 0, BLK_T * 0.6, np.where((z == yy) | (z == yy - 1), RED_T, np.where((yy == bh - 1) & (X & 1 == 1), BLK_T, 0)))
+        on = _smooth(0.0, 0.04, t / 6.0 - np.abs(X - W / 2) / W)
+        bmask = (Y < bh) | (Y >= H - bh)
+        out = np.where(bmask & (v > 0), linen + (v * pulse - linen) * on, out)
+    fh = H - 2 * bh; R = 16 if min(W, fh) >= 16 else 8; sc = 16 // R
+    fy = Y - bh; ox, oy = (W % R) // 2, (fh % R) // 2
+    u0, v0 = (X - ox) % R, (fy - oy) % R
+    u, v = u0 * sc + (sc - 1) * (u0 >= R // 2), v0 * sc + (sc - 1) * (v0 >= R // 2)   # 8x8 rapport samples the 16x16 motif
+    dx = np.where(u < 8, 7 - u, u - 8); dy = np.where(v < 8, 7 - v, v - 8)
+    val = _motif(m % 4, dx, dy, u, v)
+    tx, ty = (X - ox) // R, (fy - oy) // R
+    if m % 4 != 3: val = np.where(((tx + ty) & 1) == 1, np.where(val == RED_T, BLK_T, np.where(val == BLK_T, RED_T, 0)), val)
+    order = (np.maximum(dx, dy) + 0.4 * (dx + dy)) / 10.0 * 0.55 + 0.12 * _hash2(Xs, Ys) + 0.05 * ((tx + ty) & 3)
+    rin = _smooth(order, order + 0.05, ph * 1.6); rout = 1 - _smooth(order, order + 0.05, (ph - 0.86) * 7.0)
+    a = rin * rout
+    xst = np.where((u + v) & 1, 1.0, 0.84)                       # cross-stitch texture: the two diagonals of an X
+    glow = np.where(val == RED_T, pulse, 1.0)
+    spark = np.where((rin < 0.999) & (rin > 0.02), 0.35 * (1 - rin), 0)
+    field = np.clip(linen + (val * glow * xst - linen) * a + spark, 0, 1)
+    fm = (Y >= bh) & (Y < H - bh) & (val > 0)
+    return np.where(fm, field, out).astype(np.float32)
+
+def vysh3d(n, t, zpitch=1.0):
+    """volumetric vyshyvanka for an n x 32 x 32 cube (array [z, y, x], linear 0..1 — the firmware gamma/BCM is applied by
+    the renderer): embroidered motifs on all 6 faces (each face its own motif, phase-shifted so they are sewn one after the
+    other), zigzag borders running along the 12 cube edges, an inner shell with darker borders (layered depth), and a
+    rotating ornamental rhombus-star in the core; everything breathes slowly."""
+    V = np.zeros((n, 32, 32), np.float32)
+    k = int(t // 14.0); breath = 0.88 + 0.12 * math.sin(t * 0.9)
+    V[0] = vysh_face(32, 32, t, k, 0)                                            # front
+    V[-1] = vysh_face(32, 32, t + 3.5, k + 2, 1)[:, ::-1]                      # back
+    if n >= 3:
+        V[:, :, 0] = np.maximum(V[:, :, 0], vysh_face(32, n, t + 7.0, k + 1, 2))  # left  [z, y]
+        V[:, :, -1] = np.maximum(V[:, :, -1], vysh_face(32, n, t + 10.5, k + 3, 3))
+        V[:, 0, :] = np.maximum(V[:, 0, :], vysh_face(32, n, t + 1.7, k + 1, 4))   # top   [z, x]
+        V[:, -1, :] = np.maximum(V[:, -1, :], vysh_face(32, n, t + 5.2, k + 3, 5))
+    # 12 edges: running red/black zigzag stitches (border on the edges)
+    def edge(L, ph): i = np.arange(L); z = np.abs(((i + int(t * 3) + ph) % 6) - 3); return np.where(z == 0, RED_T, np.where(z == 3, BLK_T, 0.15)).astype(np.float32)
+    ex, ez = edge(32, 0), edge(n, 2)
+    for yy in (0, 31):
+        for zz in (0, n - 1): V[zz, yy, :] = ex
+        for xx in (0, 31): V[:, yy, xx] = ez
+    for zz in (0, n - 1):
+        for xx in (0, 31): V[zz, :, xx] = ex
+    # inner shell (layered depth): dim black-thread borders 3 voxels in
+    d = 3
+    if n >= 2 * d + 2:
+        e2 = edge(32 - 2 * d, 1) * 0.45; e3 = edge(n - 2 * d, 3) * 0.45
+        for yy in (d, 31 - d):
+            for zz in (d, n - 1 - d): V[zz, yy, d:32 - d] = np.maximum(V[zz, yy, d:32 - d], e2)
+            for xx in (d, 31 - d): V[d:n - d, yy, xx] = np.maximum(V[d:n - d, yy, xx], e3)
+        for zz in (d, n - 1 - d):
+            for xx in (d, 31 - d): V[zz, d:32 - d, xx] = np.maximum(V[zz, d:32 - d, xx], e2)
+    # core: rotating rhombus-star (octahedron shell + 6 tapered spikes + 8 diagonal stitches), grown with the motif phase
+    z_, y_, x_ = np.meshgrid(np.arange(n), np.arange(32), np.arange(32), indexing='ij')
+    x, y, z = (x_ - 15.5) / 16, (y_ - 15.5) / 16, (z_ - (n - 1) / 2) / 16 * zpitch
+    a, b = t * 0.45, 0.5 + 0.25 * math.sin(t * 0.3)
+    X1 = x * math.cos(a) + z * math.sin(a); Z1 = -x * math.sin(a) + z * math.cos(a)
+    Y2 = y * math.cos(b) - Z1 * math.sin(b); Z2 = y * math.sin(b) + Z1 * math.cos(b)
+    zext = max((n - 1) / 2 / 16 * zpitch, 0.12)
+    grow = _smooth(0.0, 0.5, (t / 14.0) % 1.0) * (1 - _smooth(0.86, 1.0, (t / 14.0) % 1.0)) * 0.7 + 0.3
+    r = min(0.42, 0.55 * max(zext, 0.25)) * breath * grow
+    w = 1.6 / 16                                                                 # ~1.6 voxel thick shell, anti-aliased
+    A = np.abs(X1) + np.abs(Y2) + np.abs(Z2)
+    shell = np.clip(1 - np.abs(A - r) / w, 0, 1) * BLK_T * 1.4
+    inner = np.clip(1 - np.abs(A - r * 0.45) / w, 0, 1) * RED_T
+    sp = 0
+    for P, Q, Rr in ((X1, Y2, Z2), (Y2, X1, Z2), (Z2, X1, Y2)):
+        L = np.abs(P); taper = np.clip(1 - L / (r * 1.9), 0, 1) * 0.11 + 0.01
+        sp = np.maximum(sp, np.clip(1 - np.maximum(np.abs(Q), np.abs(Rr)) / taper, 0, 1) * (L > r * 0.5) * (L < r * 1.9))
+    diag = np.clip(1 - (np.abs(np.abs(X1) - np.abs(Y2)) + np.abs(np.abs(Y2) - np.abs(Z2))) / w, 0, 1) * (A < r * 1.25) * (A > r * 0.6)
+    core = np.maximum.reduce([shell, inner, sp * RED_T, diag * BLK_T]) * (0.82 + 0.18 * math.sin(t * 1.7))
+    inside = (x_ > 0) & (x_ < 31) & (y_ > 0) & (y_ < 31) & (z_ > 0) & (z_ < n - 1) if n > 2 else np.ones_like(V, bool)
+    V = np.where(inside, np.maximum(V, core), V)
+    return np.clip(V * (0.9 + 0.1 * breath), 0, 1).astype(np.float32)

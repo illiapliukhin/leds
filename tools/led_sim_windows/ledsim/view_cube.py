@@ -9,11 +9,11 @@ from .world import PANELS
 from .camera import OrbitCam
 from . import cube_fx, image3d
 
-DEMOS3D = ['walker', 'runner', 'gogo', 'ambigram', 'anamorph', 'image', 'tsweep', 'life', 'fireworks', 'snake', 'heart', 'ripples', 'plasma', 'dna', 'shapes', 'wave', 'rain', 'sphere', 'text', 'slices2d', 'extrude2d']
+DEMOS3D = ['vysh3d', 'walker', 'runner', 'gogo', 'ambigram', 'anamorph', 'image', 'tsweep', 'life', 'fireworks', 'snake', 'heart', 'ripples', 'plasma', 'dna', 'shapes', 'wave', 'rain', 'sphere', 'text', 'slices2d', 'extrude2d']
 DEMO_RU = {'shapes': 'Вращающиеся фигуры', 'wave': '3D-волна', 'rain': 'Дождь', 'sphere': 'Сфера', 'text': '3D-текст (проход)',
            'slices2d': '2D-демо по слоям (срезы)', 'extrude2d': '2D-демо выдавливанием',
            'ambigram': 'Амбиграмма (3 слова)', 'anamorph': 'Анаморфоз', 'image': 'Картинка → 3D', 'tsweep': 'Вращающийся 3D-текст', 'life': '3D «Жизнь»',
-           'fireworks': 'Фейерверк', 'snake': '3D-змейка', 'heart': 'Воксельное сердце', 'ripples': 'Круги на воде', 'plasma': 'Плазма', 'dna': 'ДНК (двойная спираль)', 'walker': 'Идущий человек', 'runner': 'Бегущий человек', 'gogo': 'Гоу-гоу (танцовщица)'}
+           'fireworks': 'Фейерверк', 'snake': '3D-змейка', 'heart': 'Воксельное сердце', 'ripples': 'Круги на воде', 'plasma': 'Плазма', 'dna': 'ДНК (двойная спираль)', 'walker': 'Идущий человек', 'runner': 'Бегущий человек', 'gogo': 'Гоу-гоу (танцовщица)', 'vysh3d': 'Вышиванка 3D'}
 _GLUT = ((np.linspace(0, 1, 1024)[:, None] ** (1 / 2.2)) * np.array([255, 246, 228])).astype(np.uint8)
 GLYPH = {}
 def glyph_cols(ch):
@@ -58,6 +58,7 @@ class CubeView:
             return image3d.volume(image3d.MODES[s.imode], g, m, n, t, mask2=m2, fill=s.ifill)
         if name == 'tsweep': return cube_fx.FX.text_sweep(s.words[0], x, y, z, t, n)
         if name in ('walker', 'runner', 'gogo'): return cube_fx.figure({'walker': 'walk', 'runner': 'run'}.get(name, name), x, y, z, t, dt)
+        if name == 'vysh3d': return cube_fx.vysh3d(n, t, s.zpitch())
         if name == 'life': return s.fx.life3d(t, dt)
         if name == 'fireworks': return s.fx.fireworks(t, dt)
         if name == 'snake': return s.fx.snake3d(t, dt)

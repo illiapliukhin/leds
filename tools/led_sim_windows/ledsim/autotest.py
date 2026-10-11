@@ -174,6 +174,17 @@ def script(app, t, timing):
         for nm in ('walker', 'runner', 'gogo'):
             cv.demo = DEMOS3D.index(nm); timing['key'] = 'fig_%s_N%d' % (nm, N); yield 150
             timing['key'] = None; t.L('PASS', 'фигура %-7s N=%d: 150 кадров без исключений' % (nm, N))
+    # volumetric vyshyvanka at every cube size: shape, range, faces embroidered, core present, frame time
+    from . import cube_fx as CF
+    import time as _tm
+    for N in (8, 16, 32):
+        cv.N = N; cv._grid(); cv.demo = DEMOS3D.index('vysh3d'); timing['key'] = 'vysh3d_N%d' % N; yield 90; timing['key'] = None
+        V = CF.vysh3d(N, 9.0); t0 = _tm.perf_counter(); CF.vysh3d(N, 9.5); ms = (_tm.perf_counter() - t0) * 1e3
+        faces = [V[0], V[-1], V[:, :, 0], V[:, :, -1], V[:, 0, :], V[:, -1, :]]
+        lit = [int((f > 0.3).sum()) for f in faces]; core = float(V[1:-1, 1:-1, 1:-1].max()) if N > 2 else 1.0
+        lv = len(set((V * 255).astype(int).ravel().tolist()))
+        t.check(V.shape == (N, 32, 32) and V.min() >= 0 and V.max() <= 1 and min(lit) > 0 and core > 0.3,
+                'вышиванка 3D N=%d: стежки на всех 6 гранях %s, ядро-звезда %.2f, %d уровней яркости из 256, расчёт %.1f мс' % (N, lit, core, lv, ms))
     cv.N = 8; cv._grid(); cv.demo = 0
 
     # ---------------------------------------------------------------- 6. Тест mode (bring-up), clean and with faults
