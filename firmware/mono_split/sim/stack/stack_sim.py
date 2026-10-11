@@ -27,6 +27,20 @@ LAYOUTS = {
 MACS = [0x24EC4A3B9D17, 0x24EC4A1F02C4, 0x24EC4A7A51E0, 0x24EC4A55C3A9, 0x24EC4A0C88F2, 0x24EC4A6E1D3B]
 
 
+
+def layout_boards(layout):
+    """named layouts, or any 'CxR' grid with pseudo-random rotations"""
+    if layout in LAYOUTS: return LAYOUTS[layout]
+    c, r = map(int, layout.split('x'))
+    rng = random.Random(c * 100 + r)
+    return [(x, y, rng.randrange(4)) for y in range(r) for x in range(c)]
+
+
+def mac_for(i):
+    if i < len(MACS): return MACS[i]
+    return 0x24EC4A000000 | (random.Random(1000 + i).randrange(0x100000, 0xFFFFFF))
+
+
 def crc8(d):
     c = 0
     for x in d:
@@ -56,7 +70,7 @@ class Board:
 class Sim:
     def __init__(self, layout, log_path, base=5800):
         self.layout = layout
-        self.boards = [Board(i, *p, MACS[i], base) for i, p in enumerate(LAYOUTS[layout])]
+        self.boards = [Board(i, *p, mac_for(i), base) for i, p in enumerate(layout_boards(layout))]
         self.lock = threading.RLock()
         self.t0 = time.time()
         self.log = open(log_path, 'w')
@@ -414,10 +428,12 @@ def regress(sim, layout, args):
     for k, i in enumerate(order):
         sim.cmd(i, 'stack start'); time.sleep(0.15 + 0.1 * k)
     res = {'layout': layout, 'steps': []}
-    t, why = wait(lambda: check_formed(sim), 60)
+    TMO = 60 + 4 * len(sim.boards)
+    t, why = wait(lambda: check_formed(sim), TMO)
     res['form'] = t; sim.event('regress: initial formation %s (%s)' % ('%.1f s' % t if t else 'FAIL', why))
     ok_all = t is not None
-    for v in range(len(sim.boards)):
+    victims = list(range(len(sim.boards)))[:args.steps] if args.steps >= 0 else range(len(sim.boards))
+    for v in victims:
         if not ok_all: break
         time.sleep(3)
         t_u = sim.now()
@@ -433,16 +449,16 @@ def regress(sim, layout, args):
                 ok, why = check_formed(sim, mem, t_u)
                 if not ok: return False, why
             return True, 'ok'
-        tu, wu = wait(seg_ok, 45)
+        tu, wu = wait(seg_ok, TMO)
         t_r = sim.now()
         sim.unplug(v, False)
-        tr, wr = wait(lambda: check_formed(sim, None, t_r), 60)
+        tr, wr = wait(lambda: check_formed(sim, None, t_r), TMO)
         step = dict(victim=v, unplug_s=tu, unplug_why=wu, replug_s=tr, replug_why=wr, ok=tu is not None and tr is not None)
         res['steps'].append(step)
         sim.event('regress: board %d %s (split %s, merge %s)' % (v, 'PASS' if step['ok'] else 'FAIL',
                   '%.1fs' % tu if tu else wu, '%.1fs' % tr if tr else wr))
         if tr is None: ok_all = False
-    res['pass'] = ok_all and len(res['steps']) == len(sim.boards) and all(s['ok'] for s in res['steps'])
+    res['pass'] = ok_all and len(res['steps']) == len(victims) and all(s['ok'] for s in res['steps'])
     json.dump(res, open(args.result, 'w'), indent=1)
     sim.event('regress: %s' % ('PASS' if res['pass'] else 'FAIL'))
     sim.L(regress=res)
@@ -450,7 +466,7 @@ def regress(sim, layout, args):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--layout', default='3x2', choices=list(LAYOUTS))
+    ap.add_argument('--layout', default='3x2')
     ap.add_argument('--log', default=None)
     ap.add_argument('--headless', action='store_true')
     ap.add_argument('--duration', type=float, default=0)
@@ -458,6 +474,7 @@ def main():
     ap.add_argument('--victim', type=int, default=None)
     ap.add_argument('--regress', action='store_true')
     ap.add_argument('--show', default='')
+    ap.add_argument('--steps', type=int, default=-1)
     ap.add_argument('--result', default='/workspace/stack/regress.json')
     ap.add_argument('--base', type=int, default=5800)
     a = ap.parse_args()

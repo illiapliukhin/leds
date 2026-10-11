@@ -39,7 +39,8 @@ static const char *TAG = "stack";
 #define T_MEMBER_LOST_MS 400
 #define DEFAULT_FPS 60
 #endif
-#define MAXB 16
+#define MAXB 128                 /* boards per stack (RAM ~6 KB for all tables) */
+#define MAXE (MAXB * 2)          /* grid edges: <= 2 per board */
 
 enum { T_HELLO = 1, T_LEADER, T_TOKEN, T_PRESHI, T_SEEN, T_TOKDONE, T_MAP, T_TIME, T_PING, T_PONG, T_TILE };
 #define BCAST 0xFFFFFFFFu
@@ -58,7 +59,7 @@ static uint32_t s_members[MAXB]; static int s_nmem;
 static int64_t s_last_seen[MAXB];
 static tile_t s_tiles[MAXB]; static int s_ntiles; static int s_W = 1, s_H = 1;   /* canvas in tiles */
 static tile_t s_me = {0, 0, 0, 0, true};
-static edge_t s_edges[64]; static int s_nedges;
+static edge_t s_edges[MAXE]; static int s_nedges;
 static volatile uint32_t s_frame;             /* content frame number (shared time base) */
 static volatile int64_t s_last_leader_msg;
 static TaskHandle_t s_render_task;
@@ -399,17 +400,37 @@ static void apply_map_self(void)
                 (unsigned long)s_leader, me.placed, me.x, me.y, me.rot, W, H);
 }
 
+#define LCHUNK 60                /* member ids per LEADER message (8-bit length field) */
+#define MCHUNK 34                /* tiles per MAP message */
+static void send_leader(void)
+{
+    /* payload: n_total, start, ids[count]  (one or more messages) */
+    int st = 0;
+    do {
+        uint8_t pl[2 + LCHUNK * 4]; int n = 0, c = s_nmem - st > LCHUNK ? LCHUNK : s_nmem - st;
+        pl[n++] = (uint8_t)s_nmem; pl[n++] = (uint8_t)st;
+        for (int k = 0; k < c; k++) { put32(pl + n, s_members[st + k]); n += 4; }
+        send_msg(T_LEADER, BCAST, pl, n);
+        st += c;
+    } while (st < s_nmem);
+}
+
 static void send_map(void)
 {
-    uint8_t pl[3 + MAXB * 7]; int n = 0;
+    /* payload: W, H, n_total, start, tiles[count] x 7 bytes */
     xSemaphoreTake(s_lock, portMAX_DELAY);
-    pl[n++] = (uint8_t)s_W; pl[n++] = (uint8_t)s_H; pl[n++] = (uint8_t)s_ntiles;
-    for (int i = 0; i < s_ntiles; i++) {
-        put32(pl + n, s_tiles[i].id); n += 4;
-        pl[n++] = s_tiles[i].placed ? (uint8_t)s_tiles[i].x : 0xFF; pl[n++] = (uint8_t)s_tiles[i].y; pl[n++] = (uint8_t)s_tiles[i].rot;
-    }
+    int st = 0;
+    do {
+        uint8_t pl[4 + MCHUNK * 7]; int n = 0, c = s_ntiles - st > MCHUNK ? MCHUNK : s_ntiles - st;
+        pl[n++] = (uint8_t)s_W; pl[n++] = (uint8_t)s_H; pl[n++] = (uint8_t)s_ntiles; pl[n++] = (uint8_t)st;
+        for (int i = st; i < st + c; i++) {
+            put32(pl + n, s_tiles[i].id); n += 4;
+            pl[n++] = s_tiles[i].placed ? (uint8_t)s_tiles[i].x : 0xFF; pl[n++] = (uint8_t)s_tiles[i].y; pl[n++] = (uint8_t)s_tiles[i].rot;
+        }
+        send_msg(T_MAP, BCAST, pl, n);
+        st += c;
+    } while (st < s_ntiles);
     xSemaphoreGive(s_lock);
-    send_msg(T_MAP, BCAST, pl, n);
 }
 
 static void handle_common(const msg_t *m);
@@ -417,7 +438,7 @@ static void handle_common(const msg_t *m);
 /* PRES probe of one of my own ports (token holder) */
 static void add_edge(uint32_t a, int as, uint32_t b, int bs)
 {
-    if (s_nedges >= 64) return;
+    if (s_nedges >= MAXE) return;
     edge_t e = {a, (uint8_t)as, b, (uint8_t)bs};
     for (int i = 0; i < s_nedges; i++)
         if ((s_edges[i].a == e.b && s_edges[i].as == e.bs && s_edges[i].b == e.a) ||
@@ -450,12 +471,7 @@ static void discover(void)
     for (int i = 0; i < s_nmem && !s_abort; i++) {
         uint32_t id = s_members[i];
         if (id == s_id) alive[i] = true;
-        {   /* beacon before every member: a merging higher-ID leader hears us and stops probing */
-            uint8_t pl[1 + MAXB * 4]; int n = 0;
-            pl[n++] = (uint8_t)s_nmem;
-            for (int k = 0; k < s_nmem; k++) { put32(pl + n, s_members[k]); n += 4; }
-            send_msg(T_LEADER, BCAST, pl, n);
-        }
+        send_leader();   /* beacon before every member: a merging higher-ID leader hears us and stops probing */
         for (int side = 0; side < 4 && !s_abort; side++) {
             if (id == s_id) { probe_side(side); continue; }
             uint8_t sp[1] = {(uint8_t)side};
@@ -545,14 +561,18 @@ static void handle_common(const msg_t *m)
         if (s_state != STACK_LEAD && s_state != STACK_DISCOVER && m->src == s_leader) {
             xSemaphoreTake(s_lock, portMAX_DELAY);
             s_W = m->pl[0]; s_H = m->pl[1]; s_ntiles = m->pl[2];
-            for (int i = 0; i < s_ntiles && i < MAXB; i++) {
-                const uint8_t *p = m->pl + 3 + i * 7;
-                s_tiles[i].id = get32(p); s_tiles[i].placed = p[4] != 0xFF;
-                s_tiles[i].x = (int8_t)p[4]; s_tiles[i].y = (int8_t)p[5]; s_tiles[i].rot = (int8_t)p[6];
+            int st = m->pl[3], c = (m->len - 4) / 7;
+            for (int i = 0; i < c && st + i < MAXB; i++) {
+                const uint8_t *p = m->pl + 4 + i * 7;
+                tile_t *tt = &s_tiles[st + i];
+                tt->id = get32(p); tt->placed = p[4] != 0xFF;
+                tt->x = (int8_t)p[4]; tt->y = (int8_t)p[5]; tt->rot = (int8_t)p[6];
             }
             xSemaphoreGive(s_lock);
-            s_state = STACK_FOLLOW;
-            apply_map_self();
+            if (st + c >= s_ntiles) {                  /* last chunk: map complete */
+                s_state = STACK_FOLLOW;
+                apply_map_self();
+            }
         }
         break;
     case T_TIME:
@@ -677,9 +697,11 @@ static void stack_task(void *arg)
                         send_msg(T_HELLO, s_leader, pl, 1);
                     }
                     if (m.type == T_LEADER && m.src == s_leader) {
-                        bool listed = false;
-                        for (int i = 0; i < m.pl[0]; i++) if (get32(m.pl + 1 + 4 * i) == s_id) listed = true;
-                        if (!listed) send_msg(T_HELLO, s_leader, pl, 1);
+                        static bool listed;
+                        int tot = m.pl[0], st = m.pl[1], c = (m.len - 2) / 4;
+                        if (st == 0) listed = false;
+                        for (int i = 0; i < c; i++) if (get32(m.pl + 2 + 4 * i) == s_id) listed = true;
+                        if (st + c >= tot && !listed) send_msg(T_HELLO, s_leader, pl, 1);
                     }
                     handle_common(&m);
                 }
@@ -708,17 +730,15 @@ static void stack_task(void *arg)
                 next_time = now + 500000;
             }
             if (now >= next_beacon) {
-                uint8_t pl[1 + MAXB * 4]; int n = 0;
-                pl[n++] = (uint8_t)s_nmem;
-                for (int i = 0; i < s_nmem; i++) { put32(pl + n, s_members[i]); n += 4; }
-                send_msg(T_LEADER, BCAST, pl, n);
+                send_leader();
                 next_beacon = now + 1000000;
             }
             if (now >= next_ping && s_nmem > 1) {
                 ping_i = (ping_i + 1) % s_nmem;
                 if (s_members[ping_i] == s_id) ping_i = (ping_i + 1) % s_nmem;
                 send_msg(T_PING, s_members[ping_i], NULL, 0);
-                next_ping = now + 150000;
+                int per = T_MEMBER_LOST_MS * 1000 / (2 * (s_nmem - 1));   /* every member pinged >= 2x per loss window */
+                next_ping = now + (per < 150000 ? per : 150000);
             }
             for (int i = 0; i < s_nmem; i++) {
                 if (s_members[i] != s_id && now - s_last_seen[i] > T_MEMBER_LOST_MS * 1000) {
@@ -787,8 +807,8 @@ esp_err_t stack_start(matrix_panel_t *panel)
     xTaskCreatePinnedToCore(sync_task, "fsync", 3072, NULL, configMAX_PRIORITIES - 2, NULL, 1);
 #endif
     xTaskCreatePinnedToCore(render_task, "stack_rnd", 4096, NULL, 4, &s_render_task, 1);   /* rendering must never delay edge handling */
-    xTaskCreatePinnedToCore(stack_task, "stack", 6144, NULL, 7, NULL, 0);
-    xTaskCreatePinnedToCore(stream_task, "stack_str", 4096, NULL, 3, NULL, 0);
+    xTaskCreatePinnedToCore(stack_task, "stack", 10240, NULL, 7, NULL, 0);
+    xTaskCreatePinnedToCore(stream_task, "stack_str", 6144, NULL, 3, NULL, 0);
     return ESP_OK;
 }
 

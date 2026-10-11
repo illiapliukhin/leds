@@ -16,6 +16,7 @@ AMBER = np.array([255, 150, 30], np.float32)
 
 ap = argparse.ArgumentParser()
 ap.add_argument('log'); ap.add_argument('out')
+ap.add_argument('--raw', nargs=2, type=int, metavar=('CW', 'CH'), help='LOG is a host_render frame file (canvas WxH)')
 ap.add_argument('--t0', type=float, required=True); ap.add_argument('--dur', type=float, required=True)
 ap.add_argument('--title', default=''); ap.add_argument('--sub', default=''); ap.add_argument('--cap', default='')
 ap.add_argument('--res', default='3840x2160'); ap.add_argument('--fps', type=int, default=60)
@@ -25,36 +26,46 @@ a = ap.parse_args()
 W, H = map(int, a.res.split('x'))
 k = H / 2160.0
 
-# ---------------------------------------------------------------- load scan samples per board
-boards = None; samples = {}
-t_lo, t_hi = a.t0 - 1, a.t0 + a.dur + 1
-with open(a.log) as fh:
-    for line in fh:
-        if '"layout"' in line and boards is None:
-            r = json.loads(line); boards = [tuple(b) for b in r['boards']]; continue
-        if '"raw"' not in line: continue
-        r = json.loads(line)
-        if r['t'] < t_lo: continue
-        if r['t'] > t_hi: break
-        samples.setdefault(r['g'], []).append((r['t'], decode_g(r['raw'])))
-n = len(boards)
-# normalise to the firmware's full-scale duty (global brightness setting) seen in this clip
-_all = np.concatenate([np.stack([f for _, f in samples[i]]).ravel() for i in samples])
-GAIN = 1.0 / max(1e-3, float(np.percentile(_all, 99.95)))
-del _all
-print('gain %.2f' % GAIN)
-times = {i: [s[0] for s in samples.get(i, [])] for i in range(n)}
+# ---------------------------------------------------------------- frame source
+if a.raw:
+    CW, CH = a.raw
+    RAW = np.memmap(a.log, dtype=np.uint8, mode='r').reshape(-1, CH, CW)
+    boards = [(x, y, 0, 0) for y in range(CH // 32) for x in range(CW // 32)]
+    n = len(boards); GAIN = 1.0
+    def board_frame(i, t):
+        fi = min(len(RAW) - 1, int(round((t - a.t0) * a.fps)))          # frame-exact: video frame n = firmware frame n
+        x, y = boards[i][0], boards[i][1]
+        return RAW[fi, y * 32:(y + 1) * 32, x * 32:(x + 1) * 32].astype(np.float32) / 255.0
+else:
+    boards = None; samples = {}
+    t_lo, t_hi = a.t0 - 1, a.t0 + a.dur + 1
+    with open(a.log) as fh:
+        for line in fh:
+            if '"layout"' in line and boards is None:
+                r = json.loads(line); boards = [tuple(b) for b in r['boards']]; continue
+            if '"raw"' not in line: continue
+            r = json.loads(line)
+            if r['t'] < t_lo: continue
+            if r['t'] > t_hi: break
+            samples.setdefault(r['g'], []).append((r['t'], decode_g(r['raw'])))
+    n = len(boards)
+    # normalise to the firmware's full-scale duty (global brightness setting) seen in this clip
+    _all = np.concatenate([np.stack([f for _, f in samples[i]]).ravel() for i in samples])
+    GAIN = 1.0 / max(1e-3, float(np.percentile(_all, 99.95)))
+    del _all
+    print('gain %.2f' % GAIN)
+    times = {i: [s[0] for s in samples.get(i, [])] for i in range(n)}
 
-def board_frame(i, t):
-    """linear duty (0..1) at host time t, interpolated between consecutive logged scan frames"""
-    ts = times[i]
-    if not ts: return np.zeros((32, 32), np.float32)
-    j = bisect.bisect(ts, t)
-    if j <= 0: return samples[i][0][1]
-    if j >= len(ts): return samples[i][-1][1]
-    (ta, fa), (tb, fb) = samples[i][j - 1], samples[i][j]
-    w = (t - ta) / max(1e-6, tb - ta)
-    return fa * (1 - w) + fb * w
+    def board_frame(i, t):
+        """linear duty (0..1) at host time t, interpolated between consecutive logged scan frames"""
+        ts = times[i]
+        if not ts: return np.zeros((32, 32), np.float32)
+        j = bisect.bisect(ts, t)
+        if j <= 0: return samples[i][0][1]
+        if j >= len(ts): return samples[i][-1][1]
+        (ta, fa), (tb, fb) = samples[i][j - 1], samples[i][j]
+        w = (t - ta) / max(1e-6, tb - ta)
+        return fa * (1 - w) + fb * w
 
 def to_phys(rot, f):          # board-local scan frame -> panel physical orientation (tile_xy in stack_view)
     out = np.zeros_like(f)
