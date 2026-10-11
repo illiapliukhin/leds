@@ -27,8 +27,9 @@
 
 ## Panel selection (`--panel`)
 
-`bringup.py --panel mono32` (default) or `--panel lattice`. You can also set `BRINGUP_PANEL=lattice`. `panels.py` holds the per-panel settings: the `.kicad_pcb`, the pad dump, the cable exit directions for `cable.py`, the background image and the IR model.
+`bringup.py --panel mono32` (default), `--panel lattice` or `--panel full`. You can also set `BRINGUP_PANEL=lattice`. `panels.py` holds the per-panel settings: the `.kicad_pcb`, the pad dump, the cable exit directions for `cable.py`, the background image and the IR model.
 - **mono32**: unchanged. Uses `panel.json`, `cable_check.json`, `ir_v3.json`, `bench_report.md`.
 - **lattice**: `hardware/mono_panel_32x32_lattice`. `panel_lattice.json` is re-dumped from the `.kicad_pcb` with `pdump.py` (KiCad 10 python) whenever the board is newer. Both receptacles sit on the south tab with the cables exiting south, and `cable.py` re-derives Type B = pin 1→1 for that geometry (`cable_check_lattice.json`). The drop readout keeps the board part of `ir_v3.json` and swaps in the lattice panel copper from `analysis.json`. The scene shows the lattice (bars and windows) with lit LEDs. Outputs: `bench_report_lattice.md`, `bench_session_lattice.log`, `png/bringup_lattice_*.png`.
+- **full**: `hardware/mono_panel_32x32_full` (edge-to-edge, 5.0 mm pitch, 160 × 160 mm, 4 layers). `panel_full.json` is re-dumped from the `.kicad_pcb` the same way. Both receptacles are on the back near the centre with the cables exiting south; `cable.py` re-derives Type B = pin 1→1 (`cable_check_full.json`). The drop readout swaps in the full panel's row copper from its `analysis.json`. Outputs: `bench_report_full.md`, `bench_session_full.log`, `png/bringup_full_*.png`.
 
 QEMU runs from a private flash copy (`/tmp/bench_bringup_fw.bin`) under a private process name, and only its own instance (port 5555) is killed on restart. This lets the stacking sim's QEMUs run alongside it.

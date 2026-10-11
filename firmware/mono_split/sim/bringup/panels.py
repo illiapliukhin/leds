@@ -1,5 +1,5 @@
-"""Panel selection for the bring-up sim: `--panel mono32` (default, mono_panel_32x32) or `--panel lattice`
-(hardware/mono_panel_32x32_lattice). Also BRINGUP_PANEL=lattice. Read at import so netmodel/cable pick it up.
+"""Panel selection for the bring-up sim: `--panel mono32` (default, mono_panel_32x32), `--panel lattice`
+(hardware/mono_panel_32x32_lattice) or `--panel full` (hardware/mono_panel_32x32_full, edge-to-edge). Also BRINGUP_PANEL=lattice. Read at import so netmodel/cable pick it up.
 The panel dump (pads, nets, positions) is regenerated from the panel's .kicad_pcb with pdump.py (KiCad python)
 whenever the .kicad_pcb is newer than the dump."""
 import json, os, subprocess, sys
@@ -16,7 +16,13 @@ PANELS = {
                     exit={'J_ROW': (0, -1.0, 0), 'J_COL': (0, -1.0, 0)},          # both receptacles on the south tab, cable exits south
                     cable_json='cable_check_lattice.json',
                     bg=os.path.join(HW, 'mono_panel_32x32_lattice', 'renders', 'lattice_sim_bg.png'),
-                    ir=os.path.join(HW, 'mono_panel_32x32_lattice', 'analysis.json')),
+                    ir=os.path.join(HW, 'mono_panel_32x32_lattice', 'analysis.json'), led_dy=0.775),
+    'full': dict(title='mono_panel_32x32_full', json='panel_full.json',
+                 pcb=os.path.join(HW, 'mono_panel_32x32_full', 'mono_panel_32x32_full.kicad_pcb'),
+                 exit={'J_ROW': (0, -1.0, 0), 'J_COL': (0, -1.0, 0)},             # both receptacles mid-back, cable exits south
+                 cable_json='cable_check_full.json',
+                 bg=os.path.join(HW, 'mono_panel_32x32_full', 'renders', 'full_sim_bg.png'),
+                 ir=os.path.join(HW, 'mono_panel_32x32_full', 'analysis.json'), led_dy=0.0),
 }
 
 def _pick():
@@ -44,7 +50,7 @@ def load():
     return json.load(open(json_path()))
 
 def ir(base):
-    """per-row [board R, panel R]: lattice keeps the board part of ir_v3 and swaps in the lattice panel copper."""
+    """per-row [board R, panel R]: lattice/full keep the board part of ir_v3 and swaps in the lattice panel copper."""
     if not CFG['ir']: return base
     eff = json.load(open(CFG['ir']))['row_R_eff_ohm']
     return {k: [v[0], eff[k]] for k, v in base.items()}

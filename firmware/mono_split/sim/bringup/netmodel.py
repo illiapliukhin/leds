@@ -3,7 +3,7 @@ import json, os, re
 import cable, panels
 D = os.path.dirname(os.path.abspath(__file__))
 B = json.load(open(os.path.join(D, 'board_all.json')))
-P = panels.load()                                                 # --panel mono32|lattice
+P = panels.load()                                                 # --panel mono32|lattice|full
 IR = panels.ir(json.load(open(os.path.join(D, 'ir_v3.json'))))
 HC154_Y = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17]   # 74HC154 Y0..Y15 pins (datasheet)
 I_COL = 1.24 / 1820 * 15                                         # A per column, MBI5124 estimate

@@ -182,7 +182,7 @@ class Scene:
         # panel
         if self.pbg is not None:                                              # lattice: see-through bars, bench shows through
             s.blit(self.pbg, (self.px, self.py))
-            s.blit(self.fs.render('%s (front; bars + windows from its geometry, LEDs from its .kicad_pcb; FFCs on the back of the tab)' % panels.CFG['title'], True, (150, 170, 150)), (self.px - 300, self.py + self.pph + 4))
+            s.blit(self.fs.render(('%s (front; bars + windows from its geometry, LEDs from its .kicad_pcb; FFCs on the back of the tab)' if panels.NAME == 'lattice' else '%s (front, edge-to-edge; LEDs from its .kicad_pcb; FFCs + ribbons are on the back)') % panels.CFG['title'], True, (150, 170, 150)), (self.px - 300, self.py + self.pph + 4))
         else:
             pygame.draw.rect(s, (14, 40, 24), (self.px, self.py, self.pw, self.pw), border_radius=4)
             pygame.draw.rect(s, (80, 120, 90), (self.px, self.py, self.pw, self.pw), 1)
@@ -194,7 +194,7 @@ class Scene:
         # ribbons
         rb = netmodel.BF['J_ROW1']; cb = netmodel.BF['J_COL1']
         col = (150, 105, 35) if not self.fault else (170, 60, 40)
-        if panels.NAME == 'lattice':                                          # both receptacles on the south tab, cables exit south
+        if panels.NAME in ('lattice', 'full'):                                # receptacles side by side, cables exit south
             jr, jc = netmodel.PF['J_ROW'], netmodel.PF['J_COL']; yb = max(p['y'] for p in jr['pads']) + 1.5
             p_row_b = self.bpt(148.5, rb['y']); p_row_p = self.ppt(jr['x'], yb)
             self.ribbon(p_row_b, p_row_p, (p_row_b[0] + 200, p_row_b[1]), (p_row_p[0], p_row_p[1] + 200), 30, col, 'J_ROW1 -> J_ROW  ' + self.cable_label, 6)
@@ -209,11 +209,11 @@ class Scene:
             x, y = pts[10]; pygame.draw.circle(s, (255, 40, 40), (int(x), int(y)), 14, 3)
             s.blit(self.fs.render('OPEN: COL_07', True, (255, 80, 80)), (x + 16, y - 6))
         # LEDs
-        r = max(3, int(self.ps * (0.8 if self.pbg is not None else 1.15)))
+        r = max(3, int(self.ps * (0.8 if panels.NAME == 'lattice' else 1.15)))
         for i, l in enumerate(self.m.leds):
             v = min(1.0, max(0.0, self.lum[i]) / self.full) ** (1 / 2.2)   # LED light is linear; show it gamma-encoded
             c = (int(40 + 215 * v), int(16 + 150 * v * v), int(6 + 20 * v)) if v > 0.03 else (40, 22, 10)
-            x, y = self.ppt(l['x'], l['y'] + (0.775 if self.pbg is not None else 0))   # lattice: LED body centre
+            x, y = self.ppt(l['x'], l['y'] + panels.CFG.get('led_dy', 0.0))   # lattice: LED body centre
             if v > 0.3: pygame.draw.circle(s, (c[0] // 3, c[1] // 4, 0), (int(x), int(y)), r + 3)
             pygame.draw.circle(s, c, (int(x), int(y)), r)
         # per-row readout
