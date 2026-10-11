@@ -240,3 +240,24 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - IMU_SDA In1: the 0.1 mm segment was split at the T at (67.35,3.5) so the junction is a real node.
 - Gates: DRC 0/0/0 (all severities); copper check 0 spots <0.127 mm; netcheck 0 relabels; 0 B-side parts; worst LED drop 92.5 mV (row 17, unchanged); B GND pieces unchanged (each has ≥2 vias); ERC 0, sch vs PCB 0 differences. Gerbers, drill files and zip regenerated.
 - Images: img/v12a_usb_meander.png, v12a_usb_conn.png, v12a_gnd_pmu.png, v12a_id_bus.png, v12a_row_kinks.png, v12a_F.png.
+
+## v13: protections from the physics simulation (2026-10-11)
+- **Battery (71d356c):**
+  - J_BAT1 pad 1 is now net BAT_PACK and feeds F_BAT1 0466002.NRHF (2 A FF, I²t 0.23 A²s, 50 A interrupt), then net BAT_FUSE, then Q_BAT1 AO3401A drain. Source goes to BAT_RAW; the gate goes to GND through R_BATG1 10 k (ideal-diode reverse-battery switch, 72 mV at 1.2 A).
+  - BAT copper is 1.0 mm on F from J_BAT1 to Q_BAT1. It necks to 0.4 mm for the last 2.3 mm between the GND via at (13.2, 44.4) and the C_CHG_BAT1 GND pad. The In1 riser is 0.8 mm.
+  - GND stitch vias at (2, 50) and (2, 58) moved to (6, 51.5) and (8.5, 51.5).
+  - Short-circuit check: at 25 A the fuse clears in about 0.4 ms, against about 2.3 A²s (≈ 4 ms) for the 0.3 mm In1 trace. The pack PCM stays the primary protection (assumed, not on the board).
+- **USB (bedbc9c):**
+  - The connector side is now VBUS_CONN: J_USB1 A4/A9/B4/B9, the B bar, 2 vias and the In1 jog. These 5 track/via relabels are intentional.
+  - D_VBUS1 SMF12A (12 V standoff, 19.9 V clamp) feeds U_OVP1 TPS259531DSGR (OV clamp 5.5–5.9 V; datasheet SLVSE57C confirms TPS259521 is the 3.8 V option, so it is not usable here). Its output drives VBUS (BQ25185 IN, USBLC6 VBUS, C_USB1).
+  - EN/UVLO divider is 100 k / 39 k, giving 4.28 V. dVdt and FLT are left open.
+- **Charger thermal (0ec471b):** F.Cu GND zone x 12.6–25.3, y 37–44.1 (62 mm² fill, solid pad connection), 4 GND vias on the EP return line, EP strap 0.6 mm, GND line 0.4 mm.
+- **Abs-max review (64d1935):** see ABSMAX_REVIEW_v13.md. R_ILM1 changed from 1.78 k to 2.7 k because 1.09–1.24 A exceeded the BQ25185 IN DC abs max of 1.1 A.
+- **Full check:**
+  - DRC 0/0/0, all severities. Copper check 0 spots < 0.127 mm (25 < 0.15 mm, unchanged).
+  - Net relabels vs v12a: only the 5 intended VBUS_CONN items. 0 B-side parts.
+  - LED drop 92.5 mV (row 17, unchanged). B GND: every piece has ≥ 2 vias.
+  - ERC 0. Schematic vs PCB: 0 refs only on one side, 0 pin differences.
+  - Continuity (PROZVONKA_v13.md): 243/243 PASS.
+  - All corners arced (only 39 straight width steps remain). USB skew −0.131 / +0.189 mm.
+- Fab: manufacturing/mono_electronics/v13 and mono_electronics_v13_fab.zip. Images: img/v13_battery.png, v13_usb_ovp.png, v13_charger_thermal.png, v13_F.png.
