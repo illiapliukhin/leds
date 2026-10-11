@@ -52,7 +52,7 @@ Dropping the stacking-port group (DNP) removes ~6 extended lines (~$18 in fees) 
 
 The board and the panel need **2 × 40-pin 0.5 mm FFC, Type B (reverse / opposite-side contacts), 0.3 mm thick with stiffened ends**. They are not part of the SMT order and are not in the JLCPCB BOM upload; they are listed in the annotated BOM.
 
-- **Default (v15):** 120 mm, LCSC **C5371276** (Type B, same series). 100 mm C2857750 was the v13 default and is now too short for most mountings.
+- **Default (v15):** 120 mm, LCSC **C5371276** (JS05B-40P-120-4-8, Type B / reverse, same series), JLC stock 701, $0.154 each (@50 $0.121), checked 2026-10-11. 100 mm C2857750 was the v13 default and is now too short for most mountings.
 - **Other lengths, same series (all Type B):** 80 mm C5371275, 100 mm C2857750, 150 mm C2857751, 200 mm C2857752.
 
 A Type A (same-side) cable mirrors pins 1↔40, and nothing on the panel would light correctly; `firmware/mono_split/sim/bringup` (`cable.py`) derives this from the pad geometry.

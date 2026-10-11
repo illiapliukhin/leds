@@ -307,3 +307,4 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - Fab: manufacturing/mono_electronics/v15 + mono_electronics_v15_fab.zip. BOMs are unchanged from v14. CPL rows were updated for the 76 moved parts. Default FFC is now 120 mm (C5371276).
 - Sims: firmware/mono_split/sim/bringup/board*.json (FFC pads −13.5 mm x, E port +2 mm y); tools/led_sim_windows world.py BOARD_CONN/SIDE_OFF, new data/pcb/board_v15.json.gz (now the current board in the inspector/cube/system views).
 - Images: img/v15/v15_top.png (3D), v15_F.png, v15_F_strip.png, v15_In1.png, v15_In1_strip.png.
+- v15 cleanup: the "FFC TYPE B" silk labels moved to x 122.4, off the FFC outlines. The 120 mm FFC C5371276 is in the annotated BOM: JLC stock 701, $0.154 each ($0.121 @50). Silkscreen gerber and fab zip regenerated. Copper unchanged.
