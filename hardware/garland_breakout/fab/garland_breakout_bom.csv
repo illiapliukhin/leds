@@ -1,0 +1,9 @@
+Designator,Qty,Value,Footprint,MPN,LCSC (verify),Note
+"J_ROW,J_COL",2,FH12-40S-0.5SH,FFC_40P_050 (B.Cu),FH12-40S-0.5SH(55),C434222,Hirose 0.5mm 40p bottom-contact
+"J_R1,J_R2,J_C1,J_C2",4,IDC box header 2x8,IDC-Header_2x08_P2.54mm_Vertical,generic 2x8 box header,C3405,THT hand/wave
+D_R01..D_R32 D_C01..D_C32,64,PESD5V0S1BL,D_0402_1005Metric (SOD-882),PESD5V0S1BL,C2827686,bidirectional 5V ESD
+U_ID,1,24LC02BT-I/OT,SOT-23-5,24LC02BT-I/OT,C83981,ID EEPROM @0x50
+C_ID,1,100nF 16V X7R,C_0402_1005Metric,CL05B104KO5NNNC,C1525,
+TP_VSENSE,1,test pad,TestPoint_Pad_D1.5mm,-,-,no part
+J_INJ,1,DNP,PT 1.5/2-3.5-H,1984617,-,reserved VINJ/GND terminal (DNP)
+"H1-H4",4,M3 plated hole,MountingHole_3.2mm_M3_Pad_Via,-,-,GND / chassis earth

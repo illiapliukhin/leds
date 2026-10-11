@@ -1,0 +1,108 @@
+# LED Interface Standard v1 (mono split, 40-pin FFC pair)
+
+One output standard for every LED load driven by the mono electronics board (`hardware/mono_electronics/`): flat 32×32 / 20×20 panels, lattice panels, the full-bleed panel, the garland breakout + wire nets, and future column expansions. Related docs: [MONO_SPLIT_ARCHITECTURE.md](MONO_SPLIT_ARCHITECTURE.md), [GARLAND_REFERENCE_BUILD.md](GARLAND_REFERENCE_BUILD.md), [LED_SCALING_OPTIONS.md](LED_SCALING_OPTIONS.md), [firmware/panel_id](../../firmware/panel_id/README.md), [hardware/garland_breakout](../garland_breakout/README.md).
+
+## 1. Electrical model (unchanged from the board)
+
+- **Rows** `ROW_01…ROW_32`: P-FET high side (`AO3403`) from `LED_4V1`, one row on at a time (1/32 duty), up to **0.32 A per row** (32 × 10 mA).
+- **Columns** `COL_01…COL_32`: 2 × `MBI5124` constant-current sinks, ≈10 mA each (set by Rext).
+- LED anode → row line, LED cathode → column line. Any load that keeps this polarity and stays within the current/voltage budget in §4 is compliant.
+
+## 2. Connectors and cable
+
+| Item | Value |
+|---|---|
+| Board side | `J_ROW1`, `J_COL1`: Hirose `FH12-40S-0.5SH`, F.Cu, cable exits east, pin 1 north |
+| Load side (panel or breakout) | same part on **B.Cu**, ROW exits west, pin 1 north (the panel footprint is the reference; the garland breakout clones it) |
+| Cable | 40-way 0.5 mm FFC, **Type B**, 0.3 mm, stiffened ends, pin 1 → pin 1 |
+| Contact rating | 0.5 A/contact (FH12) |
+
+## 3. Pinout (v1 formalises pins 33–40)
+
+### J_ROW (40 pins)
+
+| Pin | Net | Direction (board view) | Rule |
+|---:|---|---|---|
+| 1–32 | `ROW_01`…`ROW_32` | out, high side | row n on pin n |
+| 33 | `GND` | — | reference / ESD return / ID ground |
+| 34 | `VLED_SENSE` | in (optional) | load-end tap of `LED_4V1` rail or of ROW_01 far end, for drop diagnostics; NC if unused |
+| 35 | `ID_SDA` | I²C | panel ID EEPROM data |
+| 36 | `ID_SCL` | I²C | panel ID EEPROM clock |
+| 37 | `ID_3V3` | out, ≤ 5 mA | EEPROM supply (from always-on 3V3 so the EEPROM is never back-powered through SDA/SCL) |
+| 38 | `GND` | — | |
+| 39 | `ID_PRESENT_N` | in | tied to GND on any compliant load; floating = no cable / legacy |
+| 40 | `GND` | — | |
+
+### J_COL (40 pins)
+
+| Pin | Net | Direction | Rule |
+|---:|---|---|---|
+| 1–32 | `COL_01`…`COL_32` | sink | column n on pin n |
+| 33 | `GND` | — | |
+| 34 | `EXP_SDI` | out | `U_LED2` SDO → expansion MBI5124 chain (reserved, see LED_SCALING_OPTIONS.md) |
+| 35 | `EXP_CLK` | out | buffered `LED_CLK_Y` (reserved) |
+| 36 | `EXP_LE` | out | buffered `LED_LE_Y` (reserved) |
+| 37 | `EXP_OE_N` | out | buffered `LED_OE_Y` (reserved) |
+| 38 | `GND` | — | |
+| 39 | `EXP_3V3` | out, ≤ 50 mA | logic supply for an expansion (reserved) |
+| 40 | `GND` | — | |
+
+Loads that do not implement a function leave the pin **unconnected**, except the three GND pins, which every new load must tie to its ground. Today's 32×32 and 20×20 panels leave 33–40 open; they read as "legacy, no ID" and get the default profile. The 20×20 panel keeps using lines 1–20.
+
+**Why GND on three pins per cable:** long nets collect ESD and common-mode noise. Without a ground in the FFC, the only return for a TVS on the load side is through the LEDs. Three contacts (1.5 A total) are also enough for the EEPROM and any expansion logic.
+
+## 4. Panel ID EEPROM
+
+- Part: any 24C02-class EEPROM, 2 kbit, SOT-23-5 (`24LC02BT-I/OT`), 7-bit address **0x50**, WP tied to GND (writable from the main board for provisioning).
+- Bus: `ID_SDA`/`ID_SCL` join the main board's existing `IMU_SDA`/`IMU_SCL` bus (GPIO8/9). The BMI270 sits at 0x68/0x69, so there is no address clash. Pull-ups stay on the main board; loads carry none, so the bus never ends up with two sets of pull-ups.
+- Record: 64 bytes at 0x00, little-endian, CRC-16/CCITT-FALSE. The layout lives in `firmware/panel_id/panel_id.h`; `mkpanelid.py` builds the image. Fields: class (flat / lattice / full-bleed / garland / breakout / expansion), LED type, rows, cols, pitch (0 = freeform), peak LED current, max row current, Vf, mapping (identity / mirror / rot180 / transpose / serpentine / table id), flags, blank ns, pre-discharge ns, row-path resistance, hw rev, serial, name, row/col population masks (for freeform nets).
+- Missing EEPROM (no ACK), bad magic or bad CRC → default profile = flat 32×32 white 10 mA identity. Old panels keep working unchanged.
+
+## 5. Current and voltage-drop rules vs. cable length
+
+Headroom budget at 10 mA/LED, white:
+
+| Item | Drop |
+|---|---:|
+| `LED_4V1` | 4.10 V |
+| P-FET + board copper at 0.32 A | −0.05 V |
+| LED Vf (white, 10 mA, worst bin) | −3.10 V |
+| MBI5124 output knee (keep ≥ 0.4 V for regulation) | −0.40 V |
+| **Left for row wiring (FFC + lead-in + net)** | **≈ 0.55 V**, design to **0.35 V** to keep margin for Vf spread and temperature |
+
+Only the row conductor counts: it carries up to 0.32 A, while each column carries just 10 mA. Drop per metre at 0.32 A (one way):
+
+| Conductor | Ω/m | V/m at 0.32 A | Max length for 0.35 V |
+|---|---:|---:|---:|
+| FFC 0.5 mm pitch (0.3 × 0.035 mm Cu) | 1.64 | 0.52 | **0.67 m** (use ≤ 0.3 m) |
+| IDC ribbon 28 AWG (7/0.127) | 0.23 | 0.074 | 4.7 m |
+| 26 AWG stranded | 0.134 | 0.043 | 8.1 m |
+| 24 AWG | 0.084 | 0.027 | 13 m |
+| Enamelled 0.20 mm | 0.55 | 0.18 | 2.0 m |
+| Enamelled 0.30 mm | 0.244 | 0.078 | 4.5 m |
+| Enamelled 0.50 mm | 0.088 | 0.028 | 12 m |
+
+Inside a net, the row current is spread along the wire. The far LED sees about **half** the end-fed drop, so a net row wire can be twice as long as the lead-in figure above.
+
+Rules:
+1. Lead-in drop plus half the in-net drop must stay **≤ 0.35 V** at the full row current `rows × i_led`. Lower `i_led` (Rext or the EEPROM `i_led_ua` cap) if you need more length; drop scales linearly.
+2. Red/amber LEDs (Vf ≈ 2.0 V) have about 1 V more headroom. The table then allows roughly 3× the lengths.
+3. Never parallel spare FFC contacts for row current in v1. The 0.32 A single-contact rating (64 %) is fine, and the spares now carry GND/ID.
+4. VLED injection at the far end **does not help** a passive multiplexed load: the row switches are on the main board, so remote VLED cannot reach the LEDs without a remote high-side switch. The breakout reserves a `VINJ` terminal for a future active row-repeater only.
+
+## 6. FFC direct vs. breakout
+
+| Use | Link |
+|---|---|
+| Panel mounted on/behind the electronics board, ≤ 0.3 m | FFC Type B direct (flat, lattice, full-bleed panels) |
+| 0.3–0.67 m, rigid mount, no hand handling | FFC is possible but marginal (drop, flex fatigue, no ESD) — prefer breakout |
+| Anything that people touch, wire nets/garlands, 0.5–5 m, outdoor or installation | **Garland breakout** + 2×8 IDC ribbon (or soldered wire) — TVS on every line, GND bonding, latching connectors |
+| > 5 m or > 32×32 | Tile more boards over the stacking ports (RS-485 + FRAME_SYNC), keep each board's LED wiring short |
+
+## 7. Compliance checklist for a new load
+
+- [ ] Line n of the load is row/col n of the FFC; mapping deviations go in the EEPROM `mapping`, not in copper.
+- [ ] GND on pins 33/38/40 of J_ROW and J_COL; `ID_PRESENT_N` (J_ROW 39) to GND.
+- [ ] 24C02 at 0x50 on pins 35/36/37 (J_ROW), 100 nF on `ID_3V3`, WP to GND, no pull-ups.
+- [ ] Row-path drop per §5 ≤ 0.35 V; record `row_path_mohm` and `blank_ns` in the EEPROM.
+- [ ] Wires longer than about 0.3 m that people can touch: TVS on every line (the breakout does this).
