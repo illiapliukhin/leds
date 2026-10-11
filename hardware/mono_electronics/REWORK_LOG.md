@@ -231,3 +231,12 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - Optional item 3 (32 × 10 k row bleed) **not applied**: the anode band (F/B, x 120–138) has no via room and no clean placement.
 - Gates: KiCad DRC 0 errors / 0 warnings / 0 unconnected, 0 dangling; copper check 0 spots < 0.127 mm between different nets (< 0.15: 115, was 113); no copper renamed (netcheck 0); no parts on B; worst LED drop 92.5 mV (row 17, unchanged); all 8 B GND pieces ≥ 2 stitching vias. Schematic regenerated (new sheet `led_interface`): ERC 0, sch netlist vs PCB 235/235 refs, 0 pin differences.
 - Images: img/v12_id_bus.png, img/v12_col_exp.png. Fab: manufacturing/mono_electronics/v12/, mono_electronics_v12_fab.zip.
+
+## v12a — arcs on every track corner (2026-10-11)
+- Scope: all nets and layers, including GND, LED_4V1, AON_3V3, VBUS, SYS, BAT, the USB pair, and the v12 ID/expansion routes. Tools are in /workspace/arc (analyze.py, plan.py, plan2.py, apply.py).
+- Corners before → after: sharp 90° 35→0, unrounded 45° 70→0, chopped 9→0, jogs/stair-steps 17→0 (USB D+ meander now rounded), kinks 1–20° 27→0, same-width collinear joints 12→0 (merged). Remaining: 38 straight width steps (collinear, not corners), plus corners hidden inside pads or vias and T-junctions, which are not counted.
+- Fillets: 148 arcs with radius 3×w where they fit. 30 are smaller, limited by segment length or by keeping ≥0.13 mm to other nets. 4 chamfers were collapsed into one arc each. Width-step corners use an arc at the narrower width.
+- USB: the D+ meander depth went from 0.92 to 1.04 mm to make up the length lost to the arcs. Skew D+−D−: A 0.013→−0.131 mm, B 0.302→0.189 mm (limit 0.5). Both lines are arced the same way.
+- IMU_SDA In1: the 0.1 mm segment was split at the T at (67.35,3.5) so the junction is a real node.
+- Gates: DRC 0/0/0 (all severities); copper check 0 spots <0.127 mm; netcheck 0 relabels; 0 B-side parts; worst LED drop 92.5 mV (row 17, unchanged); B GND pieces unchanged (each has ≥2 vias); ERC 0, sch vs PCB 0 differences. Gerbers, drill files and zip regenerated.
+- Images: img/v12a_usb_meander.png, v12a_usb_conn.png, v12a_gnd_pmu.png, v12a_id_bus.png, v12a_row_kinks.png, v12a_F.png.

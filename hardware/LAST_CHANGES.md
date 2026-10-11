@@ -1,6 +1,7 @@
 # Latest changes
 
 ## mono_electronics v12
+- mono_electronics v12a: every track corner arced (sharp 35, 45° 70, chopped 9, jogs 17, kinks 27 → 0), USB re-matched (skew −0.13/0.19 mm), gates unchanged, fab regenerated.
 - LED interface standard v1 on the main board. J_ROW1 spares: GND 33/38/40, ID I²C on 35/36 (33 Ω + PESD5V0S2BT to IMU_SDA/SCL), 100 Ω ID_3V3 from AON_3V3 on 37. J_COL1 spares: GND 33/38/40, DNP 33 Ω taps of U_LED2 SDO / CLK_Y / LE_Y / OE_Y on 34–37, DNP 0 Ω LED_LOGIC_3V3 on 39. Row bleeds not added. DRC 0/0/0, copper 0 < 0.127, no renames, no B parts, LED drop 92.5 mV, B GND stitched; ERC 0, sch-vs-PCB 0 diffs (235 refs). Fab v12 zip/BOM/CPL.
 
 ## mono_electronics v11b
