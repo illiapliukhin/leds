@@ -74,7 +74,7 @@ class PowerTree:
         elif vin_ok:
             # SYS regulator: target min(VSYS_REG, VIN − Ron·I) behind 5 mΩ, clipped to [0, ILIM]
             v_t = min(DS['BQ25185']['vsys'], Vb - 0.25 * p.get('i_in_prev', 0.3))
-            i_in = smooth_clip((v_t - Vs) / 0.005, 0.0, p['ilim'], 300)
+            i_in = smooth_clip((v_t - Vs) / 0.005, 0.0, p['ilim'], 300) + 0.01 * (v_t - Vs) * (Vb > Vs)   # 10 mS output conductance in current limit (keeps Newton gradient; ≤ 5 mA error)
         else: i_in = 0.0
         I[0] -= i_in; I[1] += i_in; info['i_in'] = i_in
         # charger SYS->BAT: ICHG, CV 4.2 V, DPM (input headroom), TREG derating
@@ -117,7 +117,7 @@ class PowerTree:
         if p['f_ldo_short']: i_ldo = (Vs - Vo) / 0.05
         elif not p['ldo_tsd'] and not p['f_ldo_open']:
             vt_ = min(3.3, Vs - DS['TLV75733']['rdo'] * max(p['i_aon_prev'], 0))
-            i_ldo = smooth_clip((vt_ - Vo) / 0.003, 0.0, DS['TLV75733']['ilim'], 300)
+            i_ldo = smooth_clip((vt_ - Vo) / 0.003, 0.0, DS['TLV75733']['ilim'], 300) + 0.01 * (vt_ - Vo) * (Vs > Vo)
         I[1] -= i_ldo + (DS['TLV75733']['ignd'] if not p['f_ldo_open'] else 0); I[4] += i_ldo; info['i_ldo'] = i_ldo
         # AON loads: ESP32-S3 + LED_LOGIC (TPS22917) + misc; constant-current until ~2.4 V then resistive
         i_aon = (p['i_esp'] + 0.025 + 0.004) * (1 / (1 + math.exp(-(Vo - 2.4) / 0.08)))
