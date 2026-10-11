@@ -11,6 +11,7 @@
 #include "matrix_refresh.h"
 #include "power_seq.h"
 #include "demo.h"
+#include "bmi270_probe.h"
 #include "sim_scan.h"
 #include "test_patterns.h"
 
@@ -66,6 +67,7 @@ static bool s_display_on;
 /* LED rails are powered only on demand (first test/display/bright-set command), not at boot. */
 static esp_err_t display_ensure_on(void)
 {
+    sim_scan_start(); /* MONO_SIM only: stream complete scans for the virtual board */
     if (s_display_on) {
         return ESP_OK;
     }
@@ -79,6 +81,16 @@ static esp_err_t display_ensure_on(void)
         return ESP_OK;
     }
     return err;
+}
+
+static int cmd_i2cscan(int argc, char **argv)
+{
+    (void)argc; (void)argv;
+    uint8_t id = 0, v[2] = {0};
+    bmi270_i2c_bus_scan();
+    if (bmi270_read_chip_id(&id) == ESP_OK) printf("BMI270 CHIP_ID=0x%02X %s\n", id, id == 0x24 ? "OK" : "BAD");
+    if (bmi270_read_reg16(0x36, 0x08, v) == ESP_OK) printf("MAX17048 VERSION=0x%02X%02X OK\n", v[0], v[1]);
+    return 0;
 }
 
 static int cmd_demo(int argc, char **argv)
@@ -249,6 +261,13 @@ esp_err_t console_test_register(matrix_panel_t *panel)
         .func = &cmd_display,
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&display_cmd));
+
+    const esp_console_cmd_t i2c_cmd = {
+        .command = "i2cscan",
+        .help = "Scan the IMU/gauge I2C bus and read BMI270/MAX17048 IDs",
+        .func = &cmd_i2cscan,
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&i2c_cmd));
 
     const esp_console_cmd_t demo_cmd = {
         .command = "demo",

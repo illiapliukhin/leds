@@ -1,0 +1,72 @@
+{
+ "J_ROW1->J_ROW typeA": {
+  "pin1_to": 40,
+  "pin40_to": 1,
+  "straight": false,
+  "reversed": true,
+  "net_mismatches": 32,
+  "first": [
+   [
+    1,
+    "ROW_01_ANODE",
+    40,
+    ""
+   ],
+   [
+    2,
+    "ROW_02_ANODE",
+    39,
+    ""
+   ],
+   [
+    3,
+    "ROW_03_ANODE",
+    38,
+    ""
+   ]
+  ]
+ },
+ "J_ROW1->J_ROW typeB": {
+  "pin1_to": 1,
+  "pin40_to": 40,
+  "straight": true,
+  "reversed": false,
+  "net_mismatches": 0,
+  "first": []
+ },
+ "J_COL1->J_COL typeA": {
+  "pin1_to": 40,
+  "pin40_to": 1,
+  "straight": false,
+  "reversed": true,
+  "net_mismatches": 32,
+  "first": [
+   [
+    1,
+    "COL_01",
+    40,
+    ""
+   ],
+   [
+    2,
+    "COL_02",
+    39,
+    ""
+   ],
+   [
+    3,
+    "COL_03",
+    38,
+    ""
+   ]
+  ]
+ },
+ "J_COL1->J_COL typeB": {
+  "pin1_to": 1,
+  "pin40_to": 40,
+  "straight": true,
+  "reversed": false,
+  "net_mismatches": 0,
+  "first": []
+ }
+}

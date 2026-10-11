@@ -111,3 +111,13 @@ Run: `/workspace/sim/run_matrix_sim.sh [--record]` (copy in `sim/matrix/`).
 | scan rate | 260–300 Hz | about 390–400 Hz |
 
 The remaining row-period jitter comes from QEMU emulating both cores on one host thread. On silicon, the esp_timer spin wait is accurate to about 1 µs.
+
+## v12c — virtual bench bring-up (`sim/bringup/`)
+
+Nominal run: I2C PASS, all-on / row walk / column walk / checkerboard PASS (32/32 rows and columns each, 0 LED mismatches over 27–79 complete scans per test).
+
+Fault injection:
+- **Type A cables:** caught, 12544 mismatches; the image lands mirrored.
+- **COL_07 open:** caught; only column 7 fails, dark in every row.
+
+**Design finding (cable).** Board (F.Cu, exit east) and panel (B.Cu, exit west/south) with FH12 bottom-contact receptacles map pin 1→1 only with a **Type B (opposite-side contacts) FFC**. A stock Type A (same-side) cable mirrors pins 1↔40, so the panel would show nothing correct. The cable type has to be specified in the BOM/architecture doc. Firmware additions for this: a MONO_SIM-only I2C mock, an `i2cscan` console command, and the scan stream starting with the first display power-up.
