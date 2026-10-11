@@ -343,6 +343,17 @@ def scenario(sim, layout, args):
     sim.event('all boards: stack start')
     if args.short:
         return
+    if args.show:
+        while not check_formed(sim)[0]: time.sleep(0.2)
+        sim.event('stack formed: %d boards placed' % len(sim.boards))
+        lead = min(range(len(sim.boards)), key=lambda i: sim.boards[i].mac & 0xFFFFFFFF)
+        time.sleep(1)
+        for item in args.show.split(','):
+            name, dur = item.split(':')
+            sim.cmd(lead, 'stack demo ' + name); sim.event('demo: ' + name); sim.L(demo=name)
+            if float(dur) <= 0: return
+            time.sleep(float(dur))
+        return
     t_run = None
     while t_run is None:
         st, _ = sim.stats()
@@ -446,6 +457,7 @@ def main():
     ap.add_argument('--short', action='store_true')
     ap.add_argument('--victim', type=int, default=None)
     ap.add_argument('--regress', action='store_true')
+    ap.add_argument('--show', default='')
     ap.add_argument('--result', default='/workspace/stack/regress.json')
     ap.add_argument('--base', type=int, default=5800)
     a = ap.parse_args()

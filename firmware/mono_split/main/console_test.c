@@ -121,13 +121,13 @@ static int cmd_stack(int argc, char **argv)
     if (strcmp(argv[1], "mode") == 0 && argc >= 3) { stack_set_mode(strcmp(argv[2], "stream") == 0 ? STACK_MODE_STREAM : STACK_MODE_GEN); return 0; }
     if (strcmp(argv[1], "fps") == 0 && argc >= 3) { stack_set_fps(atoi(argv[2])); return 0; }
     if (strcmp(argv[1], "demo") == 0 && argc >= 3) {
-        static const char *n[] = {"scroll", "ball", "plasma", "wipe"};
+        static const char *n[] = {"scroll", "ball", "plasma", "wipe", "vyshyvanka", "aurora", "kinetic"};
         int d = -1;
-        for (int i = 0; i < 4; i++) if (strcmp(argv[2], n[i]) == 0) d = i;
+        for (int i = 0; i < 7; i++) if (strcmp(argv[2], n[i]) == 0) d = i;
         stack_set_demo(d);
         return 0;
     }
-    printf("stack start|status|mode gen|stream|demo scroll|ball|plasma|wipe|cycle|fps N\n");
+    printf("stack start|status|mode gen|stream|demo scroll|ball|plasma|wipe|vyshyvanka|aurora|kinetic|cycle|fps N\n");
     return 1;
 }
 

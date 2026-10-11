@@ -13,6 +13,9 @@ typedef enum {
     DEMO_RING,     /* expanding rings */
     DEMO_PLASMA,   /* grey plasma */
     DEMO_TILT,     /* ball rolled by BMI270 tilt (mocked when the IMU is absent) */
+    DEMO_VYSH,     /* vyshyvanka cross-stitch ornaments (patterns.c) */
+    DEMO_AURORA,   /* layered aurora / flow */
+    DEMO_KINETIC,  /* moire, tunnel, Lissajous, ripples */
     DEMO_COUNT,
 } demo_mode_t;
 

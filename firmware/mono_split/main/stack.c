@@ -3,6 +3,7 @@
  * run: leader drives FRAME_SYNC every content frame, followers swap on the edge and phase-lock the
  * scan engine to it. Content: shared-generative (default) or leader-streamed 4-bit RLE tiles. */
 #include "stack.h"
+#include "patterns.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -147,9 +148,9 @@ static bool recv_msg(msg_t *m, int timeout_ms)
 
 /* ------------------------------------------------------------------ canvas rendering */
 static const char *MSG = "ILLIA PLIUKHIN   ";
-enum { D_SCROLL = 0, D_BALL, D_PLASMA, D_WIPE, D_N };
-static const char *DNAMES[D_N] = {"scroll", "ball", "plasma", "wipe"};
-static const int DSECS[D_N] = {12, 8, 8, 6};
+enum { D_SCROLL = 0, D_BALL, D_PLASMA, D_WIPE, D_VYSH, D_AURORA, D_KINETIC, D_N };
+static const char *DNAMES[D_N] = {"scroll", "ball", "plasma", "wipe", "vyshyvanka", "aurora", "kinetic"};
+static const int DSECS[D_N] = {12, 8, 8, 6, 28, 16, 18};
 
 static int demo_for_frame(uint32_t f, int fps)
 {
@@ -213,6 +214,9 @@ static float canvas_px(int d, int X, int Y, uint32_t f, int fps, int W, int H)
                   sinf(sqrtf((x - W * 16.0f / H) * (x - W * 16.0f / H) + (y - 16) * (y - 16)) * 0.25f - t * 1.6f);
         return (v + 4.0f) / 8.0f;
     }
+    case D_VYSH:    return pattern_px(PAT_VYSH, X, Y, W, H, t);
+    case D_AURORA:  return pattern_px(PAT_AURORA, X, Y, W, H, t);
+    case D_KINETIC: return pattern_px(PAT_KINETIC, X, Y, W, H, t);
     case D_WIPE: {
         /* frame-exact sweep: one column per frame across the whole canvas + a row sweep */
         int cx = (int)(f % (uint32_t)(W + 6)) - 3, ry = (int)((f / 2) % (uint32_t)H);

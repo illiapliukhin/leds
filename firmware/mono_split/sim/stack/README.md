@@ -44,3 +44,17 @@ The split/merge fixes in `main/stack.c`:
 - Discovery is validated (all members placed, no overlapping tiles, no foreign leader probing at the same time) and retried with a random back-off.
 - A HELLO received during discovery adds the board to the member list.
 - The leader records the PRES highs it sees itself, because the bus does not echo its own SEEN messages back to it.
+
+## Showcase demos and presentation videos
+
+`main/patterns.c` holds three full-8-bit generative patterns. The single-panel demos (`demo vyshyvanka|aurora|kinetic`) and the stack canvas (`stack demo vyshyvanka|aurora|kinetic`) both use them:
+- **vyshyvanka**: cross-stitch ornaments on a 16×16 repeat tile, mirrored 8 ways (Alatyr star, nested rhombuses, oblique crosses, tree of life). They have running zigzag borders and appear stitch by stitch, then unpick. Brightness stands in for thread colour: red thread is 1.0, black thread 0.42, linen 0.035. A glow pulse runs through the red thread.
+- **aurora**: three curtains with rays, flow shimmer and twinkling stars.
+- **kinetic**: 18 s segments that cross-fade into each other: rotating moiré, tunnel, a Lissajous ribbon with a trail, and three-source ripples.
+
+`stack_sim.py --show vyshyvanka:100,aurora:90,kinetic:95,vyshyvanka:0` forms the stack and runs the list. `present.py` renders a presentation video from the logged scan stream:
+- Real full-bleed panel geometry (160 mm, 5.0 mm pitch, LEDs 2.5 mm from the edge, seamless when butted), gamma 2.2 display, two-radius glow, floor reflection, title cards.
+- Brightness is normalised to the firmware's full-scale duty.
+- The scan tap is sampled at about 12–15 Hz per board in QEMU, so frames between samples are linearly interpolated.
+
+The stack viewer (`stack_view.py`) also uses the full-bleed geometry now.

@@ -1,4 +1,5 @@
 #include "demo.h"
+#include "patterns.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -12,7 +13,7 @@
 #include "matrix_refresh.h"
 
 static const char *TAG = "demo";
-static const char *const NAMES[DEMO_COUNT] = {"none", "smiley", "logo", "scroll", "ball", "life", "ring", "plasma", "tilt"};
+static const char *const NAMES[DEMO_COUNT] = {"none", "smiley", "logo", "scroll", "ball", "life", "ring", "plasma", "tilt", "vyshyvanka", "aurora", "kinetic"};
 
 static matrix_panel_t *s_panel;
 static volatile demo_mode_t s_mode;
@@ -194,6 +195,11 @@ static void render(demo_mode_t mode, uint32_t t)
             pxf(r, c, v * v * v * (1.0f - d / 30.0f));
         }
         break;
+    case DEMO_VYSH: case DEMO_AURORA: case DEMO_KINETIC: {
+        int pat = s_mode == DEMO_VYSH ? PAT_VYSH : s_mode == DEMO_AURORA ? PAT_AURORA : PAT_KINETIC;
+        for (int r = 0; r < 32; r++) for (int c = 0; c < 32; c++) pxf(r, c, pattern_px(pat, c, r, 32, 32, ts));
+        break;
+    }
     case DEMO_PLASMA:
         for (int r = 0; r < 32; r++) for (int c = 0; c < 32; c++) {
             float v = sinf(c * 0.22f + ts * 1.3f) + sinf(r * 0.17f - ts * 0.9f) + sinf((r + c) * 0.13f + ts * 1.7f) +

@@ -7,9 +7,9 @@ PORT_FRAC = {0: (0.851, 0.0), 1: (1.0, 0.422), 2: (0.432, 1.0), 3: (0.0, 0.884)}
 DX, DY = [0, 1, 0, -1], [-1, 0, 1, 0]
 AMBER = (255, 150, 30)
 # real mono_panel_32x32 geometry (hardware/mono_panel_32x32/mono_panel_32x32.kicad_pcb)
-PANEL_MM = 166.7          # outline, square
-LED_PITCH_MM = 2.54       # NCD0603W1 grid
-LED0_MM = 44.005          # outline edge -> first LED centre (44.005 left/top, 44.03 right/bottom)
+PANEL_MM = 160.0          # mono_panel_32x32_full outline (seamless when butted)
+LED_PITCH_MM = 5.0
+LED0_MM = 2.5             # pitch/2: seam pitch = 5.0 mm
 
 
 def rot_pt(u, v, rot):
