@@ -47,7 +47,7 @@ class Board:
         self.pcon, self.pbus = base + 10 * i, base + 10 * i + 1
         self.plugged = True
         self.drive = [0, 0, 0, 0]          # PRES this board drives, per side
-        self.role = 'boot'; self.tile = None; self.canvas = (1, 1); self.leader = 0
+        self.role = 'boot'; self.tile = None; self.canvas = (1, 1); self.leader = 0; self.role_t = 0.0
         self.frame = None; self.fid = 0; self.swaps = []; self.last_w = None
         self.con_buf = b''; self.bus_buf = b''; self.console = []
         self.tx_bytes = 0; self.proc = None; self.started = False; self.slock = threading.Lock(); self.outq = queue.Queue()
@@ -182,7 +182,7 @@ class Sim:
         elif txt[0] == 'R':
             p = txt.split()
             with self.lock:
-                b.role = p[1]
+                b.role = p[1]; b.role_t = self.now()
                 if p[1] in ('LEAD', 'FOLLOW') and len(p) >= 10:
                     b.leader = int(p[3], 16)
                     b.tile = (int(p[5]), int(p[6]), int(p[7])) if p[4] == '1' else None
@@ -367,6 +367,76 @@ def scenario(sim, layout, args):
     sim.L(phase='steady')
 
 
+def check_formed(sim, members=None, since=0.0):
+    """True when every plugged board in `members` follows one leader, has a unique tile, and the tile map is an
+    isometry of the physical layout (pairwise grid distances equal, rotation offset constant)."""
+    st, _ = sim.stats()
+    idx = members if members is not None else range(len(sim.boards))
+    bs = [sim.boards[i] for i in idx]
+    if any(b.role not in ('LEAD', 'FOLLOW') or not b.tile for b in bs): return False, 'unplaced'
+    if any(b.role_t < since for b in bs): return False, 'stale (no re-formation yet)'
+    if len({b.leader for b in bs}) != 1: return False, 'leaders %s' % sorted({hex(b.leader) for b in bs})
+    if len({b.tile[:2] for b in bs}) != len(bs): return False, 'overlap'
+    for a in bs:
+        for c in bs:
+            if abs(a.gx - c.gx) + abs(a.gy - c.gy) != abs(a.tile[0] - c.tile[0]) + abs(a.tile[1] - c.tile[1]):
+                return False, 'geometry %d-%d' % (a.i, c.i)
+    offs = {(b.tile[2] - b.rot) % 4 for b in bs}; offn = {(b.tile[2] + b.rot) % 4 for b in bs}
+    if len(offs) != 1 and len(offn) != 1: return False, 'rotation'
+    W, H = bs[0].canvas
+    xs = [b.tile[0] for b in bs]; ys = [b.tile[1] for b in bs]
+    if (W, H) != (max(xs) - min(xs) + 1, max(ys) - min(ys) + 1): return False, 'canvas %dx%d' % (W, H)
+    return True, 'ok'
+
+
+def regress(sim, layout, args):
+    """Unplug/replug every board position in turn; each step must re-form with all boards placed under one leader."""
+    def wait(pred, tmo):
+        t0 = sim.now()
+        while sim.now() - t0 < tmo:
+            ok, why = pred()
+            if ok: return sim.now() - t0, 'ok'
+            time.sleep(0.25)
+        return None, pred()[1]
+    time.sleep(4)
+    order = list(range(len(sim.boards))); random.Random(3).shuffle(order)
+    for k, i in enumerate(order):
+        sim.cmd(i, 'stack start'); time.sleep(0.15 + 0.1 * k)
+    res = {'layout': layout, 'steps': []}
+    t, why = wait(lambda: check_formed(sim), 60)
+    res['form'] = t; sim.event('regress: initial formation %s (%s)' % ('%.1f s' % t if t else 'FAIL', why))
+    ok_all = t is not None
+    for v in range(len(sim.boards)):
+        if not ok_all: break
+        time.sleep(3)
+        t_u = sim.now()
+        sim.unplug(v, True)
+        rest = [i for i in range(len(sim.boards)) if i != v]
+        # with the victim gone, each remaining connected segment must be a consistent stack of its own
+        def seg_ok():
+            comp = sim.comps()
+            for g in {comp[i] for i in rest}:
+                mem = [i for i in rest if comp[i] == g]
+                if len(mem) == 1:
+                    continue
+                ok, why = check_formed(sim, mem, t_u)
+                if not ok: return False, why
+            return True, 'ok'
+        tu, wu = wait(seg_ok, 45)
+        t_r = sim.now()
+        sim.unplug(v, False)
+        tr, wr = wait(lambda: check_formed(sim, None, t_r), 60)
+        step = dict(victim=v, unplug_s=tu, unplug_why=wu, replug_s=tr, replug_why=wr, ok=tu is not None and tr is not None)
+        res['steps'].append(step)
+        sim.event('regress: board %d %s (split %s, merge %s)' % (v, 'PASS' if step['ok'] else 'FAIL',
+                  '%.1fs' % tu if tu else wu, '%.1fs' % tr if tr else wr))
+        if tr is None: ok_all = False
+    res['pass'] = ok_all and len(res['steps']) == len(sim.boards) and all(s['ok'] for s in res['steps'])
+    json.dump(res, open(args.result, 'w'), indent=1)
+    sim.event('regress: %s' % ('PASS' if res['pass'] else 'FAIL'))
+    sim.L(regress=res)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--layout', default='3x2', choices=list(LAYOUTS))
@@ -375,17 +445,21 @@ def main():
     ap.add_argument('--duration', type=float, default=0)
     ap.add_argument('--short', action='store_true')
     ap.add_argument('--victim', type=int, default=None)
+    ap.add_argument('--regress', action='store_true')
+    ap.add_argument('--result', default='/workspace/stack/regress.json')
+    ap.add_argument('--base', type=int, default=5800)
     a = ap.parse_args()
     log = a.log or '/workspace/stack/run_%s.jsonl' % a.layout
-    sim = Sim(a.layout, log)
+    sim = Sim(a.layout, log, base=a.base)
     sim.start()
-    threading.Thread(target=scenario, args=(sim, a.layout, a), daemon=True).start()
+    th = threading.Thread(target=regress if a.regress else scenario, args=(sim, a.layout, a), daemon=True)
+    th.start()
     try:
         viewer = None
         if not a.headless:
             viewer = subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stack_view.py'), '--follow', log])
         end = a.duration or 1e9
-        while sim.now() < end:
+        while sim.now() < end and (th.is_alive() or not a.regress):
             time.sleep(0.5)
             out, sk = sim.stats()
             sim.L(stats=[{k: v for k, v in o.items()} for o in out], skew=[round(x, 3) for x in sk[-40:]],

@@ -64,7 +64,8 @@ static TaskHandle_t s_render_task;
 static esp_timer_handle_t s_sync_timer;
 static volatile uint32_t s_swaps, s_rx_bad, s_rx_ok, s_tx_bytes;
 static volatile int64_t s_edge_t;
-static volatile bool s_abort;            /* a lower-ID leader appeared while we lead/discover */
+static volatile bool s_abort;
+static volatile bool s_foreign;          /* another (higher-ID) leader probed while we discovered: edges suspect */            /* a lower-ID leader appeared while we lead/discover */
 /* stream mode */
 static uint8_t s_rx_tile[32 * 32]; static uint32_t s_rx_frame; static uint8_t s_rx_got[16]; static int s_rx_n;
 static volatile bool s_stream_ready; static uint8_t s_stream_tile[32 * 32];
@@ -437,15 +438,20 @@ static void probe_side(int side)
 
 static void discover(void)
 {
+  for (int attempt = 0; ; attempt++) {
     s_state = STACK_DISCOVER;
-    s_nedges = 0;
-    uint8_t pl[1 + MAXB * 4]; int n = 0;
-    pl[n++] = (uint8_t)s_nmem;
-    for (int i = 0; i < s_nmem; i++) { put32(pl + n, s_members[i]); n += 4; }
-    send_msg(T_LEADER, BCAST, pl, n);
-    ESP_LOGI(TAG, "discovery: %d members", s_nmem);
+    s_nedges = 0; s_foreign = false;
+    ESP_LOGI(TAG, "discovery: %d members (attempt %d)", s_nmem, attempt + 1);
+    bool alive[MAXB] = {0};
     for (int i = 0; i < s_nmem && !s_abort; i++) {
         uint32_t id = s_members[i];
+        if (id == s_id) alive[i] = true;
+        {   /* beacon before every member: a merging higher-ID leader hears us and stops probing */
+            uint8_t pl[1 + MAXB * 4]; int n = 0;
+            pl[n++] = (uint8_t)s_nmem;
+            for (int k = 0; k < s_nmem; k++) { put32(pl + n, s_members[k]); n += 4; }
+            send_msg(T_LEADER, BCAST, pl, n);
+        }
         for (int side = 0; side < 4 && !s_abort; side++) {
             if (id == s_id) { probe_side(side); continue; }
             uint8_t sp[1] = {(uint8_t)side};
@@ -454,14 +460,36 @@ static void discover(void)
             msg_t m; bool done = false;
             while (!done && !s_abort && esp_timer_get_time() < end) {
                 if (recv_msg(&m, 10)) {
-                    if (m.type == T_TOKDONE && m.src == id) done = true;
+                    if (m.type == T_TOKDONE && m.src == id) { done = true; alive[i] = true; }
                     else handle_common(&m);
                 }
             }
         }
     }
     if (s_abort) return;
+    /* drop members that answered no token: they are on another bus segment now (split) or gone */
+    for (int i = s_nmem - 1; i >= 0; i--) if (!alive[i]) {
+        ESP_LOGW(TAG, "member %08lx silent in discovery -> dropped", (unsigned long)s_members[i]);
+        uint32_t gone = s_members[i];
+        remove_member(gone);
+        for (int k = i; k < s_nmem; k++) alive[k] = alive[k + 1];
+    }
     compute_grid();
+    int placed = 0; bool clash = false;
+    for (int i = 0; i < s_ntiles; i++) {
+        if (!s_tiles[i].placed) continue;
+        placed++;
+        for (int j = 0; j < i; j++)
+            if (s_tiles[j].placed && s_tiles[j].x == s_tiles[i].x && s_tiles[j].y == s_tiles[i].y) clash = true;
+    }
+    if ((placed == s_nmem && !clash && !s_foreign) || attempt >= 5) break;
+    ESP_LOGW(TAG, "discovery inconsistent (%d/%d placed%s%s): retry", placed, s_nmem, clash ? ", overlap" : "", s_foreign ? ", foreign leader" : "");
+    shal_report("R RETRY %08lx %d %d", (unsigned long)s_id, placed, s_nmem);
+    int64_t end = esp_timer_get_time() + (200 + esp_random() % 300) * 1000;
+    msg_t m;
+    while (esp_timer_get_time() < end && !s_abort) if (recv_msg(&m, 10)) handle_common(&m);
+    if (s_abort) return;
+  }
     s_state = STACK_LEAD;
     s_leader = s_id;
     send_map();
@@ -481,6 +509,8 @@ static void handle_common(const msg_t *m)
 {
     if ((s_state == STACK_LEAD || s_state == STACK_DISCOVER) && (m->type == T_LEADER || m->type == T_TIME || m->type == T_MAP) &&
         m->src < s_id) s_abort = true;
+    if (s_state == STACK_DISCOVER && m->src > s_id && (m->type == T_LEADER || m->type == T_TOKEN || m->type == T_MAP)) s_foreign = true;
+    if (s_state == STACK_DISCOVER && m->type == T_HELLO && member_idx(m->src) < 0) add_member(m->src);
     if (m->src == s_leader) s_last_leader_msg = esp_timer_get_time();
     int mi = member_idx(m->src);
     if (mi >= 0) s_last_seen[mi] = esp_timer_get_time();

@@ -240,4 +240,15 @@ Four identical ports, one per board edge (`J_PORT_N`, `J_PORT_E`, `J_PORT_S`, `J
 
 Only one board drives a `PRES` line at a time, and the other side is always an input, so there is no contention. `FRAME_SYNC` is driven only by the leader; everyone else keeps it as an input with the internal pull-down.
 
+**Bus termination for stacks and split strips (v13 recommendation).**
+Every board busses A/B to all four of its ports, so a stack is a tree of short stubs, not one line with two ends. A strip
+that is split (one board unplugged) becomes two independent buses, and the 2D grids have no real "ends" at all.
+
+*Electrical length:* the bus runs at 500 kbps (2 µs bit). The THVD1406 is slew-limited, with driver edges of a few hundred ns. A 6-board stack with 100 mm cables plus the board copper adds up to about 1–1.5 m, roughly 5–8 ns one way. The edge is about 50× longer than the round trip, so reflections settle within the edge. **Termination is not needed for signal integrity at this rate and size**, and closing jumpers on the wrong boards only adds DC load (each 120 Ω pair draws about 15 mA while driving).
+
+*Recommendation:*
+1. **Default (v1 boards): leave `JP_TERM` open on every board.** This is correct for any arrangement, including a split strip: nothing has to be reconfigured on unplug or replug. Idle and open-bus states are defined by the THVD1406's built-in receiver fail-safe, so do not add bias resistors.
+2. **Jumper termination** (close `JP_TERM` on the two most distant boards) is only worth it for long or fast buses (> about 3 m total, or > 1 Mbps). It is fixed: after a rearrangement or a split, one half ends up with no terminator, or a terminated board sits mid-bus. Use it only for permanent installations.
+3. **Auto-termination (future rev, recommended if the bus speed goes up):** a GPIO-switched 120 Ω, for example a small PhotoMOS (AQY221/TLP3412-class, which tolerates the RS-485 −7…+12 V common-mode range) or back-to-back N-MOSFETs in series with `R_TERM`. Firmware already knows the topology: after discovery the leader computes the graph diameter (the two boards farthest apart in bus distance) and switches termination on only there. It recomputes on every unplug or rejoin, so each half of a split strip is terminated at its own ends. This costs one GPIO; none is free on v10b, so it needs a pin freed (or an I/O expander) in the next revision. Default it **off** at reset so a lone board draws nothing.
+
 **PCB placement (v8):** S port at (64.0, 96.4) 0°, W at (3.1, 88.0) 270°, E at (144.9, 42.0) 90°, N at (126.0, 3.1) 180°. The RS-485 block sits at (60–69, 82–89), just above the S port. The outline is unchanged at 148.0 × 99.5 mm. All parts are on the top side.
