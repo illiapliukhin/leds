@@ -72,4 +72,6 @@ class App:
 def main():
     a = sys.argv[1:]
     lang = 'en' if '--en' in a else 'ru'
+    if '--shots' in a:
+        from . import selftest; selftest.run(a[a.index('--shots') + 1]); return
     App(lang=lang).run()

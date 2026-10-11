@@ -1,7 +1,14 @@
 # LED_Simulator.exe — симулятор системы mono_split (Windows)
 
-Один файл `LED_Simulator.exe`, установка и Python не нужны. Собирается в GitHub Actions
-(`.github/workflows/led_sim_windows.yml`, windows-latest) и выкладывается артефактом `LED_Simulator`.
+Один файл `LED_Simulator.exe` (~30 МБ), установка и Python не нужны.
+
+Сборка: (1) GitHub Actions на windows-latest — workflow лежит в `tools/led_sim_windows/ci/led_sim_windows.yml`;
+чтобы он заработал, перенесите его в `.github/workflows/` (для push нужен токен со scope `workflow`:
+`gh auth refresh -s workflow`). (2) Кросс-сборка на Linux через Wine (так собран текущий exe):
+`x86_64-w64-mingw32-gcc` → `build/led_host.dll`, затем Windows-Python 3.12 (nuget-пакет) под Wine:
+`pip install pygame==2.6.1 numpy==1.26.4 pyinstaller` и
+`python -m PyInstaller --onefile --windowed --name LED_Simulator --add-data "data;data" --add-binary "build/led_host.dll;." run_sim.py`.
+Проверка exe: `LED_Simulator.exe --shots DIR` снимает скриншоты всех вкладок (папка `screenshots/` — снято так под Wine).
 
 ## Как устроено (переиспользование прошивки)
 

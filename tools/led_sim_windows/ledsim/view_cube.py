@@ -105,9 +105,12 @@ class CubeView:
         px = (xr / zc * f / 2 + W / 2).astype(np.int32); py = (yr / zc * f / 2 + H / 2).astype(np.int32)
         ok = (zc > 0.1) & (px >= 1) & (px < W - 1) & (py >= 1) & (py < H - 1)
         buf = np.zeros((H, W), np.float32)
-        base = 0.012                                                       # unlit LED die visibility
-        w = (duty * 2.5 + base)[ok] * (2.2 / zc[ok]) ** 1.2
-        np.add.at(buf, (py[ok], px[ok]), w)
+        base = 0.004                                                       # unlit LED die visibility
+        w = (duty * 4.0 + base) * (2.2 / np.maximum(zc, 0.1)) ** 1.2
+        np.add.at(buf, (py[ok], px[ok]), w[ok])
+        lit = ok & (duty > 0.01)                                           # lit LEDs: 2x2 splat so they read as dots
+        for dx, dy in ((1, 0), (0, 1), (1, 1)):
+            np.add.at(buf, (py[lit] + dy, px[lit] + dx), w[lit] * 0.6)
         img = np.clip(buf, 0, 1.5)
         rgb = (np.clip(img, 0, 1)[..., None] ** (1 / 2.2) * np.array([255, 246, 228], np.float32)).astype(np.uint8)
         small = pygame.surfarray.make_surface(np.ascontiguousarray(rgb.transpose(1, 0, 2)))
