@@ -25,6 +25,7 @@ class SystemView(Nav2D):
         s.zoom = 1.2; s.pan = [260, 200]; s.sel = None; s.drag = None; s.wire = None; s.kind = 'full'
         s.snap = 10.0; s.demo_i = 0; s.fps = 60; s.speed = 1.0; s.acc = 0.0; s.msg = ''; s.msg_t = 0
         s.masks = {}; s.ropes = Ropes(); s.rope_idx = {}; s.scroll = 0; s.show_topo = True; s.load_ms = 0.0
+        s.show = {'ffc': True, 'stack': True, 'power': True}; s.xray = False; s.checks = []; s.check_t = 0
 
     # ------------------------------------------------ coords
     def focus_at(s, wx, wy):
@@ -98,8 +99,12 @@ class SystemView(Nav2D):
             if c:
                 c.plugged = not c.plugged; s.w.dirty(); s.sel = c
                 s.note(T('plug') if c.plugged else T('unplug')); return
-            o = s.board_at(wx, wy) or s.panel_at(wx, wy)
+            o = s.board_at(wx, wy) if s.xray else None
+            o = o or s.panel_at(wx, wy) or s.board_at(wx, wy)
             s.sel = o
+            if o is not None and hasattr(o, 'node') and o.mount is not None and o.mount in s.w.panels and not s.xray: o = o.mount
+            dro = o.mount if (o is not None and hasattr(o, 'node') and o.mount in s.w.panels) else o
+            if dro is not o: o = dro
             if o: s.drag = (o, wx - o.x, wy - o.y, [p for p in s.w.panels if p.board is o and abs(p.x - o.x) < 1 and abs(p.y - o.y) < 1] if hasattr(o, 'node') else [])
         elif e.type == pygame.MOUSEBUTTONUP and e.button == 1:
             if s.wire:
@@ -125,6 +130,8 @@ class SystemView(Nav2D):
             if e.key == pygame.K_SPACE: s.w.paused = not s.w.paused
             elif e.key == pygame.K_r and s.sel is not None and hasattr(s.sel, 'rot'):
                 s.sel.rot = (s.sel.rot + 1) & 3
+                if hasattr(s.sel, 'kind') and s.sel.board is not None and s.sel.board.mount is s.sel: s.sel.board.rot = s.sel.rot
+                if hasattr(s.sel, 'node') and s.sel.mount is not None: s.sel.mount.rot = s.sel.rot
                 if hasattr(s.sel, 'node'):
                     for p in s.w.panels:
                         if p.board is s.sel and abs(p.x - s.sel.x) < 1 and abs(p.y - s.sel.y) < 1: p.rot = s.sel.rot
@@ -137,7 +144,7 @@ class SystemView(Nav2D):
     def overlaps(s, o, x, y):
         hx, hy = s.extent(o)
         for q in (s.w.boards if hasattr(o, 'node') else s.w.panels):
-            if q is o: continue
+            if q is o or (hasattr(q, 'node') and q.mount is not None): continue
             qx, qy = s.extent(q); X, Y = getattr(q, 'tx', q.x), getattr(q, 'ty', q.y)
             if abs(x - X) < hx + qx - 0.5 and abs(y - Y) < hy + qy - 0.5: return q
     def place(s, o, x, y):
@@ -169,6 +176,8 @@ class SystemView(Nav2D):
             ox, oy = o.x, o.y
             o.x += (o.tx - o.x) * k; o.y += (o.ty - o.y) * k
             if abs(o.tx - o.x) + abs(o.ty - o.y) < 0.05: o.x, o.y = o.tx, o.ty; del o.tx; del o.ty
+            if hasattr(o, 'kind') and o.board is not None and o.board.mount is o:
+                o.board.x, o.board.y = o.x, o.y; s.w.dirty()                 # board rides behind its panel
             if hasattr(o, 'node'):
                 for p in s.w.panels:
                     if p.board is o and abs(p.x - ox) < 1 and abs(p.y - oy) < 1 and not hasattr(p, 'tx'): p.x, p.y = o.x, o.y
@@ -181,6 +190,7 @@ class SystemView(Nav2D):
             sp[('c', id(c))] = (c.a.port_pos(c.as_), c.b.port_pos(c.bs) if c.plugged else None, c.length)
         for p in s.w.panels:
             for n in ('J_ROW', 'J_COL'):
+                if p.board is not None and p.board.mount is p: continue                # mounted: FFC folded flat in the 8 mm gap (drawn straight)
                 if p.board is not None and p.board in s.w.boards: sp[('f', id(p), n)] = (p.board.conn_pos(n), p.conn_pos(n), p.ffc_len)
                 else: sp[('f', id(p), n)] = (p.conn_pos(n), None, p.ffc_len)
         return sp
@@ -207,6 +217,7 @@ class SystemView(Nav2D):
         ov = None
         for k, i in s.rope_idx.items():
             P = s.ropes.pts(i); pts = [s.w2s(x, y) for x, y in P]
+            if (k[0] == 'c' and not s.show['stack']) or (k[0] == 'f' and not s.show['ffc']): continue
             if k[0] == 'c':
                 c = next((c for c in s.w.cables if id(c) == k[1]), None)
                 if c is None: continue
@@ -236,6 +247,17 @@ class SystemView(Nav2D):
                     pygame.draw.polygon(ov, tuple(int(c * shade) for c in col) + (150,), q)
                 pygame.draw.lines(ov, (230, 70, 70, 220), False, L, max(1, int(s.zoom * 0.8)))    # pin-1 stripe
                 if s.zoom > 1.5 and k[2] == 'J_ROW': text(surf, 'FFC %s %d мм' % (p.ffc, p.ffc_len), (pts[n // 2][0] + 8, pts[n // 2][1]), (170, 190, 230), 10)
+        if s.show['ffc']:
+            for p in s.w.panels:
+                b = p.board
+                if b is None or b.mount is not p: continue
+                if ov is None: ov = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
+                need = s.w.ffc_need(p); col = (120, 150, 200, 120 if s.xray else 40) if need <= p.ffc_len else (255, 70, 70, 160)
+                for n in ('J_ROW', 'J_COL'):
+                    a = s.w2s(*b.conn_pos(n)); c = s.w2s(*p.conn_pos(n)); dx, dy = c[0] - a[0], c[1] - a[1]; ln = math.hypot(dx, dy) or 1
+                    nx, ny = -dy / ln * 10.5 * s.zoom, dx / ln * 10.5 * s.zoom
+                    pygame.draw.polygon(ov, col, [(a[0] + nx, a[1] + ny), (c[0] + nx, c[1] + ny), (c[0] - nx, c[1] - ny), (a[0] - nx, a[1] - ny)])
+                    if s.zoom > 1.5 and n == 'J_ROW': text(surf, 'FFC %s %d мм (нужно %.0f)' % (p.ffc, p.ffc_len, need), ((a[0] + c[0]) / 2, (a[1] + c[1]) / 2 - 18), (170, 190, 230), 10)
         if ov: surf.blit(ov, (0, 0))
 
     def delete_sel(s):
@@ -319,10 +341,21 @@ class SystemView(Nav2D):
         col = ROLE_COL.get(n.state if b.powered else stack_model.OFF)
         k = (r.size, b.powered)
         if len(s.masks) > 300: s.masks.clear()
+        behind = b.mount is not None and b.mount in s.w.panels
+        k = (r.size, b.powered, behind, s.xray)
         if k not in s.masks:
-            ov = pygame.Surface(r.size, pygame.SRCALPHA); ov.fill((20, 60, 30, 70) if b.powered else (60, 20, 20, 90)); s.masks[k] = ov
+            a = (150 if s.xray else 22) if behind else 70
+            ov = pygame.Surface(r.size, pygame.SRCALPHA); ov.fill((20, 70, 40, a) if b.powered else (70, 20, 20, a)); s.masks[k] = ov
         surf.blit(s.masks[k], r.topleft)
+        if behind and s.xray and s.zoom > 0.6:
+            for nm, cc in (('J_ROW', (120, 150, 220)), ('J_COL', (120, 150, 220)), ('J_USB', (210, 210, 220)), ('J_BAT', (220, 90, 90))):
+                q = s.w2s(*b.conn_pos(nm)); pygame.draw.rect(surf, cc, (q[0] - 4, q[1] - 4, 8, 8), 1)
+                if s.zoom > 1.4: text(surf, nm + '1', (q[0] + 5, q[1] - 5), cc, 9)
         pygame.draw.rect(surf, (255, 255, 255) if b is s.sel else col, r, 2 if b is s.sel else 1)
+        if behind and not s.xray and b is not s.sel:
+            for side in range(4):
+                px, py = s.w2s(*b.port_pos(side)); pygame.draw.circle(surf, (150, 150, 160), (int(px), int(py)), 3)
+            return
         for side in range(4):
             px, py = s.w2s(*b.port_pos(side)); s.w.comps(); c = s.w._cmap.get((b.id, side))
             pc = (90, 220, 120) if c and c.plugged and c.type == 'B' else (255, 80, 80) if c else (150, 150, 160)
@@ -336,6 +369,24 @@ class SystemView(Nav2D):
                 text(surf, '%s  %s' % (inf['state'], inf['pos']), (r.x + 4, r.y + 18), (220, 220, 220), 11)
                 if r.w > 150: text(surf, '%d fps  skew %.1f µs  Δf %d' % (inf['fps'], inf['skew'], inf['dframe']), (r.x + 4, r.y + 32), (180, 190, 200), 10)
 
+    def draw_power(s, surf):
+        lab = getattr(s.w, 'lab', None); p = lab.p if lab else {'usb_on': True, 'src': 'battery'}
+        for b in s.w.boards:
+            if p.get('usb_on'):
+                ux, uy = b.conn_pos('J_USB'); out = -1 if not b.mirror else 1
+                d = [0, 1, 0, -1][b.world_dir(3)], [-1, 0, 1, 0][b.world_dir(3)]           # USB-C sits on the W edge
+                a = s.w2s(ux, uy); e = s.w2s(ux + d[0] * 25, uy + d[1] * 25)
+                pygame.draw.line(surf, (30, 30, 30), a, e, max(3, int(3.5 * s.zoom))); pygame.draw.line(surf, (200, 200, 210), a, e, max(1, int(2.2 * s.zoom)))
+                if s.zoom > 1.0: text(surf, 'USB-C', (e[0] + 3, e[1] - 6), (200, 200, 210), 10)
+            if p.get('src') in ('battery', 'bench'):
+                bx, by = b.conn_pos('J_BAT'); a = s.w2s(bx, by)
+                d = [0, 1, 0, -1][b.world_dir(3)], [-1, 0, 1, 0][b.world_dir(3)]
+                cpos = (bx + d[0] * 12 + (0 if d[0] else 0), by + d[1] * 12 + 22)
+                e = s.w2s(*cpos)
+                pygame.draw.line(surf, (200, 60, 60), a, e, max(1, int(1.2 * s.zoom))); pygame.draw.line(surf, (40, 40, 40), (a[0] + 2, a[1]), (e[0] + 2, e[1]), max(1, int(1.2 * s.zoom)))
+                w_, h_ = 18 * s.zoom, 30 * s.zoom
+                pygame.draw.rect(surf, (60, 70, 90) if p.get('src') == 'battery' else (90, 70, 40), (e[0] - w_ / 2, e[1], w_, h_), border_radius=3)
+                if s.zoom > 1.0: text(surf, 'JST PH' if p.get('src') == 'battery' else 'БП', (e[0] - w_ / 2, e[1] + h_ + 2), (180, 180, 190), 9)
     def draw(s, surf, view):
         s.nav_update(s.app.dt, view)
         surf.set_clip(view); surf.fill((14, 15, 19), view)
@@ -348,6 +399,13 @@ class SystemView(Nav2D):
         for p in s.w.panels: s.draw_panel(surf, p)
         for b in s.w.boards: s.draw_board(surf, b)
         s.draw_ropes(surf)
+        if s.show['power']: s.draw_power(surf)
+        now = pygame.time.get_ticks()
+        if now - s.check_t > 300: s.checks = s.w.checks(); s.check_t = now
+        for lvl, msg, (cx, cy) in s.checks:
+            q = s.w2s(cx, cy); pygame.draw.line(surf, (255, 60, 60), (q[0] - 7, q[1] - 7), (q[0] + 7, q[1] + 7), 3); pygame.draw.line(surf, (255, 60, 60), (q[0] - 7, q[1] + 7), (q[0] + 7, q[1] - 7), 3)
+        if s.checks: text(surf, '⚠ %d физически невозможных соединений — см. панель справа' % len(s.checks), (view.x + 10, view.y + 30), (255, 90, 90), 13)
+        if s.w.mirror_mount: text(surf, 'Платы обращены к панели обратной стороной: вид спереди зеркален (E↔W) — прошивка не знает об этом, холст зеркалится', (view.x + 10, view.y + 48), (255, 200, 80), 12)
         if s.show_topo:                              # discovered topology (leader's edges)
             bm = {b.id: b for b in s.w.boards}
             for b in s.w.boards:
@@ -385,6 +443,20 @@ class SystemView(Nav2D):
                 s.w.preset(c, rr, s.kind); s.sel = None; s.fit(s.app.view); s.apply_global()
             px += 56
         y += 30
+        tb = (W - 16) // 5
+        for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'))):
+            if ui.button(surf, (x + i * (tb + 4), y, tb, 22), lab, on=s.show[k], sz=10): s.show[k] = not s.show[k]
+        allon = all(s.show.values())
+        if ui.button(surf, (x + 3 * (tb + 4), y, tb, 22), 'Все', on=allon, sz=10):
+            for k in s.show: s.show[k] = not allon
+        if ui.button(surf, (x + 4 * (tb + 4), y, tb, 22), 'Рентген', on=s.xray, sz=10): s.xray = not s.xray
+        y += 26
+        if ui.button(surf, (x, y, W, 22), 'Плата к панели: ' + ('обратной стороной (зеркально)' if s.w.mirror_mount else 'компонентами (F.Cu)'), on=s.w.mirror_mount, sz=10):
+            s.w.mirror_mount = not s.w.mirror_mount; n = max(1, len(s.w.boards)); c = int(round(n ** 0.5))
+            cols = sorted({round(b.x) for b in s.w.boards}); rows = sorted({round(b.y) for b in s.w.boards})
+            s.w.preset(max(1, len(cols)), max(1, len(rows)), s.kind); s.fit(s.app.view); s.apply_global()
+        y += 26
+        for lvl, msg, _ in s.checks[:3]: text(surf, msg[:64], (x, y), (255, 110, 110), 10); y += 13
         hb = (W - 4) // 2
         if ui.button(surf, (x, y, hb, 26), T('save')): s.save()
         if ui.button(surf, (x + hb + 4, y, hb, 26), T('load')): s.load()

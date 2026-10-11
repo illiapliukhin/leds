@@ -23,7 +23,10 @@ def panel_data(kind):
 
 # real connector positions (mm from the outline centre, KiCad view) from mono_electronics v12 / the panel .kicad_pcb
 SIDE_OFF = [(52.0, -46.6), (70.9, -7.8), (-10.0, 46.6), (-70.9, 38.2)]          # J_PORT_N1/E1/S1/W1
-BOARD_CONN = {'J_ROW': (69.0, -27.8), 'J_COL': (69.0, 18.8)}                     # J_ROW1, J_COL1 (40P FFC)
+# mono_electronics v13 (hardware/mono_electronics/mono_electronics.kicad_pcb, origin = board corner, centre 74, 49.75):
+# J_ROW1 143.04,22 · J_COL1 143.04,68.6 · J_USB1 6.5,18 · J_BAT1 7,57 · ports N 126,3.125 E 144.915,42 S 64,96.375 W 3.125,88
+BOARD_CONN = {'J_ROW': (69.04, -27.75), 'J_COL': (69.04, 18.85), 'J_USB': (-67.5, -31.75), 'J_BAT': (-67.0, 7.25)}
+MOUNT_GAP = 8.0            # mm, panel back to board (standoff) — assumption; FFC path = planar distance + 2·gap
 PANEL_CONN = {'full': {'J_ROW': (-7.2, 0.0), 'J_COL': (27.8, 0.0)},              # back side receptacles
               'flat': {'J_ROW': (-75.3, 0.0), 'J_COL': (0.0, 75.1)},
               'lattice': {'J_ROW': (-14.0, 81.0), 'J_COL': (14.0, 81.0)}}
@@ -40,11 +43,15 @@ class Board:
         s.id = bid if bid is not None else world.new_id()
         s.node = Node(world, s.id)
         s.tile = np.zeros((32, 32), np.uint8); s.pdemo = 0; s.pdemo_t = 0; s.override = None
-    def port_pos(s, side):
-        dx, dy = rotv(*SIDE_OFF[side], s.rot); return s.x + dx, s.y + dy
-    def world_dir(s, side): return (side + s.rot) & 3
-    def conn_pos(s, name):
-        dx, dy = rotv(*BOARD_CONN[name], s.rot); return s.x + dx, s.y + dy
+        s.mirror = False; s.mount = None              # mounted behind a panel: seen from the front the board is x-mirrored
+    def local(s, dx, dy):
+        if s.mirror: dx = -dx
+        dx, dy = rotv(dx, dy, s.rot); return s.x + dx, s.y + dy
+    def port_pos(s, side): return s.local(*SIDE_OFF[side])
+    def world_dir(s, side):
+        if s.mirror and side in (1, 3): side = 4 - side             # E <-> W when seen from the front
+        return (side + s.rot) & 3
+    def conn_pos(s, name): return s.local(*BOARD_CONN[name])
 
 class Panel:
     def __init__(s, kind, x, y, rot=0):
@@ -68,6 +75,7 @@ class World:
         s.now = 0; s.maxb = 16; s._comp = None; s.brightness = 128; s.gamma = 2.2
         s.bus_bytes = 0; s.paused = False; s.rng = random.Random(7)
         s.pd_cache = {}
+        s.mirror_mount = False      # True: board's B side faces the panel (seen mirrored from the front); False: components (F.Cu) face the panel
 
     # ------------------------------------------------ edit
     def new_id(s):
@@ -106,15 +114,47 @@ class World:
                     wd = a.world_dir(side); P = pitch or 160.0
                     ex, ey = a.x + [0, 1, 0, -1][wd] * P, a.y + [-1, 0, 1, 0][wd] * P
                     if abs(b.x - ex) > tol or abs(b.y - ey) > tol: continue
-                    bs = ((wd + 2) - b.rot) & 3
+                    bs = next(k for k in range(4) if b.world_dir(k) == (wd + 2) & 3)
                     if s.connect(a, side, b, bs): n += 1
         return n
+    def ffc_need(s, p):
+        b = p.board
+        if b is None: return 0.0
+        return max(math.hypot(b.conn_pos(n)[0] - p.conn_pos(n)[0], b.conn_pos(n)[1] - p.conn_pos(n)[1]) + (2 * MOUNT_GAP if b.mount is p else 0) for n in ('J_ROW', 'J_COL'))
+    def mount(s, b, p):
+        """rigid assembly: board b behind panel p (centred, same rotation, mirrored as seen from the front)"""
+        for q in s.panels:
+            if q.board is b: q.board = None
+        if b.mount is not None and b.mount is not p: b.mount = None
+        p.board = b; b.mount = p; b.mirror = s.mirror_mount; b.x, b.y, b.rot = p.x, p.y, p.rot
+        need = s.ffc_need(p); p.ffc_len = 100 if need <= 100 else pick_len(need, FFC_LENGTHS); s.dirty()
     def auto_panels(s, kind):
         for b in s.boards:
             if not any(p.board is b for p in s.panels):
-                p = s.add_panel(kind, b.x, b.y, b.rot); p.board = b
-                d = max(((b.conn_pos(n)[0] - p.conn_pos(n)[0]) ** 2 + (b.conn_pos(n)[1] - p.conn_pos(n)[1]) ** 2) ** 0.5 for n in ('J_ROW', 'J_COL'))
-                p.ffc_len = pick_len(d, FFC_LENGTHS)
+                p = s.add_panel(kind, b.x, b.y, b.rot); s.mount(b, p)
+    def checks(s):
+        """physically impossible connections: (level, message, world xy)"""
+        out = []
+        for p in s.panels:
+            if p.board is None or p.board not in s.boards: continue
+            need = s.ffc_need(p)
+            if need > p.ffc_len: out.append(('FAIL', 'FFC %d мм короче нужного %.0f мм (панель→плата %08X)' % (p.ffc_len, need, p.board.id), p.conn_pos('J_ROW')))
+        for c in s.cables:
+            pa, pb = c.a.port_pos(c.as_), c.b.port_pos(c.bs); d = math.hypot(pa[0] - pb[0], pa[1] - pb[1])
+            if d > c.length: out.append(('FAIL', 'кабель %08X.%s–%08X.%s: %d мм < расстояния %.0f мм' % (c.a.id, 'NESW'[c.as_], c.b.id, 'NESW'[c.bs], c.length, d), pa))
+        for b in s.boards:
+            for side in range(4):
+                if s._cmap_get(b, side) is None: continue
+                wd = b.world_dir(side); px, py = b.port_pos(side)
+                qx, qy = px + [0, 1, 0, -1][wd] * 6, py + [-1, 0, 1, 0][wd] * 6      # plug + bend radius ≈ 6 mm outward
+                for o in s.boards:
+                    if o is b: continue
+                    hw, hh = (BOARD_W / 2, BOARD_H / 2) if o.rot % 2 == 0 else (BOARD_H / 2, BOARD_W / 2)
+                    if abs(qx - o.x) < hw and abs(qy - o.y) < hh:
+                        out.append(('FAIL', 'порт %08X.%s упирается в плату %08X — разъём не вставить' % (b.id, 'NESW'[side], o.id), (px, py))); break
+        return out
+    def _cmap_get(s, b, side):
+        s.comps(); return s._cmap.get((b.id, side))
 
     # ------------------------------------------------ wires
     def comps(s):
@@ -247,28 +287,30 @@ class World:
     # ------------------------------------------------ save / load / presets
     def to_json(s):
         bi = {b: i for i, b in enumerate(s.boards)}
-        return {'cable_len': [c.length for c in s.cables], 'ffc_len': [p.ffc_len for p in s.panels], 'boards': [dict(id=b.id, x=b.x, y=b.y, rot=b.rot, powered=b.powered, pdemo=b.pdemo, demo=b.node.demo) for b in s.boards],
-                'panels': [dict(kind=p.kind, x=p.x, y=p.y, rot=p.rot, board=bi.get(p.board, -1), ffc=p.ffc, open_col=p.open_col) for p in s.panels],
+        return {'cable_len': [c.length for c in s.cables], 'ffc_len': [p.ffc_len for p in s.panels], 'boards': [dict(id=b.id, x=b.x, y=b.y, rot=b.rot, mirror=b.mirror, powered=b.powered, pdemo=b.pdemo, demo=b.node.demo) for b in s.boards],
+                'panels': [dict(kind=p.kind, x=p.x, y=p.y, rot=p.rot, board=bi.get(p.board, -1), mounted=bool(p.board is not None and p.board.mount is p), ffc=p.ffc, open_col=p.open_col) for p in s.panels],
                 'cables': [dict(a=bi[c.a], as_=c.as_, b=bi[c.b], bs=c.bs, type=c.type, plugged=c.plugged) for c in s.cables],
-                'maxb': s.maxb, 'brightness': s.brightness, 'gamma': s.gamma}
+                'mirror_mount': s.mirror_mount, 'maxb': s.maxb, 'brightness': s.brightness, 'gamma': s.gamma}
     def from_json(s, d):
         s.__init__()
         for e in d['boards']:
-            b = s.add_board(e['x'], e['y'], e.get('rot', 0), e['id']); b.powered = e.get('powered', True); b.pdemo = e.get('pdemo', 0); b.node.demo = e.get('demo', -1)
+            b = s.add_board(e['x'], e['y'], e.get('rot', 0), e['id']); b.powered = e.get('powered', True); b.pdemo = e.get('pdemo', 0); b.node.demo = e.get('demo', -1); b.mirror = e.get('mirror', False)
         for e in d['panels']:
             p = s.add_panel(e['kind'], e['x'], e['y'], e.get('rot', 0)); p.ffc = e.get('ffc', 'B'); p.open_col = e.get('open_col', -1)
-            if e.get('board', -1) >= 0: p.board = s.boards[e['board']]
+            if e.get('board', -1) >= 0:
+                p.board = s.boards[e['board']]
+                if e.get('mounted'): p.board.mount = p
         for e in d['cables']:
             c = s.connect(s.boards[e['a']], e['as_'], s.boards[e['b']], e['bs'], e.get('type', 'B'))
             if c: c.plugged = e.get('plugged', True)
         for c, L in zip(s.cables, d.get('cable_len', [])): c.length = L
         for p, L in zip(s.panels, d.get('ffc_len', [])): p.ffc_len = L
-        s.maxb = d.get('maxb', 16); s.brightness = d.get('brightness', 128); s.gamma = d.get('gamma', 2.2)
+        s.mirror_mount = d.get('mirror_mount', False); s.maxb = d.get('maxb', 16); s.brightness = d.get('brightness', 128); s.gamma = d.get('gamma', 2.2)
     def preset(s, cols, rows, kind='full', pitch=None):
-        s.__init__()
+        mm = s.mirror_mount; s.__init__(); s.mirror_mount = mm
         P = pitch or PANELS[kind][0]
         if cols * rows > 16: s.maxb = 256
         for r in range(rows):
             for c in range(cols):
-                s.add_board(c * P, r * P)
+                b = s.add_board(c * P, r * P); b.mirror = s.mirror_mount
         s.auto_connect(P); s.auto_panels(kind)
