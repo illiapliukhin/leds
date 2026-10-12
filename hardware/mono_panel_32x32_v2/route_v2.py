@@ -98,13 +98,28 @@ def route(net, kind, start, goal_fn, hfun, layers_ok=(True, True), via_cost=12.0
     path.reverse()
     paths, vias = [], []
     run = [path[0]]
+    def clear(l, a, b, need):
+        # any-angle line-of-sight test on the exact distance field: min of the 4 surrounding nodes at every sample,
+        # minus the worst interpolation error (1-Lipschitz field, sample-to-node <= G/sqrt2) => conservative
+        L_ = math.hypot(b[0] - a[0], b[1] - a[1]); k = max(1, int(L_ / (G / 4)))
+        F = oth[RL[l]]
+        for t in range(k + 1):
+            x = (a[0] + (b[0] - a[0]) * t / k) / G; y = (a[1] + (b[1] - a[1]) * t / k) / G
+            i0, j0 = int(math.floor(y)), int(math.floor(x))
+            fx, fy = x - j0, y - i0      # bilinear: convex distance field => over-estimate <= G^2/(8 r) ~ 0.006 mm, covered by CLR margin
+            v = (F[i0, j0] * (1 - fx) + F[i0, j0 + 1] * fx) * (1 - fy) + (F[i0 + 1, j0] * (1 - fx) + F[i0 + 1, j0 + 1] * fx) * fy
+            dn = 0.008
+            if v - dn < need or edge_d[i0, j0] - G < w / 2 + EDGE: return False
+        return True
     def flush(run):
         if len(run) < 2: return
-        pts = [run[0]]
-        for a, b2, c3 in zip(run, run[1:], run[2:]):
-            if (b2[1] - a[1], b2[2] - a[2]) != (c3[1] - b2[1], c3[2] - b2[2]): pts.append(b2)
-        pts.append(run[-1])
-        paths.append(dict(net=net, layer=LAYERS[RL[run[0][0]]], w=w, pts=[[q[2] * G, q[1] * G] for q in pts]))
+        l = run[0][0]; P = [(q[2] * G, q[1] * G) for q in run]; need = w / 2 + CLR
+        pts = [P[0]]; i = 0
+        while i < len(P) - 1:
+            j = len(P) - 1
+            while j > i + 1 and not clear(l, P[i], P[j], need): j -= 1
+            pts.append(P[j]); i = j
+        paths.append(dict(net=net, layer=LAYERS[RL[l]], w=w, pts=[list(p) for p in pts]))
     for p, q in zip(path, path[1:]):
         if p[0] != q[0]: flush(run); vias.append([p[2] * G, p[1] * G, net]); run = [q]
         else: run.append(q)

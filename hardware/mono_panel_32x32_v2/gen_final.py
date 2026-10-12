@@ -26,4 +26,8 @@ def finish(B, info):
         z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
         z.SetZoneName('GND_' + ('In2' if layer == pcbnew.In2_Cu else 'B'))
         b.Add(z)
+    for f in b.GetFootprints():                       # SMD GND pads already track-fed: solid zone joint, no starved thermals
+        if f.GetReference() in ('J_ROW1', 'J_COL1', 'U_ID1', 'C_ID1'):
+            for p in f.Pads():
+                if p.GetNetname() == 'GND': p.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
     filler = pcbnew.ZONE_FILLER(b); filler.Fill(b.Zones())

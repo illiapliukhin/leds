@@ -18,7 +18,7 @@ This is a single-colour matrix panel for `projects/mono_electronics_v15`, follow
 Rules (in `.kicad_pro`) and stackup:
 - 0.127 mm minimum clearance; tracks ≥0.15 mm; vias 0.6/0.3; edge 0.3 mm.
 - Stackup JLC04161H-7628, 1.6 mm, 1 oz outer.
-- Every bend is a tangent arc. GND zones on In2/B.Cu use thermal reliefs (0.3 gap / 0.3 spoke) and are refilled before plotting. 455 GND stitching vias.
+- Every bend is a tangent arc: router output is string-pulled to any-angle straight runs (bilinear distance-field line of sight, 0.15 mm clearance), then filleted; `check_bends.py` audits tangency. GND zones on In2/B.Cu use thermal reliefs (0.3 gap / 0.3 spoke) and are refilled before plotting. 455 GND stitching vias.
 
 ## Row drop (docs/analysis.json, from the routed copper)
 - Load: 32 LEDs × 10 mA = 0.32 A per row.
