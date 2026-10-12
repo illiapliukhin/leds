@@ -12,7 +12,7 @@ sys.path.insert(0, HERE); import export_pcb
 
 CURRENT_BOARD = 'board_v15'
 PCB = {  # key -> (kicad_pcb, title, schematic or None)
-    CURRENT_BOARD: ('hardware/mono_electronics/mono_electronics.kicad_pcb', 'mono_electronics v15', 'hardware/mono_schematic/mono_electronics.kicad_sch'),
+    CURRENT_BOARD: ('projects/mono_electronics_v15/mono_electronics.kicad_pcb', 'mono_electronics v15b', 'projects/mono_electronics_v15/mono_electronics.kicad_sch'),
     'panel_full': ('hardware/mono_panel_32x32_full/mono_panel_32x32_full.kicad_pcb', 'mono_panel_32x32_full (edge-to-edge)', None),
     'panel_flat': ('hardware/mono_panel_32x32/mono_panel_32x32.kicad_pcb', 'mono_panel_32x32 (flat, old)', None),
     'panel_lattice': ('hardware/mono_panel_32x32_lattice/mono_panel_32x32_lattice.kicad_pcb', 'mono_panel_32x32_lattice', None),
@@ -55,7 +55,7 @@ def main():
         out['firmware'][rel] = dict(git=git_sha(rel), sha256=sha(os.path.join(REPO, rel)))
     fw = subprocess.run(['git', '-C', REPO, 'log', '-1', '--format=%H %cI', '--', 'firmware/mono_split/main', 'firmware/panel_id'], capture_output=True, text=True).stdout.split()
     out['firmware_commit'], out['firmware_date'] = fw[0], fw[1]
-    out['hardware_commit'] = subprocess.run(['git', '-C', REPO, 'log', '-1', '--format=%H', '--', 'hardware/mono_electronics', 'hardware/mono_panel_32x32_full', 'hardware/garland_breakout', 'hardware/mono_panel_32x32_lattice'], capture_output=True, text=True).stdout.strip()
+    out['hardware_commit'] = subprocess.run(['git', '-C', REPO, 'log', '-1', '--format=%H', '--', 'projects/mono_electronics_v15', 'hardware/mono_electronics', 'hardware/mono_panel_32x32_full', 'hardware/garland_breakout', 'hardware/mono_panel_32x32_lattice'], capture_output=True, text=True).stdout.strip()
     with open(os.path.join(APP, 'data', 'versions.json'), 'w') as f: json.dump(out, f, indent=1)
     print('versions.json: firmware', out['firmware_commit'][:8], 'hardware', out['hardware_commit'][:8])
 

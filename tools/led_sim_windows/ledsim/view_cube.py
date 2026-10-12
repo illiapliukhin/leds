@@ -288,8 +288,8 @@ class CubeView:
                         qq = quad(cx_ - px0, ty - py0, zk, pw, ph)
                         if all(qq): pygame.draw.polygon(ov, tuple(colr[:3]) + (150,), qq)
                 pygame.draw.lines(surf, oc, True, q, 1)
-            if k in (0, n - 1) or (n > 8 and k % 8 == 0):
-                q = Pm(rig.bx + BOARD_W / 2, ty + BOARD_H / 2, zk); q and text(surf, 'L%d' % k, (q[0] + 4, q[1] - 6), (150, 200, 160), 9)
+            if k in (0, n - 1) and (k == 0 or rig.units[k][0] != rig.units[0][0] or True):
+                q = Pm(rig.bx + BOARD_W / 2, ty + BOARD_H / 2, zk); q and text(surf, 'L%d' % k, (q[0] + 6, q[1] - 4 + (8 if k == 0 else -8)), (150, 200, 160), 9)
         surf.blit(ov, (0, 0))
         for k, r in enumerate(rig.cables):
             if show.get('ffc', True):
@@ -354,19 +354,20 @@ class CubeView:
         D((-rig.hx, -rig.hy - 34, zb), (rig.hx, -rig.hy - 34, zb), ('рамка %.0f мм' if rig.wire else 'панель %.1f мм') % (2 * rig.hx), (200, 190, 150))
         D((-rig.hx - 10, -rig.hy - 10, zb), (-rig.hx - 10, -rig.hy - 10, zt), 'H %.0f мм (%d × %.2f)' % (zt - zb, rig.n - 1, s.pz))
         if hw:
-            ty, zk = rig.units[-1]
-            D((rig.bx - BOARD_W / 2, ty - BOARD_H / 2 - 8, zk), (rig.bx + BOARD_W / 2, ty - BOARD_H / 2 - 8, zk), 'v15 %.2f мм' % BOARD_W, (150, 220, 170))
-            D((rig.bx + BOARD_W / 2 + 8, ty - BOARD_H / 2, zk), (rig.bx + BOARD_W / 2 + 8, ty + BOARD_H / 2, zk), '%.1f мм' % BOARD_H, (150, 220, 170))
-            if rig.wire:
-                D((rig.ax - GB_W / 2, ty + GB_H / 2 + 8, zk), (rig.ax + GB_W / 2, ty + GB_H / 2 + 8, zk), 'breakout %.0f×%.0f' % (GB_W, GB_H), (220, 190, 120))
-            D((rig.hx, -rig.hy - 18, zf), ((rig.ax - GB_W / 2) if rig.wire else (rig.bx - BOARD_W / 2), -rig.hy - 18, zf), 'зазор %.0f' % GAP, (170, 170, 190))
+            # tower dimensions on the FLOOR in front of the tower (one row, no stacking on the boards themselves)
+            ty0 = min(u[0] for u in rig.units); yf = ty0 - (GB_H if rig.wire else BOARD_H) / 2 - 22
+            D((rig.bx - BOARD_W / 2, yf, zf), (rig.bx + BOARD_W / 2, yf, zf), 'v15 %.2f × %.1f' % (BOARD_W, BOARD_H), (150, 220, 170))
+            if rig.wire: D((rig.ax - GB_W / 2, yf - 16, zf), (rig.ax + GB_W / 2, yf - 16, zf), 'breakout %.0f × %.0f' % (GB_W, GB_H), (220, 190, 120))
             zs = [u[1] for u in rig.units]
-            D((rig.bx + BOARD_W / 2 + 30, ty, min(zs)), (rig.bx + BOARD_W / 2 + 30, ty, max(zs)), 'стек плат %.0f мм' % (max(zs) - min(zs)), (150, 220, 170))
-            r = rig.cables[-1]                                                         # cable lengths of the top layer (one label per kind)
+            if max(zs) - min(zs) > 1:
+                xo = rig.bx + BOARD_W / 2 + 25
+                D((xo, yf, min(zs)), (xo, yf, max(zs)), 'стек %.0f мм' % (max(zs) - min(zs)), (150, 220, 170))
+            # top-layer cable lengths: labelled where the loom meets the cube (away from the tower)
+            r = rig.cables[-1]
             sel = ([r['looms'][0], r['looms'][2]] if rig.wire else r['ffcs'][:1])
             for c_ in sel:
-                pts = c_['pts']; q = Pm(*pts[-2])
-                if q: text(surf, '%s L%d: %.0f мм → %d' % ('строки' if c_.get('row') else 'столбцы' if 'row' in c_ else 'FFC', rig.n - 1, c_['need'], c_['std']), (q[0] + 6, q[1] - 14), (255, 240, 160) if c_['ok'] else (255, 110, 100), 10)
+                q = Pm(*c_['anc']) if 'anc' in c_ else Pm(*c_['pts'][-1])
+                if q: text(surf, '%s %.0f → %d мм' % ('строки' if c_.get('row') else 'столбцы' if 'row' in c_ else 'FFC', c_['need'], c_['std']), (q[0] - 60, q[1] - 18), (255, 240, 160) if c_['ok'] else (255, 110, 100), 10)
 
     def draw_handles(s, surf, Pm, rig):
         """drag handles: grab the dot at the end of an axis and pull to stretch that pitch (mm)"""

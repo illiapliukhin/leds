@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "/workspace/leds_push/hardware/mono_schematic/mono_electronics.kicad_sch")
-		(date "2026-10-11T22:30:22")
+		(source "/workspace/leds_push/projects/mono_electronics_v15/mono_electronics.kicad_sch")
+		(date "2026-10-12T10:08:03")
 		(tool "Eeschema 10.0.7")
 		(sheet
 			(number "1")
@@ -1135,10 +1135,10 @@
 		(comp
 			(ref "C_LL_IN1")
 			(value "1u")
-			(footprint "mono_electronics:C_0402_1005Metric")
+			(footprint "mono_electronics:C_0402_1005Metric_SilkTrim")
 			(fields
 				(field
-					(name "Footprint") "mono_electronics:C_0402_1005Metric")
+					(name "Footprint") "mono_electronics:C_0402_1005Metric_SilkTrim")
 				(field
 					(name "Datasheet")
 				)
@@ -11242,10 +11242,10 @@
 		(comp
 			(ref "R_F1")
 			(value "100k")
-			(footprint "mono_electronics:R_0402_1005Metric")
+			(footprint "mono_electronics:R_0402_1005Metric_SilkTrim")
 			(fields
 				(field
-					(name "Footprint") "mono_electronics:R_0402_1005Metric")
+					(name "Footprint") "mono_electronics:R_0402_1005Metric_SilkTrim")
 				(field
 					(name "Datasheet")
 				)
@@ -11851,6 +11851,9 @@
 				(name "Sheetfile")
 				(value "sheets/stacking.kicad_sch")
 			)
+			(property
+				(name "exclude_from_bom")
+			)
 			(sheetpath
 				(names "/stacking/")
 				(tstamps "/a6e6abad-48c2-4e5c-a982-6d01ccb8da96/")
@@ -12300,6 +12303,9 @@
 				(name "Sheetfile")
 				(value "sheets/led_interface.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/led_interface/")
 				(tstamps "/e726ba7c-55e4-4354-8bd6-c9cba358cb1b/")
@@ -12345,6 +12351,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/led_interface.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/led_interface/")
@@ -12392,6 +12401,9 @@
 				(name "Sheetfile")
 				(value "sheets/led_interface.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/led_interface/")
 				(tstamps "/e726ba7c-55e4-4354-8bd6-c9cba358cb1b/")
@@ -12438,6 +12450,9 @@
 				(name "Sheetfile")
 				(value "sheets/led_interface.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/led_interface/")
 				(tstamps "/e726ba7c-55e4-4354-8bd6-c9cba358cb1b/")
@@ -12483,6 +12498,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/led_interface.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/led_interface/")
@@ -12668,6 +12686,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -12713,6 +12734,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -12760,6 +12784,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -12805,6 +12832,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -12852,6 +12882,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -12897,6 +12930,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -12944,6 +12980,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -12989,6 +13028,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13036,6 +13078,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13081,6 +13126,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13128,6 +13176,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13173,6 +13224,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13220,6 +13274,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13265,6 +13322,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13312,6 +13372,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13357,6 +13420,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13404,6 +13470,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13449,6 +13518,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13496,6 +13568,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13541,6 +13616,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13588,6 +13666,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13633,6 +13714,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13680,6 +13764,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13725,6 +13812,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13772,6 +13862,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13817,6 +13910,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13864,6 +13960,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -13909,6 +14008,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -13956,6 +14058,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14001,6 +14106,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14048,6 +14156,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14093,6 +14204,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14140,6 +14254,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14185,6 +14302,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14232,6 +14352,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14277,6 +14400,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14324,6 +14450,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14369,6 +14498,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14416,6 +14548,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14461,6 +14596,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14508,6 +14646,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14553,6 +14694,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14600,6 +14744,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14645,6 +14792,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14692,6 +14842,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14737,6 +14890,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14784,6 +14940,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14829,6 +14988,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14876,6 +15038,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -14921,6 +15086,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -14968,6 +15136,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15013,6 +15184,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -15060,6 +15234,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15105,6 +15282,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -15152,6 +15332,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15197,6 +15380,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -15244,6 +15430,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15289,6 +15478,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -15336,6 +15528,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15381,6 +15576,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -15428,6 +15626,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15473,6 +15674,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -15520,6 +15724,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15566,6 +15773,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15611,6 +15821,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
+			)
+			(property
+				(name "dnp")
 			)
 			(sheetpath
 				(names "/install_headers/")
@@ -15772,6 +15985,9 @@
 				(name "Sheetfile")
 				(value "sheets/install_headers.kicad_sch")
 			)
+			(property
+				(name "dnp")
+			)
 			(sheetpath
 				(names "/install_headers/")
 				(tstamps "/0303ce9c-5cf8-44d8-b753-51520e22f47c/")
@@ -15932,6 +16148,9 @@
 				(name "Sheetfile")
 				(value "sheets/mechanical.kicad_sch")
 			)
+			(property
+				(name "exclude_from_bom")
+			)
 			(sheetpath
 				(names "/mechanical/")
 				(tstamps "/73831cdd-f4fa-4082-90ae-a4e382bf11ae/")
@@ -15974,6 +16193,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/mechanical.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(sheetpath
 				(names "/mechanical/")
@@ -16018,6 +16240,9 @@
 				(name "Sheetfile")
 				(value "sheets/mechanical.kicad_sch")
 			)
+			(property
+				(name "exclude_from_bom")
+			)
 			(sheetpath
 				(names "/mechanical/")
 				(tstamps "/73831cdd-f4fa-4082-90ae-a4e382bf11ae/")
@@ -16060,6 +16285,9 @@
 			(property
 				(name "Sheetfile")
 				(value "sheets/mechanical.kicad_sch")
+			)
+			(property
+				(name "exclude_from_bom")
 			)
 			(sheetpath
 				(names "/mechanical/")

@@ -1,12 +1,12 @@
 {
- "repo_head": "b1f2aa7696e172aa8dc38cba4daeb6e7a365c4e7",
+ "repo_head": "fbe0cd612621edef0209eecfaddfbc9b6902708a",
  "pcb": {
   "board_v15": {
-   "src": "hardware/mono_electronics/mono_electronics.kicad_pcb",
-   "git": "5702e9609eb649516ece84da5e1c744e77bbc515",
-   "src_sha256": "af67cea87ab12ff499fad12083501a982fe147914604283d3f13f56daa22ca2e",
-   "export_sha256": "627194e0cc8c81781c52d907395eb2043f581165ce3971ef3ce7b9acc596fe9c",
-   "title": "mono_electronics v15"
+   "src": "projects/mono_electronics_v15/mono_electronics.kicad_pcb",
+   "git": "965deb15e9db1e3889d4ba5500f0843852b7a0ef",
+   "src_sha256": "eebc1a4481e6d2995a8755869da4136145361db398f353993b555e7471003d00",
+   "export_sha256": "271d7ffd1f5d98fc015b21406e19009a1a125368a486cd6c2bf509f61c75df2d",
+   "title": "mono_electronics v15b"
   },
   "panel_full": {
    "src": "hardware/mono_panel_32x32_full/mono_panel_32x32_full.kicad_pcb",
@@ -46,8 +46,8 @@
  },
  "sch": {
   "board_v15": {
-   "src": "hardware/mono_schematic/mono_electronics.kicad_sch",
-   "git": "c1c68757cb12bd7ddf8cef37266f8d9435291019",
+   "src": "projects/mono_electronics_v15/mono_electronics.kicad_sch",
+   "git": "965deb15e9db1e3889d4ba5500f0843852b7a0ef",
    "src_sha256": "88cc168038114544f18cb48e141f7d21a40682be00cea42c901b621b664418ed",
    "pdf": true,
    "net": true,
@@ -98,5 +98,5 @@
  },
  "firmware_commit": "1f5e193545857f763880217a7969d492f6a2dd28",
  "firmware_date": "2026-10-11T21:07:51+03:00",
- "hardware_commit": "5c201416e8c1d56654f50b43b9608b0d221428f3"
+ "hardware_commit": "965deb15e9db1e3889d4ba5500f0843852b7a0ef"
 }
