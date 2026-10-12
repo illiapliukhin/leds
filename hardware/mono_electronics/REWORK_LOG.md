@@ -308,3 +308,8 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - Sims: firmware/mono_split/sim/bringup/board*.json (FFC pads −13.5 mm x, E port +2 mm y); tools/led_sim_windows world.py BOARD_CONN/SIDE_OFF, new data/pcb/board_v15.json.gz (now the current board in the inspector/cube/system views).
 - Images: img/v15/v15_top.png (3D), v15_F.png, v15_F_strip.png, v15_In1.png, v15_In1_strip.png.
 - v15 cleanup: the "FFC TYPE B" silk labels moved to x 122.4, off the FFC outlines. The 120 mm FFC C5371276 is in the annotated BOM: JLC stock 701, $0.154 each ($0.121 @50). Silkscreen gerber and fab zip regenerated. Copper unchanged.
+
+## v15 audit fixes (2026-10-12)
+- Zones refilled. The committed v15 file and Gerbers had stale fills: 590 DRC errors, with GND overlapping signal vias on B.Cu/In2. Gerbers and drill files regenerated.
+- Arcs on the LED_CLK_Y, LED_LE_Y and USB_D_P 45° corners. Thermal relief on the GND pads of R_ILIM1, R_ISET1, R_ILM1, R_EN_BOT1 and C_CHG_SYS1. SYS In1/B.Cu 0.25–0.30 → 0.45 mm.
+- Gates: DRC 0 (also at 0.127 mm min), ERC 0, sch-vs-PCB 0, continuity 309/309, nets unchanged. See MFG_AUDIT_v15.md.
