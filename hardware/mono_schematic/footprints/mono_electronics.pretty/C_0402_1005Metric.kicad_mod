@@ -1,15 +1,15 @@
 (footprint "C_0402_1005Metric"
-	(version 20241229)
-	(generator "mono_schematic")
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
 	(layer "F.Cu")
-	(at 0 0)
 	(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 	(tags "capacitor")
-	(property "Reference" "C_485"
+	(property "Reference" "REF**"
 		(at 0 -1.16 0)
 		(layer "F.SilkS")
 		(hide yes)
-		(uuid "546a8c30-e1cf-409f-b6aa-00519854683d")
+		(uuid "70e81847-84b0-4197-9c7f-1c1294e3a5b7")
 		(effects
 			(font
 				(size 1 1)
@@ -20,7 +20,7 @@
 	(property "Value" "100nF"
 		(at 0 1.16 0)
 		(layer "F.Fab")
-		(uuid "ac1054f4-8216-4b8f-b793-f28bf1b77ec3")
+		(uuid "f5abed11-0547-4957-afa8-cd6dfc8e7ce7")
 		(effects
 			(font
 				(size 1 1)
@@ -32,7 +32,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "6f281e23-38f7-4e34-a4e1-800c8797d2c6")
+		(uuid "42cb4a2b-b927-4758-ad37-6fcb735109ff")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -43,7 +43,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "dda99e32-2e5d-412c-89df-28d78be260cb")
+		(uuid "2833f5b1-d38c-4ab3-a474-4f3aa7842258")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -68,7 +68,7 @@
 		(start -0.107836 -0.36)
 		(end 0.107836 -0.36)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -78,7 +78,7 @@
 		(start -0.107836 0.36)
 		(end 0.107836 0.36)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -122,7 +122,6 @@
 		(size 0.56 0.62)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		
 		(uuid "14300767-0129-4cde-a25d-fbb8971d7788")
 	)
 	(pad "2" smd roundrect
@@ -130,11 +129,10 @@
 		(size 0.56 0.62)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		
 		(uuid "5013d836-8b19-4848-8f09-d4298d146cee")
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Capacitor_SMD.3dshapes/C_0402_1005Metric.step"
+	(model "${KIPRJMOD}/3dmodels/Capacitor_SMD.3dshapes/C_0402_1005Metric.step"
 		(offset
 			(xyz 0 0 0)
 		)

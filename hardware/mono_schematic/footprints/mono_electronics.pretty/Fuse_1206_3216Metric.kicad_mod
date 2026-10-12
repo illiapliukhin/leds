@@ -1,15 +1,15 @@
 (footprint "Fuse_1206_3216Metric"
-	(version 20241229)
-	(generator "mono_schematic")
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
 	(layer "F.Cu")
-	(at 0 0)
 	(descr "Fuse SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf)")
 	(tags "fuse")
-	(property "Reference" "F_BAT1"
-		(at 0 -1.83 90)
+	(property "Reference" "REF**"
+		(at 0 -1.83 0)
 		(layer "F.SilkS")
 		(hide yes)
-		(uuid "20cce6cf-9903-45ff-9984-236e5d44de36")
+		(uuid "0d46fd57-139a-4e0e-b0af-50489e9f8aa5")
 		(effects
 			(font
 				(size 1 1)
@@ -18,9 +18,9 @@
 		)
 	)
 	(property "Value" "0466002.NRHF 2A"
-		(at 0 1.83 90)
+		(at 0 1.83 0)
 		(layer "F.Fab")
-		(uuid "609422a1-fd68-4a4d-ba94-140b4da88fbb")
+		(uuid "16e40db5-59cb-417a-a4a9-312cd7a16f46")
 		(effects
 			(font
 				(size 1 1)
@@ -29,10 +29,10 @@
 		)
 	)
 	(property "Datasheet" ""
-		(at 0 0 90)
+		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "832fada5-d9f9-4220-96d2-b17d77e2b645")
+		(uuid "a6b65b7d-a630-4cae-879f-eece64dd3edf")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -40,10 +40,10 @@
 		)
 	)
 	(property "Description" ""
-		(at 0 0 90)
+		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "314a8493-19bb-4361-89a9-51703b67be53")
+		(uuid "1f826343-a594-407e-a0e4-ff1ffea46371")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -51,7 +51,7 @@
 		)
 	)
 	(property "KiLib_Generator" "SMD_2terminal_chip_molded"
-		(at 0 0 90)
+		(at 0 0 0)
 		(layer "F.SilkS")
 		(hide yes)
 		(uuid "63e0369c-2109-4010-a048-92a244997196")
@@ -68,7 +68,7 @@
 		(start -0.602064 -0.91)
 		(end 0.602064 -0.91)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -78,7 +78,7 @@
 		(start -0.602064 0.91)
 		(end 0.602064 0.91)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -107,7 +107,7 @@
 		(uuid "9533425c-def7-4b2f-bd74-24e92e9067f5")
 	)
 	(fp_text user "${REFERENCE}"
-		(at 0 0 90)
+		(at 0 0 0)
 		(layer "F.Fab")
 		(uuid "ba86f5d6-d6cf-45a7-bd6e-607e19d6edb9")
 		(effects
@@ -118,23 +118,21 @@
 		)
 	)
 	(pad "1" smd roundrect
-		(at -1.4 0 90)
+		(at -1.4 0)
 		(size 1.25 1.75)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.2)
-		
 		(uuid "db6258bf-90d8-4b18-b6d5-b815c9f1bdf0")
 	)
 	(pad "2" smd roundrect
-		(at 1.4 0 90)
+		(at 1.4 0)
 		(size 1.25 1.75)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.2)
-		
 		(uuid "ad691b6b-2d27-4a14-9890-504d7ca9cbea")
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Fuse.3dshapes/Fuse_1206_3216Metric.step"
+	(model "${KIPRJMOD}/3dmodels/Fuse.3dshapes/Fuse_1206_3216Metric.step"
 		(offset
 			(xyz 0 0 0)
 		)

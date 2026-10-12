@@ -1,6 +1,6 @@
 # mono_electronics v15 — JLCPCB fab package (PR #4 board), two assembly variants
 
-Board: **148.0 × 99.5 mm** (v15: FFCs J_ROW1/J_COL1 moved 13.5 mm west, box headers + TVS strip at x 136–148, back to the v13 outline; v14/v14b were 160.5/159.45 wide), 4 layers (F / In1 / In2 / B), single-sided assembly (top only). KiCad DRC 0 errors / 0 warnings / 0 unconnected.
+Board: **148.0 × 99.5 mm** (v15: FFCs J_ROW1/J_COL1 moved 13.5 mm west, box headers + TVS strip at x 136–148, back to the v13 outline; v14/v14b were 160.5/159.45 wide), 4 layers (F / In1 / In2 / B), **1.6 mm JLC04161H-7628 stackup** (explicit in the board file since v15b), single-sided assembly (top only), 3 fiducials (FID1–3, not in BOM/CPL). KiCad DRC 0 errors / 0 warnings / 0 unconnected.
 
 ## Files
 - `gerbers/` — Protel extensions, no X2, soldermask subtracted from silk, drill-file (aux) origin. Layer order for the JLC stackup: GTL (F.Cu) / G1 (In1) / G2 (In2) / GBL (B.Cu). Excellon drill, mm, separate PTH / NPTH, with drill maps.
@@ -10,9 +10,10 @@ Board: **148.0 × 99.5 mm** (v15: FFCs J_ROW1/J_COL1 moved 13.5 mm west, box hea
 - CPL: placement (Designator, Mid X, Mid Y, Layer, Rotation), all Top; wearable 231 parts, installation 297 parts (R_EXP_* DNP in both).
 
 ## Order settings (JLCPCB)
-4 layers, FR-4, 1.6 mm (project rule says 1.0 mm — pick deliberately), JLC04161H-7628 or any stackup with ≥0.127 mm trace/space capability (board min other-net spacing 0.127 mm, min track 0.10 mm (IMU_SDA/DEC_B_EN_N etc.; JLC 4L min 0.09), vias 0.40/0.20 + 0.45/0.20 mm; board file thickness is 1.0 mm), ENIG recommended (QFN/LGA/VQFN fine pitch), tented vias, Standard PCBA, top side, remove order number or "specify position".
+4 layers, FR-4, **1.6 mm, JLC04161H-7628** (the board file stackup since v15b; no impedance control needed), ≥0.127 mm trace/space capability (board min other-net spacing 0.127 mm, verified by DRC with min_clearance 0.127, min track 0.10 mm (IMU_SDA/DEC_B_EN_N etc.; JLC 4L min 0.09), vias 0.40/0.20 + 0.45/0.20 mm), ENIG recommended (QFN/LGA/VQFN fine pitch), tented vias, Standard PCBA, top side, remove order number or "specify position".
 
 ## Flags before ordering
+- **v15b (2026-10-12):** D_VBUS1 moved next to J_USB1 (CPL changed). J_PORT_E1/N1/S1/W1 moved 0.25 mm inward (CPL changed). 3 fiducials added. Silk 0.15 mm. SYS widened, with doubled vias. 24 sub-0.127 mm gaps fixed. Gerbers/drill regenerated from `projects/mono_electronics_v15/` (the canonical standalone project). Re-upload this zip.
 - **v15 audit (2026-10-12, hardware/mono_electronics/MFG_AUDIT_v15.md):** the earlier v15 Gerbers were plotted from stale zone fills (B.Cu/In2 GND poured over signal vias = shorts). Zones are now refilled and all Gerbers/drill files regenerated: re-upload this zip. Also: 3 sharp corners arced, thermal relief on 5 tombstone-prone passives, SYS In1/B.Cu widened to 0.45 mm, installation BOM designators comma-separated. No fiducials: ask JLC for edge rails.
 - **v15 FFC shift:** the FFC length changes at the panel end: the board connectors are now 13.5 mm further from the east edge. Default FFC is now the **120 mm** Type B (C5371276); check the run against your mounting before ordering. CPL positions changed for J_ROW1, J_COL1, J_RH1, J_CH1, J_PORT_E1 (+2 mm south), D_ID1, R_ID_*, D_E_SP1, D_E_AB1, D_N_AB1 and the 64 TVS.
 - **v14/v15 installation headers (LED_INTERFACE_STANDARD.md §6.1):** J_RH1/J_CH1 repeat J_ROW1/J_COL1 pin for pin (pin n = FFC pin n, rows/cols 1–32, GND on 33/38/40). Never fit FFC panels and header loads at the same time. Header stock (125) and socket stock (140) are thin; check before ordering. Check the header and SOD-882 rotations in the CPL preview.

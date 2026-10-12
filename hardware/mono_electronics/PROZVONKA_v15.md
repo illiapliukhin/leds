@@ -2,7 +2,7 @@
 
 Method: each pad's board net is compared with the exported schematic netlist (hardware/mono_schematic/reports/mono_electronics_sch_netlist.xml). Each pad on a multi-pad net must have copper attached (KiCad connectivity engine). KiCad DRC must report 0 unconnected, which proves every net is a single connected cluster.
 
-**Result: 309 parts, 309 PASS, 0 FAIL**
+**Result: 312 parts, 312 PASS, 0 FAIL**
 
 | Ref | Value | Pads | Net = schematic | Copper attached | Result | Notes |
 |---|---|---|---|---|---|---|
@@ -122,6 +122,9 @@ Method: each pad's board net is compared with the exported schematic netlist (ha
 | D_VBUS1 | SMF12A | 2 | 2 | 2 | PASS |  |
 | D_W_AB1 | SM712 | 3 | 3 | 3 | PASS |  |
 | D_W_SP1 | PESD3V3S2UT | 3 | 3 | 3 | PASS |  |
+| FID1 | Fiducial | 0 | 0 | 0 | PASS |  |
+| FID2 | Fiducial | 0 | 0 | 0 | PASS |  |
+| FID3 | Fiducial | 0 | 0 | 0 | PASS |  |
 | F_BAT1 | 0466002.NRHF 2A | 2 | 2 | 2 | PASS |  |
 | H1 | M2.5 | 1 | 1 | 1 | PASS |  |
 | H2 | M2.5 | 1 | 1 | 1 | PASS |  |

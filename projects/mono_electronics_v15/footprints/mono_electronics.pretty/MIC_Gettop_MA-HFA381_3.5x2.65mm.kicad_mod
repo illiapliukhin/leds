@@ -1,0 +1,123 @@
+(footprint "MIC_Gettop_MA-HFA381_3.5x2.65mm"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "Gettop MA-HFA381-H13-1AF top-port analog MEMS mic, 3.5x2.65 mm, 6-pad LGA, land pattern per datasheet p.11 (0.62x1.03 pads, 0.5 gap, 1.18 row gap)")
+	(property "Reference" "REF**"
+		(at 0 -2.6 0)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "3586e5ee-ddc6-4336-9b00-a5e2d55318ac")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MA-HFA381-H13-1AF"
+		(at 0 2.6 0)
+		(layer "F.Fab")
+		(uuid "30cb47c8-e3e0-42d7-82c5-21e2c410314c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ee9b142d-305c-42c3-8607-9dae89af4e3a")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d83b7ee3-1e5c-41d6-90ed-a38769443ae2")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start 1.45 -1.85)
+		(end 1.45 -2.05)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "87897370-5595-4a09-8545-fbda5fd87cfd")
+	)
+	(fp_rect
+		(start -1.6 -2)
+		(end 1.6 2)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "0f149057-ff47-4a9d-977e-996de3f391db")
+	)
+	(fp_rect
+		(start -1.325 -1.75)
+		(end 1.325 1.75)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "99a56cd9-5e50-472d-99b8-d611178b3cea")
+	)
+	(pad "1" smd rect
+		(at 1.12 -1.105)
+		(size 0.62 1.03)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "510c0005-9faa-45eb-b47a-5babb107dad2")
+	)
+	(pad "2" smd rect
+		(at 0 -1.105)
+		(size 0.62 1.03)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "545a97d5-e985-4e27-98cb-0fa3ba96a0aa")
+	)
+	(pad "3" smd rect
+		(at -1.12 -1.105)
+		(size 0.62 1.03)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "355f31e0-399f-4abc-b055-3723ec62e86f")
+	)
+	(pad "4" smd rect
+		(at -1.12 1.105)
+		(size 0.62 1.03)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "ee031559-7bbd-40cf-876c-93ac418020c8")
+	)
+	(pad "5" smd rect
+		(at 0 1.105)
+		(size 0.62 1.03)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "196a33c9-5d6b-4410-b4a0-5de4c1b4fb7d")
+	)
+	(pad "6" smd rect
+		(at 1.12 1.105)
+		(size 0.62 1.03)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "2971f61d-d43b-4d1c-921f-df31595ded4f")
+	)
+	(embedded_fonts no)
+)

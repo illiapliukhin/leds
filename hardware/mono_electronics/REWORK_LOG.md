@@ -313,3 +313,9 @@ Reference: hardware/common/LED_INTERFACE_STANDARD.md, LED_SCALING_OPTIONS.md (ma
 - Zones refilled. The committed v15 file and Gerbers had stale fills: 590 DRC errors, with GND overlapping signal vias on B.Cu/In2. Gerbers and drill files regenerated.
 - Arcs on the LED_CLK_Y, LED_LE_Y and USB_D_P 45° corners. Thermal relief on the GND pads of R_ILIM1, R_ISET1, R_ILM1, R_EN_BOT1 and C_CHG_SYS1. SYS In1/B.Cu 0.25–0.30 → 0.45 mm.
 - Gates: DRC 0 (also at 0.127 mm min), ERC 0, sch-vs-PCB 0, continuity 309/309, nets unchanged. See MFG_AUDIT_v15.md.
+
+## v15b (2026-10-12): audit recommendations applied
+- D_VBUS1 moved next to J_USB1, upstream of U_OVP1. SYS B.Cu 0.6 mm, plus a second via at every SYS layer change. 3 fiducials (board-only). Silk widened to 0.15 mm. J_PORT_* 0.25 mm inward. Explicit 1.6 mm JLC04161H-7628 stackup.
+- Real 0.127 mm spacing: 24 pre-existing sub-0.127 gaps fixed (ROW anode In1 0.36 → 0.345 mm, VBUS escape 0.3 mm, SYS arc 0.25 mm). min_clearance rule set to 0.127.
+- Schematic DNP/in_bom attributes now match the board. Footprint library nicknames added. KiCad native parity 0.
+- Standalone project: projects/mono_electronics_v15/.

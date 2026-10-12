@@ -1,5 +1,10 @@
 {
   "pcb_refs": 309,
+  "board_only_excluded": [
+    "FID1",
+    "FID2",
+    "FID3"
+  ],
   "sch_refs": 309,
   "refs_only_pcb": [],
   "refs_only_sch": [],

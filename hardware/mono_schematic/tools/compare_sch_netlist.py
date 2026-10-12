@@ -13,7 +13,16 @@ for n in t.find('nets'):
     sch[n.get('name').lstrip('/')]=nodes
 sch_refs={c.get('ref') for c in t.find('components')}
 pcb={}
-fps=extract_board(ROOT/'hardware/mono_electronics/mono_electronics.kicad_pcb')
+BOARD=Path(sys.argv[2]) if len(sys.argv)>2 else ROOT/'hardware/mono_electronics/mono_electronics.kicad_pcb'
+REPORT=Path(sys.argv[3]) if len(sys.argv)>3 else ROOT/'hardware/mono_schematic/reports/sch_netlist_vs_pcb.json'
+import re
+# board-only footprints (fiducials FID*) have no schematic symbol by design: excluded from the parity check
+_txt=BOARD.read_text(); board_only=set()
+for m in re.finditer(r'\n\t\(footprint ',_txt):
+    blk=_txt[m.start():_txt.find('\n\t)',m.start())]
+    if re.search(r'\(attr[^)]*board_only',blk):
+        r=re.search(r'\(property "Reference" "([^"]+)"',blk); board_only.add(r.group(1))
+fps=[f for f in extract_board(BOARD) if f.reference not in board_only]
 for f in fps:
     for p,n in f.pad_nets.items(): pcb.setdefault(n,set()).add((f.reference,p))
 pcb={k:frozenset(v) for k,v in pcb.items()}
@@ -28,7 +37,7 @@ for node,net in ps.items():
     if pcb[net]!=sch[sn]: diffs.append(f'{node} pcb={net}({len(pcb[net])}) sch={sn}({len(sch[sn])})')
 for node,net in ss.items():
     if node not in ps and len(sch[net])>1: diffs.append(f'{node} sch={net} pcb=<no net>')
-rep={'pcb_refs':len(pcb_refs),'sch_refs':len(sch_refs),'refs_only_pcb':sorted(pcb_refs-sch_refs),'refs_only_sch':sorted(sch_refs-pcb_refs),'pin_differences':len(diffs),'examples':diffs[:40]}
-(ROOT/'hardware/mono_schematic/reports/sch_netlist_vs_pcb.json').write_text(json.dumps(rep,indent=2))
+rep={'pcb_refs':len(pcb_refs),'board_only_excluded':sorted(board_only),'sch_refs':len(sch_refs),'refs_only_pcb':sorted(pcb_refs-sch_refs),'refs_only_sch':sorted(sch_refs-pcb_refs),'pin_differences':len(diffs),'examples':diffs[:40]}
+REPORT.write_text(json.dumps(rep,indent=2))
 print(json.dumps({k:v for k,v in rep.items() if k!='examples'},indent=1)); print('\n'.join(diffs[:15]))
 sys.exit(1 if diffs or rep['refs_only_pcb'] or rep['refs_only_sch'] else 0)

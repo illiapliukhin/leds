@@ -1,14 +1,14 @@
 (footprint "R_0402_1005Metric"
-	(version 20241229)
-	(generator "mono_schematic")
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
 	(layer "F.Cu")
-	(at 0 0)
 	(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 	(tags "resistor")
-	(property "Reference" "R_XOE1"
+	(property "Reference" "REF**"
 		(at 0 0 0)
 		(layer "F.Fab")
-		(uuid "8ceb6f4c-1f3b-4007-9bce-3361708a6331")
+		(uuid "89e84562-beec-4f81-bff7-08df4198aec7")
 		(effects
 			(font
 				(size 1 1)
@@ -20,7 +20,7 @@
 		(at 0 1.17 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "e92a4218-b670-4fa8-844b-17d457607898")
+		(uuid "bbc99d89-7e88-4ef0-a62d-85d06034ad56")
 		(effects
 			(font
 				(size 1 1)
@@ -32,7 +32,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "a130e92b-d650-43b4-83bd-183955c0765f")
+		(uuid "c1287374-fba6-4dc6-a1de-4dfd0928cebb")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -43,7 +43,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "e1e247b8-810d-491a-b008-22fb6ed13995")
+		(uuid "6f1c7055-f2f6-4dd8-881c-a0c0da170a2a")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -68,7 +68,7 @@
 		(start -0.153641 -0.38)
 		(end 0.153641 -0.38)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -78,7 +78,7 @@
 		(start -0.153641 0.38)
 		(end 0.153641 0.38)
 		(stroke
-			(width 0.12)
+			(width 0.15)
 			(type solid)
 		)
 		(layer "F.SilkS")
@@ -122,7 +122,6 @@
 		(size 0.54 0.64)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		
 		(uuid "ab2e3874-263c-4fdc-b9b8-ddf9c326240d")
 	)
 	(pad "2" smd roundrect
@@ -130,11 +129,10 @@
 		(size 0.54 0.64)
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(roundrect_rratio 0.25)
-		
 		(uuid "16d6d97f-c7a7-4d51-82d7-3e44e932a33b")
 	)
 	(embedded_fonts no)
-	(model "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0402_1005Metric.step"
+	(model "${KIPRJMOD}/3dmodels/Resistor_SMD.3dshapes/R_0402_1005Metric.step"
 		(offset
 			(xyz 0 0 0)
 		)
