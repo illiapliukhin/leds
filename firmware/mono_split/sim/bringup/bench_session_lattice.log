@@ -1,0 +1,26 @@
+   0.01 INFO  Cable check from pad geometry: Type A mirrors pin 1->40 (32 net errors), Type B pin 1->1 (0)
+   1.51 RUN   Plug USB-C: VBUS 5 V
+   2.31 INFO  BQ25185 power path: SYS 4.5 V (~1 ms class)
+   3.11 INFO  TLV75733P soft start: AON_3V3 (sub-ms)
+   3.91 INFO  CHIP_PU RC releases, ESP32-S3 boots (QEMU)
+   5.23 PASS  Firmware up: LED rails OFF at boot (on demand)
+   6.23 RUN   I2C scan: expect BMI270 0x68, MAX17048 0x36 (sim-mocked)
+   6.75 RUN   All on: `test all`
+        examples: []
+  10.05 RUN   Row walk: `test row`
+        examples: []
+  15.56 RUN   Column walk: `test col`
+        examples: []
+  21.06 RUN   Checkerboard: `test checker`
+        examples: []
+  25.96 INFO  FAULT 1: swap both FFCs for Type A (same-side contacts) cables
+  25.96 RUN   [F1] All on: `test all`
+        examples: ['D247 (ROW_08 x COL_23) dark, expected lit', 'D248 (ROW_08 x COL_24) dark, expected lit', 'D249 (ROW_08 x COL_25) dark, expected lit', 'D250 (ROW_08 x COL_26) dark, expected lit']
+  28.77 RUN   [F1] Row walk: `test row`
+        examples: ['D329 (ROW_11 x COL_09) lit, expected dark', 'D330 (ROW_11 x COL_10) lit, expected dark', 'D331 (ROW_11 x COL_11) lit, expected dark', 'D332 (ROW_11 x COL_12) lit, expected dark']
+  34.07 INFO  FAULT 2: Type B cable, conductor 7 of the COL cable open (COL_07)
+  34.07 RUN   [F2] Column walk: `test col`
+        examples: ['D7 (ROW_01 x COL_07) dark, expected lit', 'D39 (ROW_02 x COL_07) dark, expected lit', 'D71 (ROW_03 x COL_07) dark, expected lit', 'D103 (ROW_04 x COL_07) dark, expected lit']
+  40.07 INFO  Faults removed, correct Type B cables back in
+  40.07 PASS  Bench report written: bench_report_lattice.md
+  41.58 RUN   Demo: `demo cycle` (left running)

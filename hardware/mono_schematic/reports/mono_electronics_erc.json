@@ -1,0 +1,87 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-12T09:42:50",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.7",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f",
+            "violations": []
+        },
+        {
+            "path": "/power/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/a11c3b35-e0df-473b-b77d-20b4dfabdd92",
+            "violations": []
+        },
+        {
+            "path": "/mcu/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/cde5e97b-1796-4403-8085-6c3212750aaf",
+            "violations": []
+        },
+        {
+            "path": "/imu/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/a1e65076-152d-4248-abc7-90337ac875d7",
+            "violations": []
+        },
+        {
+            "path": "/led_drive/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/b896a762-29b2-460c-9fdb-4845306b80f2",
+            "violations": []
+        },
+        {
+            "path": "/row_farm/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/46b31606-4b30-4c04-9d0e-2018456dff2a",
+            "violations": []
+        },
+        {
+            "path": "/audio/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/dfd71f24-5dd7-4027-856f-15ebe7c74edf",
+            "violations": []
+        },
+        {
+            "path": "/stacking/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/a6e6abad-48c2-4e5c-a982-6d01ccb8da96",
+            "violations": []
+        },
+        {
+            "path": "/led_interface/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/e726ba7c-55e4-4354-8bd6-c9cba358cb1b",
+            "violations": []
+        },
+        {
+            "path": "/install_headers/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/0303ce9c-5cf8-44d8-b753-51520e22f47c",
+            "violations": []
+        },
+        {
+            "path": "/mechanical/",
+            "uuid_path": "/495a449c-7ee1-4079-8672-5f56a2313c5f/73831cdd-f4fa-4082-90ae-a4e382bf11ae",
+            "violations": []
+        }
+    ],
+    "source": "mono_electronics.kicad_sch"
+}
