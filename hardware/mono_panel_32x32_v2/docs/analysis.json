@@ -1,0 +1,247 @@
+{
+ "I_row_A": 0.32,
+ "R_ffc_ohm": 0.328,
+ "R_via_mohm": 1.4,
+ "worst_row": "ROW_01",
+ "worst": {
+  "R_fan_mohm": 0.0,
+  "R_bus_mohm": 464.8,
+  "vias": 1,
+  "dV_mV": 199.0,
+  "board_only_mV": 74.8
+ },
+ "budget_mV": 350,
+ "sink_headroom_V": 1.26,
+ "ipc2221_10C": {
+  "0.3mm_ext_A": 1.0,
+  "1.0mm_bus_ext_A": 2.39,
+  "0.2mm_int_A": 0.37
+ },
+ "I_row_rms_A": 0.057,
+ "rows": {
+  "ROW_01": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 464.8,
+   "vias": 1,
+   "dV_mV": 199.0,
+   "board_only_mV": 74.8
+  },
+  "ROW_02": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 451.8,
+   "vias": 1,
+   "dV_mV": 196.9,
+   "board_only_mV": 72.7
+  },
+  "ROW_03": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 437.1,
+   "vias": 1,
+   "dV_mV": 194.5,
+   "board_only_mV": 70.4
+  },
+  "ROW_04": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 423.0,
+   "vias": 1,
+   "dV_mV": 192.3,
+   "board_only_mV": 68.1
+  },
+  "ROW_05": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 408.2,
+   "vias": 1,
+   "dV_mV": 189.9,
+   "board_only_mV": 65.8
+  },
+  "ROW_06": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 393.8,
+   "vias": 1,
+   "dV_mV": 187.6,
+   "board_only_mV": 63.5
+  },
+  "ROW_07": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 379.9,
+   "vias": 1,
+   "dV_mV": 185.4,
+   "board_only_mV": 61.2
+  },
+  "ROW_08": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 366.3,
+   "vias": 1,
+   "dV_mV": 183.2,
+   "board_only_mV": 59.1
+  },
+  "ROW_09": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 350.5,
+   "vias": 1,
+   "dV_mV": 180.7,
+   "board_only_mV": 56.5
+  },
+  "ROW_10": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 337.5,
+   "vias": 1,
+   "dV_mV": 178.6,
+   "board_only_mV": 54.4
+  },
+  "ROW_11": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 321.7,
+   "vias": 1,
+   "dV_mV": 176.1,
+   "board_only_mV": 51.9
+  },
+  "ROW_12": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 309.1,
+   "vias": 1,
+   "dV_mV": 174.1,
+   "board_only_mV": 49.9
+  },
+  "ROW_13": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 293.4,
+   "vias": 1,
+   "dV_mV": 171.5,
+   "board_only_mV": 47.4
+  },
+  "ROW_14": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 279.8,
+   "vias": 1,
+   "dV_mV": 169.4,
+   "board_only_mV": 45.2
+  },
+  "ROW_15": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 264.2,
+   "vias": 1,
+   "dV_mV": 166.9,
+   "board_only_mV": 42.7
+  },
+  "ROW_16": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 250.5,
+   "vias": 1,
+   "dV_mV": 164.7,
+   "board_only_mV": 40.5
+  },
+  "ROW_17": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 231.0,
+   "vias": 1,
+   "dV_mV": 161.6,
+   "board_only_mV": 37.4
+  },
+  "ROW_18": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 248.4,
+   "vias": 1,
+   "dV_mV": 164.3,
+   "board_only_mV": 40.2
+  },
+  "ROW_19": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 268.5,
+   "vias": 1,
+   "dV_mV": 167.6,
+   "board_only_mV": 43.4
+  },
+  "ROW_20": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 278.8,
+   "vias": 1,
+   "dV_mV": 169.2,
+   "board_only_mV": 45.1
+  },
+  "ROW_21": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 298.9,
+   "vias": 1,
+   "dV_mV": 172.4,
+   "board_only_mV": 48.3
+  },
+  "ROW_22": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 308.0,
+   "vias": 1,
+   "dV_mV": 173.9,
+   "board_only_mV": 49.7
+  },
+  "ROW_23": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 328.0,
+   "vias": 1,
+   "dV_mV": 177.1,
+   "board_only_mV": 52.9
+  },
+  "ROW_24": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 337.3,
+   "vias": 1,
+   "dV_mV": 178.6,
+   "board_only_mV": 54.4
+  },
+  "ROW_25": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 357.1,
+   "vias": 1,
+   "dV_mV": 181.8,
+   "board_only_mV": 57.6
+  },
+  "ROW_26": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 366.5,
+   "vias": 1,
+   "dV_mV": 183.2,
+   "board_only_mV": 59.1
+  },
+  "ROW_27": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 386.2,
+   "vias": 1,
+   "dV_mV": 186.4,
+   "board_only_mV": 62.2
+  },
+  "ROW_28": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 395.9,
+   "vias": 1,
+   "dV_mV": 187.9,
+   "board_only_mV": 63.8
+  },
+  "ROW_29": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 409.8,
+   "vias": 1,
+   "dV_mV": 190.2,
+   "board_only_mV": 66.0
+  },
+  "ROW_30": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 429.7,
+   "vias": 1,
+   "dV_mV": 193.4,
+   "board_only_mV": 69.2
+  },
+  "ROW_31": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 438.9,
+   "vias": 1,
+   "dV_mV": 194.8,
+   "board_only_mV": 70.7
+  },
+  "ROW_32": {
+   "R_fan_mohm": 0.0,
+   "R_bus_mohm": 451.4,
+   "vias": 1,
+   "dV_mV": 196.8,
+   "board_only_mV": 72.7
+  }
+ }
+}
