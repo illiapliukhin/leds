@@ -8,7 +8,9 @@ from . import host
 from .ui import T, text
 from .world import PANELS
 from .camera import OrbitCam
-from . import cube_fx, image3d
+from . import cube_fx, image3d, cube_rig
+from .world import BOARD_W, BOARD_H, BOARD_CONN
+from .cube_rig import GB, GB_W, GB_H, GAP
 
 DEMOS3D = ['vysh3d', 'walker', 'runner', 'gogo', 'ambigram', 'anamorph', 'image', 'tsweep', 'life', 'fireworks', 'snake', 'heart', 'ripples', 'plasma', 'dna', 'shapes', 'wave', 'rain', 'sphere', 'text', 'slices2d', 'extrude2d']
 DEMO_RU = {'shapes': 'Вращающиеся фигуры', 'wave': '3D-волна', 'rain': 'Дождь', 'sphere': 'Сфера', 'text': '3D-текст (проход)',
@@ -37,7 +39,8 @@ class CubeView:
         s.words = ['LED', 'ILLIA', 'MONO']; s.fx = cube_fx.FX(); s.amb = None; s.amb_key = None; s.ana = None; s.ana_key = None
         s.img = image3d.demo_image(); s.img2 = None; s.img_name = 'встроенная картинка'; s.imode = 0; s.igamma = 1.0; s.ithr = 0.5
         s.idither = False; s.iinvert = False; s.ifill = False; s.msg = ''
-        s._grid()
+        s.kind = 'wire'; s.show_hw = False; s.show_ruler = False; s.stretch = False; s.handles = {}; s.hdrag = None; s.ptxt = {}
+        s._grid(); s.reset_pitch()
     def _grid(s):
         n = s.N
         z, y, x = np.meshgrid(np.arange(n), np.arange(32), np.arange(32), indexing='ij')
@@ -47,7 +50,27 @@ class CubeView:
     # normalized coords -1..1 (layer axis scaled by the layer pitch ratio)
     def ncoords(s):
         return (s.X - 15.5) / 16, (s.Y - 15.5) / 16, (s.Z - (s.N - 1) / 2) / 16 * s.zpitch()
-    def zpitch(s): return 32 / max(s.N, 1) if s.kind == 'full_cube' else 1.0
+    def zpitch(s): return round(s.pz / s.px, 2) if hasattr(s, 'pz') else (32 / max(s.N, 1) if s.kind == 'full_cube' else 1.0)
+    # ---- real pitch per axis (mm). PCB panels: X/Y fixed by the board, only Z (layer spacing) can change.
+    def reset_pitch(s, z_only=False):
+        p0, _ = cube_rig.nominal(s.kind)
+        if not z_only: s.px = s.py = p0
+        s.pz = cube_rig.default_z(s.kind, s.N); s._rig = None
+    def set_pitch(s, ax, v):
+        lo, hi = cube_rig.PITCH_RANGE['z' if ax == 'z' else 'xy']
+        if ax != 'z' and s.kind != 'wire': return                                    # printed panel: pitch is copper
+        setattr(s, 'p' + ax, round(max(lo, min(hi, float(v))), 2)); s._rig = None
+    def U(s): return 1.0 / (16 * cube_rig.nominal(s.kind)[0])                        # mm -> render units (nominal grid = ±1)
+    def rig(s):
+        k = (s.kind, s.N, s.px, s.py, s.pz)
+        if getattr(s, '_rig', None) is None or s._rig_key != k: s._rig = cube_rig.Rig(*k); s._rig_key = k
+        return s._rig
+    def fit_hw(s):
+        """camera framing for the whole rig (cube + electronics) when the electronics are switched on"""
+        r = s.rig(); U = s.U(); c = s.cam
+        x0, x1 = -r.hx, (r.psu[0] + 50 if getattr(s, 'show_hw', False) else r.hx)
+        c.target = [(x0 + x1) / 2 * U, 0.0, 0.0]; c.dist_t = max(2.6, (x1 - x0) / 2 * U * 1.8); c.R = None
+        if c.goal: c.goal = tuple(c.goal[:2]) + (c.dist_t,)
 
     def volume(s, t):
         x, y, z = s.ncoords(); name = DEMOS3D[s.demo]; n = s.N; dt = min(0.1, s.app.dt)
@@ -57,7 +80,7 @@ class CubeView:
             if k != s.amb_key: s.amb, s.amb_rep = cube_fx.ambigram(s.words, n); s.amb_key = k
             return s.amb
         if name == 'anamorph':
-            k = (s.words[0], n, s.kind)
+            k = (s.words[0], n, s.kind, s.zpitch())
             if k != s.ana_key: s.ana = cube_fx.anamorphic(cube_fx.text_mask(s.words[0], 32, 32), n, *s.READ['ana'], zpitch=s.zpitch()); s.ana_key = k
             return s.ana
         if name == 'image':
@@ -134,7 +157,21 @@ class CubeView:
             return np.stack([img * (0.4 + 0.6 * (k == 0 or k == n - 1)) for k in range(n)])
         return np.zeros_like(x)
 
-    def event(s, e, view): s.cam.event(e, view, s.app)
+    def event(s, e, view):
+        if getattr(s, 'stretch', False):                                   # pitch drag handles take the left button first
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and not s.app.ui.consumed:
+                for ax, (o, q) in s.handles.items():
+                    if math.hypot(e.pos[0] - q[0], e.pos[1] - q[1]) < 11: s.hdrag = ax; return
+            elif e.type == pygame.MOUSEBUTTONUP and e.button == 1 and s.hdrag: s.hdrag = None; return
+            elif e.type == pygame.MOUSEMOTION and s.hdrag:
+                o, q = s.handles.get(s.hdrag, (None, None))
+                if o:
+                    vx, vy = q[0] - o[0], q[1] - o[1]; Ln = math.hypot(vx, vy)
+                    if Ln > 5:
+                        d = (e.rel[0] * vx + e.rel[1] * vy) / Ln
+                        s.set_pitch(s.hdrag, getattr(s, 'p' + s.hdrag) * (Ln + d) / Ln)
+                return
+        s.cam.event(e, view, s.app)
 
     def post(s, vol, t):
         """per-board output stage every effect shares (what the firmware does after the effect kernel): a phosphor-like
@@ -170,9 +207,11 @@ class CubeView:
         cy, sy, cp, sp = math.cos(c.yaw), math.sin(c.yaw), math.cos(c.pitch), math.sin(c.pitch); sp_cam = sp
         # world: layer axis vertical (layers stacked upward); camera looks at c.target
         M = c.matrix()
-        pkey = (M.tobytes(), tuple(c.target), c.dist, getattr(c, 'tele', False), view.size, s.N, s.kind)
-        if pkey != getattr(s, '_pkey', None):                              # projection only changes with the camera
-            X, Y, Z = x - tx, -z - ty, y - tz
+        pkey = (M.tobytes(), tuple(c.target), c.dist, getattr(c, 'tele', False), view.size, s.N, s.kind, s.px, s.py, s.pz)
+        if pkey != getattr(s, '_pkey', None):                              # projection only changes with the camera / pitch
+            U = s.U()                                                      # LED positions at the real pitch (mm) per axis
+            xm = (s.X - 15.5) * (s.px * U); ym = (s.Y - 15.5) * (s.py * U); zm = (s.Z - (s.N - 1) / 2) * (s.pz * U)
+            X, Y, Z = xm - tx, -zm - ty, ym - tz
             xr = M[0, 0] * X + M[0, 1] * Y + M[0, 2] * Z; yr = M[1, 0] * X + M[1, 1] * Y + M[1, 2] * Z; zr = M[2, 0] * X + M[2, 1] * Y + M[2, 2] * Z
             zc = zr + c.dist; f = min(view.w, view.h) * 0.9 * (c.dist / 2.6 if getattr(c, 'tele', False) else 1.0)
             W, H = view.w // 2, view.h // 2
@@ -196,122 +235,155 @@ class CubeView:
         glow = pygame.transform.smoothscale(pygame.transform.smoothscale(small, (max(1, W // 6), max(1, H // 6))), (W, H))
         small.blit(glow, (0, 0), special_flags=pygame.BLEND_ADD)
         surf.blit(pygame.transform.smoothscale(small, view.size), view.topleft)
-        # layer frames
-        n = s.N
-        for k in (0, n - 1):
-            zz = (k - (n - 1) / 2) / 16 * s.zpitch()
-            pts = []
-            for (a, b) in [(-1.03, -1.03), (1.03, -1.03), (1.03, 1.03), (-1.03, 1.03)]:
-                Xx, Yy, Zz = a - tx, -zz - ty, b - tz
-                xr2 = M[0, 0] * Xx + M[0, 1] * Yy + M[0, 2] * Zz; yr2 = M[1, 0] * Xx + M[1, 1] * Yy + M[1, 2] * Zz; zr2 = M[2, 0] * Xx + M[2, 1] * Yy + M[2, 2] * Zz + c.dist
-                pts.append((view.x + (xr2 / zr2 * f / 2 + W / 2) * 2, view.y + (yr2 / zr2 * f / 2 + H / 2) * 2))
-            pygame.draw.lines(surf, (60, 70, 90), True, pts, 1)
-        # dimension lines (mm): W along columns, D along rows, H along the layer axis + layer spacing
-        from .world import panel_data
-        from .rulers import dim_line
-        pd = panel_data('lattice' if s.kind == 'lattice' else 'full'); pitch = (pd['hi'][0] - pd['lo'][0]) / 31
-        sp = pitch * s.zpitch()                                                   # layer spacing in mm
+        # ---- true-scale overlay: every coordinate below is mm (cube centre = origin, z up), U = mm -> render units
+        rig = s.rig(); U = s.U()
         def P3(a, b, zz):
             Xx, Yy, Zz = a - tx, -zz - ty, b - tz
             xr2 = M[0, 0] * Xx + M[0, 1] * Yy + M[0, 2] * Zz; yr2 = M[1, 0] * Xx + M[1, 1] * Yy + M[1, 2] * Zz; zr2 = M[2, 0] * Xx + M[2, 1] * Yy + M[2, 2] * Zz + c.dist
             if zr2 < 0.15: return None
             return (view.x + (xr2 / zr2 * f / 2 + W / 2) * 2, view.y + (yr2 / zr2 * f / 2 + H / 2) * 2)
-        sp_ = sp_cam
-        zb = -(n - 1) / 2 / 16 * s.zpitch(); zt = -zb
-        e = 31 / 32
-        dl = lambda a_, b_, *r: getattr(s, 'show_hw', False) and (a_ and b_) and dim_line(surf, a_, b_, *r)   # off by default: only the cube
-        dl(P3(-e, 1.12, zb), P3(e, 1.12, zb), 'W %.1f мм (32 × %.2f)' % (31 * pitch, pitch), (255, 210, 120))
-        dl(P3(1.12, -e, zb), P3(1.12, e, zb), 'D %.1f мм' % (31 * pitch), (255, 210, 120))
-        dl(P3(-1.12, 1.0, zb), P3(-1.12, 1.0, zt), 'H %.1f мм, %d слоёв × %.2f мм' % ((n - 1) * sp, n, sp), (255, 210, 120))
-        if getattr(s, 'show_hw', False): s.draw_hw(surf, P3, zb, pitch, sp)
+        Pm = lambda x_, y_, z_: P3(x_ * U, y_ * U, z_ * U)
+        s._Pm = Pm
+        n = s.N
+        hw = getattr(s, 'show_hw', False)
+        for zz in (rig.zl if hw else (rig.zl[0], rig.zl[-1])):                # frame / panel outline (every layer with electronics on)
+            pts = [Pm(a_ * rig.hx, b_ * rig.hy, zz) for a_, b_ in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            if all(pts): pygame.draw.lines(surf, (60, 70, 90), True, pts, 1)
+        if hw: s.draw_hw(surf, Pm, rig)
+        if getattr(s, 'show_ruler', False): s.draw_ruler(surf, Pm, rig, hw)
+        if getattr(s, 'stretch', False): s.draw_handles(surf, Pm, rig)
         text(surf, '%d × 32 × 32  (%d LED)  —  %s' % (n, n * 1024, DEMO_RU[DEMOS3D[s.demo]]), (view.x + 10, view.y + 8), (255, 220, 140), 16)
+        text(surf, 'шаг X %.2f · Y %.2f · Z %.2f мм   |   куб %.0f × %.0f × %.0f мм' % (s.px, s.py, s.pz, 2 * rig.hx, 2 * rig.hy, (n - 1) * s.pz),
+             (view.x + 10, view.y + 28), (170, 180, 200), 12)
+        y_ = view.y + 44
+        if hw or getattr(s, 'stretch', False):
+            for sev, ln in rig.flags():
+                text(surf, ('⚠ ' if sev == 'err' else '✓ ') + ln, (view.x + 10, y_), (255, 120, 100) if sev == 'err' else (140, 210, 150), 12); y_ += 15
         text(surf, T('hint_cube'), (view.x + 8, view.bottom - 20), (140, 146, 160), 11)
         surf.set_clip(None)
 
-    def draw_hw(s, surf, P3, zb, pitch, lsp):
-        """our electronics under the cube: per layer one mono_electronics board + one garland breakout lying on the
-        floor in front of the cube, FFC board→breakout, stacking cables board→board, USB-C power, and the garland strands
-        from the breakout IDC headers to the layer's row / column wire ends. Real connector positions (mm, v13 board,
-        garland breakout .kicad_pcb)."""
-        from .world import BOARD_CONN, SIDE_OFF, BOARD_W, BOARD_H
-        show = s.app.views['system'].show; n = s.N
-        class SD:
-            @staticmethod
-            def line(sf, c, a, b, w=1):
-                if a and b: pygame.draw.line(sf, c, a, b, w)
-            @staticmethod
-            def lines(sf, c, cl, pts, w=1):
-                if all(pts): pygame.draw.lines(sf, c, cl, pts, w)
-            @staticmethod
-            def polygon(sf, c, pts, w=0):
-                if all(pts): pygame.draw.polygon(sf, c, pts, w)
-        U = 1.0 / (16 * pitch)                                                   # mm -> cube units
-        zf = zb - 0.45                                                           # floor plane below the bottom layer
-        GB = {'J_ROW': (-24.0, -20.2), 'J_COL': (-24.0, 45.8), 'J_R1': (14.0, -64.5), 'J_R2': (14.0, -34.5), 'J_C1': (14.0, 1.5), 'J_C2': (14.0, 31.5)}
-        pair_w = (BOARD_W + 12 + 60) * U; row_d = (150) * U
+    # ------------------------------------------------------------------ true-scale rig (cube_rig.Rig) drawing
+    def draw_hw(s, surf, Pm, rig):
+        """electronics beside the cube at real mm: a tower of mono_electronics v15 boards (148.04 × 99.5) on 16 mm
+        stand-offs (or one per layer height when the layer pitch ≥ 16 mm), each with its garland_breakout (60 × 145) for the
+        wire grid; FFC board→breakout, four 16-way ribbon looms per layer up shared risers (= bundled), combs to the rails,
+        JST-SH stacking cables, USB-C harness to the 5 V PSU. Boards are drawn semi-transparent."""
+        from . import pcbtex
+        show = s.app.views['system'].show; n = rig.n; bundle = show.get('bundle', True)
+        ov = pygame.Surface(surf.get_size(), pygame.SRCALPHA)
         lod = 1 if n <= 8 else 2 if n <= 16 else 4
-        boards = []; pw_taps = []
-        for k in range(n):
-            # true mm scale: one board per layer, stacked under the cube on 12 mm stand-offs (JST-SH stacking ports);
-            # its garland breakout beside it. Footprint 148+12+60 = 220 × 145 mm vs the cube's 31·pitch.
-            bx = -(220 / 2 - BOARD_W / 2) * U; by = 0.0
-            gx = bx + (BOARD_W / 2 + 12 + 30) * U
-            zk = zf - 0.15 - k * 12 * U
-            boards.append((bx, by, gx, zk))
-            def rect(cx, cy, w, h, colr):
-                pts = [P3(cx + dx * w / 2, cy + dy * h / 2, zk) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
-                SD.polygon(surf, colr, pts, 1)
-            from . import pcbtex
-            for (cx_, cy_, ww, hh, key_) in ((bx, by, BOARD_W, BOARD_H, 'board_v15'), (gx, by, 60, 145, 'garland')):
-                pts = [P3(cx_ + dx * ww * U / 2, cy_ + dy * hh * U / 2, zk) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
-                SD.polygon(surf, pcbtex.MASK, pts)                               # solder mask
+        def quad(cx, cy, z, w, h):
+            return [Pm(cx + dx * w / 2, cy + dy * h / 2, z) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        def L(col, pts, w=1, on=surf):
+            q = [Pm(*p) for p in pts]
+            if all(q) and len(q) > 1: pygame.draw.lines(on, col, False, q, w)
+        mask = tuple(pcbtex.MASK[:3]) + (120,)
+        for k, (ty, zk) in enumerate(rig.units):
+            for (cx_, ww, hh, key_, oc) in ((rig.bx, BOARD_W, BOARD_H, 'board_v15', (80, 180, 110)),) + (((rig.ax, GB_W, GB_H, 'garland', (180, 150, 80)),) if rig.wire else ()):
+                q = quad(cx_, ty, zk, ww, hh)
+                if not all(q): continue
+                pygame.draw.polygon(ov, mask, q)
                 if lod == 1:
-                    for (px0, py0, pw, ph, colr) in pcbtex.parts(key_):          # every package body at its real place
-                        SD.polygon(surf, colr, [P3(cx_ + (px0 + dx * pw / 2) * U, cy_ + (py0 + dy * ph / 2) * U, zk) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
-            rect(bx, by, BOARD_W * U, BOARD_H * U, (80, 180, 110)); rect(gx, by, 60 * U, 145 * U, (180, 150, 80))
-            q = P3(bx - BOARD_W * U / 2, by - BOARD_H * U / 2, zk); q and text(surf, 'L%d' % k, q, (150, 200, 160), 9)
-            B = lambda nm: (bx + BOARD_CONN[nm][0] * U, by + BOARD_CONN[nm][1] * U)
-            G = lambda nm: (gx + GB[nm][0] * U, by + GB[nm][1] * U)
+                    for (px0, py0, pw, ph, colr) in pcbtex.parts(key_):                  # parts at their real place (board rotated 180°)
+                        qq = quad(cx_ - px0, ty - py0, zk, pw, ph)
+                        if all(qq): pygame.draw.polygon(ov, tuple(colr[:3]) + (150,), qq)
+                pygame.draw.lines(surf, oc, True, q, 1)
+            if k in (0, n - 1) or (n > 8 and k % 8 == 0):
+                q = Pm(rig.bx + BOARD_W / 2, ty + BOARD_H / 2, zk); q and text(surf, 'L%d' % k, (q[0] + 4, q[1] - 6), (150, 200, 160), 9)
+        surf.blit(ov, (0, 0))
+        for k, r in enumerate(rig.cables):
             if show.get('ffc', True):
-                if show.get('bundle', True):                                   # one 2×40P ribbon, fanning out at both ends
-                    am = ((B('J_ROW')[0] + B('J_COL')[0]) / 2 + 6 * U, (B('J_ROW')[1] + B('J_COL')[1]) / 2)
-                    gm = ((G('J_ROW')[0] + G('J_COL')[0]) / 2 - 6 * U, (G('J_ROW')[1] + G('J_COL')[1]) / 2)
-                    for nm in ('J_ROW', 'J_COL'):
-                        SD.line(surf, (120, 150, 220), P3(*B(nm), zk), P3(*am, zk), 2); SD.line(surf, (120, 150, 220), P3(*gm, zk), P3(*G(nm), zk), 2)
-                    SD.line(surf, (120, 150, 220), P3(*am, zk), P3(*gm, zk), 6)
+                if rig.wire:
+                    L((120, 150, 220), r['ffc']['pts'], 4 if bundle else 2)
+                    if not bundle: L((120, 150, 220), [rig.bpt(k, BOARD_CONN['J_COL']), rig.gpt(k, GB['J_COL'])], 2)
                 else:
-                    for nm in ('J_ROW', 'J_COL'):
-                        a, b = B(nm), G(nm); SD.line(surf, (120, 150, 220), P3(a[0], a[1], zk), P3(b[0], b[1], zk), 3)
-            if show.get('power', True):
-                a = B('J_USB'); SD.line(surf, (210, 210, 220), P3(a[0], a[1], zk), P3(-2.6 if not show.get('bundle', True) else bx - (BOARD_W / 2 + 15) * U, a[1], zk), 1)
-                pw_taps.append((bx - (BOARD_W / 2 + 15) * U, a[1], zk))
-            if show.get('led', True) and k % lod == 0:
-                zl = (k - (n - 1) / 2) / 16 * s.zpitch()
-                for hdr, kind, base in (('J_R1', 'r', 0), ('J_R2', 'r', 16), ('J_C1', 'c', 0), ('J_C2', 'c', 16)):
-                    hx, hy = G(hdr)
-                    for i in range(0, 16, 2 if lod > 1 else 1):
-                        px_ = hx + ((i // 8) * 2.54) * U; py_ = hy + ((i % 8) * 2.54 - 8.9) * U   # IDC 2×8, 2.54 mm pitch
-                        idx = base + i
-                        tgt = (-1.06, (idx - 15.5) / 16, zl) if kind == 'r' else ((idx - 15.5) / 16, 1.06, zl)
-                        mid = (tgt[0] if kind == 'c' else -1.06, 1.15, (zk + zl) / 2)
-                        colr = (200, 120, 90) if kind == 'r' else (110, 170, 220)
-                        if show.get('bundle', True):           # 16 strands leave the header as one loom, split near the cube edge
-                            hub = ((-1.06 - 0.12) if kind == 'r' else (base / 16 - 0.5 + 0.25), 1.22, (zk + zl) / 2)
-                            if i == 0: SD.lines(surf, colr, False, [P3(hx, hy, zk), P3(*hub)], 4)
-                            SD.lines(surf, colr, False, [P3(*hub), P3(*mid), P3(*tgt)], 1)
-                        else: SD.lines(surf, colr, False, [P3(px_, py_, zk), P3(*mid), P3(*tgt)], 1)
+                    for fc in r['ffcs']: L((120, 150, 220) if fc['ok'] else (255, 90, 80), fc['pts'], 3 if bundle else 2)
+            if show.get('led', True) and rig.wire:
+                for lm in r['looms']:
+                    col = (200, 120, 90) if lm['row'] else (110, 170, 220)
+                    if not lm['ok']: col = (255, 70, 70)
+                    if bundle: L(col, lm['pts'], 2)
+                    else:
+                        for i in range(0, 16, 4): L(col, [(p[0] + i * 0.6, p[1] + i * 0.6, p[2]) for p in lm['pts'][:-1]] + [lm['pts'][-1]], 1)
+                    if k % lod == 0:                                                  # comb: anchor -> each wire end on the rail
+                        ax_, ay_, az_ = lm['anc']
+                        for i in range(0, 16, 1 if lod == 1 else 3):
+                            j = lm['half'] * 16 + i
+                            end = (rig.rx, (j - 15.5) * rig.py, az_) if lm['row'] else ((j - 15.5) * rig.px, -rig.ry, az_)
+                            L(col if lm['comb_ok'] else (255, 70, 70), [lm['anc'], end], 1)
         if show.get('stack', True):
-            for k in range(n - 1):
-                (ax, ay, _, za), (cx_, cy_, _, zc) = boards[k], boards[k + 1]
-                a = (ax + SIDE_OFF[2][0] * U, ay + SIDE_OFF[2][1] * U); b = (cx_ + SIDE_OFF[2][0] * U, cy_ + SIDE_OFF[2][1] * U)
-                SD.line(surf, (90, 220, 120), P3(a[0], a[1], za), P3(b[0], b[1], zc), 2)
-        if show.get('power', True) and show.get('bundle', True) and pw_taps:   # power harness: one trunk per board column -> PSU
-            xx, yy = pw_taps[0][0], pw_taps[0][1]; zs = [t[2] for t in pw_taps]
-            SD.lines(surf, (210, 210, 220), False, [P3(xx, yy, max(zs)), P3(xx, yy, min(zs)), P3(-2.6, 1.6, min(zs))], 3)
-        if show.get('power', True):
-            q = P3(-2.6, 1.6, (boards[-1][3] if boards else zf))
-            if q: pygame.draw.rect(surf, (90, 90, 110), (q[0] - 18, q[1] - 10, 36, 20), 1);
-            if q: text(surf, 'БП 5 В', (q[0] - 16, q[1] - 6), (200, 200, 210), 9)
+            for st in rig.stack: L((90, 220, 120) if st['ok'] else (255, 90, 80), st['pts'], 2)
+        if show.get('power', True):                                                   # USB-C harness: one trunk per stack -> PSU
+            ex = rig.bx + BOARD_W / 2 + 15; zs = {}
+            for k, (ty, zk) in enumerate(rig.units):
+                a = rig.bpt(k, BOARD_CONN['J_USB']); L((210, 210, 220), [a, (ex, a[1], zk)], 1); zs.setdefault(a[1], []).append(zk)
+            for yy, z_ in zs.items(): L((210, 210, 220), [(ex, yy, max(z_)), (ex, yy, rig.floor), (rig.psu[0] - 45, rig.psu[1], rig.floor)], 3 if bundle else 1)
+            q = [Pm(rig.psu[0] + dx * 45, rig.psu[1] + dy * 30, rig.floor) for dx, dy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+            if all(q): pygame.draw.polygon(surf, (70, 70, 85), q); pygame.draw.lines(surf, (150, 150, 170), True, q, 1)
+            c_ = Pm(*rig.psu, rig.floor); c_ and text(surf, 'БП 5 В', c_, (210, 210, 220), 9, center=True)
+
+    def draw_ruler(s, surf, Pm, rig, hw):
+        """mm ruler: a floor grid (10 mm minor / 50 mm / 100 mm labelled) under the cube (and the electronics when shown) and
+        dimension lines for the grid, frame, layer stack and — with electronics on — boards, breakouts and cable lengths."""
+        from .rulers import dim_line
+        x0, x1 = -rig.hx - 40, (rig.psu[0] + 60 if hw else rig.hx + 40); y0, y1 = -rig.hy - 40, rig.hy + 40
+        if hw: y0 = min(y0, rig.units[0][0] - 110 - 40 * (rig.ntw > 1)); y1 = max(y1, rig.units[-1][0] + 110)
+        zf = rig.floor; st = 10 if (x1 - x0) < 500 else 50
+        g0 = math.floor(x0 / st) * st
+        v = g0
+        while v <= x1:
+            maj = abs(v % 100) < 1e-6
+            a, b = Pm(v, y0, zf), Pm(v, y1, zf)
+            if a and b: pygame.draw.line(surf, (70, 80, 100) if maj else (34, 38, 48), a, b, 1)
+            if maj and a: text(surf, '%d' % v, (a[0] - 8, a[1] + 2), (150, 160, 180), 9)
+            v += st
+        v = math.floor(y0 / st) * st
+        while v <= y1:
+            maj = abs(v % 100) < 1e-6
+            a, b = Pm(x0, v, zf), Pm(x1, v, zf)
+            if a and b: pygame.draw.line(surf, (70, 80, 100) if maj else (34, 38, 48), a, b, 1)
+            if maj and b: text(surf, '%d' % v, (b[0] + 3, b[1] - 5), (150, 160, 180), 9)
+            v += st
+        q = Pm(x0, y0, zf); q and text(surf, 'мм, сетка %d мм' % st, (q[0] - 10, q[1] + 12), (255, 220, 140), 10)
+        Y = (255, 210, 120); zb, zt = rig.zl[0], rig.zl[-1]
+        def D(a, b, lab, col=Y):
+            a, b = Pm(*a), Pm(*b)
+            if a and b: dim_line(surf, a, b, lab, col)
+        D((-rig.lx, -rig.hy - 18, zb), (rig.lx, -rig.hy - 18, zb), 'LED %.0f мм (31 × %.2f)' % (31 * s.px, s.px))
+        D((-rig.hx - 18, -rig.ly, zb), (-rig.hx - 18, rig.ly, zb), 'LED %.0f мм (31 × %.2f)' % (31 * s.py, s.py))
+        D((-rig.hx, -rig.hy - 34, zb), (rig.hx, -rig.hy - 34, zb), ('рамка %.0f мм' if rig.wire else 'панель %.1f мм') % (2 * rig.hx), (200, 190, 150))
+        D((-rig.hx - 10, -rig.hy - 10, zb), (-rig.hx - 10, -rig.hy - 10, zt), 'H %.0f мм (%d × %.2f)' % (zt - zb, rig.n - 1, s.pz))
+        if hw:
+            ty, zk = rig.units[-1]
+            D((rig.bx - BOARD_W / 2, ty - BOARD_H / 2 - 8, zk), (rig.bx + BOARD_W / 2, ty - BOARD_H / 2 - 8, zk), 'v15 %.2f мм' % BOARD_W, (150, 220, 170))
+            D((rig.bx + BOARD_W / 2 + 8, ty - BOARD_H / 2, zk), (rig.bx + BOARD_W / 2 + 8, ty + BOARD_H / 2, zk), '%.1f мм' % BOARD_H, (150, 220, 170))
+            if rig.wire:
+                D((rig.ax - GB_W / 2, ty + GB_H / 2 + 8, zk), (rig.ax + GB_W / 2, ty + GB_H / 2 + 8, zk), 'breakout %.0f×%.0f' % (GB_W, GB_H), (220, 190, 120))
+            D((rig.hx, -rig.hy - 18, zf), ((rig.ax - GB_W / 2) if rig.wire else (rig.bx - BOARD_W / 2), -rig.hy - 18, zf), 'зазор %.0f' % GAP, (170, 170, 190))
+            zs = [u[1] for u in rig.units]
+            D((rig.bx + BOARD_W / 2 + 30, ty, min(zs)), (rig.bx + BOARD_W / 2 + 30, ty, max(zs)), 'стек плат %.0f мм' % (max(zs) - min(zs)), (150, 220, 170))
+            r = rig.cables[-1]                                                         # cable lengths of the top layer (one label per kind)
+            sel = ([r['looms'][0], r['looms'][2]] if rig.wire else r['ffcs'][:1])
+            for c_ in sel:
+                pts = c_['pts']; q = Pm(*pts[-2])
+                if q: text(surf, '%s L%d: %.0f мм → %d' % ('строки' if c_.get('row') else 'столбцы' if 'row' in c_ else 'FFC', rig.n - 1, c_['need'], c_['std']), (q[0] + 6, q[1] - 14), (255, 240, 160) if c_['ok'] else (255, 110, 100), 10)
+
+    def draw_handles(s, surf, Pm, rig):
+        """drag handles: grab the dot at the end of an axis and pull to stretch that pitch (mm)"""
+        zb = rig.zl[0]; O = (-rig.lx, -rig.ly, zb)
+        ends = {'x': (rig.lx, -rig.ly, zb), 'y': (-rig.lx, rig.ly, zb), 'z': (-rig.lx, -rig.ly, rig.zl[-1])}
+        o = Pm(*O); s.handles = {}
+        cols = {'x': (255, 110, 110), 'y': (120, 230, 130), 'z': (120, 160, 255)}
+        for ax_, e in ends.items():
+            q = Pm(*e)
+            if not (o and q): continue
+            fixed = ax_ in 'xy' and not rig.wire
+            pygame.draw.line(surf, cols[ax_], o, q, 1)
+            pygame.draw.circle(surf, (90, 90, 100) if fixed else cols[ax_], (int(q[0]), int(q[1])), 7 if s.hdrag == ax_ else 6, 0 if not fixed else 1)
+            text(surf, '%s %.2f мм%s' % (ax_.upper(), getattr(s, 'p' + ax_), ' (PCB)' if fixed else ''), (q[0] + 9, q[1] - 7), cols[ax_], 11)
+            if not fixed: s.handles[ax_] = (o, q)
+
+
     READ = {'w1': (0.0, 0.0), 'w2': (-math.pi / 2, 0.0), 'w3': (0.0, 1.55), 'ana': (0.62, 0.42)}
     def snap(s, k): s.cam.goal = s.READ[k] + (8.0,); s.cam.target = [0.0, 0.0, 0.0]; s.cam.tele = True       # far + long lens ≈ orthographic reading view
     def frames_for_export(s):
@@ -375,26 +447,56 @@ class CubeView:
             if s.msg: text(surf, s.msg[:58], (x, y), (255, 230, 150), 10); y += 14
         y += 16
         n = int(ui.slider(surf, (x, y, W, 8), T('layers_n'), s.N, 2, 32))
-        if n != s.N: s.N = n; s._grid()
+        if n != s.N: s.N = n; s._grid(); s.kind == 'full_cube' and s.reset_pitch(z_only=True)
         y += 14
-        for i, (k, lab) in enumerate((('lattice', 'решётка'), ('full_cube', 'full: N на высоту'))):
-            if ui.button(surf, (x + i * (bw + 4), y, bw, 20), lab, on=s.kind == k, sz=10): s.kind = k
+        kb = (W - 8) // 3
+        for i, k in enumerate(('wire', 'lattice', 'full_cube')):
+            if ui.button(surf, (x + i * (kb + 4), y, kb, 20), cube_rig.KINDS[k][1], on=s.kind == k, sz=10):
+                if k != s.kind: s.kind = k; s.reset_pitch(); s.amb_key = s.ana_key = None
+        y += 24
+        # pitch per axis: numeric field (Enter) + −/+ ; drag handles in the view when «Тянуть» is on
+        fw = 70
+        for i, ax in enumerate('xyz'):
+            xx = x + i * ((W - 8) // 3 + 4); cw = (W - 8) // 3
+            fixed = ax != 'z' and s.kind != 'wire'
+            text(surf, ax.upper(), (xx, y + 4), (255, 110, 110) if ax == 'x' else (120, 230, 130) if ax == 'y' else (120, 160, 255), 12)
+            key = ('pitch', ax); cur = '%.2f' % getattr(s, 'p' + ax)
+            txt = s.ptxt.get(ax, cur) if ui.focus == key else cur
+            txt, ent = ui.field(surf, (xx + 12, y, cw - 52, 22), key, txt); s.ptxt[ax] = txt
+            if ent:
+                try: s.set_pitch(ax, float(txt.replace(',', '.')))
+                except ValueError: pass
+                ui.focus = None
+            st = 0.5 if ax != 'z' or s.pz < 20 else 2.0
+            if ui.button(surf, (xx + cw - 38, y, 18, 22), '−', sz=12) and not fixed: s.set_pitch(ax, getattr(s, 'p' + ax) - st)
+            if ui.button(surf, (xx + cw - 18, y, 18, 22), '+', sz=12) and not fixed: s.set_pitch(ax, getattr(s, 'p' + ax) + st)
+        y += 25
+        tb3 = (W - 8) // 3
+        if ui.button(surf, (x, y, tb3, 20), 'Тянуть шаг мышью', on=s.stretch, sz=10): s.stretch = not s.stretch
+        if ui.button(surf, (x + tb3 + 4, y, tb3, 20), 'Линейка (мм)', on=s.show_ruler, sz=10): s.show_ruler = not s.show_ruler
+        if ui.button(surf, (x + 2 * (tb3 + 4), y, tb3, 20), 'Шаг по умолчанию', sz=10): s.reset_pitch()
         y += 24
         qb = (W - 12) // 4
         for i, (k, lab) in enumerate((('front', 'Спереди'), ('top', 'Сверху'), ('iso', 'Изо'), ('reset', 'Сброс'))):
             if ui.button(surf, (x + i * (qb + 4), y, qb, 20), lab, sz=10):
                 s.cam.reset() if k == 'reset' else s.cam.preset(k)
+                if getattr(s, 'show_hw', False): s.fit_hw()
         y += 38
         sv = s.app.views['system'].w
         sv.brightness = int(ui.slider(surf, (x, y, bw, 8), T('brightness'), sv.brightness, 0, 255))
         sv.gamma = round(ui.slider(surf, (x + bw + 4, y, bw, 8), T('gamma'), sv.gamma, 1.0, 3.0, '%.2f'), 2); y += 14
         show = s.app.views['system'].show; tb = (W - 20) // 5; hw = getattr(s, 'show_hw', False)
-        if ui.button(surf, (x, y, W - 16, 20), 'Электроника, кабели и размеры: ' + ('вкл' if hw else 'выкл'), on=hw, sz=10): s.show_hw = not hw
+        if ui.button(surf, (x, y, W - 16, 20), 'Электроника и кабели (реальный масштаб): ' + ('вкл' if hw else 'выкл'), on=hw, sz=10):
+            s.show_hw = not hw; s.fit_hw() if s.show_hw else s.cam.reset()
         y += 24
         if hw:
             for i, (k, lab) in enumerate((('ffc', 'FFC'), ('stack', 'Стек'), ('power', 'Питание'), ('led', 'Гирлянды'), ('bundle', 'Жгуты'))):
                 if ui.button(surf, (x + i * (tb + 4), y, tb, 20), lab, on=show.get(k, True), sz=9): show[k] = not show.get(k, True)
             y += 24
+        if hw or s.stretch:
+            for ln, ok in s.rig().summary():
+                text(surf, ln, (x, y), (150, 200, 160) if ok else (255, 120, 100), 10); y += 13
+            y += 3
         lim = s.limits()
         for ln in lim:
             text(surf, ln, (x, y), (150, 160, 180), 10); y += 13

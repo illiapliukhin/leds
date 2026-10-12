@@ -337,6 +337,31 @@ def cube_motion(app, N=8, frames=40):
         if nm in STATIC3D: ok = drawn >= frames // 2 and lit > 0; why = 'статичная скульптура (так задумано)'
         else: ok = drawn >= frames // 2 and ch > 0 and lit > 0; why = 'изменилось %d вокселей' % ch
         res.append(('куб N=%d «%s»: отрисовано %d кадров, светится %d, %s' % (N, nm, drawn, lit, why), ok))
+    res += yield from cube_rig_check(app)
+    return res
+
+def cube_rig_check(app):
+    """true-scale rig: geometry/limits of cube_rig.Rig, then the view drawn with electronics + ruler + stretch handles"""
+    from . import cube_rig as R
+    res = []
+    for kind in ('wire', 'lattice', 'full_cube'):
+        for n in (2, 8, 16, 32):
+            p0, _ = R.nominal(kind); r = R.Rig(kind, n, p0, p0, R.default_z(kind, n)); ov = r.overlaps()
+            res.append(('риг %s N=%d: без перекрытий (%d объектов), плата %.2f×%.1f, шаг %.2f/%.2f мм' % (kind, n, len(r.footprints()), R.BOARD_W, R.BOARD_H, p0, r.pz), not ov))
+    r = R.Rig('wire', 8, 10, 10, 10); fl = r.flags()
+    res.append(('провода 10 мм N=8: все кабели стандартные, падение %.0f мВ ≤ 350' % max(c['drop_mV'] for c in r.cables), all(f[0] == 'ok' for f in fl)))
+    a, b = R.Rig('wire', 8, 10, 10, 10), R.Rig('wire', 8, 20, 20, 10)
+    la = max(l['need'] for c in a.cables for l in c['looms']); lb = max(l['need'] for c in b.cables for l in c['looms'])
+    res.append(('растяжение шага 10→20 мм: шлейф %.0f→%.0f мм, рамка %.0f→%.0f мм' % (la, lb, 2 * a.hx, 2 * b.hx), lb > la and b.hx > a.hx))
+    r = R.Rig('wire', 8, 40, 40, 10)
+    res.append(('шаг 40 мм помечен как превышение (гребёнка/шлейф): %s' % '; '.join(t for sv, t in r.flags() if sv == 'err'), any(sv == 'err' for sv, _ in r.flags())))
+    cv = app.views['cube']; keep = (cv.kind, cv.N, cv.show_hw, getattr(cv, 'show_ruler', False), getattr(cv, 'stretch', False))
+    cv.kind = 'lattice'; cv.reset_pitch(); cv.set_pitch('x', 9.0)
+    res.append(('печатная панель: шаг X не меняется (%.2f мм)' % cv.px, abs(cv.px - R.nominal('lattice')[0]) < 1e-6))
+    cv.kind = 'wire'; cv.N = 8; cv._grid(); cv.reset_pitch(); cv.show_hw = cv.show_ruler = cv.stretch = True; cv.fit_hw()
+    f0 = cv.frames_drawn; yield 10; cv.set_pitch('z', 30); cv.set_pitch('x', 15); yield 10
+    res.append(('вид с электроникой+линейкой+ручками: %d кадров, ручек %d, шаг %.1f/%.1f/%.1f' % (cv.frames_drawn - f0, len(cv.handles), cv.px, cv.py, cv.pz), cv.frames_drawn - f0 >= 10 and len(cv.handles) == 3))
+    cv.kind, n_, cv.show_hw, cv.show_ruler, cv.stretch = keep[0], keep[1], keep[2], keep[3], keep[4]; cv.N = n_; cv._grid(); cv.reset_pitch(); cv.cam.reset()
     return res
 
 def run(out=None, headless=False):
